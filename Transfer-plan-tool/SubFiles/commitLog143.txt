@@ -1,0 +1,2833 @@
+b'commit 383388a8b9e4b91aad561373f9766c6f50b44df7
+Author: Santosh Pallanti <santos.pallanti.jv.ext@valeo.com>
+Date:   Wed Oct 27 15:49:30 2021 +0530
+
+    $100kW-43488$ - SBC SW integration from Modelkit to 100kw
+    
+    Change-Id: I078880bb7b0c86c23a264a537fdb06e19f57db40
+
+diff --git a/src/fw_cu/Components/Cmn/Shared/SysDef/include/AddEnumTypes.h b/src/fw_cu/Components/Cmn/Shared/SysDef/include/AddEnumTypes.h
+index e94d1be87..142915aa5 100644
+--- a/src/fw_cu/Components/Cmn/Shared/SysDef/include/AddEnumTypes.h
++++ b/src/fw_cu/Components/Cmn/Shared/SysDef/include/AddEnumTypes.h
+@@ -30,18 +30,22 @@ typedef enum  {QSPI_UNINIT = 0, QSPI_IDLE = 1, QSPI_BUSY = 2} SftyQSpi_StatusTyp
+ typedef enum  {SFTY_QSPI_TRANSFER_START_LSB = 0, SFTY_QSPI_TRANSFER_START_MSB = 1} SftyQSpi_TransferStartType;
+ typedef enum  {NEGATIVE_HALF_CYCLE = 0, POSITIVE_HALF_CYCLE = 1} SftyRslvrEvln_HalfCycPosnType;
+ typedef enum  {SFTYSBCCTRL_FALSE = 0, SFTYSBCCTRL_TRUE = 1, SFTYSBCCTRL_UNKNOWN = 2} SftySbcCtrl_FlagType;
++typedef enum  {SFTYSBCTRLIF_WK_SRC_KL15 = 0, SFTYSBCTRLIF_WK_SRC_CAN = 1, SFTYSBCTRLIF_WK_SRC_KL30 = 2} SftySbcCtrlIfWkSrcType;
++typedef enum  {SFTYSBCCTRL_INIT = 0, SFTYSBCCTRL_REFRESH = 1, SFTYSBCCTRL_RESET = 2, SFTYSBCCTRL_SHUTDWN = 3} SftySbcCtrlStType;
++typedef enum  {SFTYTLF35584_DEVCFG0_ADR = 0, SFTYTLF35584_DEVCFG1_ADR = 1, SFTYTLF35584_DEVCFG2_ADR = 2, SFTYTLF35584_PROTCFG_ADR = 3, SFTYTLF35584_SYSPCFG0_ADR = 4, SFTYTLF35584_SYSPCFG1_ADR = 5, SFTYTLF35584_WDCFG0_ADR = 6, SFTYTLF35584_WDCFG1_ADR = 7, SFTYTLF35584_FWDCFG_ADR = 8, SFTYTLF35584_WWDCFG0_ADR = 9, SFTYTLF35584_WWDCFG1_ADR = 10, SFTYTLF35584_RSYSPCFG0_ADR = 11, SFTYTLF35584_RSYSPCFG1_ADR = 12, SFTYTLF35584_RWDCFG0_ADR = 13, SFTYTLF35584_RWDCFG1_ADR = 14, SFTYTLF35584_RFWDCFG_ADR = 15, SFTYTLF35584_RWWDCFG0_ADR = 16, SFTYTLF35584_RWWDCFG1_ADR = 17, SFTYTLF35584_WAKTIMCF0_ADR = 18, SFTYTLF35584_WAKTIMCF1_ADR = 19, SFTYTLF35584_WAKTIMCF2_ADR = 20, SFTYTLF35584_DEVCTRL_ADR = 21, SFTYTLF35584_DEVCTRLN_ADR = 22, SFTYTLF35584_WWDSCMD_ADR = 23, SFTYTLF35584_FWDRSP_ADR = 24, SFTYTLF35584_FWDRSPSYNC_ADR = 25, SFTYTLF35584_SYSFAIL_ADR = 26, SFTYTLF35584_INITERR_ADR = 27, SFTYTLF35584_IF_ADR = 28, SFTYTLF35584_SYSSF_ADR = 29, SFTYTLF35584_WKSF_ADR = 30, SFTYTLF35584_SPISF_ADR = 31, SFTYTLF35584_MONSF0_ADR = 32, SFTYTLF35584_MONSF1_ADR = 33, SFTYTLF35584_MONSF2_ADR = 34, SFTYTLF35584_MONSF3_ADR = 35, SFTYTLF35584_OTFAIL_ADR = 36, SFTYTLF35584_OTWRNSF_ADR = 37, SFTYTLF35584_VMONSTAT_ADR = 38, SFTYTLF35584_DEVSTAT_ADR = 39, SFTYTLF35584_PROTSTAT_ADR = 40, SFTYTLF35584_WWDSTAT_ADR = 41, SFTYTLF35584_FWDSTAT1_ADR = 43, SFTYTLF35584_FWDSTAT0_ADR = 42, SFTYTLF35584_ABIST_CTRL0_ADR = 44, SFTYTLF35584_ABIST_CTRL1_ADR = 45, SFTYTLF35584_ABIST_SELECT0_ADR = 46, SFTYTLF35584_ABIST_SELECT1_ADR = 47, SFTYTLF35584_ABIST_SELECT2_ADR = 48, SFTYTLF35584_BCK_FREQ_CHANGE_ADR = 49, SFTYTLF35584_BCK_FRE_SPREAD_ADR = 50, SFTYTLF35584_BCK_MAIN_CTRL_ADR = 51, SFTYTLF35584_GTM_ADR = 63} SftyTlf35584AdrType;
++typedef enum  {SFTYTLF35584_DEV_ST_NONE = 0, SFTYTLF35584_DEV_ST_INIT = 1, SFTYTLF35584_DEV_ST_NORMAL = 2, SFTYTLF35584_DEV_ST_SLEEP = 3, SFTYTLF35584_DEV_ST_STANDBY = 4, SFTYTLF35584_DEV_ST_WAKE = 5} SftyTlf35584DevStType;
++typedef enum  {SFTYTLF35584_WWDTEST = 0, SFTYTLF35584_FWDTEST = 1, SFTYTLF35584_ERRPINTEST = 2, SFTYTLF35584_VLDTRES = 3, SFTYTLF35584_FINSHD = 4} SftyTlf35584DigSelfTestStType;
++typedef enum  {SFTYTLF35584_WD_INIT = 0, SFTYTLF35584_REQ_READ_STS = 1, SFTYTLF35584_WINWDG_REFRSH = 2, SFTYTLF35584_HNDL_ON_DMD_COM = 4, SFTYTLF35584_WD_SHUTDWN = 5, SFTYTLF35584_WD_RESET = 6, SFTYTLF35584_FCTLWDG_REFRSH = 3} SftyTlf35584DrvrStType;
++typedef enum  {SFTYSBCFS6500_INIT_WINDOW = 0,SFTYSBCFS6500_READ_LFSR = 1,SFTYSBCFS6500_READ_IO = 2, SFTYSBCFS6500_READ_FSXB =3,SFTYSBCFS6500_READ_WD_ANSWER = 4,SFTYSBCFS6500_RESET_REQ = 5,SFTYSBCFS6500_SHTDWN_REQ = 6} SftySbcFs6500_SysState;
++typedef enum  {SFTY_SBC_FS6500_WD_WINDOW_DISABLE = 0, SFTY_SBC_FS6500_WD_WINDOW_1MS = 1, SFTY_SBC_FS6500_WD_WINDOW_2MS = 2, SFTY_SBC_FS6500_WD_WINDOW_3MS = 3, SFTY_SBC_FS6500_WD_WINDOW_4MS = 4, SFTY_SBC_FS6500_WD_WINDOW_6MS = 5, SFTY_SBC_FS6500_WD_WINDOW_8MS = 6, SFTY_SBC_FS6500_WD_WINDOW_12MS = 7, SFTY_SBC_FS6500_WD_WINDOW_16MS = 8, SFTY_SBC_FS6500_WD_WINDOW_24MS = 9, SFTY_SBC_FS6500_WD_WINDOW_32MS = 10, SFTY_SBC_FS6500_WD_WINDOW_64MS = 11, SFTY_SBC_FS6500_WD_WINDOW_128MS = 12, SFTY_SBC_FS6500_WD_WINDOW_256MS = 13, SFTY_SBC_FS6500_WD_WINDOW_512MS = 14, SFTY_SBC_FS6500_WD_WINDOW_1024MS = 15} SftySbcFs6500_WdWindowTimeType;
+ typedef enum  {SFTY_SHUT_OFF_PATH_TEST_INIT = 0, SFTY_SHUT_OFF_PATH_TEST_WAIT_FOR_PRECOND = 1, SFTY_SHUT_OFF_PATH_TEST_PART1 = 2, SFTY_SHUT_OFF_PATH_TEST_WAIT_FOR_FS0B_OFF = 3, SFTY_SHUT_OFF_PATH_TEST_PART2 = 4, SFTY_SHUT_OFF_PATH_TEST_FINISHD = 5} SftyShutoffPahTstStType;
+ typedef enum  {IGBT_TOP_OFF_BOT_OFF = 0, IGBT_TOP_ON_BOT_OFF = 1, IGBT_TOP_OFF_BOT_ON = 2} SftyShutoffPahTst_IgbtSwtReqType;
++typedef enum  {SFTYTLF35584_WDG_WIN_TI_20MS = 3, SFTYTLF35584_WDG_WIN_TI_25MS = 4, SFTYTLF35584_WDG_WIN_TI_30MS = 5, SFTYTLF35584_WDG_WIN_TI_35MS = 6, SFTYTLF35584_WDG_WIN_TI_40MS = 7, SFTYTLF35584_WDG_WIN_TI_45MS = 8, SFTYTLF35584_WDG_WIN_TI_50MS = 9, SFTYTLF35584_WDG_WIN_TI_55MS = 10, SFTYTLF35584_WDG_WIN_TI_60MS = 11, SFTYTLF35584_WDG_WIN_TI_65MS = 12, SFTYTLF35584_WDG_WIN_TI_70MS = 13, SFTYTLF35584_WDG_WIN_TI_75MS = 14, SFTYTLF35584_WDG_WIN_TI_80MS = 15, SFTYTLF35584_WDG_WIN_TI_85MS = 16, SFTYTLF35584_WDG_WIN_TI_90MS = 17, SFTYTLF35584_WDG_WIN_TI_95MS = 18, SFTYTLF35584_WDG_WIN_TI_100MS = 19} SftyTlf35584WdgWinType;
+ typedef enum  {SFTY_ST_ACTIVE = 0, SFTY_ST_SPO = 1, SFTY_ST_ASC = 2} Sfty_ModActType;
+ typedef enum  {SYSPRM_EM_PHA_SET_ACTVN_NONE = 0, SYSPRM_EM_PHA_SET_ACTVN_A = 1, SYSPRM_EM_PHA_SET_ACTVN_B = 2, SYSPRM_EM_PHA_SET_ACTVN_AB = 3} SysPrmEmPhaSetActvnType;
+ typedef enum  {BSW_ERR_DEB_MONR_NOT_TESTD_ST = 0, BSW_ERR_DEB_MONR_NO_ERR_ST = 1, BSW_ERR_DEB_MONR_ERR_ST = 2} BswErrDeb_ErrMonrStType;
+ typedef enum  {INV_STANDBY = 0, INV_TRQCTRL = 1, INV_INT_SPDCTRL = 2, INV_VTGCTRL = 3, INV_EX_SPDCTRL = 4, INV_FAILURE = 5, INV_CALIBRATION = 6, INV_SPCLBRK = 7, INV_FREEWHL = 8, INV_INIT = 15}Sfty_InvModType;
+ typedef enum  {NVM_UPDT_INACTIVE = 0, NVM_UPDT_PENDING = 1, NVM_UPDT_SUCCESS = 2, NVM_UPDT_FAILED = 3} RslvrOffsNvmUpdtStsType;
+-typedef enum  {SFTYSBCCTRL_INIT = 0, SFTYSBCCTRL_REFRESH = 1, SFTYSBCCTRL_RESET = 2, SFTYSBCCTRL_SLEEP = 3} SftySbcCtrlStType;
+-typedef enum  {SFTYTLF35584_DEV_ST_NONE = 0, SFTYTLF35584_DEV_ST_INIT = 1, SFTYTLF35584_DEV_ST_NORMAL = 2, SFTYTLF35584_DEV_ST_SLEEP = 3, SFTYTLF35584_DEV_ST_STANDBY = 4, SFTYTLF35584_DEV_ST_WAKE = 5} SftyTlf35584DevStType;
+-typedef enum  {SFTYTLF35584_WD_INIT = 0, SFTYTLF35584_REQ_READ_STS = 1, SFTYTLF35584_WINWDG_REFRSH = 2, SFTYTLF35584_FCTLWDG_REFRSH = 3, SFTYTLF35584_HNDL_SAFE_ST_REQ = 4, SFTYTLF35584_WD_SLEEP = 5, SFTYTLF35584_WD_RESET = 6} SftyTlf35584DrvrStType;
+-typedef enum  {SFTYSBCFS6500_INIT_WINDOW = 0,SFTYSBCFS6500_READ_LFSR = 1,SFTYSBCFS6500_READ_IO = 2, SFTYSBCFS6500_READ_FSXB =3,SFTYSBCFS6500_READ_WD_ANSWER = 4,SFTYSBCFS6500_RESET_REQ = 5,SFTYSBCFS6500_SHTDWN_REQ = 6} SftySbcFs6500_SysState;
+-typedef enum  {SFTY_SBC_FS6500_WD_WINDOW_DISABLE = 0, SFTY_SBC_FS6500_WD_WINDOW_1MS = 1, SFTY_SBC_FS6500_WD_WINDOW_2MS = 2, SFTY_SBC_FS6500_WD_WINDOW_3MS = 3, SFTY_SBC_FS6500_WD_WINDOW_4MS = 4, SFTY_SBC_FS6500_WD_WINDOW_6MS = 5, SFTY_SBC_FS6500_WD_WINDOW_8MS = 6, SFTY_SBC_FS6500_WD_WINDOW_12MS = 7, SFTY_SBC_FS6500_WD_WINDOW_16MS = 8, SFTY_SBC_FS6500_WD_WINDOW_24MS = 9, SFTY_SBC_FS6500_WD_WINDOW_32MS = 10, SFTY_SBC_FS6500_WD_WINDOW_64MS = 11, SFTY_SBC_FS6500_WD_WINDOW_128MS = 12, SFTY_SBC_FS6500_WD_WINDOW_256MS = 13, SFTY_SBC_FS6500_WD_WINDOW_512MS = 14, SFTY_SBC_FS6500_WD_WINDOW_1024MS = 15} SftySbcFs6500_WdWindowTimeType;
+ 
+ 
+ #endif
+diff --git a/src/fw_cu/Components/Cmn/Shared/SysDef/include/AddGlobalDefines.h b/src/fw_cu/Components/Cmn/Shared/SysDef/include/AddGlobalDefines.h
+index 1542a2072..45a51ae01 100644
+--- a/src/fw_cu/Components/Cmn/Shared/SysDef/include/AddGlobalDefines.h
++++ b/src/fw_cu/Components/Cmn/Shared/SysDef/include/AddGlobalDefines.h
+@@ -93,6 +93,9 @@
+ #define\tSYSCON_RPM_TO_RAD 0.104719758f    /*   rpm to rad/s  (2*PI)/60   */
+ #define\tSYSCON_SQRT2_DIV_SQRT3 0.8164966f    /* sqrt(2)  / sqrt(3)  */
+ #define\tSYSCON_S_TO_MS 1000.0f    /* conversion factor for sec to milli sec (1000) */
++#define\tFTR_SBC_FS6500 0UL    /* Selects NXP FS6500 SBC */
++#define\tFTR_SBC_TLF35584 1UL    /* Selects Infineon TLF35584 SBC */
++#define\tFTR_SIMN_IF 1U    /* Simulation interface feature */
+ #define\tSYSDEF_AIRBAG01_CRASH_SERIOUS 6UL    /* error code for Airbag01 serious crash */
+ #define  SYSDEF_VCUINVSTAT1_INTERLOCK_EVENT_EXT_ERROR 2U
+ #define  SYSDEF_VCUINVSTAT1_CRASH_STATUS_ERROR 1U
+@@ -108,8 +111,6 @@
+ #define MaxACOCInitTime 3U /* MAX AC over current reinit times */
+ 
+ #define  SYSCON_FTR_EMULATE_100KW 0U    /* emulate 100kW on VW HW */
+-#define  SYSCON_SBC_FS6500    0U     /* SBC FS6500 is connected */
+-#define  SYSCON_SBC_TLF35584  1U    /* SBC TLF35584 is connected */
+ 
+ #endif
+ /** @} doxygen end group definition */
+diff --git a/src/fw_cu/Components/Cmn/Sys/LlswDio/include/LlswDio.h b/src/fw_cu/Components/Cmn/Sys/LlswDio/include/LlswDio.h
+index 2188f4b13..614bdb19b 100644
+--- a/src/fw_cu/Components/Cmn/Sys/LlswDio/include/LlswDio.h
++++ b/src/fw_cu/Components/Cmn/Sys/LlswDio/include/LlswDio.h
+@@ -30,6 +30,18 @@
+ #include "Platform_Types.h"
+ #include "Compiler.h"
+ #include "Dio.h"
++#include "IfxPort_reg.h"
++#include "LlswDio_cfg.h"
++
++
++#define SFTYQSPI_START_SEC_CONST_32 //TODO - @LLSW - create a better one, i use what we already have
++#include <MemMap.h>
++
++extern CONST(Ifx_P*, LLSWDIOCONST) LlswDioPortMap[17];
++
++#define SFTYQSPI_STOP_SEC_CONST_32 //TODO - @LLSW - create a better one, i use what we already have
++#include <MemMap.h>
++
+ 
+ #define LLSW_DIO_START_SEC_CODE_SLOW
+ #include "MemMap.h"
+@@ -39,6 +51,20 @@ EXTERNAL_ FUNC(Std_ReturnType, LLSWDIO_CODE) Dio_SetPortPinSts(Dio_ChannelType C
+ 
+ #define LLSW_DIO_STOP_SEC_CODE_SLOW
+ #include "MemMap.h"
++LOCAL_INLINE uint8 LlswDio_ReadChannel(LlswDio_ChannelIdType channelId)
++{
++   uint8 pin;
++   uint8 port;
++   uint8 retVal;
++
++   pin = channelId & 0x00FF;
++
++   port = (channelId & 0xFF00) >> 8;
++
++   retVal = (LlswDioPortMap[port]->IN.U >> pin) & 1U;
++
++   return retVal;
++}
+ 
+ /*========================== [closure] ==============================================*/
+ /*! \\misra Warning No C2004:19.6 "Undefine EXTERNAL_ according to Coding Guideline." */
+diff --git a/src/fw_cu/Components/Cmn/Sys/LlswDio/src/LlswDio.c b/src/fw_cu/Components/Cmn/Sys/LlswDio/src/LlswDio.c
+index 58c0907a3..30fc8da34 100644
+--- a/src/fw_cu/Components/Cmn/Sys/LlswDio/src/LlswDio.c
++++ b/src/fw_cu/Components/Cmn/Sys/LlswDio/src/LlswDio.c
+@@ -16,10 +16,41 @@
+ 
+ #define MASTER_LLSWDIO_
+ 
++#include "Std_Types.h"
++#include "Platform_Types.h"
++#include "IfxPort_reg.h"
++#include "LlswDio_cfg.h"
+ #include "LlswDio.h"  /* PRQA S 0380 */
++#include "Std_Types.h"
+ #include "C2cComBswData.h"
+ #include "Evadc.h"
+ 
++#define SFTYQSPI_START_SEC_CONST_32 //TODO - @LLSW - create a better one, i use what we already have
++#include <MemMap.h>
++
++CONST(Ifx_P*, LLSWDIOCONST) LlswDioPortMap[17] =
++{
++   &MODULE_P00,
++   &MODULE_P01,
++   &MODULE_P02,
++   &MODULE_P10,
++   &MODULE_P11,
++   &MODULE_P12,
++   &MODULE_P13,
++   &MODULE_P14,
++   &MODULE_P15,
++   &MODULE_P20,
++   &MODULE_P21,
++   &MODULE_P22,
++   &MODULE_P23,
++   &MODULE_P32,
++   &MODULE_P33,
++   &MODULE_P34,
++   &MODULE_P40
++};
++
++#define SFTYQSPI_STOP_SEC_CONST_32 //TODO - @LLSW - create a better one, i use what we already have
++#include <MemMap.h>
+ 
+ #define LLSW_DIO_START_SEC_CODE_SLOW
+ #include "MemMap.h"
+diff --git a/src/fw_cu/Components/Cmn/Sys/LlswDio_Cfg/include/LlswDio_cfg.h b/src/fw_cu/Components/Cmn/Sys/LlswDio_Cfg/include/LlswDio_cfg.h
+new file mode 100644
+index 000000000..54e9d4ca8
+--- /dev/null
++++ b/src/fw_cu/Components/Cmn/Sys/LlswDio_Cfg/include/LlswDio_cfg.h
+@@ -0,0 +1,43 @@
++/* ************************************************************************* */
++/* Sourcefile:      LlswDio_cfg.h                                            */
++/*                                                                           */
++/* Department: VSeA R&D SWENG OPS 1 OP                                       */
++/*                                                                           */
++/* ************************************************************************* */
++/* Copyright (C) Valeo Siemens eAutomotive Germany GmbH 2020                 */
++/* All Rights Reserved. Confidential                                         */
++/* ************************************************************************* */
++
++#ifndef LLSWDIO_CFG_H
++#define LLSWDIO_CFG_H
++
++/*!
++ * \\addtogroup LLswDio
++ * @{
++ */
++
++/*================== [includes] =============================================*/
++
++/*================== [macros] ===============================================*/
++
++/*================== [type definitions] =====================================*/
++
++/* Can be replaced by calibratable values, makes more sense, no cfg-file needed */
++typedef enum
++{
++   SFTY_TLF35584_SS1_PIN = 0x0007, //PORT 00, PIN 07
++}LlswDio_ChannelIdType;
++
++/*================== [declaration of public data] ===========================*/
++
++/*================== [declaration of global functions] ======================*/
++
++
++/*================== [closure] ==============================================*/
++/*! @} doxygen end of group definition */
++#endif /* LLSWDIO_CFG_H */
++/* ************************************************************************* */
++/* Copyright (C) Valeo Siemens eAutomotive Germany GmbH 2020                 */
++/* All Rights Reserved. Confidential                                         */
++/* ************************************************************************* */
++/*================== [end of file] ==========================================*/
+diff --git a/src/fw_cu/Components/Cmn/Sys/LlswDio_Cfg/make/makefile.mak b/src/fw_cu/Components/Cmn/Sys/LlswDio_Cfg/make/makefile.mak
+new file mode 100644
+index 000000000..b8c6b649b
+--- /dev/null
++++ b/src/fw_cu/Components/Cmn/Sys/LlswDio_Cfg/make/makefile.mak
+@@ -0,0 +1,28 @@
++# \\\\file\
+#
++# \\brief AUTOSAR <ComponentName>
++#
++# This file contains the implementation of AUTOSAR
++# module <ComponentName>.
++#
++# \\author <AuthorInformation> Siemens AG, 91056 Erlangen, Germany
++#
++# Copyright 2015 - 2015 Siemens AG
++# All rights exclusively reserved for Siemens AG,
++# unless expressly agreed to otherwise.#
++################################################################## DEFINITIONS#
++#################################################################
++
++
++LlswDio_cfg_BASE := $(dir $(abspath $(lastword $(dir $(abspath $(lastword $(MAKEFILE_LIST)))))))
++LlswDio_cfg_PATH_OUT := $(LlswDio_cfg_BASE)generated
++LlswDio_cfg_PATH_USE := $(LlswDio_cfg_BASE)
++CC_FILES_TO_BUILD += $(wildcard $(LlswDio_cfg_BASE)src/*.c)
++CPP_FILES_TO_BUILD += $(wildcard $(LlswDio_cfg_BASE)src/*.cpp)
++ASM_FILES_TO_BUILD += $(wildcard $(LlswDio_cfg_BASE)src/*.s)
++
++LlswDio_cfg_ARCHIVED_LIB := $(wildcard $(LlswDio_cfg_BASE)lib/*.a)
++LlswDio_cfg_GENERATED_LIB := $(LlswDio_cfg_BASE)generated/lib/LlswDio_cfg.a
++LlswDio_cfg_ARCHIVED_A2L := $(wildcard $(LlswDio_cfg_BASE)a2l/*.a2l)
++LlswDio_cfg_GENERATED_A2L := $(LlswDio_cfg_BASE)generated/a2l/LlswDio_cfg.a2l
++A2L_SLAVE_LlswDio_cfg = $(LlswDio_cfg_GENERATED_A2L)
++CC_INCLUDE_PATH += $(LlswDio_cfg_BASE)include
+\\ No newline at end of file
+diff --git a/src/fw_cu/Components/Inv/RtEnv/DrvCtrlSeqr/src/DrvCtrlSeqr.c b/src/fw_cu/Components/Inv/RtEnv/DrvCtrlSeqr/src/DrvCtrlSeqr.c
+index accdf0cbb..6eb1c1ce9 100644
+--- a/src/fw_cu/Components/Inv/RtEnv/DrvCtrlSeqr/src/DrvCtrlSeqr.c
++++ b/src/fw_cu/Components/Inv/RtEnv/DrvCtrlSeqr/src/DrvCtrlSeqr.c
+@@ -437,6 +437,8 @@ FUNC(void, DRVCTRLSEQR_CODE) DrvCtrlSeqr_Run(void)
+             BswC2cData.HwpFltCtrlOvrdSts;
+ #endif
+ 
++#if 0
++//TODO: This section to be corrected for 100KW- SMU Fault Signalling Protocol changed; Sfty and SBC requests incorrect.
+    /* Safe state request from the SMU */
+    SafeStReqSmu   = P33_IN.B.P8;
+    DrvCtrlSeqrSafeStReqs.B.Smu = (SAFE_ST_REQ_ACTIVE == SafeStReqSmu) ? TRUE:FALSE;
+@@ -448,6 +450,7 @@ FUNC(void, DRVCTRLSEQR_CODE) DrvCtrlSeqr_Run(void)
+    /* Safe state request from the SBC */
+    /* Cannot read this back from a pin unfortunately. HW CR!! */
+    DrvCtrlSeqrSafeStReqs.B.Sbc = SftyC2cData.StsSbcFs0b;
++#endif
+ 
+    /* Calculate some helper flags for various bits in the bitfield */
+    PulseDsblLoc    = (0U !=  DrvCtrlSeqrSafeStReqs.U) ? TRUE:FALSE;
+diff --git a/src/fw_cu/Components/Safety/Sfty_Cmn/SftySdl/src/SftySdl_cfg.c b/src/fw_cu/Components/Safety/Sfty_Cmn/SftySdl/src/SftySdl_cfg.c
+index 6b958d0d2..3f1b9893d 100644
+--- a/src/fw_cu/Components/Safety/Sfty_Cmn/SftySdl/src/SftySdl_cfg.c
++++ b/src/fw_cu/Components/Safety/Sfty_Cmn/SftySdl/src/SftySdl_cfg.c
+@@ -586,7 +586,7 @@ CONST(SftySdl_InitTblType, SFTYSDL) SftySdlInitNormRunTbl[] =
+ //    ,{ SFTYSDL_AREA_CMN, &SftyQSpi_Init}
+     ,{ SFTYSDL_AREA_0,   (SftySdlCbkFuncType)(&LlswQSpi_InitArea0)}
+     ,{ SFTYSDL_AREA_CMN, (SftySdlCbkFuncType)(&LlswQSpi_Init)}
+-//    ,{ SFTYSDL_AREA_0,   &SftyAscLinSpi_InitArea0}
++    ,{ SFTYSDL_AREA_2,   &SftySbcCtrl_PreInit}
+     ,{ SFTYSDL_AREA_CMN, &SftySysInit_PostInit } //Generates virtual PORST flag after TLF Digital sefltests are done
+     ,{ SFTYSDL_AREA_2,   &SftySbcCtrl_Init}
+ //    ,{ SFTYSDL_AREA_0,   &SftySbcCtrl_InitArea0}
+Submodule src/fw_cu/Components/Safety/Sfty_CtrlrMonr/WdgAndMcuSplyMonCompst 4fb776e9a..06bd36a6a:
+  > $MODEL_KIT-15263$ - SWE 4.2  Fixed diagnostic reads while SS requests is OFF and updated SimVal for PreInit function
+  > $MODEL_KIT-15263$ - SWE 4.2 Software unit verification [SSW WdgAndMcuSplyMon]: Review update to T2xxx
+  > $MODEL_KIT-15263$ - SWE 4.2 Disabled SS1 pin readback : Workaround need to request TLF35584 state from INIT/Wake to Normal after Disabled SS1 pin readback
+  > $MODEL_KIT-15263$ - SWE 4.2 Disabled SS1 pin readback
+  > $MODEL_KIT-15263$ HIS warning fix
+  > $MODEL_KIT-13748$ - SWE 4.2 Software unit verification [SSW WdgAndMcuSplyMon]: Implement SWUT - code clean-up including related to HIS metrics - implementing SWUT: work-in-progress
+  > $MODEL_KIT-15263$ QAC warning fixes
+  > $MODEL_KIT-12272$- SWE 3.2 TIf35584 [SSW WdgAndMcuSplyMon]: LBIST implementation
+  > $MODEL_KIT-12272$ PORST flag generation according to SW-Arch, moving hand-written definitions into ADD
+  > $MODEL_KIT-12272$ Return-Values + reactions cleanup
+  > $MODEL_KIT-12272$ - SWE 3.2 TIf35584 [SSW WdgAndMcuSplyMon]: LBIST implementation
+  > $MODEL_KIT-13748$ - SWE 4.2 Software unit verification [SSW WdgAndMcuSplyMon]: Implement SWUT - add replacement value for SftyTlf35584AbistCtrl0RegVal during ABIST - cosmetic updates - SWUT implementation-in-progress
+  > $MODEL_KIT-12272$ ADD integration of new variables
+  > $MODEL_KIT-12272$ - SWE 3.2 TIf35584 [SSW WdgAndMcuSplyMon]: LBIST implementation
+  > $MODEL_KIT-14346$ - SWE 3.2 TIf35584 [SSW WdgAndMcuSplyMon]: SS1 readback over DIO - cleanup as part of DD update - SS1 pin read activated and status message updated - moved IF register read request to SFTYTLF35584_REQ_READ_STS and variable update to SFTYTLF35584_WINWDG_REFRSH - moved DEVSTAT register read to SFTYTLF35584_WINWDG_REFRSH along with the watchdog trigger
+  > $MODEL_KIT-12272$ - SWE 3.2 TIf35584 [SSW WdgAndMcuSplyMon]: LBIST implementation
+  > $MODEL_KIT-12272$ - SWE 3.2 TIf35584 [SSW WdgAndMcuSplyMon]: LBIST implementation
+  > $MODEL_KIT-11836$ - SWE 3.2 Software Unit construction [SSW WdgAndMcuSplyMon]: Adaptation after SW-Arch is finalized - new WkSrc interface in _Cfg
+  > $MODEL_KIT-11836$ - SWE 3.2 Software Unit construction [SSW WdgAndMcuSplyMon]: Adaptation after SW-Arch is finalized - removing moritz comments - enabling bit in SYSPCFG1: ERREN register (error monitoring)
+  > $MODEL_KIT-11836$ - SWE 3.2 Software Unit construction [SSW WdgAndMcuSplyMon]: Adaptation after SW-Arch is finalized - updated interfaces from ADD and "wiring" between the components - renamed a local variable which looked like a global one - moved QSPI Rx and Tx function calls to separate functions so that ComErrMonr can be calculated.
+  > $MODEL_KIT-10538$ - SWE 3.2 SftyTIf35584Drvr [SSW WdgAndMcuSplyMon]: Implement ABIST
+  > $MODEL_KIT-11836$ - SWE 3.2 Software Unit construction [SSW WdgAndMcuSplyMon]: Adaptation after SW-Arch is finalized - move SftySbcSpiIf functions into SftyTlf35584 and remove the interface component
+  > $MODEL_KIT-11836$ Adapting implementation to match new SW-Arch
+  > $MODEL_KIT-10998$ - SWE 3.2 TIf35584 [SSW WdgAndMcuSplyMon]: Diagnostic readout - correcting first trigger - diag read was triggered due to IF:SYS and SYSSF:WWDE during first trigger and overwriting startup values.
+  > $MODEL_KIT-10998$ - SWE 3.2 TIf35584 [SSW WdgAndMcuSplyMon]: Diagnostic readout - prevent diagnostic read during safe state requests - optimize return values - correct state change handling in ON_DEM_COM state
+  > $MODEL_KIT-10496$ - SWE 4.2 Software unit verification [SSW WdgAndMcuSplyMon]: Prepare initial folders and RTRT projects
+  > $MODEL_KIT-10538$ - SWE 3.2 SftyTIf35584Drvr [SSW WdgAndMcuSplyMon]: Implement ABIST
+  > $MODEL_KIT-10998$ - SWE 3.2 TIf35584 [SSW WdgAndMcuSplyMon]: Diagnostic readout - cosmetic updates - added on-demand diagnostic read request and counter
+  > $MODEL_KIT-10998$ - Implementation of Decentralized definition of replacement value
+  > Swit_Gpc_testing_100kw
+  > $100kW-19106$ Swit_Gpc_testing_100kw
+  > $MODEL_KIT-10998$ Diagnostic readout: ADD integration
+  > $MODEL_KIT-10998$ Diagnostic readout
+  > $MODEL_KIT-10556$ - Implement readback of configuration, ADD integration
+  > $MODEL_KIT-10790$ - SWE 3.2 TIf35584 [SSW WdgAndMcuSplyMon]: Implement TLF specific shutdown-function - Sleep replaced by Shutdown function - Reset function implemented by moving to standby mode (just like during shutdown) - corrected naming of some defines - removed Wdg sleep-related variables
+  > $MODEL_KIT-10556$ - Implement readback of configuration
+  > $MODEL_KIT-10538$ - Added replacement values for fault injection
+  > $MODEL_KIT-10538$ - Added "code variants" inside of ADD. Less manual merging work.
+  > $MODEL_KIT-10538$ - Fixed initial wrong trigger of window watchdog.
+  > $MODEL_KIT-10496$ Software unit verification [SSW WdgAndMcuSplyMon]: Prepare initial folders and RTRT projects
+  > MODEL_KIT-10496 - SWE 4.2 Software unit verification
+  > $MODEL_KIT-9279$ - Sync communication is now handled inside of special state for this.
+  > $MODEL_KIT-10367$ - SWE 3.2 SftyTIf35584Drvr [SSW WdgAndMcuSplyMon]: Remove cfg-files and use par-files instead - Moritz and Doxygen updates - template updates - removed WWD trigger and timing values from init sequence - removed unused argument in reset function in SftySbcCtrl - removed cfg templates and removed SftyTlf35584_cfg.h inclusions - including relevant constants from deleted cfg files
+  > $MODEL_KIT-9279$ - SFTY SftySbcTlf35584Drvr: SS1 triggering over SPI
+  > $MODEL_KIT-10367$ - Moving init-register values into a2l accessible parameters.
+  > $MODEL_KIT-10367$ - SWE 3.2 SftyTIf35584Drvr [SSW WdgAndMcuSplyMon]: Remove cfg-files and use par-files instead
+  > $MODEL_KIT-10367$ - SWE 3.2 SftyTIf35584Drvr [SSW WdgAndMcuSplyMon]: Remove cfg-files and use par-files instead
+diff --git a/src/fw_cu/Components/Safety/Sfty_CtrlrMonr/WdgAndMcuSplyMonCompst_Cfg/SftySbcCtrlIf_Cfg/include/SftySbcCtrlIf_cfg.h b/src/fw_cu/Components/Safety/Sfty_CtrlrMonr/WdgAndMcuSplyMonCompst_Cfg/SftySbcCtrlIf_Cfg/include/SftySbcCtrlIf_cfg.h
+new file mode 100644
+index 000000000..2cd9bbd04
+--- /dev/null
++++ b/src/fw_cu/Components/Safety/Sfty_CtrlrMonr/WdgAndMcuSplyMonCompst_Cfg/SftySbcCtrlIf_Cfg/include/SftySbcCtrlIf_cfg.h
+@@ -0,0 +1,42 @@
++/* ************************************************************************* */
++/* Sourcefile: SftySbcCtrlIf_cfg.h                                           */
++/*                                                                           */
++/* Department: VSeA R&D SWENG OPS 1 OP                                       */
++/*                                                                           */
++/* ************************************************************************* */
++/* Copyright (C) Valeo Siemens eAutomotive Germany GmbH 2020                 */
++/* All Rights Reserved. Confidential                                         */
++/* ************************************************************************* */
++#ifndef SFTYSBCCTRLIFCFG_H
++#define SFTYSBCCTRLIFCFG_H
++/*!
++* \\addtogroup SftySbcCtrlIfCfg_module
++* @{
++*/
++
++
++/*================== [includes] =============================================*/
++
++/*================== [type definitions] =====================================*/
++
++/*================== [declaration of public data] ===========================*/
++
++/*================== [declaration of global functions] ======================*/
++
++#define SFTYSBCCTRLIF_AREA_2_START_SEC_CODE_SLOW
++#include "MemMap.h"
++
++FUNC(boolean, SFTYSBCCTRLIF_CODE) SftySbcCtrlIf_SafeStReqCfg(void);
++FUNC(SftySbcCtrlIfWkSrcType, SFTYSBCCTRLIF_CODE) SftySbcCtrlIf_WkSrcCfg(void);
++
++#define SFTYSBCCTRLIF_AREA_2_STOP_SEC_CODE_SLOW
++#include "MemMap.h"
++
++/*================== [closure] ==============================================*/
++/*! @} doxygen end of group definition */
++#endif
++/* ************************************************************************* */
++/* Copyright (C) Valeo Siemens eAutomotive Germany GmbH 2020                 */
++/* All Rights Reserved. Confidential                                         */
++/* ************************************************************************* */
++/*================== [end of file] ==========================================*/
+diff --git a/src/fw_cu/Components/Safety/Sfty_CtrlrMonr/WdgAndMcuSplyMonCompst_Cfg/SftySbcCtrlIf_Cfg/make/makefile.mak b/src/fw_cu/Components/Safety/Sfty_CtrlrMonr/WdgAndMcuSplyMonCompst_Cfg/SftySbcCtrlIf_Cfg/make/makefile.mak
+new file mode 100644
+index 000000000..a71070a2d
+--- /dev/null
++++ b/src/fw_cu/Components/Safety/Sfty_CtrlrMonr/WdgAndMcuSplyMonCompst_Cfg/SftySbcCtrlIf_Cfg/make/makefile.mak
+@@ -0,0 +1,28 @@
++# \\\\file\
+#
++# \\brief AUTOSAR <ComponentName>
++#
++# This file contains the implementation of AUTOSAR
++# module <ComponentName>.
++#
++# \\author <AuthorInformation> Siemens AG, 91056 Erlangen, Germany
++#
++# Copyright 2015 - 2015 Siemens AG
++# All rights exclusively reserved for Siemens AG,
++# unless expressly agreed to otherwise.#
++################################################################## DEFINITIONS#
++#################################################################
++
++
++SftySbcCtrlIfCfg_BASE := $(dir $(abspath $(lastword $(dir $(abspath $(lastword $(MAKEFILE_LIST)))))))
++SftySbcCtrlIfCfg_PATH_OUT := $(SftySbcCtrlIfCfg_BASE)generated
++SftySbcCtrlIfCfg_PATH_USE := $(SftySbcCtrlIfCfg_BASE)
++CC_FILES_TO_BUILD += $(wildcard $(SftySbcCtrlIfCfg_BASE)src/*.c)
++CPP_FILES_TO_BUILD += $(wildcard $(SftySbcCtrlIfCfg_BASE)src/*.cpp)
++ASM_FILES_TO_BUILD += $(wildcard $(SftySbcCtrlIfCfg_BASE)src/*.s)
++
++SftySbcCtrlIfCfg_ARCHIVED_LIB := $(wildcard $(SftySbcCtrlIfCfg_BASE)lib/*.a)
++SftySbcCtrlIfCfg_GENERATED_LIB := $(SftySbcCtrlIfCfg_BASE)generated/lib/SftySbcCtrlIfCfg.a
++SftySbcCtrlIfCfg_ARCHIVED_A2L := $(wildcard $(SftySbcCtrlIfCfg_BASE)a2l/*.a2l)
++SftySbcCtrlIfCfg_GENERATED_A2L := $(SftySbcCtrlIfCfg_BASE)generated/a2l/SftySbcCtrlIfCfg.a2l
++A2L_SLAVE_SftySbcCtrlIfCfg = $(SftySbcCtrlIfCfg_GENERATED_A2L)
++CC_INCLUDE_PATH += $(SftySbcCtrlIfCfg_BASE)include
+\\ No newline at end of file
+diff --git a/src/fw_cu/Components/Safety/Sfty_CtrlrMonr/WdgAndMcuSplyMonCompst_Cfg/SftySbcCtrlIf_Cfg/src/SftySbcCtrlIf_cfg.c b/src/fw_cu/Components/Safety/Sfty_CtrlrMonr/WdgAndMcuSplyMonCompst_Cfg/SftySbcCtrlIf_Cfg/src/SftySbcCtrlIf_cfg.c
+new file mode 100644
+index 000000000..958e99151
+--- /dev/null
++++ b/src/fw_cu/Components/Safety/Sfty_CtrlrMonr/WdgAndMcuSplyMonCompst_Cfg/SftySbcCtrlIf_Cfg/src/SftySbcCtrlIf_cfg.c
+@@ -0,0 +1,108 @@
++/* ************************************************************************* */
++/* Sourcefile: SftySbcCtrlIf_cfg.c                                           */
++/*                                                                           */
++/* Department: VSeA R&D SWENG OPS 1 OP                                       */
++/*                                                                           */
++/* ************************************************************************* */
++/* Copyright (C) Valeo Siemens eAutomotive Germany GmbH 2020                 */
++/* All Rights Reserved. Confidential                                         */
++/* ************************************************************************* */
++
++/*================== [includes] =============================================*/
++#include "Std_Types.h"
++#include "AddEnumTypes.h"
++#if FTR_SBC_FS6500 == 1
++/* include FS65500 specific headers here */
++#endif
++#if FTR_SBC_TLF35584 == 1
++# include "SftyTlf35584.h"
++# include "SftyTlf35584_data.h"
++#endif
++#include "SftySbcCtrlIf_cfg.h"
++
++#define SFTYSBCCTRLIF_AREA_2_START_SEC_CODE_SLOW
++#include "MemMap.h"
++
++/******************************************************************/
++/*!
++ * \\fn      boolean SftySbcCtrlIf_SafeStReqCfg(void)
++ * \\brief   Accumulate the safe state requests
++ * \\param   void
++ * \\return  boolean retVal: safe state request
++ * \\retval  STD_ON: safe state request on
++ * \\retval  STD_OFF: safe state request off
++ */
++/******************************************************************/
++FUNC(boolean, SFTYSBCCTRLIF_CODE) SftySbcCtrlIf_SafeStReqCfg(void)
++{
++   /* ******** Variables declaration *********** */
++   boolean retVal = STD_OFF;
++
++/* If SBC FS6500 is used, accumulate the safe state requests */
++#if FTR_SBC_FS6500 == 1
++
++#endif
++
++/* If SBC TLF35584 is used, accumulate the safe state requests */
++#if FTR_SBC_TLF35584 == 1
++   retVal = STD_OFF;
++#endif
++
++   return retVal;
++}
++
++/******************************************************************/
++/*!
++ * \\fn      SftySbcCtrlIfWkSrcType SftySbcCtrlIf_WkSrcCfg(void)
++ * \\brief   Map wake sources
++ * \\param   void
++ * \\return  SftySbcCtrlIfWkSrcType retVal: wake source
++ * \\retval  SFTYSBCTRLIF_WK_SRC_KL15: KL15 wake
++ * \\retval  SFTYSBCTRLIF_WK_SRC_CAN: CAN wake
++ * \\retval  SFTYSBCTRLIF_WK_SRC_KL30: KL30 wake
++ */
++/******************************************************************/
++FUNC(SftySbcCtrlIfWkSrcType, SFTYSBCCTRLIF_CODE) SftySbcCtrlIf_WkSrcCfg(void)
++{
++   /* ******** Variables declaration *********** */
++   SftySbcCtrlIfWkSrcType retVal = 0U;
++#if FTR_SBC_TLF35584 == 1
++   SftyTlf35584WkSrcType regValTlf35584WkSrc;
++#endif
++
++/* If SBC FS6500 is used, set the wake source based on the wake source from the SBC */
++#if FTR_SBC_FS6500 == 1
++
++#endif
++
++/* If SBC TLF35584 is used, set the wake source based on the wake source from the SBC */
++#if FTR_SBC_TLF35584 == 1
++   regValTlf35584WkSrc.Val = SftyTlf35584WkSfRegValDiagRead;
++
++   if( regValTlf35584WkSrc.B.ENA == 1U )
++   {
++      retVal = SFTYSBCTRLIF_WK_SRC_KL15;
++   }
++   else if( regValTlf35584WkSrc.B.WAK == 1U )
++   {
++      retVal = SFTYSBCTRLIF_WK_SRC_CAN;
++   }
++   else
++   {
++      retVal = SFTYSBCTRLIF_WK_SRC_KL30;
++   }
++#endif
++
++   return retVal;
++}
++
++#define SFTYSBCCTRLIF_AREA_2_STOP_SEC_CODE_SLOW
++#include "MemMap.h"
++
++/*================== [closure] ==============================================*/
++/*! @} doxygen end of group definition */
++/* ************************************************************************* */
++/* Copyright (C) Valeo Siemens eAutomotive Germany GmbH 2020                 */
++/* All Rights Reserved. Confidential                                         */
++/* ************************************************************************* */
++/*================== [end of file] ==========================================*/
+diff --git a/src/fw_cu/Components/Safety/Sfty_CtrlrMonr/WdgAndMcuSplyMonCompst_Cfg/SftySbcCtrl_Cfg/include/SftySbcCtrl_cfg.h b/src/fw_cu/Components/Safety/Sfty_CtrlrMonr/WdgAndMcuSplyMonCompst_Cfg/SftySbcCtrl_Cfg/include/SftySbcCtrl_cfg.h
+new file mode 100644
+index 000000000..15b96daf4
+--- /dev/null
++++ b/src/fw_cu/Components/Safety/Sfty_CtrlrMonr/WdgAndMcuSplyMonCompst_Cfg/SftySbcCtrl_Cfg/include/SftySbcCtrl_cfg.h
+@@ -0,0 +1,41 @@
++/* ************************************************************************* */
++/* Sourcefile: SftySbcCtrl_cfg.h                                           */
++/*                                                                           */
++/* Department: VSeA R&D SWENG OPS 1 OP                                       */
++/*                                                                           */
++/* ************************************************************************* */
++/* Copyright (C) Valeo Siemens eAutomotive Germany GmbH 2021                 */
++/* All Rights Reserved. Confidential                                         */
++/* ************************************************************************* */
++#ifndef SFTYSBCCTRLCFG_H
++#define SFTYSBCCTRLCFG_H
++/*!
++* \\addtogroup SftySbcCtrlCfg_module
++* @{
++*/
++
++
++/*================== [includes] =============================================*/
++
++/*================== [type definitions] =====================================*/
++
++/*================== [declaration of public data] ===========================*/
++
++/*================== [declaration of global functions] ======================*/
++
++#define SFTYSBCCTRL_AREA_2_START_SEC_CODE_SLOW
++#include "MemMap.h"
++
++FUNC(void, SFTYSBCCTRL_CODE) SftySbcCtrl_ErrHndlr(void);
++
++#define SFTYSBCCTRL_AREA_2_STOP_SEC_CODE_SLOW
++#include "MemMap.h"
++
++/*================== [closure] ==============================================*/
++/*! @} doxygen end of group definition */
++#endif
++/* ************************************************************************* */
++/* Copyright (C) Valeo Siemens eAutomotive Germany GmbH 2021                 */
++/* All Rights Reserved. Confidential                                         */
++/* ************************************************************************* */
++/*================== [end of file] ==========================================*/
+diff --git a/src/fw_cu/Components/Safety/Sfty_CtrlrMonr/WdgAndMcuSplyMonCompst_Cfg/SftySbcCtrl_Cfg/make/makefile.mak b/src/fw_cu/Components/Safety/Sfty_CtrlrMonr/WdgAndMcuSplyMonCompst_Cfg/SftySbcCtrl_Cfg/make/makefile.mak
+new file mode 100644
+index 000000000..958980645
+--- /dev/null
++++ b/src/fw_cu/Components/Safety/Sfty_CtrlrMonr/WdgAndMcuSplyMonCompst_Cfg/SftySbcCtrl_Cfg/make/makefile.mak
+@@ -0,0 +1,28 @@
++# \\\\file\
+#
++# \\brief AUTOSAR <ComponentName>
++#
++# This file contains the implementation of AUTOSAR
++# module <ComponentName>.
++#
++# \\author <AuthorInformation> Siemens AG, 91056 Erlangen, Germany
++#
++# Copyright 2015 - 2015 Siemens AG
++# All rights exclusively reserved for Siemens AG,
++# unless expressly agreed to otherwise.#
++################################################################## DEFINITIONS#
++#################################################################
++
++
++SftySbcCtrlCfg_BASE := $(dir $(abspath $(lastword $(dir $(abspath $(lastword $(MAKEFILE_LIST)))))))
++SftySbcCtrlCfg_PATH_OUT := $(SftySbcCtrlCfg_BASE)generated
++SftySbcCtrlCfg_PATH_USE := $(SftySbcCtrlCfg_BASE)
++CC_FILES_TO_BUILD += $(wildcard $(SftySbcCtrlCfg_BASE)src/*.c)
++CPP_FILES_TO_BUILD += $(wildcard $(SftySbcCtrlCfg_BASE)src/*.cpp)
++ASM_FILES_TO_BUILD += $(wildcard $(SftySbcCtrlCfg_BASE)src/*.s)
++
++SftySbcCtrlCfg_ARCHIVED_LIB := $(wildcard $(SftySbcCtrlCfg_BASE)lib/*.a)
++SftySbcCtrlCfg_GENERATED_LIB := $(SftySbcCtrlCfg_BASE)generated/lib/SftySbcCtrlCfg.a
++SftySbcCtrlCfg_ARCHIVED_A2L := $(wildcard $(SftySbcCtrlCfg_BASE)a2l/*.a2l)
++SftySbcCtrlCfg_GENERATED_A2L := $(SftySbcCtrlCfg_BASE)generated/a2l/SftySbcCtrlCfg.a2l
++A2L_SLAVE_SftySbcCtrlCfg = $(SftySbcCtrlCfg_GENERATED_A2L)
++CC_INCLUDE_PATH += $(SftySbcCtrlCfg_BASE)include
+\\ No newline at end of file
+diff --git a/src/fw_cu/Components/Safety/Sfty_CtrlrMonr/WdgAndMcuSplyMonCompst_Cfg/SftySbcCtrl_Cfg/src/SftySbcCtrl_cfg.c b/src/fw_cu/Components/Safety/Sfty_CtrlrMonr/WdgAndMcuSplyMonCompst_Cfg/SftySbcCtrl_Cfg/src/SftySbcCtrl_cfg.c
+new file mode 100644
+index 000000000..d9c38f793
+--- /dev/null
++++ b/src/fw_cu/Components/Safety/Sfty_CtrlrMonr/WdgAndMcuSplyMonCompst_Cfg/SftySbcCtrl_Cfg/src/SftySbcCtrl_cfg.c
+@@ -0,0 +1,46 @@
++/* ************************************************************************* */
++/* Sourcefile: SftySbcCtrl_cfg.c                                             */
++/*                                                                           */
++/* Department: VSeA R&D SWENG OPS 1 OP                                       */
++/*                                                                           */
++/* ************************************************************************* */
++/* Copyright (C) Valeo Siemens eAutomotive Germany GmbH 2021                 */
++/* All Rights Reserved. Confidential                                         */
++/* ************************************************************************* */
++
++/*================== [includes] =============================================*/
++#include "Std_Types.h"
++#include "SftySbcCtrl_cfg.h"
++#include "SftyUtils.h"
++
++#define SFTYSBCCTRL_AREA_2_START_SEC_CODE_SLOW
++#include "MemMap.h"
++
++/******************************************************************/
++/*!
++ * \\fn      void SftySbcCtrl_ErrHndlr(void)
++ * \\brief   Fatal error handler
++ * \\param   void
++ * \\return  void
++ */
++/******************************************************************/
++FUNC(void, SFTYSBCCTRL_CODE) SftySbcCtrl_ErrHndlr(void)
++{
++   /* ******** Variables declaration *********** */
++
++   /* ************* Source code **************** */
++ //  SftyUtils_EnforceSbcReset();
++
++   return;
++}
++
++#define SFTYSBCCTRL_AREA_2_STOP_SEC_CODE_SLOW
++#include "MemMap.h"
++
++/*================== [closure] ==============================================*/
++/*! @} doxygen end of group definition */
++/* ************************************************************************* */
++/* Copyright (C) Valeo Siemens eAutomotive Germany GmbH 2021                 */
++/* All Rights Reserved. Confidential                                         */
++/* ************************************************************************* */
++/*================== [end of file] ==========================================*/
+diff --git a/src/fw_cu/Components/Safety/Sfty_CtrlrMonr/WdgAndMcuSplyMonCompst_Cfg/SftySbcFs6500Drvr_Cfg/include/SftySbcFs6500Drvr_cfg.h b/src/fw_cu/Components/Safety/Sfty_CtrlrMonr/WdgAndMcuSplyMonCompst_Cfg/SftySbcFs6500Drvr_Cfg/include/SftySbcFs6500Drvr_cfg.h
+deleted file mode 100644
+index 8bb8ad3c8..000000000
+--- a/src/fw_cu/Components/Safety/Sfty_CtrlrMonr/WdgAndMcuSplyMonCompst_Cfg/SftySbcFs6500Drvr_Cfg/include/SftySbcFs6500Drvr_cfg.h
++++ /dev/null
+@@ -1,175 +0,0 @@
+-/* ************************************************************************* */
+-/* Sourcefile: SftySbcFs6500Drvr_cfg.h                                       */
+-/*                                                                           */
+-/* Department: VSeA R&D SWENG OPS 1 OP                                       */
+-/*                                                                           */
+-/* ************************************************************************* */
+-/* Copyright (C) Valeo Siemens eAutomotive Germany GmbH 2020                 */
+-/* All Rights Reserved. Confidential                                         */
+-/* ************************************************************************* */
+-
+-
+-#ifndef SFTYSBCFS6500DRVR_CFG_H
+-#define SFTYSBCFS6500DRVR_CFG_H
+-
+-/*!
+-* \\defgroup SftySbcFs6500Drvr_cfg Safety SBC Driver Configuration
+-* \\ingroup SftySbcFs6500Drvr
+-* @{
+-*/
+-
+-/*================================================ [includes] ========================================================*/
+-/*================================================= [defines] ========================================================*/
+-
+-/* Length definition is used in Admin Table "adminTable.c" */
+-#define SFTY_SBC_FS6500_CFG_LEN                17u
+-
+-/*================================================= [macros] =========================================================*/
+-#define SFTYSBCFS6500_INIT_VREG_VAL                         0x44u
+-#define SFTYSBCFS6500_INIT_WU1_VAL                          0x41u
+-#define SFTYSBCFS6500_INIT_WU2_VAL                          0x00u
+-#define SFTYSBCFS6500_INIT_INH_INT_VAL                      0x09u
+-#define SFTYSBCFS6500_INIT_INT_VAL                          0x3Eu
+-#define SFTYSBCFS6500_INIT_VCORE_OVUV_IMPACT_VAL            0xF0u
+-#define SFTYSBCFS6500_INIT_VAUX_OVUV_IMPACT_VAL             0xF0u
+-#define SFTYSBCFS6500_INIT_VCCA_OVUV_IMPACT_VAL             0xF0u
+-#define SFTYSBCFS6500_INIT_SUPERVISOR_VAL                   0x00u
+-#define SFTYSBCFS6500_INIT_FSSM_VAL                         0x00u
+-#define SFTYSBCFS6500_WD_WINDOW_VAL                         0x00u
+-#define SFTYSBCFS6500_INIT_WD_CNT_VAL                       0x00u
+-#define SFTYSBCFS6500_INIT_FS1B_TIMING_VAL                  0x00u
+-#define SFTYSBCFS6500_INIT_FAULT_VAL                        0xB0u
+-#define SFTYSBCFS6500_INIT_SF_IMPACT_VAL                    0x30u
+-#define SFTYSBCFS6500_BIST_VAL                              0x20u
+-#define SFTYSBCFS6500_IO_OUT_AMUX_VAL                       0x00u
+-
+-
+-#define SFTYSBCFS6500_INIT_VREG_READ_BACK_VAL               0x44u
+-#define SFTYSBCFS6500_INIT_WU1_READ_BACK_VAL                0x41u
+-#define SFTYSBCFS6500_INIT_WU2_READ_BACK_VAL                0x00u
+-#define SFTYSBCFS6500_INIT_INH_INT_READ_BACK_VAL            0x09u
+-#define SFTYSBCFS6500_INIT_INT_READ_BACK_VAL                0x3Eu
+-#define SFTYSBCFS6500_MODE_READ_BACK_VAL                    0x04u
+-#define SFTYSBCFS6500_INIT_VCORE_OVUV_IMPACT_READ_BACK_VAL  0x0Fu
+-#define SFTYSBCFS6500_INIT_VAUX_OVUV_IMPACT_READ_BACK_VAL   0x0Fu
+-#define SFTYSBCFS6500_INIT_VCCA_OVUV_IMPACT_READ_BACK_VAL   0x0Fu
+-#define SFTYSBCFS6500_INIT_SUPERVISOR_READ_BACK_VAL         0x00u
+-#define SFTYSBCFS6500_INIT_FSSM_READ_BACK_VAL               0x00u
+-#define SFTYSBCFS6500_INIT_FAULT_READ_BACK_VAL              0x0Bu
+-#define SFTYSBCFS6500_INIT_SF_IMPACT_READ_BACK_VAL          0x03u
+-#define SFTYSBCFS6500_BIST_READ_BACK_VAL                    0x0Fu
+-#define SFTYSBCFS6500_IO_OUT_AMUX_READ_BACK_VAL             0x00u
+-#define SFTYSBCFS6500_HW_CONFIG_READ_BACK_VAL               0x20u
+-
+-
+-
+-
+-/*============================================= [type definitions] ===================================================*/
+-
+-/*! Type: SftySbcFs6500CfgType, used inside of bootloader */
+-typedef struct SftySbcFs6500CfgType_
+-{
+-  /*
+-  @@ ELEMENT = regVal
+-  @@ STRUCTURE = SftySbcFs6500CfgType
+-  @@ A2L_TYPE = PARAMETER
+-  @@ DATA_TYPE = UBYTE
+-  @@ DESCRIPTION = "calibration value for register"
+-  @@ END
+-  */
+-  uint8 regVal;     /*!< calibration value for register */
+-  /*
+-  @@ ELEMENT = regValInv
+-  @@ STRUCTURE = SftySbcFs6500CfgType
+-  @@ A2L_TYPE = PARAMETER
+-  @@ DATA_TYPE = UBYTE
+-  @@ DESCRIPTION = "Inverse value, needed for validation inside of bootloader"
+-  @@ END
+-  */
+-
+-  uint8 regValInv;  /*!< Inverse value, needed for validation inside of bootloader */
+-
+-  /*
+-  @@ ELEMENT = regAdr
+-  @@ STRUCTURE = SftySbcFs6500CfgType
+-  @@ A2L_TYPE = PARAMETER
+-  @@ DATA_TYPE = UBYTE
+-  @@ DESCRIPTION = "register address"
+-  @@ END
+-  */
+-  uint8 regAdr;     /*!< register address */
+-} SftySbcFs6500CfgType;
+-
+-
+-/*! Type: SftySbcFs6500CnfgReadBackType */
+-typedef struct SftySbcFs6500CfgReadBackType_
+-{
+-  /*
+-  @@ ELEMENT = regVal
+-  @@ STRUCTURE = SftySbcFs6500CfgReadBackType
+-  @@ A2L_TYPE = PARAMETER
+-  @@ DATA_TYPE = UBYTE
+-  @@ DESCRIPTION = "calibration value for register"
+-  @@ END
+-  */
+-  uint8                            regVal;  /*!< Expected calibration value for register */
+-
+-  /*
+-  @@ ELEMENT = regMask
+-  @@ STRUCTURE = SftySbcFs6500CfgReadBackType
+-  @@ A2L_TYPE = PARAMETER
+-  @@ DATA_TYPE = UBYTE
+-  @@ DESCRIPTION = "Mask to filter out status and error flags"
+-  @@ END
+-  */
+-  uint8                            regMask; /*!< Mask to filter out status and error flags */
+-
+-  /*
+-  @@ ELEMENT = regAdr
+-  @@ STRUCTURE = SftySbcFs6500CfgReadBackType
+-  @@ A2L_TYPE = PARAMETER
+-  @@ DATA_TYPE = UBYTE
+-  @@ DESCRIPTION = "register address"
+-  @@ END
+-  */
+-  uint8        regAdr;  /*!< register address */
+-
+-  /*
+-  @@ ELEMENT = rlvDurgDbg
+-  @@ STRUCTURE = SftySbcFs6500CfgReadBackType
+-  @@ A2L_TYPE = PARAMETER
+-  @@ DATA_TYPE = UBYTE
+-  @@ CONVERSION = TABLE 0 "FALSE" 1 "TRUE"
+-  @@ DESCRIPTION = "Relevance during debug. In case FALSE - deviations matter only when SftySysInitAurixSftySysEnad is FALSE"
+-  @@ END
+-  */
+-  boolean        rlvDurgDbg;  /*!< register address */
+-} SftySbcFs6500CfgReadBackType;
+-
+-
+-/*============================================= [declaration of public data] =========================================*/
+-#if (SYSCON_SBC_FS6500 == 1U)
+-#define SFTYSBCFS6500_START_SEC_CALIB_32
+-#include "MemMap.h"
+-
+-extern CONST(SftySbcFs6500CfgType,    SFTYSBCFS6500_CONST)  SftySbcFs6500Cfg[SFTY_SBC_FS6500_CFG_LEN];
+-extern CONST(uint32,                  SFTYSBCFS6500_CONST)  SftySbcFs6500CfgLen;
+-
+-extern CONST(SftySbcFs6500CfgReadBackType, SFTYSBCFS6500_CONST)  SftySbcFs6500ConfigReadBack[];
+-extern CONST(uint32,                       SFTYSBCFS6500_CONST)  SftySbcFs6500NumOfReadBackEntries;
+-
+-
+-#define SFTYSBCFS6500_STOP_SEC_CALIB_32
+-#include "MemMap.h"
+-#endif /* end (SYSCON_SBC_FS6500 == 1U) */
+-/*============================================ [declaration of global functions] =====================================*/
+-
+-/*==================================================== [closure] =====================================================*/
+-
+-/*! @} doxygen end of group definition */
+-#endif /* SFTYSBCFS6500DRVR_CFG_H */
+-/* ************************************************************************* */
+-/* Copyright (C) Valeo Siemens eAutomotive Germany GmbH 2020                 */
+-/* All Rights Reserved. Confidential                                         */
+-/* ************************************************************************* */
+-/*================== [end of file] ==========================================*/
+diff --git a/src/fw_cu/Components/Safety/Sfty_CtrlrMonr/WdgAndMcuSplyMonCompst_Cfg/SftySbcFs6500Drvr_Cfg/make/makefile.mak b/src/fw_cu/Components/Safety/Sfty_CtrlrMonr/WdgAndMcuSplyMonCompst_Cfg/SftySbcFs6500Drvr_Cfg/make/makefile.mak
+deleted file mode 100644
+index 8f4d9b979..000000000
+--- a/src/fw_cu/Components/Safety/Sfty_CtrlrMonr/WdgAndMcuSplyMonCompst_Cfg/SftySbcFs6500Drvr_Cfg/make/makefile.mak
++++ /dev/null
+@@ -1,28 +0,0 @@
+-# \\\\file\
+#
+-# \\brief AUTOSAR <ComponentName>
+-#
+-# This file contains the implementation of AUTOSAR
+-# module <ComponentName>.
+-#
+-# \\author <AuthorInformation> Siemens AG, 91056 Erlangen, Germany
+-#
+-# Copyright 2015 - 2015 Siemens AG
+-# All rights exclusively reserved for Siemens AG,
+-# unless expressly agreed to otherwise.#
+-################################################################## DEFINITIONS#
+-#################################################################
+-
+-
+-SftySbcFs6500DrvrCfg_BASE := $(dir $(abspath $(lastword $(dir $(abspath $(lastword $(MAKEFILE_LIST)))))))
+-SftySbcFs6500DrvrCfg_PATH_OUT := $(SftySbcFs6500DrvrCfg_BASE)generated
+-SftySbcFs6500DrvrCfg_PATH_USE := $(SftySbcFs6500DrvrCfg_BASE)
+-CC_FILES_TO_BUILD += $(wildcard $(SftySbcFs6500DrvrCfg_BASE)src/*.c)
+-CPP_FILES_TO_BUILD += $(wildcard $(SftySbcFs6500DrvrCfg_BASE)src/*.cpp)
+-ASM_FILES_TO_BUILD += $(wildcard $(SftySbcFs6500DrvrCfg_BASE)src/*.s)
+-
+-SftySbcFs6500DrvrCfg_ARCHIVED_LIB := $(wildcard $(SftySbcFs6500DrvrCfg_BASE)lib/*.a)
+-SftySbcFs6500DrvrCfg_GENERATED_LIB := $(SftySbcFs6500DrvrCfg_BASE)generated/lib/SftySbcFs6500DrvrCfg.a
+-SftySbcFs6500DrvrCfg_ARCHIVED_A2L := $(wildcard $(SftySbcFs6500DrvrCfg_BASE)a2l/*.a2l)
+-SftySbcFs6500DrvrCfg_GENERATED_A2L := $(SftySbcFs6500DrvrCfg_BASE)generated/a2l/SftySbcFs6500DrvrCfg.a2l
+-A2L_SLAVE_SftySbcFs6500DrvrCfg = $(SftySbcFs6500DrvrCfg_GENERATED_A2L)
+-CC_INCLUDE_PATH += $(SftySbcFs6500DrvrCfg_BASE)include
+\\ No newline at end of file
+diff --git a/src/fw_cu/Components/Safety/Sfty_CtrlrMonr/WdgAndMcuSplyMonCompst_Cfg/SftySbcFs6500Drvr_Cfg/src/SftySbcFs6500Drvr_cfg.c b/src/fw_cu/Components/Safety/Sfty_CtrlrMonr/WdgAndMcuSplyMonCompst_Cfg/SftySbcFs6500Drvr_Cfg/src/SftySbcFs6500Drvr_cfg.c
+deleted file mode 100644
+index 50e241ba1..000000000
+--- a/src/fw_cu/Components/Safety/Sfty_CtrlrMonr/WdgAndMcuSplyMonCompst_Cfg/SftySbcFs6500Drvr_Cfg/src/SftySbcFs6500Drvr_cfg.c
++++ /dev/null
+@@ -1,206 +0,0 @@
+-/* ************************************************************************* */
+-/* Sourcefile: SftySbcFs6500Drvr_cfg.c                                       */
+-/*                                                                           */
+-/* Department: VSeA R&D SWENG OPS 1 OP                                       */
+-/*                                                                           */
+-/* ************************************************************************* */
+-/* Copyright (C) Valeo Siemens eAutomotive Germany GmbH 2020                 */
+-/* All Rights Reserved. Confidential                                         */
+-/* ************************************************************************* */
+-
+-
+-/*!
+-* \\defgroup SftySbcFs6500Drvr_cfg Safety SBC Driver Configuration
+-* \\ingroup SftySbcFs6500Drvr
+-* @{
+-*/
+-
+-/*============================================= [includes] ===========================================================*/
+-#include "Std_Types.h"
+-#include "AddGlobalDefines.h"
+-#if (SYSCON_SBC_FS6500 == 1U)
+-#include "SftySbcFs6500Drvr.h"
+-#endif /* end (SYSCON_SBC_FS6500 == 1U) */
+-#include "SftySbcFs6500Drvr_cfg.h"
+-
+-/*============================================== [local data] ========================================================*/
+-#if (SYSCON_SBC_FS6500 == 1U)
+-
+-/* README
+-*  Initialization routine runs inside of bootloader. This must be done, because many
+-*  registers may be initialized only during INIT-Mode. This creates a problem - for other
+-*  configuration you will need new bootloader. To avoid that SBC config data is saved inside
+-*  application flash. Its location is know to bootloader over "admin-tables".
+-*  That means -> new application -> new bootloader config.
+-*/
+-
+-
+-#define SFTYSBCFS6500_START_SEC_CALIB_32
+-#include "MemMap.h"
+-
+-/* Safety SBCFS6500 Structure Data */
+-/* Length definition SFTY_SBC_FS6500_CFG_LEN is used in Admin Table "adminTable.c" -> do not remove */
+-
+-/*
+-@@ INSTANCE = SftySbcFs6500Cfg._0_ SftySbcFs6500Cfg.SFTYSBCFS6500_INIT_VREG_ADDR
+-@@ STRUCTURE = SftySbcFs6500CfgType
+-@@ END
+-@@ INSTANCE = SftySbcFs6500Cfg._1_ SftySbcFs6500Cfg.SFTYSBCFS6500_INIT_WU1_ADDR
+-@@ STRUCTURE = SftySbcFs6500CfgType
+-@@ END
+-@@ INSTANCE = SftySbcFs6500Cfg._2_ SftySbcFs6500Cfg.SFTYSBCFS6500_INIT_WU2_ADDR
+-@@ STRUCTURE = SftySbcFs6500CfgType
+-@@ END
+-@@ INSTANCE = SftySbcFs6500Cfg._3_ SftySbcFs6500Cfg.SFTYSBCFS6500_INIT_INH_INT_ADDR
+-@@ STRUCTURE = SftySbcFs6500CfgType
+-@@ END
+-@@ INSTANCE = SftySbcFs6500Cfg._4_ SftySbcFs6500Cfg.SFTYSBCFS6500_INIT_INT_ADDR
+-@@ STRUCTURE = SftySbcFs6500CfgType
+-@@ END
+-@@ INSTANCE = SftySbcFs6500Cfg._5_ SftySbcFs6500Cfg.SFTYSBCFS6500_INIT_VCORE_OVUV_IMPACT_ADDR
+-@@ STRUCTURE = SftySbcFs6500CfgType
+-@@ END
+-@@ INSTANCE = SftySbcFs6500Cfg._6_ SftySbcFs6500Cfg.SFTYSBCFS6500_INIT_VAUX_OVUV_IMPACT_ADDR
+-@@ STRUCTURE = SftySbcFs6500CfgType
+-@@ END
+-@@ INSTANCE = SftySbcFs6500Cfg._7_ SftySbcFs6500Cfg.SFTYSBCFS6500_INIT_VCCA_OVUV_IMPACT_ADDR
+-@@ STRUCTURE = SftySbcFs6500CfgType
+-@@ END
+-@@ INSTANCE = SftySbcFs6500Cfg._8_ SftySbcFs6500Cfg.SFTYSBCFS6500_INIT_SUPERVISOR_ADDR
+-@@ STRUCTURE = SftySbcFs6500CfgType
+-@@ END
+-@@ INSTANCE = SftySbcFs6500Cfg._9_ SftySbcFs6500Cfg.SFTYSBCFS6500_INIT_FSSM_ADDR
+-@@ STRUCTURE = SftySbcFs6500CfgType
+-@@ END
+-@@ INSTANCE = SftySbcFs6500Cfg._10_ SftySbcFs6500Cfg.SFTYSBCFS6500_WD_WINDOW_ADDR
+-@@ STRUCTURE = SftySbcFs6500CfgType
+-@@ END
+-@@ INSTANCE = SftySbcFs6500Cfg._11_ SftySbcFs6500Cfg.SFTYSBCFS6500_WD_COUNTER_ADDR
+-@@ STRUCTURE = SftySbcFs6500CfgType
+-@@ END
+-@@ INSTANCE = SftySbcFs6500Cfg._12_ SftySbcFs6500Cfg.SFTYSBCFS6500_INIT_FS1B_TIMING_ADDR
+-@@ STRUCTURE = SftySbcFs6500CfgType
+-@@ END
+-@@ INSTANCE = SftySbcFs6500Cfg._13_ SftySbcFs6500Cfg.SFTYSBCFS6500_INIT_FAULT_ADDR
+-@@ STRUCTURE = SftySbcFs6500CfgType
+-@@ END
+-@@ INSTANCE = SftySbcFs6500Cfg._14_ SftySbcFs6500Cfg.SFTYSBCFS6500_INIT_SF_IMPACT_ADDR
+-@@ STRUCTURE = SftySbcFs6500CfgType
+-@@ END
+-@@ INSTANCE = SftySbcFs6500Cfg._15_ SftySbcFs6500Cfg.SFTYSBCFS6500_BIST_ADDR
+-@@ STRUCTURE = SftySbcFs6500CfgType
+-@@ END
+-@@ INSTANCE = SftySbcFs6500Cfg._16_ SftySbcFs6500Cfg.SFTYSBCFS6500_IO_OUT_AMUX_ADDR
+-@@ STRUCTURE = SftySbcFs6500CfgType
+-@@ END
+-*/
+-CONST(SftySbcFs6500CfgType, SFTYSBCFS6500_CONST) SftySbcFs6500Cfg[SFTY_SBC_FS6500_CFG_LEN] =
+-{
+-   {(uint8)SFTYSBCFS6500_INIT_VREG_VAL,              (uint8)~SFTYSBCFS6500_INIT_VREG_VAL,              (uint8)SFTYSBCFS6500_INIT_VREG_ADDR},
+-   {(uint8)SFTYSBCFS6500_INIT_WU1_VAL,               (uint8)~SFTYSBCFS6500_INIT_WU1_VAL,               (uint8)SFTYSBCFS6500_INIT_WU1_ADDR},
+-   {(uint8)SFTYSBCFS6500_INIT_WU2_VAL,               (uint8)~SFTYSBCFS6500_INIT_WU2_VAL,               (uint8)SFTYSBCFS6500_INIT_WU2_ADDR},
+-   {(uint8)SFTYSBCFS6500_INIT_INH_INT_VAL,           (uint8)~SFTYSBCFS6500_INIT_INH_INT_VAL,           (uint8)SFTYSBCFS6500_INIT_INH_INT_ADDR},
+-   {(uint8)SFTYSBCFS6500_INIT_INT_VAL,               (uint8)~SFTYSBCFS6500_INIT_INT_VAL,               (uint8)SFTYSBCFS6500_INIT_INT_ADDR},
+-   {(uint8)SFTYSBCFS6500_INIT_VCORE_OVUV_IMPACT_VAL, (uint8)~SFTYSBCFS6500_INIT_VCORE_OVUV_IMPACT_VAL, (uint8)SFTYSBCFS6500_INIT_VCORE_OVUV_IMPACT_ADDR},
+-   {(uint8)SFTYSBCFS6500_INIT_VAUX_OVUV_IMPACT_VAL,  (uint8)~SFTYSBCFS6500_INIT_VAUX_OVUV_IMPACT_VAL,  (uint8)SFTYSBCFS6500_INIT_VAUX_OVUV_IMPACT_ADDR},
+-   {(uint8)SFTYSBCFS6500_INIT_VCCA_OVUV_IMPACT_VAL,  (uint8)~SFTYSBCFS6500_INIT_VCCA_OVUV_IMPACT_VAL,  (uint8)SFTYSBCFS6500_INIT_VCCA_OVUV_IMPACT_ADDR},
+-   {(uint8)SFTYSBCFS6500_INIT_SUPERVISOR_VAL,        (uint8)~SFTYSBCFS6500_INIT_SUPERVISOR_VAL,        (uint8)SFTYSBCFS6500_INIT_SUPERVISOR_ADDR},
+-   {(uint8)SFTYSBCFS6500_INIT_FSSM_VAL,              (uint8)~SFTYSBCFS6500_INIT_FSSM_VAL,              (uint8)SFTYSBCFS6500_INIT_FSSM_ADDR},
+-   {(uint8)SFTYSBCFS6500_WD_WINDOW_VAL,              (uint8)~SFTYSBCFS6500_WD_WINDOW_VAL,              (uint8)SFTYSBCFS6500_WD_WINDOW_ADDR},
+-   {(uint8)SFTYSBCFS6500_INIT_WD_CNT_VAL,            (uint8)~SFTYSBCFS6500_INIT_WD_CNT_VAL,            (uint8)SFTYSBCFS6500_WD_COUNTER_ADDR},
+-   {(uint8)SFTYSBCFS6500_INIT_FS1B_TIMING_VAL,       (uint8)~SFTYSBCFS6500_INIT_FS1B_TIMING_VAL,       (uint8)SFTYSBCFS6500_INIT_FS1B_TIMING_ADDR},
+-   {(uint8)SFTYSBCFS6500_INIT_FAULT_VAL,             (uint8)~SFTYSBCFS6500_INIT_FAULT_VAL,             (uint8)SFTYSBCFS6500_INIT_FAULT_ADDR},
+-   {(uint8)SFTYSBCFS6500_INIT_SF_IMPACT_VAL,         (uint8)~SFTYSBCFS6500_INIT_SF_IMPACT_VAL,         (uint8)SFTYSBCFS6500_INIT_SF_IMPACT_ADDR},
+-   {(uint8)SFTYSBCFS6500_BIST_VAL,                   (uint8)~SFTYSBCFS6500_BIST_VAL,                   (uint8)SFTYSBCFS6500_BIST_ADDR},
+-   {(uint8)SFTYSBCFS6500_IO_OUT_AMUX_VAL,            (uint8)~SFTYSBCFS6500_IO_OUT_AMUX_VAL,            (uint8)SFTYSBCFS6500_IO_OUT_AMUX_ADDR}
+-};
+-
+-CONST(uint32, SFTYSBCFS6500_CONST) SftySbcFs6500CfgLen = sizeof(SftySbcFs6500Cfg)/sizeof(SftySbcFs6500Cfg[0U]);
+-
+-
+-/*
+-@@ INSTANCE = SftySbcFs6500ConfigReadBack._0_ SftySbcFs6500ConfigReadBack.SFTYSBCFS6500_INIT_VREG_ADDR
+-@@ STRUCTURE = SftySbcFs6500CfgReadBackType
+-@@ END
+-@@ INSTANCE = SftySbcFs6500ConfigReadBack._1_ SftySbcFs6500ConfigReadBack.SFTYSBCFS6500_INIT_WU1_ADDR
+-@@ STRUCTURE = SftySbcFs6500CfgReadBackType
+-@@ END
+-@@ INSTANCE = SftySbcFs6500ConfigReadBack._2_ SftySbcFs6500ConfigReadBack.SFTYSBCFS6500_INIT_WU2_ADDR
+-@@ STRUCTURE = SftySbcFs6500CfgReadBackType
+-@@ END
+-@@ INSTANCE = SftySbcFs6500ConfigReadBack._3_ SftySbcFs6500ConfigReadBack.SFTYSBCFS6500_INIT_INH_INT_ADDR
+-@@ STRUCTURE = SftySbcFs6500CfgReadBackType
+-@@ END
+-@@ INSTANCE = SftySbcFs6500ConfigReadBack._4_ SftySbcFs6500ConfigReadBack.SFTYSBCFS6500_INIT_INT_ADDR
+-@@ STRUCTURE = SftySbcFs6500CfgReadBackType
+-@@ END
+-@@ INSTANCE = SftySbcFs6500ConfigReadBack._5_ SftySbcFs6500ConfigReadBack.SFTYSBCFS6500_MODE_ADDR
+-@@ STRUCTURE = SftySbcFs6500CfgReadBackType
+-@@ END
+-@@ INSTANCE = SftySbcFs6500ConfigReadBack._6_ SftySbcFs6500ConfigReadBack.SFTYSBCFS6500_INIT_VCORE_OVUV_IMPACT_ADDR
+-@@ STRUCTURE = SftySbcFs6500CfgReadBackType
+-@@ END
+-@@ INSTANCE = SftySbcFs6500ConfigReadBack._7_ SftySbcFs6500ConfigReadBack.SFTYSBCFS6500_INIT_VAUX_OVUV_IMPACT_ADDR
+-@@ STRUCTURE = SftySbcFs6500CfgReadBackType
+-@@ END
+-@@ INSTANCE = SftySbcFs6500ConfigReadBack._8_ SftySbcFs6500ConfigReadBack.SFTYSBCFS6500_INIT_VCCA_OVUV_IMPACT_ADDR
+-@@ STRUCTURE = SftySbcFs6500CfgReadBackType
+-@@ END
+-@@ INSTANCE = SftySbcFs6500ConfigReadBack._9_ SftySbcFs6500ConfigReadBack.SFTYSBCFS6500_INIT_SUPERVISOR_ADDR
+-@@ STRUCTURE = SftySbcFs6500CfgReadBackType
+-@@ END
+-@@ INSTANCE = SftySbcFs6500ConfigReadBack._10_ SftySbcFs6500ConfigReadBack.SFTYSBCFS6500_INIT_FSSM_ADDR
+-@@ STRUCTURE = SftySbcFs6500CfgReadBackType
+-@@ END
+-@@ INSTANCE = SftySbcFs6500ConfigReadBack._11_ SftySbcFs6500ConfigReadBack.SFTYSBCFS6500_INIT_FAULT_ADDR
+-@@ STRUCTURE = SftySbcFs6500CfgReadBackType
+-@@ END
+-@@ INSTANCE = SftySbcFs6500ConfigReadBack._12_ SftySbcFs6500ConfigReadBack.SFTYSBCFS6500_INIT_SF_IMPACT_ADDR
+-@@ STRUCTURE = SftySbcFs6500CfgReadBackType
+-@@ END
+-@@ INSTANCE = SftySbcFs6500ConfigReadBack._13_ SftySbcFs6500ConfigReadBack.SFTYSBCFS6500_BIST_ADDR
+-@@ STRUCTURE = SftySbcFs6500CfgReadBackType
+-@@ END
+-@@ INSTANCE = SftySbcFs6500ConfigReadBack._14_ SftySbcFs6500ConfigReadBack.SFTYSBCFS6500_IO_OUT_AMUX_ADDR
+-@@ STRUCTURE = SftySbcFs6500CfgReadBackType
+-@@ END
+-@@ INSTANCE = SftySbcFs6500ConfigReadBack._15_ SftySbcFs6500ConfigReadBack.SFTYSBCFS6500_HW_CONFIG_ADDR
+-@@ STRUCTURE = SftySbcFs6500CfgReadBackType
+-@@ END
+-*/
+-CONST(SftySbcFs6500CfgReadBackType, SFTYSBCFS6500_CONST) SftySbcFs6500ConfigReadBack[] =
+-{
+-   {(uint8)SFTYSBCFS6500_INIT_VREG_READ_BACK_VAL,              (uint8)SFTYSBCFS6500_INIT_VREG_MASK              ,  (uint8)SFTYSBCFS6500_INIT_VREG_ADDR,               TRUE},
+-   {(uint8)SFTYSBCFS6500_INIT_WU1_READ_BACK_VAL,               (uint8)SFTYSBCFS6500_INIT_WU1_MASK               ,  (uint8)SFTYSBCFS6500_INIT_WU1_ADDR,                TRUE},
+-   {(uint8)SFTYSBCFS6500_INIT_WU2_READ_BACK_VAL,               (uint8)SFTYSBCFS6500_INIT_WU2_MASK               ,  (uint8)SFTYSBCFS6500_INIT_WU2_ADDR,                TRUE},
+-   {(uint8)SFTYSBCFS6500_INIT_INH_INT_READ_BACK_VAL,           (uint8)SFTYSBCFS6500_INIT_INH_INT_MASK           ,  (uint8)SFTYSBCFS6500_INIT_INH_INT_ADDR,            TRUE},
+-   {(uint8)SFTYSBCFS6500_INIT_INT_READ_BACK_VAL,               (uint8)SFTYSBCFS6500_INIT_INT_MASK               ,  (uint8)SFTYSBCFS6500_INIT_INT_ADDR,                TRUE},
+-   {(uint8)SFTYSBCFS6500_MODE_READ_BACK_VAL,                   (uint8)SFTYSBCFS6500_MODE_MASK                   ,  (uint8)SFTYSBCFS6500_MODE_ADDR,                    TRUE},
+-   {(uint8)SFTYSBCFS6500_INIT_VCORE_OVUV_IMPACT_READ_BACK_VAL, (uint8)SFTYSBCFS6500_INIT_VCORE_OVUV_IMPACT_MASK ,  (uint8)SFTYSBCFS6500_INIT_VCORE_OVUV_IMPACT_ADDR,  TRUE},
+-   {(uint8)SFTYSBCFS6500_INIT_VAUX_OVUV_IMPACT_READ_BACK_VAL,  (uint8)SFTYSBCFS6500_INIT_VAUX_OVUV_IMPACT_MASK  ,  (uint8)SFTYSBCFS6500_INIT_VAUX_OVUV_IMPACT_ADDR,   TRUE},
+-   {(uint8)SFTYSBCFS6500_INIT_VCCA_OVUV_IMPACT_READ_BACK_VAL,  (uint8)SFTYSBCFS6500_INIT_VCCA_OVUV_IMPACT_MASK  ,  (uint8)SFTYSBCFS6500_INIT_VCCA_OVUV_IMPACT_ADDR,   TRUE},
+-   {(uint8)SFTYSBCFS6500_INIT_SUPERVISOR_READ_BACK_VAL,        (uint8)SFTYSBCFS6500_INIT_SUPERVISOR_MASK        ,  (uint8)SFTYSBCFS6500_INIT_SUPERVISOR_ADDR,         TRUE},
+-   {(uint8)SFTYSBCFS6500_INIT_FSSM_READ_BACK_VAL,              (uint8)SFTYSBCFS6500_INIT_FSSM_MASK              ,  (uint8)SFTYSBCFS6500_INIT_FSSM_ADDR,               TRUE},
+-   {(uint8)SFTYSBCFS6500_INIT_FAULT_READ_BACK_VAL,             (uint8)SFTYSBCFS6500_INIT_FAULT_MASK             ,  (uint8)SFTYSBCFS6500_INIT_FAULT_ADDR,              TRUE},
+-   {(uint8)SFTYSBCFS6500_INIT_SF_IMPACT_READ_BACK_VAL,         (uint8)SFTYSBCFS6500_INIT_SF_IMPACT_MASK         ,  (uint8)SFTYSBCFS6500_INIT_SF_IMPACT_ADDR,          TRUE},
+-   {(uint8)SFTYSBCFS6500_BIST_READ_BACK_VAL,                   (uint8)SFTYSBCFS6500_BIST_MASK                   ,  (uint8)SFTYSBCFS6500_BIST_ADDR,                    TRUE},
+-   {(uint8)SFTYSBCFS6500_IO_OUT_AMUX_READ_BACK_VAL,            (uint8)SFTYSBCFS6500_IO_OUT_AMUX_MASK            ,  (uint8)SFTYSBCFS6500_IO_OUT_AMUX_ADDR,             TRUE},
+-   {(uint8)SFTYSBCFS6500_HW_CONFIG_READ_BACK_VAL,              (uint8)SFTYSBCFS6500_HW_CONFIG_MASK              ,  (uint8)SFTYSBCFS6500_HW_CONFIG_ADDR,               FALSE}
+-};
+-
+-CONST(uint32, SFTYSBCFS6500_CONST) SftySbcFs6500NumOfReadBackEntries = sizeof(SftySbcFs6500ConfigReadBack)/sizeof(SftySbcFs6500ConfigReadBack[0U]);
+-
+-#define SFTYSBCFS6500_STOP_SEC_CALIB_32
+-#include "MemMap.h"
+-
+-#endif /* end (SYSCON_SBC_FS6500 == 1U) */
+-
+-/*! @} doxygen end of group definition */
+-
+-/*================================================ [closure] =========================================================*/
+-/*! @} doxygen end of group definition */
+-/* ************************************************************************* */
+-/* Copyright (C) Valeo Siemens eAutomotive Germany GmbH 2020                 */
+-/* All Rights Reserved. Confidential                                         */
+-/* ************************************************************************* */
+-/*================== [end of file] ==========================================*/
+diff --git a/src/fw_cu/Components/Safety/Sfty_CtrlrMonr/WdgAndMcuSplyMonCompst_Cfg/SftyTlf35584_Cfg/include/SftyTlf35584_cfg.h b/src/fw_cu/Components/Safety/Sfty_CtrlrMonr/WdgAndMcuSplyMonCompst_Cfg/SftyTlf35584_Cfg/include/SftyTlf35584_cfg.h
+deleted file mode 100644
+index bb7cd1a5a..000000000
+--- a/src/fw_cu/Components/Safety/Sfty_CtrlrMonr/WdgAndMcuSplyMonCompst_Cfg/SftyTlf35584_Cfg/include/SftyTlf35584_cfg.h
++++ /dev/null
+@@ -1,87 +0,0 @@
+-/* ************************************************************************* */
+-/* Sourcefile: SftyTlf35584_cfg.h                                     */
+-/*                                                                           */
+-/* Department: VSeA R&D SWENG OPS 1 OP                                       */
+-/*                                                                           */
+-/* ************************************************************************* */
+-/* Copyright (C) Valeo Siemens eAutomotive Germany GmbH 2020                 */
+-/* All Rights Reserved. Confidential                                         */
+-/* ************************************************************************* */
+-#ifndef SFTYTLF35584_CFG_H
+-#define SFTYTLF35584_CFG_H
+-
+-/*!
+-* \\defgroup SftyTlf35584_cfg Safety SBC Driver Configuration
+-* \\ingroup SftyTlf35584
+-* @{
+-*/
+-
+-/*================================================ [includes] ========================================================*/
+-
+-/*================================================= [defines] ========================================================*/
+-
+-/*================================================= [macros] =========================================================*/
+-
+-/*============================================= [type definitions] ===================================================*/
+-
+-
+-/*! Masks for WR to registers */
+-#define SFTYTLF35584_INIT_READ_WKSRC            0x00U   /*! Mask to read wake up status flag register */
+-#define SFTYTLF35584_INIT_DEVCFG0_VAL           0x08U   /*! Mask to configure the DEVCFG0 register */
+-#define SFTYTLF35584_INIT_DEVCFG1_VAL           0x06U   /*! Mask to configure the DEVCFG1 register */
+-#define SFTYTLF35584_INIT_DEVCFG2_VAL           0x10U   /*! Mask to configure the DEVCFG2 register */
+-#define SFTYTLF35584_INIT_UNLCK_BYTE1_VAL       0xABU   /*! BYTE1 of unlock sequence */
+-#define SFTYTLF35584_INIT_UNLCK_BYTE2_VAL       0xEFU   /*! BYTE2 of unlock sequence */
+-#define SFTYTLF35584_INIT_UNLCK_BYTE3_VAL       0x56U   /*! BYTE3 of unlock sequence */
+-#define SFTYTLF35584_INIT_UNLCK_BYTE4_VAL       0x12U   /*! BYTE4 of unlock sequence */
+-#define SFTYTLF35584_INIT_SYSPCFG0_VAL          0x01U   /*! Mask to configure SYSPCFG0 register */
+-#define SFTYTLF35584_INIT_SYSPCFG1_VAL          0x00U   /*! Mask to configure SYSPCFG1 register */
+-#define SFTYTLF35584_INIT_WDCFG0_VAL            0x6FU   /*! Mask to configure WDCFG0 register */
+-#define SFTYTLF35584_INIT_WDCFG1_VAL            0x06U   /*! Mask to configure WDCFG1 register */
+-#define SFTYTLF35584_INIT_FWDCFG_VAL            0x0BU   /*! Mask to configure FWDCFG register */
+-#define SFTYTLF35584_INIT_WWDCFG0_VAL           0x06U   /*! Mask to configure WWDCFG0 register */
+-#define SFTYTLF35584_INIT_WWDCFG1_VAL           0x15U   /*! Mask to configure WWDCFG1 register */
+-#define SFTYTLF35584_INIT_WWDREFRESH_VAL        0x01U   /*! Watchdog refresh value in initialisation */
+-#define SFTYTLF35584_INIT_LCK_BYTE1_VAL         0xDFU   /*! BYTE1 of lock sequence */
+-#define SFTYTLF35584_INIT_LCK_BYTE2_VAL         0x34U   /*! BYTE2 of lock sequence */
+-#define SFTYTLF35584_INIT_LCK_BYTE3_VAL         0xBEU   /*! BYTE3 of lock sequence */
+-#define SFTYTLF35584_INIT_LCK_BYTE4_VAL         0xCAU   /*! BYTE4 of lock sequence */
+-#define SFTYTLF35584_INITMOD_WDCFG0_VAL         0x6EU   /*! Mask to configure WDCFG0 register in INIT mode */
+-#define SFTYTLF35584_INITMOD_WWDCFG0_VAL        0x06U   /*! Mask to configure WWDCFG0 register in INIT mode */
+-#define SFTYTLF35584_INITMOD_WWDCFG1_VAL        0x06U   /*! Mask to configure WWDCFG1 register in INIT mode */
+-#define SFTYTLF35584_INITMOD_DEVCTRL_VAL        0xEAU   /*! Mask to configure DEVCTRL register to goto NORMAL mode*/
+-#define SFTYTLF35584_RSTMOD_DEVCTRL_VAL         0xECU   /*! Mask to configure DEVCTRL register to goto STANDBY mode */
+-#define SFTYTLF35584_INITMOD_DEVCTRLN_VAL       (uint8)(~(SFTYTLF35584_INITMOD_DEVCTRL_VAL))  /*! Inverted value of DEVCTRL to configure DEVCTRLN register */
+-#define SFTYTLF35584_RSTMOD_DEVCTRLN_VAL        (uint8)(~(SFTYTLF35584_RSTMOD_DEVCTRL_VAL))   /*! Inverted value of DEVCTRL to configure DEVCTRLN register */
+-#define SFTYTLF35584_RSTMOD_WWDCFG01_VAL        (0x00U)   /*! Mask to configure WWDCFG0 register to minimal WD duration */
+-#define SFTYTLF35584_WARM_RST                   (0U)
+-
+-/*============================================= [declaration of public data] =========================================*/
+-#if (SYSCON_SBC_TLF35584 == 1U)
+-
+-#define SFTYTLF35584_START_SEC_CALIB_32
+-#include "MemMap.h"
+-
+-extern CONST(SftyTlf35584FrmType,    SFTYTLF35584_CONST)  SftyTlf35584InitSeq[];
+-extern CONST(SftyTlf35584FrmType,    SFTYTLF35584_CONST)  SftyTlf35584WdgReCfgSeq[];
+-extern CONST(SftyTlf35584FrmType,    SFTYTLF35584_CONST)  SftyTlf35584RstSeq[];
+-
+-extern CONST(uint8, SFTYTLF35584_CONST)  SftyTlf35584InitSeqLen;
+-extern CONST(uint8, SFTYTLF35584_CONST)  SftyTlf35584WdgReCfgSeqLen;
+-extern CONST(uint8, SFTYTLF35584_CONST)  SftyTlf35584RstSeqLen;
+-
+-#define SFTYTLF35584_STOP_SEC_CALIB_32
+-#include "MemMap.h"
+-
+-#endif /* end (SYSCON_SBC_TLF35584 == 1U) */
+-/*============================================ [declaration of global functions] =====================================*/
+-
+-/*==================================================== [closure] =====================================================*/
+-
+-/*! @} doxygen end of group definition */
+-#endif /* SFTYTLF35584_CFG_H */
+-/* ************************************************************************* */
+-/* Copyright (C) Valeo Siemens eAutomotive Germany GmbH 2020                 */
+-/* All Rights Reserved. Confidential                                         */
+-/* ************************************************************************* */
+-/*================== [end of file] ==========================================*/
+diff --git a/src/fw_cu/Components/Safety/Sfty_CtrlrMonr/WdgAndMcuSplyMonCompst_Cfg/SftyTlf35584_Cfg/make/makefile.mak b/src/fw_cu/Components/Safety/Sfty_CtrlrMonr/WdgAndMcuSplyMonCompst_Cfg/SftyTlf35584_Cfg/make/makefile.mak
+deleted file mode 100644
+index dfb4f20c5..000000000
+--- a/src/fw_cu/Components/Safety/Sfty_CtrlrMonr/WdgAndMcuSplyMonCompst_Cfg/SftyTlf35584_Cfg/make/makefile.mak
++++ /dev/null
+@@ -1,28 +0,0 @@
+-# \\\\file\
+#
+-# \\brief AUTOSAR <ComponentName>
+-#
+-# This file contains the implementation of AUTOSAR
+-# module <ComponentName>.
+-#
+-# \\author <AuthorInformation> Siemens AG, 91056 Erlangen, Germany
+-#
+-# Copyright 2015 - 2015 Siemens AG
+-# All rights exclusively reserved for Siemens AG,
+-# unless expressly agreed to otherwise.#
+-################################################################## DEFINITIONS#
+-#################################################################
+-
+-
+-SftyTlf35584Cfg_BASE := $(dir $(abspath $(lastword $(dir $(abspath $(lastword $(MAKEFILE_LIST)))))))
+-SftyTlf35584Cfg_PATH_OUT := $(SftyTlf35584Cfg_BASE)generated
+-SftyTlf35584Cfg_PATH_USE := $(SftyTlf35584Cfg_BASE)
+-CC_FILES_TO_BUILD += $(wildcard $(SftyTlf35584Cfg_BASE)src/*.c)
+-CPP_FILES_TO_BUILD += $(wildcard $(SftyTlf35584Cfg_BASE)src/*.cpp)
+-ASM_FILES_TO_BUILD += $(wildcard $(SftyTlf35584Cfg_BASE)src/*.s)
+-
+-SftyTlf35584Cfg_ARCHIVED_LIB := $(wildcard $(SftyTlf35584Cfg_BASE)lib/*.a)
+-SftyTlf35584Cfg_GENERATED_LIB := $(SftyTlf35584Cfg_BASE)generated/lib/SftyTlf35584Cfg.a
+-SftyTlf35584Cfg_ARCHIVED_A2L := $(wildcard $(SftyTlf35584Cfg_BASE)a2l/*.a2l)
+-SftyTlf35584Cfg_GENERATED_A2L := $(SftyTlf35584Cfg_BASE)generated/a2l/SftyTlf35584Cfg.a2l
+-A2L_SLAVE_SftyTlf35584Cfg = $(SftyTlf35584Cfg_GENERATED_A2L)
+-CC_INCLUDE_PATH += $(SftyTlf35584Cfg_BASE)include
+\\ No newline at end of file
+diff --git a/src/fw_cu/Components/Safety/Sfty_CtrlrMonr/WdgAndMcuSplyMonCompst_Cfg/SftyTlf35584_Cfg/src/SftyTlf35584_cfg.c b/src/fw_cu/Components/Safety/Sfty_CtrlrMonr/WdgAndMcuSplyMonCompst_Cfg/SftyTlf35584_Cfg/src/SftyTlf35584_cfg.c
+deleted file mode 100644
+index 184129559..000000000
+--- a/src/fw_cu/Components/Safety/Sfty_CtrlrMonr/WdgAndMcuSplyMonCompst_Cfg/SftyTlf35584_Cfg/src/SftyTlf35584_cfg.c
++++ /dev/null
+@@ -1,79 +0,0 @@
+-/* ************************************************************************* */
+-/* Sourcefile: SftyTlf35584_cfg.c                                     */
+-/*                                                                           */
+-/* Department: VSeA R&D SWENG OPS 1 OP                                       */
+-/*                                                                           */
+-/* ************************************************************************* */
+-/* Copyright (C) Valeo Siemens eAutomotive Germany GmbH 2020                 */
+-/* All Rights Reserved. Confidential                                         */
+-/* ************************************************************************* */
+-
+-
+-/*!
+-* \\defgroup SftyTlf35584_cfg Safety SBC Driver Configuration
+-* \\ingroup SftyTlf35584
+-* @{
+-*/
+-
+-/*============================================= [includes] ===========================================================*/
+-#include "Std_Types.h"
+-#include "AddGlobalDefines.h"
+-#if (SYSCON_SBC_TLF35584 == 1U)
+-#include "SftyTlf35584.h"
+-#include "SftyTlf35584_cfg.h"
+-#endif /* end (SYSCON_SBC_TLF35584 == 1U) */
+-/*============================================== [local data] ========================================================*/
+-#if (SYSCON_SBC_TLF35584 == 1U)
+-
+-#define SFTYTLF35584_START_SEC_CALIB_32
+-#include "MemMap.h"
+-
+-CONST(SftyTlf35584FrmType, SFTYTLF35584_CONST) SftyTlf35584InitSeq[] =
+-{
+-   { .Frm.Adr = SFTYTLF35584_INIT_DEVCFG0_ADDR   , .Frm.Data = SFTYTLF35584_INIT_DEVCFG0_VAL     },
+-   { .Frm.Adr = SFTYTLF35584_INIT_DEVCFG1_ADDR   , .Frm.Data = SFTYTLF35584_INIT_DEVCFG1_VAL     },
+-   { .Frm.Adr = SFTYTLF35584_INIT_DEVCFG2_ADDR   , .Frm.Data = SFTYTLF35584_INIT_DEVCFG2_VAL     },
+-   { .Frm.Adr = SFTYTLF35584_INIT_SYSPCFG0_ADDR  , .Frm.Data = SFTYTLF35584_INIT_SYSPCFG0_VAL    },
+-   { .Frm.Adr = SFTYTLF35584_INIT_SYSPCFG1_ADDR  , .Frm.Data = SFTYTLF35584_INIT_SYSPCFG1_VAL    },
+-   { .Frm.Adr = SFTYTLF35584_INIT_WDCFG0_ADDR    , .Frm.Data = SFTYTLF35584_INIT_WDCFG0_VAL      },
+-   { .Frm.Adr = SFTYTLF35584_INIT_WDCFG1_ADDR    , .Frm.Data = SFTYTLF35584_INIT_WDCFG1_VAL      },
+-   { .Frm.Adr = SFTYTLF35584_INIT_FWDCFG_ADDR    , .Frm.Data = SFTYTLF35584_INIT_FWDCFG_VAL      },
+-   { .Frm.Adr = SFTYTLF35584_INIT_WWDCFG0_ADDR   , .Frm.Data = SFTYTLF35584_INIT_WWDCFG0_VAL     },
+-   { .Frm.Adr = SFTYTLF35584_INIT_WWDCFG1_ADDR   , .Frm.Data = SFTYTLF35584_INIT_WWDCFG1_VAL     },
+-   { .Frm.Adr = SFTYTLF35584_WWDSCMD_ADDR        , .Frm.Data = SFTYTLF35584_INIT_WWDREFRESH_VAL  }
+-};
+-
+-CONST(uint8, SFTYTLF35584_CONST) SftyTlf35584InitSeqLen = sizeof(SftyTlf35584InitSeq)/sizeof(SftyTlf35584InitSeq[0U]);
+-
+-
+-CONST(SftyTlf35584FrmType, SFTYTLF35584_CONST) SftyTlf35584WdgReCfgSeq[] =
+-{
+-   { .Frm.Adr = SFTYTLF35584_INIT_WDCFG0_ADDR    , .Frm.Data = SFTYTLF35584_INITMOD_WDCFG0_VAL   },
+-   { .Frm.Adr = SFTYTLF35584_INIT_WWDCFG0_ADDR   , .Frm.Data = SFTYTLF35584_INITMOD_WWDCFG0_VAL  },
+-   { .Frm.Adr = SFTYTLF35584_INIT_WWDCFG1_ADDR   , .Frm.Data = SFTYTLF35584_INITMOD_WWDCFG1_VAL  }
+-};
+-
+-CONST(uint8, SFTYTLF35584_CONST) SftyTlf35584WdgReCfgSeqLen = sizeof(SftyTlf35584WdgReCfgSeq)/sizeof(SftyTlf35584WdgReCfgSeq[0U]);
+-
+-
+-CONST(SftyTlf35584FrmType, SFTYTLF35584_CONST) SftyTlf35584RstSeq[] =
+-{
+-    { .Frm.Adr = SFTYTLF35584_INIT_WDCFG0_ADDR   , .Frm.Data = SFTYTLF35584_INITMOD_WDCFG0_VAL   },
+-    { .Frm.Adr = SFTYTLF35584_INIT_WWDCFG0_ADDR  , .Frm.Data = SFTYTLF35584_RSTMOD_WWDCFG01_VAL  },
+-    { .Frm.Adr = SFTYTLF35584_INIT_WWDCFG1_ADDR  , .Frm.Data = SFTYTLF35584_RSTMOD_WWDCFG01_VAL  }
+-};
+-
+-CONST(uint8, SFTYTLF35584_CONST) SftyTlf35584RstSeqLen = sizeof(SftyTlf35584RstSeq)/sizeof(SftyTlf35584RstSeq[0U]);
+-
+-#define SFTYTLF35584_STOP_SEC_CALIB_32
+-#include "MemMap.h"
+-
+-#endif /* end (SYSCON_SBC_TLF35584 == 1U) */
+-
+-/*================== [closure] ==============================================*/
+-/*! @} doxygen end of group definition */
+-/* ************************************************************************* */
+-/* Copyright (C) Valeo Siemens eAutomotive Germany GmbH 2020                 */
+-/* All Rights Reserved. Confidential                                         */
+-/* ************************************************************************* */
+-/*================== [end of file] ==========================================*/
+diff --git a/src/fw_cu/build/Parfiles/P2_100kW/Testbench/VW310E_76_49_A274_0028_VEH_200901.par b/src/fw_cu/build/Parfiles/P2_100kW/Testbench/VW310E_76_49_A274_0028_VEH_200901.par
+index ae95eaea3..6a8c5a1e0 100644
+--- a/src/fw_cu/build/Parfiles/P2_100kW/Testbench/VW310E_76_49_A274_0028_VEH_200901.par
++++ b/src/fw_cu/build/Parfiles/P2_100kW/Testbench/VW310E_76_49_A274_0028_VEH_200901.par
+@@ -18145,3 +18145,5 @@ ErrDebFctIdSftyMask.B.FCT_ID_FAILURE_MODE [UINT(1)]  0 ; INACTIVE
+ ErrDebFctIdEnaMask.B.FCT_ID_FAILURE_MODE [UINT(1)]  0 ; INACTIVE
+ ErrDebFctIdSimn.B.FCT_ID_FAILURE_MODE [UINT(1)]  0 ; INACTIVE
+ GearRatFac [FLOAT]  11.97 ;  11.97
++SftySbcCtrlIfSafeStReqSimnEna [UINT(8)]  0 ; FALSE
++SftySbcCtrlIfSafeStSimnVal [UINT(8)]  0 ; STD_OFF
+diff --git a/src/fw_cu/build/a2l/Add.a2l b/src/fw_cu/build/a2l/Add.a2l
+index 3c8dd5036..407cb5282 100644
+--- a/src/fw_cu/build/a2l/Add.a2l
++++ b/src/fw_cu/build/a2l/Add.a2l
+@@ -30680,10 +30680,91 @@ ASAP2_VERSION 1 60
+       /end FUNCTION
+ 
+       /* !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! */
+-      /*   TEYMUR: MERGE HERE THE NEW OPTIMUS OUTPUT TO KEEP THINGS MERGEABLE */
++      /*   TEYMUR: MERGE HERE THE NEW 100KW OUTPUT TO KEEP THINGS MERGEABLE */
+       /* !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! */
+-      
+-       /begin MEASUREMENT SftySbcCtrlIfSafSt
++ 
++
++
++      /begin AXIS_PTS SftyTlf35584RegCfgXAxis
++         "Axis for SftyTlf35584RegCfg. Will be used also as \\"map\\" to map indexes -> register addresses"
++         0x0
++         NO_INPUT_QUANTITY
++         _REC_A2AXS_Autosar40_S4
++         63.
++         oFbojub_CsBemhb_upwdBub_nFRRTR_
++         6
++         0.
++         63.
++      /end AXIS_PTS
++
++      /begin CHARACTERISTIC SftyTlf35584RegCfg
++         "TLF35584 register configuration"
++         CURVE
++         0x0
++         _REC_A1CUR_Autosar40_U1_S4
++         255.
++         raChrxc_kBtBrmb_FmDuEFa_n__aa0o
++         0.
++         255.
++         FORMAT "%6.3"
++         /begin AXIS_DESCR
++            COM_AXIS
++            NO_INPUT_QUANTITY
++            oFbojub_CsBemhb_upwdBub_nFRRTR_
++            6
++            0.
++            63.
++            AXIS_PTS_REF SftyTlf35584RegCfgXAxis
++         /end AXIS_DESCR
++      /end CHARACTERISTIC
++
++
++      /begin MEASUREMENT SftySbcCtrlIfBistErrMonrSt
++         "Result of built in self tests (collected from currently running SBC driver) that will be provided to the application."
++         UBYTE
++         mdzeicb_bchtbkd_qjvDDcd_n_0T1EF
++         1
++         0.
++         0.
++         2.
++         DISPLAY_IDENTIFIER SftySbcCtrlIfBistErrMonrSt
++         ECU_ADDRESS 0x0
++         /begin IF_DATA ETK_XETK
++            DEFAULT_RASTERS 13 
++         /end IF_DATA
++      /end MEASUREMENT
++
++      /begin MEASUREMENT SftySbcCtrlIfComErrMonrSt
++         "Result of last cycle communication (collected from currently running SBC driver) that will be provided to the application."
++         UBYTE
++         mdzeicb_bchtbkd_qjvDDcd_n_0T1EF
++         1
++         0.
++         0.
++         2.
++         DISPLAY_IDENTIFIER SftySbcCtrlIfComErrMonrSt
++         ECU_ADDRESS 0x0
++         /begin IF_DATA ETK_XETK
++            DEFAULT_RASTERS 13 
++         /end IF_DATA
++      /end MEASUREMENT
++
++      /begin MEASUREMENT SftySbcCtrlIfInitErrMonrSt
++         "Result of initialization routine\xc2\xa0(collected from currently running SBC driver) that will be provided to the application."
++         UBYTE
++         mdzeicb_bchtbkd_qjvDDcd_n_0T1EF
++         1
++         0.
++         0.
++         2.
++         DISPLAY_IDENTIFIER SftySbcCtrlIfInitErrMonrSt
++         ECU_ADDRESS 0x0
++         /begin IF_DATA ETK_XETK
++            DEFAULT_RASTERS 13 
++         /end IF_DATA
++      /end MEASUREMENT
++
++      /begin MEASUREMENT SftySbcCtrlIfSafeStPinSts
+          "Current state of safe state output pin of SBC"
+          UBYTE
+          kAcxaDa_hjFDxfd_gbvyctd_nS__O_T
+@@ -30691,13 +30772,14 @@ ASAP2_VERSION 1 60
+          0.
+          0.
+          1.
++         DISPLAY_IDENTIFIER SftySbcCtrlIfSafeStPinSts
+          ECU_ADDRESS 0x0
+          /begin IF_DATA ETK_XETK
+             DEFAULT_RASTERS 13 
+          /end IF_DATA
+       /end MEASUREMENT
+ 
+-      /begin MEASUREMENT SftySbcCtrlSafeStReq
++      /begin MEASUREMENT SftySbcCtrlIfSafeStReq
+          "This output combines all the safe state requests from other SW-Components and provides it to SBC drivers"
+          UBYTE
+          kAcxaDa_hjFDxfd_gbvyctd_nS__O_T
+@@ -30705,6 +30787,7 @@ ASAP2_VERSION 1 60
+          0.
+          0.
+          1.
++         DISPLAY_IDENTIFIER SftySbcCtrlIfSafeStReq
+          ECU_ADDRESS 0x0
+          /begin IF_DATA ETK_XETK
+             DEFAULT_RASTERS 13 
+@@ -30714,11 +30797,121 @@ ASAP2_VERSION 1 60
+       /begin MEASUREMENT SftySbcCtrlSt
+          "Current state of SBC control state machine"
+          SLONG
+-         FcdqBwc_fgyiqxd_csjahgb_nSNC__Y
++         rzEtsma_ajBzgib_Dezkqna_nSIT2RB
+          1
+          0.
+          0.
+          3.
++         DISPLAY_IDENTIFIER SftySbcCtrlSt
++         ECU_ADDRESS 0x0
++         /begin IF_DATA ETK_XETK
++            DEFAULT_RASTERS 13 
++         /end IF_DATA
++      /end MEASUREMENT
++
++      /begin MEASUREMENT SftyTlf35584AbistCtrl0RegVal
++         "ABIST_CTRL0 register value after ABIST"
++         UBYTE
++         raChrxc_kBtBrmb_FmDuEFa_n__aa0o
++         1
++         0.
++         0.
++         255.
++         DISPLAY_IDENTIFIER SftyTlf35584AbistCtrl0RegVal
++         ECU_ADDRESS 0x0
++         FORMAT "%6.3"
++         /begin IF_DATA ETK_XETK
++            DEFAULT_RASTERS 13 
++         /end IF_DATA
++      /end MEASUREMENT
++
++      /begin MEASUREMENT SftyTlf35584AbistErrMonrSt
++         "Error monitor state for: ABIST"
++         UBYTE
++         mdzeicb_bchtbkd_qjvDDcd_n_0T1EF
++         1
++         0.
++         0.
++         2.
++         DISPLAY_IDENTIFIER SftyTlf35584AbistErrMonrSt
++         ECU_ADDRESS 0x0
++         /begin IF_DATA ETK_XETK
++            DEFAULT_RASTERS 13 
++         /end IF_DATA
++      /end MEASUREMENT
++
++      /begin MEASUREMENT SftyTlf35584AbistSelect0RegVal
++         "ABIST_SELECT0 register value after ABIST"
++         UBYTE
++         raChrxc_kBtBrmb_FmDuEFa_n__aa0o
++         1
++         0.
++         0.
++         255.
++         DISPLAY_IDENTIFIER SftyTlf35584AbistSelect0RegVal
++         ECU_ADDRESS 0x0
++         FORMAT "%6.3"
++         /begin IF_DATA ETK_XETK
++            DEFAULT_RASTERS 13 
++         /end IF_DATA
++      /end MEASUREMENT
++
++      /begin MEASUREMENT SftyTlf35584AbistSelect1RegVal
++         "ABIST_SELECT1 register value after ABIST"
++         UBYTE
++         raChrxc_kBtBrmb_FmDuEFa_n__aa0o
++         1
++         0.
++         0.
++         255.
++         DISPLAY_IDENTIFIER SftyTlf35584AbistSelect1RegVal
++         ECU_ADDRESS 0x0
++         FORMAT "%6.3"
++         /begin IF_DATA ETK_XETK
++            DEFAULT_RASTERS 13 
++         /end IF_DATA
++      /end MEASUREMENT
++
++      /begin MEASUREMENT SftyTlf35584AbistSelect2RegVal
++         "ABIST_SELECT2 register value after ABIST"
++         UBYTE
++         raChrxc_kBtBrmb_FmDuEFa_n__aa0o
++         1
++         0.
++         0.
++         255.
++         DISPLAY_IDENTIFIER SftyTlf35584AbistSelect2RegVal
++         ECU_ADDRESS 0x0
++         FORMAT "%6.3"
++         /begin IF_DATA ETK_XETK
++            DEFAULT_RASTERS 13 
++         /end IF_DATA
++      /end MEASUREMENT
++
++      /begin MEASUREMENT SftyTlf35584BistErrMonrSt
++         "Combined self test results from logical selftest and ABIST"
++         UBYTE
++         mdzeicb_bchtbkd_qjvDDcd_n_0T1EF
++         1
++         0.
++         0.
++         2.
++         DISPLAY_IDENTIFIER SftyTlf35584BistErrMonrSt
++         ECU_ADDRESS 0x0
++         /begin IF_DATA ETK_XETK
++            DEFAULT_RASTERS 13 
++         /end IF_DATA
++      /end MEASUREMENT
++
++      /begin MEASUREMENT SftyTlf35584ComErrMonrSt
++         "Error monitor state for: result of last communication"
++         UBYTE
++         mdzeicb_bchtbkd_qjvDDcd_n_0T1EF
++         1
++         0.
++         0.
++         2.
++         DISPLAY_IDENTIFIER SftyTlf35584ComErrMonrSt
+          ECU_ADDRESS 0x0
+          /begin IF_DATA ETK_XETK
+             DEFAULT_RASTERS 13 
+@@ -30728,11 +30921,58 @@ ASAP2_VERSION 1 60
+       /begin MEASUREMENT SftyTlf35584DevSt
+          "Device state, read out of DEVSTAT-Register"
+          SLONG
+-         bgDArvd_aijzhna_rrtdudd_nFLTYF_
++         DDnmzkd_rfiagcb_igvBgsc_nD45LT_
+          1
+          0.
+          0.
+          5.
++         DISPLAY_IDENTIFIER SftyTlf35584DevSt
++         ECU_ADDRESS 0x0
++         /begin IF_DATA ETK_XETK
++            DEFAULT_RASTERS 13 
++         /end IF_DATA
++      /end MEASUREMENT
++
++      /begin MEASUREMENT SftyTlf35584DiagRegUpdCntr
++         "This counter provides number of diagnostic data updates. (Hint: diagnostic data update happens in case IF-Register shows that something happened)"
++         UBYTE
++         raChrxc_kBtBrmb_FmDuEFa_n__aa0o
++         1
++         0.
++         0.
++         255.
++         DISPLAY_IDENTIFIER SftyTlf35584DiagRegUpdCntr
++         ECU_ADDRESS 0x0
++         FORMAT "%6.3"
++         /begin IF_DATA ETK_XETK
++            DEFAULT_RASTERS 13 
++         /end IF_DATA
++      /end MEASUREMENT
++
++      /begin MEASUREMENT SftyTlf35584DigSelfTestErrMonrSt
++         "Error monitor state for: Digital logic self test"
++         UBYTE
++         mdzeicb_bchtbkd_qjvDDcd_n_0T1EF
++         1
++         0.
++         0.
++         2.
++         DISPLAY_IDENTIFIER SftyTlf35584DigSelfTestErrMonrSt
++         ECU_ADDRESS 0x0
++         /begin IF_DATA ETK_XETK
++            DEFAULT_RASTERS 13 
++         /end IF_DATA
++      /end MEASUREMENT
++
++      /begin MEASUREMENT SftyTlf35584DigSelfTestSt
++         "State of digital logic self test"
++         SLONG
++         tDikeod_dlAtsbc_kjEEzya_nLSTELS
++         1
++         0.
++         0.
++         4.
++         DISPLAY_IDENTIFIER SftyTlf35584DigSelfTestSt
+          ECU_ADDRESS 0x0
+          /begin IF_DATA ETK_XETK
+             DEFAULT_RASTERS 13 
+@@ -30742,61 +30982,573 @@ ASAP2_VERSION 1 60
+       /begin MEASUREMENT SftyTlf35584DrvrSt
+          "Internal driver state, used for state machine handling"
+          SLONG
+-         darrutb_rDdrhzb_Bppqlpd_nIEED_E
++         fqFlnlb_mpvjnEb_cvCtwEd_nISFMT_
+          1
+          0.
+          0.
+-         6.
++         3.
++         DISPLAY_IDENTIFIER SftyTlf35584DrvrSt
+          ECU_ADDRESS 0x0
+          /begin IF_DATA ETK_XETK
+             DEFAULT_RASTERS 13 
+          /end IF_DATA
+       /end MEASUREMENT
+ 
+-      /begin MEASUREMENT SftyTlf35584SS1St
+-         "Output state of SS1 (safe state output 1) of TLF35584 SBC"
++      /begin MEASUREMENT SftyTlf35584FctlWdgAns
++         "Functional watchdog answer"
++         ULONG
++         raChrxc_kBtBrmb_FmDuEFa_n__aa0o
++         1
++         0.
++         0.
++         4294967295.
++         DISPLAY_IDENTIFIER SftyTlf35584FctlWdgAns
++         ECU_ADDRESS 0x0
++         FORMAT "%6.3"
++         /begin IF_DATA ETK_XETK
++            DEFAULT_RASTERS 13 
++         /end IF_DATA
++      /end MEASUREMENT
++
++      /begin MEASUREMENT SftyTlf35584FctlWdgErrCntr
++         "Error Counter of Functional Watchdog"
++         UBYTE
++         raChrxc_kBtBrmb_FmDuEFa_n__aa0o
++         1
++         0.
++         0.
++         255.
++         DISPLAY_IDENTIFIER SftyTlf35584FctlWdgErrCntr
++         ECU_ADDRESS 0x0
++         FORMAT "%6.3"
++         /begin IF_DATA ETK_XETK
++            DEFAULT_RASTERS 13 
++         /end IF_DATA
++      /end MEASUREMENT
++
++      /begin MEASUREMENT SftyTlf35584FctlWdgQstn
++         "Question of functional watchdog"
++         UBYTE
++         raChrxc_kBtBrmb_FmDuEFa_n__aa0o
++         1
++         0.
++         0.
++         255.
++         DISPLAY_IDENTIFIER SftyTlf35584FctlWdgQstn
++         ECU_ADDRESS 0x0
++         FORMAT "%6.3"
++         /begin IF_DATA ETK_XETK
++            DEFAULT_RASTERS 13 
++         /end IF_DATA
++      /end MEASUREMENT
++
++      /begin MEASUREMENT SftyTlf35584FctlWdgTmr
++         "Timer to measure time for next functional watchdog trigger"
++         ULONG
++         raChrxc_kBtBrmb_FmDuEFa_n__aa0o
++         1
++         0.
++         0.
++         4294967295.
++         DISPLAY_IDENTIFIER SftyTlf35584FctlWdgTmr
++         ECU_ADDRESS 0x0
++         FORMAT "%6.3"
++         /begin IF_DATA ETK_XETK
++            DEFAULT_RASTERS 13 
++         /end IF_DATA
++      /end MEASUREMENT
++
++      /begin MEASUREMENT SftyTlf35584FctlWdgWaitTi
++         "Functional watchdog wait time until triggering"
++         ULONG
++         BBqFzEd_qeipDAa_FwpvsEb_m__1o0o
++         1
++         0.
++         0.
++         4294967.295
++         DISPLAY_IDENTIFIER SftyTlf35584FctlWdgWaitTi
++         ECU_ADDRESS 0x0
++         FORMAT "%6.3"
++         /begin IF_DATA ETK_XETK
++            DEFAULT_RASTERS 13 
++         /end IF_DATA
++      /end MEASUREMENT
++
++      /begin MEASUREMENT SftyTlf35584FirstRunAftDigSelfTest
++         "Flag to indicate first run after last reset that was done for digital logic self test of TLF35584. Used to generate \\"virutal PORST\\" flag."
++         UBYTE
++         xaiedFa_EhanAdc_jnotdjb_n__0A1T
++         1
++         0.
++         0.
++         1.
++         DISPLAY_IDENTIFIER SftyTlf35584FirstRunAftDigSelfTest
++         ECU_ADDRESS 0x0
++         /begin IF_DATA ETK_XETK
++            DEFAULT_RASTERS 13 
++         /end IF_DATA
++      /end MEASUREMENT
++
++      /begin MEASUREMENT SftyTlf35584IfRegVal
++         "Interrupt flags (IF Register) of TLF35584. Read cyclically"
++         UBYTE
++         raChrxc_kBtBrmb_FmDuEFa_n__aa0o
++         1
++         0.
++         0.
++         255.
++         DISPLAY_IDENTIFIER SftyTlf35584IfRegVal
++         ECU_ADDRESS 0x0
++         FORMAT "%6.3"
++         /begin IF_DATA ETK_XETK
++            DEFAULT_RASTERS 13 
++         /end IF_DATA
++      /end MEASUREMENT
++
++      /begin MEASUREMENT SftyTlf35584IfRegValDiagRead
++         "Interrupt flags (IF Register) of TLF35584. Read out during diagnostic read during startup."
++         UBYTE
++         raChrxc_kBtBrmb_FmDuEFa_n__aa0o
++         1
++         0.
++         0.
++         255.
++         DISPLAY_IDENTIFIER SftyTlf35584IfRegValDiagRead
++         ECU_ADDRESS 0x0
++         FORMAT "%6.3"
++         /begin IF_DATA ETK_XETK
++            DEFAULT_RASTERS 13 
++         /end IF_DATA
++      /end MEASUREMENT
++
++      /begin MEASUREMENT SftyTlf35584InitErrMonrSt
++         "Error monitor state for: final initialization result"
++         UBYTE
++         mdzeicb_bchtbkd_qjvDDcd_n_0T1EF
++         1
++         0.
++         0.
++         2.
++         DISPLAY_IDENTIFIER SftyTlf35584InitErrMonrSt
++         ECU_ADDRESS 0x0
++         /begin IF_DATA ETK_XETK
++            DEFAULT_RASTERS 13 
++         /end IF_DATA
++      /end MEASUREMENT
++
++      /begin MEASUREMENT SftyTlf35584InitErrRegValDiagRead
++         "Init error status flags (INITERR Register) of TLF35584. Read out during diagnostic read during startup."
++         UBYTE
++         raChrxc_kBtBrmb_FmDuEFa_n__aa0o
++         1
++         0.
++         0.
++         255.
++         DISPLAY_IDENTIFIER SftyTlf35584InitErrRegValDiagRead
++         ECU_ADDRESS 0x0
++         FORMAT "%6.3"
++         /begin IF_DATA ETK_XETK
++            DEFAULT_RASTERS 13 
++         /end IF_DATA
++      /end MEASUREMENT
++
++      /begin MEASUREMENT SftyTlf35584InitErrRegValDigSelfTest
++         "INITERR register value after finishing digital logic test. "
++         UBYTE
++         raChrxc_kBtBrmb_FmDuEFa_n__aa0o
++         1
++         0.
++         0.
++         255.
++         DISPLAY_IDENTIFIER SftyTlf35584InitErrRegValDigSelfTest
++         ECU_ADDRESS 0x0
++         FORMAT "%6.3"
++         /begin IF_DATA ETK_XETK
++            DEFAULT_RASTERS 13 
++         /end IF_DATA
++      /end MEASUREMENT
++
++      /begin MEASUREMENT SftyTlf35584MonSf0RegValDiagRead
++         "Monitor status flags 0(MONSF0 Register) of TLF35584. Read out during diagnostic read during startup."
++         UBYTE
++         raChrxc_kBtBrmb_FmDuEFa_n__aa0o
++         1
++         0.
++         0.
++         255.
++         DISPLAY_IDENTIFIER SftyTlf35584MonSf0RegValDiagRead
++         ECU_ADDRESS 0x0
++         FORMAT "%6.3"
++         /begin IF_DATA ETK_XETK
++            DEFAULT_RASTERS 13 
++         /end IF_DATA
++      /end MEASUREMENT
++
++      /begin MEASUREMENT SftyTlf35584MonSf1RegValDiagRead
++         "Monitor status flags 1(MONSF1 Register) of TLF35584. Read out during diagnostic read during startup."
++         UBYTE
++         raChrxc_kBtBrmb_FmDuEFa_n__aa0o
++         1
++         0.
++         0.
++         255.
++         DISPLAY_IDENTIFIER SftyTlf35584MonSf1RegValDiagRead
++         ECU_ADDRESS 0x0
++         FORMAT "%6.3"
++         /begin IF_DATA ETK_XETK
++            DEFAULT_RASTERS 13 
++         /end IF_DATA
++      /end MEASUREMENT
++
++      /begin MEASUREMENT SftyTlf35584MonSf2RegValDiagRead
++         "Monitor status flags 2(MONSF2 Register) of TLF35584. Read out during diagnostic read during startup."
++         UBYTE
++         raChrxc_kBtBrmb_FmDuEFa_n__aa0o
++         1
++         0.
++         0.
++         255.
++         DISPLAY_IDENTIFIER SftyTlf35584MonSf2RegValDiagRead
++         ECU_ADDRESS 0x0
++         FORMAT "%6.3"
++         /begin IF_DATA ETK_XETK
++            DEFAULT_RASTERS 13 
++         /end IF_DATA
++      /end MEASUREMENT
++
++      /begin MEASUREMENT SftyTlf35584MonSf3RegValDiagRead
++         "Monitor status flags 3(MONSF3 Register) of TLF35584. Read out during diagnostic read during startup."
++         UBYTE
++         raChrxc_kBtBrmb_FmDuEFa_n__aa0o
++         1
++         0.
++         0.
++         255.
++         DISPLAY_IDENTIFIER SftyTlf35584MonSf3RegValDiagRead
++         ECU_ADDRESS 0x0
++         FORMAT "%6.3"
++         /begin IF_DATA ETK_XETK
++            DEFAULT_RASTERS 13 
++         /end IF_DATA
++      /end MEASUREMENT
++
++      /begin MEASUREMENT SftyTlf35584ReadbackRegCfg[0]
++         "Readback configuration of TLF35584"
++         UBYTE
++         raChrxc_kBtBrmb_FmDuEFa_n__aa0o
++         1
++         0.
++         0.
++         255.
++         DISPLAY_IDENTIFIER SftyTlf35584ReadbackRegCfg_DEVCFG0
++         ECU_ADDRESS 0x0
++         FORMAT "%6.3"
++         /begin IF_DATA ETK_XETK
++            DEFAULT_RASTERS 13 
++         /end IF_DATA
++      /end MEASUREMENT
++
++      /begin MEASUREMENT SftyTlf35584ReadbackRegCfg[1]
++         "Readback configuration of TLF35584"
++         UBYTE
++         raChrxc_kBtBrmb_FmDuEFa_n__aa0o
++         1
++         0.
++         0.
++         255.
++         DISPLAY_IDENTIFIER SftyTlf35584ReadbackRegCfg_DEVCFG1
++         ECU_ADDRESS 0x0
++         FORMAT "%6.3"
++         /begin IF_DATA ETK_XETK
++            DEFAULT_RASTERS 13 
++         /end IF_DATA
++      /end MEASUREMENT
++
++      /begin MEASUREMENT SftyTlf35584ReadbackRegCfg[2]
++         "Readback configuration of TLF35584"
++         UBYTE
++         raChrxc_kBtBrmb_FmDuEFa_n__aa0o
++         1
++         0.
++         0.
++         255.
++         DISPLAY_IDENTIFIER SftyTlf35584ReadbackRegCfg_DEVCFG2
++         ECU_ADDRESS 0x0
++         FORMAT "%6.3"
++         /begin IF_DATA ETK_XETK
++            DEFAULT_RASTERS 13 
++         /end IF_DATA
++      /end MEASUREMENT
++
++      /begin MEASUREMENT SftyTlf35584ReadbackRegCfg[3]
++         "Readback configuration of TLF35584"
++         UBYTE
++         raChrxc_kBtBrmb_FmDuEFa_n__aa0o
++         1
++         0.
++         0.
++         255.
++         DISPLAY_IDENTIFIER SftyTlf35584ReadbackRegCfg_SYSPCFG0
++         ECU_ADDRESS 0x0
++         FORMAT "%6.3"
++         /begin IF_DATA ETK_XETK
++            DEFAULT_RASTERS 13 
++         /end IF_DATA
++      /end MEASUREMENT
++
++      /begin MEASUREMENT SftyTlf35584ReadbackRegCfg[4]
++         "Readback configuration of TLF35584"
++         UBYTE
++         raChrxc_kBtBrmb_FmDuEFa_n__aa0o
++         1
++         0.
++         0.
++         255.
++         DISPLAY_IDENTIFIER SftyTlf35584ReadbackRegCfg_SYSPCFG1
++         ECU_ADDRESS 0x0
++         FORMAT "%6.3"
++         /begin IF_DATA ETK_XETK
++            DEFAULT_RASTERS 13 
++         /end IF_DATA
++      /end MEASUREMENT
++
++      /begin MEASUREMENT SftyTlf35584ReadbackRegCfg[5]
++         "Readback configuration of TLF35584"
++         UBYTE
++         raChrxc_kBtBrmb_FmDuEFa_n__aa0o
++         1
++         0.
++         0.
++         255.
++         DISPLAY_IDENTIFIER SftyTlf35584ReadbackRegCfg_WDCFG1
++         ECU_ADDRESS 0x0
++         FORMAT "%6.3"
++         /begin IF_DATA ETK_XETK
++            DEFAULT_RASTERS 13 
++         /end IF_DATA
++      /end MEASUREMENT
++
++      /begin MEASUREMENT SftyTlf35584ReadbackRegCfg[6]
++         "Readback configuration of TLF35584"
++         UBYTE
++         raChrxc_kBtBrmb_FmDuEFa_n__aa0o
++         1
++         0.
++         0.
++         255.
++         DISPLAY_IDENTIFIER SftyTlf35584ReadbackRegCfg_WDCFG0
++         ECU_ADDRESS 0x0
++         FORMAT "%6.3"
++         /begin IF_DATA ETK_XETK
++            DEFAULT_RASTERS 13 
++         /end IF_DATA
++      /end MEASUREMENT
++
++      /begin MEASUREMENT SftyTlf35584ReadbackRegCfg[7]
++         "Readback configuration of TLF35584"
++         UBYTE
++         raChrxc_kBtBrmb_FmDuEFa_n__aa0o
++         1
++         0.
++         0.
++         255.
++         DISPLAY_IDENTIFIER SftyTlf35584ReadbackRegCfg_WWDCFG0
++         ECU_ADDRESS 0x0
++         FORMAT "%6.3"
++         /begin IF_DATA ETK_XETK
++            DEFAULT_RASTERS 13 
++         /end IF_DATA
++      /end MEASUREMENT
++
++      /begin MEASUREMENT SftyTlf35584ReadbackRegCfg[8]
++         "Readback configuration of TLF35584"
++         UBYTE
++         raChrxc_kBtBrmb_FmDuEFa_n__aa0o
++         1
++         0.
++         0.
++         255.
++         DISPLAY_IDENTIFIER SftyTlf35584ReadbackRegCfg_WWDCFG1
++         ECU_ADDRESS 0x0
++         FORMAT "%6.3"
++         /begin IF_DATA ETK_XETK
++            DEFAULT_RASTERS 13 
++         /end IF_DATA
++      /end MEASUREMENT
++
++      /begin MEASUREMENT SftyTlf35584ReadbackRegCfg[9]
++         "Readback configuration of TLF35584"
++         UBYTE
++         raChrxc_kBtBrmb_FmDuEFa_n__aa0o
++         1
++         0.
++         0.
++         255.
++         DISPLAY_IDENTIFIER SftyTlf35584ReadbackRegCfg_FWDCFG
++         ECU_ADDRESS 0x0
++         FORMAT "%6.3"
++         /begin IF_DATA ETK_XETK
++            DEFAULT_RASTERS 13 
++         /end IF_DATA
++      /end MEASUREMENT
++
++      /begin MEASUREMENT SftyTlf35584RxBuf
++         "Receive buffer for TLF35584 communication"
++         UWORD
++         raChrxc_kBtBrmb_FmDuEFa_n__aa0o
++         1
++         0.
++         0.
++         65535.
++         ECU_ADDRESS 0x0
++         FORMAT "%6.3"
++         MATRIX_DIM 4 1 1
++         /begin IF_DATA ETK_XETK
++            DEFAULT_RASTERS 13 
++         /end IF_DATA
++      /end MEASUREMENT
++
++      /begin MEASUREMENT SftyTlf35584SS1St
++         "Output state of SS1 (safe state output 1) of TLF35584 SBC"
++         UBYTE
++         kAcxaDa_hjFDxfd_gbvyctd_nS__O_T
++         1
++         0.
++         0.
++         1.
++         DISPLAY_IDENTIFIER SftyTlf35584SS1St
++         ECU_ADDRESS 0x0
++         /begin IF_DATA ETK_XETK
++            DEFAULT_RASTERS 13 
++         /end IF_DATA
++      /end MEASUREMENT
++
++      /begin MEASUREMENT SftyTlf35584SkipNextRx
++         "Flag to indicate that the next Rx operation has to be skipped in the next state after a Tx operation"
++         UBYTE
++         xaiedFa_EhanAdc_jnotdjb_n__0A1T
++         1
++         0.
++         0.
++         1.
++         DISPLAY_IDENTIFIER SftyTlf35584SkipNextRx
++         ECU_ADDRESS 0x0
++         /begin IF_DATA ETK_XETK
++            DEFAULT_RASTERS 13 
++         /end IF_DATA
++      /end MEASUREMENT
++
++      /begin MEASUREMENT SftyTlf35584SpiSfRegValDiagRead
++         "SPI status flags (SPISF Register) of TLF35584. Read out during diagnostic read during startup."
++         UBYTE
++         raChrxc_kBtBrmb_FmDuEFa_n__aa0o
++         1
++         0.
++         0.
++         255.
++         DISPLAY_IDENTIFIER SftyTlf35584SpiSfRegValDiagRead
++         ECU_ADDRESS 0x0
++         FORMAT "%6.3"
++         /begin IF_DATA ETK_XETK
++            DEFAULT_RASTERS 13 
++         /end IF_DATA
++      /end MEASUREMENT
++
++      /begin MEASUREMENT SftyTlf35584SuppDiagRead
++         "Suppresses diagnostic readouts at startup. Used to prevent reading diagnostic data over and over again during digital logic selftest."
++         UBYTE
++         xaiedFa_EhanAdc_jnotdjb_n__0A1T
++         1
++         0.
++         0.
++         1.
++         DISPLAY_IDENTIFIER SftyTlf35584SuppDiagRead
++         ECU_ADDRESS 0x0
++         /begin IF_DATA ETK_XETK
++            DEFAULT_RASTERS 13 
++         /end IF_DATA
++      /end MEASUREMENT
++
++      /begin MEASUREMENT SftyTlf35584SysFailAbistRegVal
++         "SYSFAIL Register content after executing ABIST"
++         UBYTE
++         raChrxc_kBtBrmb_FmDuEFa_n__aa0o
++         1
++         0.
++         0.
++         255.
++         DISPLAY_IDENTIFIER SftyTlf35584SysFailAbistRegVal
++         ECU_ADDRESS 0x0
++         FORMAT "%6.3"
++         /begin IF_DATA ETK_XETK
++            DEFAULT_RASTERS 13 
++         /end IF_DATA
++      /end MEASUREMENT
++
++      /begin MEASUREMENT SftyTlf35584SysFailRegValDiagRead
++         "Failure status flags (SYSFAIL Register) of TLF35584. Read out during diagnostic read during startup."
++         UBYTE
++         raChrxc_kBtBrmb_FmDuEFa_n__aa0o
++         1
++         0.
++         0.
++         255.
++         DISPLAY_IDENTIFIER SftyTlf35584SysFailRegValDiagRead
++         ECU_ADDRESS 0x0
++         FORMAT "%6.3"
++         /begin IF_DATA ETK_XETK
++            DEFAULT_RASTERS 13 
++         /end IF_DATA
++      /end MEASUREMENT
++
++      /begin MEASUREMENT SftyTlf35584SysSfRegValDiagRead
++         "System status flags (SYSSF Register) of TLF35584. Read out during diagnostic read during startup."
+          UBYTE
+-         kAcxaDa_hjFDxfd_gbvyctd_nS__O_T
++         raChrxc_kBtBrmb_FmDuEFa_n__aa0o
+          1
+          0.
+          0.
+-         1.
++         255.
++         DISPLAY_IDENTIFIER SftyTlf35584SysSfRegValDiagRead
+          ECU_ADDRESS 0x0
++         FORMAT "%6.3"
+          /begin IF_DATA ETK_XETK
+             DEFAULT_RASTERS 13 
+          /end IF_DATA
+       /end MEASUREMENT
+ 
+-      /begin MEASUREMENT SftyTlf35584WinWdgErrCntr
+-         "Error Counter of Window Watchdog"
+-         UBYTE
++      /begin MEASUREMENT SftyTlf35584TxBuf
++         "Transmit buffer for TLF35584 communication"
++         UWORD
+          raChrxc_kBtBrmb_FmDuEFa_n__aa0o
+          1
+          0.
+          0.
+-         255.
++         65535.
+          ECU_ADDRESS 0x0
+          FORMAT "%6.3"
++         MATRIX_DIM 4 1 1
+          /begin IF_DATA ETK_XETK
+             DEFAULT_RASTERS 13 
+          /end IF_DATA
+       /end MEASUREMENT
+ 
+-      /begin MEASUREMENT SftyTlf35584FctlWdgErrCntr
+-         "Error Counter of Functional Watchdog"
++      /begin MEASUREMENT SftyTlf35584WinWdgErrCntr
++         "Error Counter of Window Watchdog"
+          UBYTE
+          raChrxc_kBtBrmb_FmDuEFa_n__aa0o
+          1
+          0.
+          0.
+          255.
++         DISPLAY_IDENTIFIER SftyTlf35584WinWdgErrCntr
+          ECU_ADDRESS 0x0
+          FORMAT "%6.3"
+          /begin IF_DATA ETK_XETK
+             DEFAULT_RASTERS 13 
+          /end IF_DATA
+       /end MEASUREMENT
+-      
++
+       /begin MEASUREMENT SftyTlf35584WinWdgRefrshVal
+          "Window Watchdog refresh value"
+          UBYTE
+@@ -30805,6 +31557,7 @@ ASAP2_VERSION 1 60
+          0.
+          0.
+          255.
++         DISPLAY_IDENTIFIER SftyTlf35584WinWdgRefrshVal
+          ECU_ADDRESS 0x0
+          FORMAT "%6.3"
+          /begin IF_DATA ETK_XETK
+@@ -30820,27 +31573,288 @@ ASAP2_VERSION 1 60
+          0.
+          0.
+          4294967295.
++         DISPLAY_IDENTIFIER SftyTlf35584WinWdgTmr
+          ECU_ADDRESS 0x0
+          FORMAT "%6.3"
+          /begin IF_DATA ETK_XETK
+             DEFAULT_RASTERS 13 
+          /end IF_DATA
+       /end MEASUREMENT
+-      
+-      /begin MEASUREMENT SftyTlf35584FctlWdgTmr
+-         "Timer to measure time for next functional watchdog trigger"
++
++      /begin MEASUREMENT SftyTlf35584WinWdgWaitTi
++         "Window watchdog wait time until triggering"
+          ULONG
++         BBqFzEd_qeipDAa_FwpvsEb_m__1o0o
++         1
++         0.
++         0.
++         4294967.295
++         DISPLAY_IDENTIFIER SftyTlf35584WinWdgWaitTi
++         ECU_ADDRESS 0x0
++         FORMAT "%6.3"
++         /begin IF_DATA ETK_XETK
++            DEFAULT_RASTERS 13 
++         /end IF_DATA
++      /end MEASUREMENT
++
++      /begin MEASUREMENT SftyTlf35584WkSfRegValDiagRead
++         "Wake up status flags (WKSF Register) of TLF35584. Read out during diagnostic read during startup."
++         UBYTE
+          raChrxc_kBtBrmb_FmDuEFa_n__aa0o
+          1
+          0.
+          0.
+-         4294967295.
++         255.
++         DISPLAY_IDENTIFIER SftyTlf35584WkSfRegValDiagRead
+          ECU_ADDRESS 0x0
+          FORMAT "%6.3"
+          /begin IF_DATA ETK_XETK
+             DEFAULT_RASTERS 13 
+          /end IF_DATA
+       /end MEASUREMENT
++      
++      
++      /begin CHARACTERISTIC SftySbcCtrlIfSafeStReqSimnEna
++         "Enables simolation for SBC safe state request"
++         VALUE
++         0x0
++         _REC_S1VAL_1_U1
++         1.
++         xaiedFa_EhanAdc_jnotdjb_n__0A1T
++         0.
++         1.
++         DISPLAY_IDENTIFIER SftySbcCtrlIfSafeStReqSimnEna
++      /end CHARACTERISTIC
++
++      /begin CHARACTERISTIC SftySbcCtrlIfSafeStSimnVal
++         "Simulation value for SBC safe state request"
++         VALUE
++         0x0
++         _REC_S1VAL_1_U1
++         1.
++         kAcxaDa_hjFDxfd_gbvyctd_nS__O_T
++         0.
++         1.
++         DISPLAY_IDENTIFIER SftySbcCtrlIfSafeStSimnVal
++      /end CHARACTERISTIC
++
++      /begin CHARACTERISTIC SftySbcCtrlStSimnEna
++         "Enables simolation for SBC state"
++         VALUE
++         0x0
++         _REC_S1VAL_1_U1
++         1.
++         xaiedFa_EhanAdc_jnotdjb_n__0A1T
++         0.
++         1.
++         DISPLAY_IDENTIFIER SftySbcCtrlStSimnEna
++      /end CHARACTERISTIC
++
++      /begin CHARACTERISTIC SftySbcCtrlStSimnVal
++         "Simulation value for SBC state"
++         VALUE
++         0x0
++         _REC_S1VAL_1_S4
++         3.
++         rzEtsma_ajBzgib_Dezkqna_nSIT2RB
++         0.
++         3.
++         DISPLAY_IDENTIFIER SftySbcCtrlStSimnVal
++      /end CHARACTERISTIC
++
++      /begin CHARACTERISTIC SftyTlf35584FctlWdgAnsLkUpTbl
++         "Functional watchdog answer look-up table from TLF35584 datasheet"
++         VAL_BLK
++         0x0
++         _REC_S1VAL_Param_Auto_U1
++         255.
++         raChrxc_kBtBrmb_FmDuEFa_n__aa0o
++         0.
++         255.
++         FORMAT "%6.3"
++         MATRIX_DIM 16 4 1
++      /end CHARACTERISTIC
++
++      /begin CHARACTERISTIC SftyTlf35584FctlWdgAnsSimnEna
++         "Enables TLF35584 function watchdog answer stimulation"
++         VALUE
++         0x0
++         _REC_S1VAL_1_U1
++         1.
++         xaiedFa_EhanAdc_jnotdjb_n__0A1T
++         0.
++         1.
++         DISPLAY_IDENTIFIER SftyTlf35584FctlWdgAnsSimnEna
++      /end CHARACTERISTIC
++
++      /begin CHARACTERISTIC SftyTlf35584FctlWdgAnsSimnVal
++         "Simulation value for TLF35584 functioanal watchdog answer"
++         VALUE
++         0x0
++         _REC_S1VAL_1_U4
++         4294967295.
++         raChrxc_kBtBrmb_FmDuEFa_n__aa0o
++         0.
++         4294967295.
++         DISPLAY_IDENTIFIER SftyTlf35584FctlWdgAnsSimnVal
++         FORMAT "%6.3"
++      /end CHARACTERISTIC
++
++      /begin CHARACTERISTIC SftyTlf35584WdgWinTi
++         "Window time configuration for TLF35584. Duration configures \\"closed\\" and \\"open\\" windows for window watchdog and also \\"heartbeat duration\\" for functional watchdog. Window watchdog period (closed + open windows) is twice as long."
++         VALUE
++         0x0
++         _REC_S1VAL_Autosar40_S4
++         16.
++         EBBsbjd_ozjzlpb_ggodqra_nTIF_SD
++         3.
++         19.
++         DISPLAY_IDENTIFIER SftyTlf35584WdgWinTi
++      /end CHARACTERISTIC
++
++      /begin CHARACTERISTIC SftyTlf35584WinWdgWaitTiSimnEna
++         "Enables TLF35584 window watchdog wait time simulation"
++         VALUE
++         0x0
++         _REC_S1VAL_1_U1
++         1.
++         xaiedFa_EhanAdc_jnotdjb_n__0A1T
++         0.
++         1.
++         DISPLAY_IDENTIFIER SftyTlf35584WinWdgWaitTiSimnEna
++      /end CHARACTERISTIC
++
++      /begin CHARACTERISTIC SftyTlf35584WinWdgWaitTiSimnVal
++         "Simulation value for TLF35584 window watchdog wait time"
++         VALUE
++         0x0
++         _REC_S1VAL_1_U4
++         4294967.295
++         BBqFzEd_qeipDAa_FwpvsEb_m__1o0o
++         0.
++         4294967.295
++         DISPLAY_IDENTIFIER SftyTlf35584WinWdgWaitTiSimnVal
++         FORMAT "%6.3"
++      /end CHARACTERISTIC
++
++      /begin CHARACTERISTIC SftyTlf35584AbistCtrl0RegValSimnEna
++         "Enables TLF35584 ABISTCTRL0 register value stimulation during ABIST"
++         VALUE
++         0x0
++         _REC_S1VAL_1_U1
++         1.
++         xaiedFa_EhanAdc_jnotdjb_n__0A1T
++         0.
++         1.
++         DISPLAY_IDENTIFIER SftyTlf35584AbistCtrl0RegValSimnEna
++      /end CHARACTERISTIC
++
++      /begin CHARACTERISTIC SftyTlf35584AbistCtrl0RegValSimnVal
++         "Simulation value for TLF35584 ABISTCTRL0 register value during ABIST"
++         VALUE
++         0x0
++         _REC_S1VAL_1_U1
++         255.
++         raChrxc_kBtBrmb_FmDuEFa_n__aa0o
++         0.
++         255.
++         DISPLAY_IDENTIFIER SftyTlf35584AbistCtrl0RegValSimnVal
++         FORMAT "%6.3"
++      /end CHARACTERISTIC
++
++      /begin COMPU_METHOD oFbojub_CsBemhb_upwdBub_nFRRTR_
++         "[VIT_DDS]ArtificialDDSConversion"
++         TAB_VERB
++         "%6.3"
++         "-"
++         COMPU_TAB_REF oFbojub_CsBemhb_upwdBub_nFRRTR_
++      /end COMPU_METHOD
++
++      /begin COMPU_VTAB oFbojub_CsBemhb_upwdBub_nFRRTR_
++         "[VIT_DDS]ArtificialDDSConversion"
++         TAB_VERB
++         53
++         0 "SFTYTLF35584_DEVCFG0_ADR"
++         1 "SFTYTLF35584_DEVCFG1_ADR"
++         2 "SFTYTLF35584_DEVCFG2_ADR"
++         3 "SFTYTLF35584_PROTCFG_ADR"
++         4 "SFTYTLF35584_SYSPCFG0_ADR"
++         5 "SFTYTLF35584_SYSPCFG1_ADR"
++         6 "SFTYTLF35584_WDCFG0_ADR"
++         7 "SFTYTLF35584_WDCFG1_ADR"
++         8 "SFTYTLF35584_FWDCFG_ADR"
++         9 "SFTYTLF35584_WWDCFG0_ADR"
++         10 "SFTYTLF35584_WWDCFG1_ADR"
++         11 "SFTYTLF35584_RSYSPCFG0_ADR"
++         12 "SFTYTLF35584_RSYSPCFG1_ADR"
++         13 "SFTYTLF35584_RWDCFG0_ADR"
++         14 "SFTYTLF35584_RWDCFG1_ADR"
++         15 "SFTYTLF35584_RFWDCFG_ADR"
++         16 "SFTYTLF35584_RWWDCFG0_ADR"
++         17 "SFTYTLF35584_RWWDCFG1_ADR"
++         18 "SFTYTLF35584_WAKTIMCF0_ADR"
++         19 "SFTYTLF35584_WAKTIMCF1_ADR"
++         20 "SFTYTLF35584_WAKTIMCF2_ADR"
++         21 "SFTYTLF35584_DEVCTRL_ADR"
++         22 "SFTYTLF35584_DEVCTRLN_ADR"
++         23 "SFTYTLF35584_WWDSCMD_ADR"
++         24 "SFTYTLF35584_FWDRSP_ADR"
++         25 "SFTYTLF35584_FWDRSPSYNC_ADR"
++         26 "SFTYTLF35584_SYSFAIL_ADR"
++         27 "SFTYTLF35584_INITERR_ADR"
++         28 "SFTYTLF35584_IF_ADR"
++         29 "SFTYTLF35584_SYSSF_ADR"
++         30 "SFTYTLF35584_WKSF_ADR"
++         31 "SFTYTLF35584_SPISF_ADR"
++         32 "SFTYTLF35584_MONSF0_ADR"
++         33 "SFTYTLF35584_MONSF1_ADR"
++         34 "SFTYTLF35584_MONSF2_ADR"
++         35 "SFTYTLF35584_MONSF3_ADR"
++         36 "SFTYTLF35584_OTFAIL_ADR"
++         37 "SFTYTLF35584_OTWRNSF_ADR"
++         38 "SFTYTLF35584_VMONSTAT_ADR"
++         39 "SFTYTLF35584_DEVSTAT_ADR"
++         40 "SFTYTLF35584_PROTSTAT_ADR"
++         41 "SFTYTLF35584_WWDSTAT_ADR"
++         43 "SFTYTLF35584_FWDSTAT1_ADR"
++         42 "SFTYTLF35584_FWDSTAT0_ADR"
++         44 "SFTYTLF35584_ABIST_CTRL0_ADR"
++         45 "SFTYTLF35584_ABIST_CTRL1_ADR"
++         46 "SFTYTLF35584_ABIST_SELECT0_ADR"
++         47 "SFTYTLF35584_ABIST_SELECT1_ADR"
++         48 "SFTYTLF35584_ABIST_SELECT2_ADR"
++         49 "SFTYTLF35584_BCK_FREQ_CHANGE_ADR"
++         50 "SFTYTLF35584_BCK_FRE_SPREAD_ADR"
++         51 "SFTYTLF35584_BCK_MAIN_CTRL_ADR"
++         63 "SFTYTLF35584_GTM_ADR"
++      /end COMPU_VTAB
++
++      /begin COMPU_METHOD tDikeod_dlAtsbc_kjEEzya_nLSTELS
++         "[VIT_DDS]ArtificialDDSConversion"
++         TAB_VERB
++         "%6.3"
++         "-"
++         COMPU_TAB_REF tDikeod_dlAtsbc_kjEEzya_nLSTELS
++      /end COMPU_METHOD
++
++      /begin COMPU_VTAB tDikeod_dlAtsbc_kjEEzya_nLSTELS
++         "[VIT_DDS]ArtificialDDSConversion"
++         TAB_VERB
++         5
++         0 "SFTYTLF35584_WWDTEST"
++         1 "SFTYTLF35584_FWDTEST"
++         2 "SFTYTLF35584_ERRPINTEST"
++         3 "SFTYTLF35584_VLDTRES"
++         4 "SFTYTLF35584_FINSHD"
++      /end COMPU_VTAB
++
++      /begin COMPU_METHOD raChrxc_kBtBrmb_FmDuEFa_n__aa0o
++         "RATIONALFUNCTION_[0;1;0;0;0;1]"
++         RAT_FUNC
++         "%6.3"
++         "-"
++         COEFFS 0. 1. 0. 0. 0. 1.
++      /end COMPU_METHOD
+ 
+       /begin COMPU_METHOD kAcxaDa_hjFDxfd_gbvyctd_nS__O_T
+          "STRING_AUTOSAR_OFF_ON"
+@@ -30858,33 +31872,34 @@ ASAP2_VERSION 1 60
+          1 "STD_ON"
+       /end COMPU_VTAB
+ 
+-      /begin COMPU_METHOD FcdqBwc_fgyiqxd_csjahgb_nSNC__Y
++      /begin COMPU_METHOD rzEtsma_ajBzgib_Dezkqna_nSIT2RB
+          "[VIT_DDS]ArtificialDDSConversion"
+          TAB_VERB
+          "%6.3"
+          "-"
+-         COMPU_TAB_REF FcdqBwc_fgyiqxd_csjahgb_nSNC__Y
++         COMPU_TAB_REF rzEtsma_ajBzgib_Dezkqna_nSIT2RB
+       /end COMPU_METHOD
+ 
+-      /begin COMPU_VTAB FcdqBwc_fgyiqxd_csjahgb_nSNC__Y
++      /begin COMPU_VTAB rzEtsma_ajBzgib_Dezkqna_nSIT2RB
+          "[VIT_DDS]ArtificialDDSConversion"
+          TAB_VERB
+          4
+          0 "SFTYSBCCTRL_INIT"
+          1 "SFTYSBCCTRL_REFRESH"
+          2 "SFTYSBCCTRL_RESET"
+-         3 "SFTYSBCCTRL_SLEEP"
++         3 "SFTYSBCCTRL_SHUTDWN"
+       /end COMPU_VTAB
+ 
+-      /begin COMPU_METHOD bgDArvd_aijzhna_rrtdudd_nFLTYF_
++   
++      /begin COMPU_METHOD DDnmzkd_rfiagcb_igvBgsc_nD45LT_
+          "[VIT_DDS]ArtificialDDSConversion"
+          TAB_VERB
+          "%6.3"
+          "-"
+-         COMPU_TAB_REF bgDArvd_aijzhna_rrtdudd_nFLTYF_
++         COMPU_TAB_REF DDnmzkd_rfiagcb_igvBgsc_nD45LT_
+       /end COMPU_METHOD
+ 
+-      /begin COMPU_VTAB bgDArvd_aijzhna_rrtdudd_nFLTYF_
++      /begin COMPU_VTAB DDnmzkd_rfiagcb_igvBgsc_nD45LT_
+          "[VIT_DDS]ArtificialDDSConversion"
+          TAB_VERB
+          6
+@@ -30896,35 +31911,123 @@ ASAP2_VERSION 1 60
+          5 "SFTYTLF35584_DEV_ST_WAKE"
+       /end COMPU_VTAB
+ 
+-      /begin COMPU_METHOD darrutb_rDdrhzb_Bppqlpd_nIEED_E
++      /begin COMPU_METHOD fqFlnlb_mpvjnEb_cvCtwEd_nISFMT_
+          "[VIT_DDS]ArtificialDDSConversion"
+          TAB_VERB
+          "%6.3"
+          "-"
+-         COMPU_TAB_REF darrutb_rDdrhzb_Bppqlpd_nIEED_E
++         COMPU_TAB_REF fqFlnlb_mpvjnEb_cvCtwEd_nISFMT_
+       /end COMPU_METHOD
+ 
+-      /begin COMPU_VTAB darrutb_rDdrhzb_Bppqlpd_nIEED_E
++      /begin COMPU_VTAB fqFlnlb_mpvjnEb_cvCtwEd_nISFMT_
+          "[VIT_DDS]ArtificialDDSConversion"
+          TAB_VERB
+          7
+          0 "SFTYTLF35584_WD_INIT"
+          1 "SFTYTLF35584_REQ_READ_STS"
+          2 "SFTYTLF35584_WINWDG_REFRSH"
+-         3 "SFTYTLF35584_FCTLWDG_REFRSH"
+-         4 "SFTYTLF35584_HNDL_SAFE_ST_REQ"
+-         5 "SFTYTLF35584_WD_SLEEP"
++         4 "SFTYTLF35584_HNDL_ON_DMD_COM"
++         5 "SFTYTLF35584_WD_SHUTDWN"
+          6 "SFTYTLF35584_WD_RESET"
++         3 "SFTYTLF35584_FCTLWDG_REFRSH"
+       /end COMPU_VTAB
+ 
+-      /begin COMPU_METHOD raChrxc_kBtBrmb_FmDuEFa_n__aa0o
+-         "RATIONALFUNCTION_[0;1;0;0;0;1]"
++      /begin COMPU_METHOD BBqFzEd_qeipDAa_FwpvsEb_m__1o0o
++         "RATIONALFUNCTION_[0;1;0;0;0;0.001]"
+          RAT_FUNC
+          "%6.3"
++         "ms"
++         COEFFS 0. 1. 0. 0. 0. 1.e-03
++      /end COMPU_METHOD
++
++      /begin COMPU_METHOD xaiedFa_EhanAdc_jnotdjb_n__0A1T
++         "STRING_BOOLEAN.CONVERSION"
++         TAB_VERB
++         "%6.3"
+          "-"
+-         COEFFS 0. 1. 0. 0. 0. 1.
++         COMPU_TAB_REF xaiedFa_EhanAdc_jnotdjb_n__0A1T
++      /end COMPU_METHOD
++
++      /begin COMPU_VTAB xaiedFa_EhanAdc_jnotdjb_n__0A1T
++         "STRING_BOOLEAN.CONVERSION"
++         TAB_VERB
++         2
++         0 "FALSE"
++         1 "TRUE"
++      /end COMPU_VTAB
++
++      /begin COMPU_METHOD EBBsbjd_ozjzlpb_ggodqra_nTIF_SD
++         "[VIT_DDS]ArtificialDDSConversion"
++         TAB_VERB
++         "%6.3"
++         "-"
++         COMPU_TAB_REF EBBsbjd_ozjzlpb_ggodqra_nTIF_SD
+       /end COMPU_METHOD
+ 
++      /begin COMPU_VTAB EBBsbjd_ozjzlpb_ggodqra_nTIF_SD
++         "[VIT_DDS]ArtificialDDSConversion"
++         TAB_VERB
++         17
++         3 "SFTYTLF35584_WDG_WIN_TI_20MS"
++         4 "SFTYTLF35584_WDG_WIN_TI_25MS"
++         5 "SFTYTLF35584_WDG_WIN_TI_30MS"
++         6 "SFTYTLF35584_WDG_WIN_TI_35MS"
++         7 "SFTYTLF35584_WDG_WIN_TI_40MS"
++         8 "SFTYTLF35584_WDG_WIN_TI_45MS"
++         9 "SFTYTLF35584_WDG_WIN_TI_50MS"
++         10 "SFTYTLF35584_WDG_WIN_TI_55MS"
++         11 "SFTYTLF35584_WDG_WIN_TI_60MS"
++         12 "SFTYTLF35584_WDG_WIN_TI_65MS"
++         13 "SFTYTLF35584_WDG_WIN_TI_70MS"
++         14 "SFTYTLF35584_WDG_WIN_TI_75MS"
++         15 "SFTYTLF35584_WDG_WIN_TI_80MS"
++         16 "SFTYTLF35584_WDG_WIN_TI_85MS"
++         17 "SFTYTLF35584_WDG_WIN_TI_90MS"
++         18 "SFTYTLF35584_WDG_WIN_TI_95MS"
++         19 "SFTYTLF35584_WDG_WIN_TI_100MS"
++      /end COMPU_VTAB
++
++      /begin RECORD_LAYOUT _REC_A2AXS_Autosar40_S4
++         NO_AXIS_PTS_X 1 SLONG
++         AXIS_PTS_X 2 SLONG INDEX_INCR DIRECT
++      /end RECORD_LAYOUT
++
++      /begin RECORD_LAYOUT _REC_A1CUR_Autosar40_U1_S4
++         FNC_VALUES 1 UBYTE COLUMN_DIR DIRECT
++      /end RECORD_LAYOUT
++
++      /begin RECORD_LAYOUT _REC_S1VAL_Autosar40_U1
++         FNC_VALUES 1 UBYTE COLUMN_DIR DIRECT
++      /end RECORD_LAYOUT
++
++      /begin RECORD_LAYOUT _REC_S1VAL_1_U1
++         FNC_VALUES 1 UBYTE COLUMN_DIR DIRECT
++      /end RECORD_LAYOUT
++      
++      /begin RECORD_LAYOUT _REC_S1VAL_1_S4
++         FNC_VALUES 1 SLONG COLUMN_DIR DIRECT
++      /end RECORD_LAYOUT
++
++      /begin RECORD_LAYOUT _REC_S1VAL_1_U4
++         FNC_VALUES 1 ULONG COLUMN_DIR DIRECT
++      /end RECORD_LAYOUT
++
++      /begin RECORD_LAYOUT _REC_S1VAL_Param_Auto_U1
++         FNC_VALUES 1 UBYTE COLUMN_DIR DIRECT
++      /end RECORD_LAYOUT
++
++      /begin RECORD_LAYOUT _REC_S1VAL_Autosar40_S4
++         FNC_VALUES 1 SLONG COLUMN_DIR DIRECT
++      /end RECORD_LAYOUT
++
++      /begin FUNCTION SftyReplcmt
++         "3.1.0     SftyReplcmt"
++         FUNCTION_VERSION "3.1.0"
++         /begin DEF_CHARACTERISTIC
++            
++         /end DEF_CHARACTERISTIC
++      /end FUNCTION
++
+       /begin FUNCTION WdgAndMcuSplyMonCompst
+          "1.1.0     WdgAndMcuSplyMonCompst"
+          FUNCTION_VERSION "1.1.0"
+@@ -30938,43 +32041,115 @@ ASAP2_VERSION 1 60
+       /begin FUNCTION SftySbcCtrl
+          "3.1.0     SftySbcCtrl"
+          FUNCTION_VERSION "3.1.0"
++         /begin DEF_CHARACTERISTIC
++            SftySbcCtrlStSimnEna
++            SftySbcCtrlStSimnVal
++         /end DEF_CHARACTERISTIC
+          /begin OUT_MEASUREMENT
+-            SftySbcCtrlSafeStReq
+-         /end OUT_MEASUREMENT
+-         /begin LOC_MEASUREMENT
+             SftySbcCtrlSt
+-         /end LOC_MEASUREMENT
++         /end OUT_MEASUREMENT
+       /end FUNCTION
+ 
+       /begin FUNCTION SftySbcCtrlIf
+          "1.1.0     SftySbcCtrlIf"
+          FUNCTION_VERSION "1.1.0"
++         /begin DEF_CHARACTERISTIC
++            SftySbcCtrlIfSafeStReqSimnEna
++            SftySbcCtrlIfSafeStSimnVal
++         /end DEF_CHARACTERISTIC
+          /begin OUT_MEASUREMENT
+-            SftySbcCtrlIfSafSt
++            SftySbcCtrlIfBistErrMonrSt
++            SftySbcCtrlIfComErrMonrSt
++            SftySbcCtrlIfInitErrMonrSt
++            SftySbcCtrlIfSafeStPinSts
++            SftySbcCtrlIfSafeStReq
+          /end OUT_MEASUREMENT
++         /begin IN_MEASUREMENT
++            SftyTlf35584BistErrMonrSt
++            SftyTlf35584ComErrMonrSt
++            SftyTlf35584InitErrMonrSt
++            SftyTlf35584SS1St
++            SftyTlf35584WkSfRegValDiagRead
++         /end IN_MEASUREMENT
+       /end FUNCTION
+ 
+       /begin FUNCTION SftyTlf35584
+          "1.1.0     SftyTlf35584"
+          FUNCTION_VERSION "1.1.0"
++         /begin DEF_CHARACTERISTIC
++            SftyTlf35584RegCfgXAxis
++            SftyTlf35584RegCfg
++            SftyTlf35584FctlWdgAnsLkUpTbl
++            SftyTlf35584FctlWdgAnsSimnEna
++            SftyTlf35584FctlWdgAnsSimnVal
++            SftyTlf35584WdgWinTi
++            SftyTlf35584WinWdgWaitTiSimnEna
++            SftyTlf35584WinWdgWaitTiSimnVal
++            SftyTlf35584AbistCtrl0RegValSimnEna
++            SftyTlf35584AbistCtrl0RegValSimnVal
++         /end DEF_CHARACTERISTIC
+          /begin OUT_MEASUREMENT
++            SftyTlf35584BistErrMonrSt
++            SftyTlf35584ComErrMonrSt
++            SftyTlf35584FirstRunAftDigSelfTest
++            SftyTlf35584InitErrMonrSt
+             SftyTlf35584SS1St
++            SftyTlf35584WkSfRegValDiagRead
+          /end OUT_MEASUREMENT
+-\t /begin IN_MEASUREMENT
+-            SftySbcCtrlSafeStReq
++         /begin IN_MEASUREMENT
++            SftySbcCtrlIfSafeStReq
+          /end IN_MEASUREMENT
+          /begin LOC_MEASUREMENT
++            SftyTlf35584AbistCtrl0RegVal
++            SftyTlf35584AbistErrMonrSt
++            SftyTlf35584AbistSelect0RegVal
++            SftyTlf35584AbistSelect1RegVal
++            SftyTlf35584AbistSelect2RegVal
+             SftyTlf35584DevSt
++            SftyTlf35584DiagRegUpdCntr
++            SftyTlf35584DigSelfTestErrMonrSt
++            SftyTlf35584DigSelfTestSt
+             SftyTlf35584DrvrSt
+-            SftyTlf35584WinWdgErrCntr
++            SftyTlf35584FctlWdgAns
+             SftyTlf35584FctlWdgErrCntr
++            SftyTlf35584FctlWdgQstn
++            SftyTlf35584FctlWdgTmr
++            SftyTlf35584FctlWdgWaitTi
++            SftyTlf35584IfRegVal
++            SftyTlf35584IfRegValDiagRead
++            SftyTlf35584InitErrRegValDiagRead
++            SftyTlf35584InitErrRegValDigSelfTest
++            SftyTlf35584MonSf0RegValDiagRead
++            SftyTlf35584MonSf1RegValDiagRead
++            SftyTlf35584MonSf2RegValDiagRead
++            SftyTlf35584MonSf3RegValDiagRead
++            SftyTlf35584ReadbackRegCfg[0]
++            SftyTlf35584ReadbackRegCfg[1]
++            SftyTlf35584ReadbackRegCfg[2]
++            SftyTlf35584ReadbackRegCfg[3]
++            SftyTlf35584ReadbackRegCfg[4]
++            SftyTlf35584ReadbackRegCfg[5]
++            SftyTlf35584ReadbackRegCfg[6]
++            SftyTlf35584ReadbackRegCfg[7]
++            SftyTlf35584ReadbackRegCfg[8]
++            SftyTlf35584ReadbackRegCfg[9]
++            SftyTlf35584RxBuf
++            SftyTlf35584SkipNextRx
++            SftyTlf35584SpiSfRegValDiagRead
++            SftyTlf35584SuppDiagRead
++            SftyTlf35584SysFailAbistRegVal
++            SftyTlf35584SysFailRegValDiagRead
++            SftyTlf35584SysSfRegValDiagRead
++            SftyTlf35584TxBuf
++            SftyTlf35584WinWdgErrCntr
+             SftyTlf35584WinWdgRefrshVal
+             SftyTlf35584WinWdgTmr
+-            SftyTlf35584FctlWdgTmr
++            SftyTlf35584WinWdgWaitTi
+          /end LOC_MEASUREMENT
+       /end FUNCTION
+ 
+ 
++
+       /* !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! */
+       /*   TEYMUR: END MERGE HERE                                             */
+       /* !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! */
+diff --git a/src/fw_cu/build/a2l/Measurements-to-Timeslices-Mapping.csv b/src/fw_cu/build/a2l/Measurements-to-Timeslices-Mapping.csv
+index d02e56ad5..6e29814ce 100644
+--- a/src/fw_cu/build/a2l/Measurements-to-Timeslices-Mapping.csv
++++ b/src/fw_cu/build/a2l/Measurements-to-Timeslices-Mapping.csv
+@@ -6765,8 +6765,6 @@ SftyTempEvlnMotStatorTempStuckErrMonrSt,Core_1,Core_1_200us,2,,,SSW
+ SftyTempEvlnMotStatorTRawVal,Core_1,Core_1_200us,0.2,,,SSW
+ SftyTempEvlnMotStatorTRawValOld,Core_1,Core_1_200us,0.2,,,SSW
+ SftyTempEvlnMotStatorTVal,Core_1,Core_1_200us,0.2,,,SSW
+-SftyTlf35584IsRstReqDone,Core_1,Core_1_200us,0.2,,,SSW
+-SftyTlf35584FctlWdgAns,Core_1,Core_1_200us,0.2,,,SSW
+ SftyCrashSigMonAnErrMonrSt,Core_1,Core_1_200us,0.2,,,SSW
+ SftyCrashSigMonCANErrMonrSt,Core_1,Core_1_200us,0.2,,,SSW
+ SftyCrashSigMonCrashSts,Core_1,Core_1_200us,0.2,,,SSW
+@@ -7511,9 +7509,6 @@ SWIT_funcCovTrapTst1,Core_1,Core_1_200us,0.2,,,SSW
+ SWIT_funcCovSftySdl1,Core_1,Core_1_200us,0.2,,,SSW
+ SftyActvDchaCtrlEncDataSendCntr,Core_1,Core_1_200us,0.2,,,SSW
+ SftyActvDchaCtrlSendDataMode,Core_1,Core_1_200us,0.2,,,SSW
+-SftyTlf35584WKSrc,Core_1,Core_1_200us,0.2,,,SSW
+-SftyTlf35584FctlWdgSt,Core_1,Core_1_200us,0.2,,,SSW
+-SftyTlf35584IfRxParityError,Core_1,Core_1_200us,0.2,,,SSW
+ SftySbcFs6500LFSRVal,Core_1,Core_1_200us,0.2,,,SSW
+ SftySbcFs6500RegReadBack_INIT_VREG,Core_1,Core_1_200us,0.2,,,SSW
+ SftySbcFs6500RegReadBack_INIT_WU1,Core_1,Core_1_200us,0.2,,,SSW
+@@ -8197,8 +8192,6 @@ SftyE2eFpgaSCspdReady,Core_1,Core_1_200us,0.2,,,SSW
+ SftyE2eFpgaScSpdReadyFltSts,Core_1,Core_1_200us,0.2,,,SSW
+ SftyE2eFpgaScSpdReadyFltStsAcc,Core_1,Core_1_200us,0.2,,,SSW
+ SftyE2eFpgaTiStampChkFirstRun,Core_1,Core_1_200us,0.2,,,SSW
+-SftyTlf35584SleepTmr,Core_1,Core_1_200us,0.2,,,SSW
+-SftyTlf35584SleepTmrStrtd,Core_1,Core_1_200us,0.2,,,SSW
+ DrvCtrlSdlRbl1msFpgaSetTx.RunTi,Core_2,C2_1ms,1,,,SWIT
+ DrvCtrlSdlRbl1msDataAcqn.RunTi,Core_2,C2_1ms,1,,,SWIT
+ DrvCtrlSdlRbl1msDrvCtrlErrDeb.RunTi,Core_2,C2_1ms,1,,,SWIT
+'

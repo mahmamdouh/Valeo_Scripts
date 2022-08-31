@@ -1,0 +1,1697 @@
+b'commit 603abd331b280e35b387ae6ce57e26f1eb9eaa1f
+Author: Mohammed ANDALOUSSI (JV) <mohammed.andaloussi.jv@valeo.com>
+Date:   Mon Dec 6 00:31:55 2021 +0100
+
+    $100kW-46479$ - FCT_IvtrCom - SftyE2eFpga - Software Detailed Design and Unit Construction
+    
+    Change-Id: I756b2edbcf5916c576a1455357a440e081b982ca
+
+diff --git a/src/fw_cu/Components/Cmn/Com/C2cCom/include/C2cComSftyData.h b/src/fw_cu/Components/Cmn/Com/C2cCom/include/C2cComSftyData.h
+index c881e1670..f8ee98828 100644
+--- a/src/fw_cu/Components/Cmn/Com/C2cCom/include/C2cComSftyData.h
++++ b/src/fw_cu/Components/Cmn/Com/C2cCom/include/C2cComSftyData.h
+@@ -42,19 +42,28 @@ typedef struct SftyC2cDataType_
+    @@ STRUCTURE = SftyC2cDataType
+    @@ A2L_TYPE = MEASURE
+    @@ DATA_TYPE = UBYTE
+-   @@ DIMENSION = 16
+    @@ DESCRIPTION = " Decrypted data which is received "
+    @@ GROUP = SftyE2e
+    @@ END
+    */
+    uint8 StsCalibSfty;
+ 
++   /*
++   @@ ELEMENT = FpgaActvDchaReq
++   @@ STRUCTURE = SftyC2cDataType
++   @@ A2L_TYPE = MEASURE
++   @@ DATA_TYPE = UBYTE
++   @@ DESCRIPTION = " Active Discharge request "
++   @@ GROUP = SftyE2e
++   @@ END
++   */
++   boolean FpgaActvDchaReq;
++
+    /*
+    @@ ELEMENT = EAxleSpd
+    @@ STRUCTURE = SftyC2cDataType
+    @@ A2L_TYPE = MEASURE
+    @@ DATA_TYPE = FLOAT
+-   @@ DIMENSION = 16
+    @@ DESCRIPTION = " Decrypted data which is received "
+    @@ GROUP = SftyE2e
+    @@ END
+@@ -238,18 +247,6 @@ typedef struct SftyC2cDataType_
+    */
+    C2cStsKl15Type Kl15St; /*!< Klamp 15 state */
+ 
+-   /*
+-   @@ ELEMENT = FpgaRxCrcErrMonrSt
+-   @@ STRUCTURE = SftyC2cDataType
+-   @@ A2L_TYPE = MEASURE
+-   @@ DATA_TYPE = UBYTE
+-   @@ CONVERSION = TABLE 0 "INACTIVE" 1 "PASSED" 2 "FAILED"
+-   @@ DESCRIPTION = "Error monitoring status of FPGA Rx CRC"
+-   @@ GROUP = C2cCom
+-   @@ END
+-   */
+-   uint8 FpgaRxCrcErrMonrSt;
+-
+    /*
+    @@ ELEMENT = OperRdy
+    @@ STRUCTURE = SftyC2cDataType
+diff --git a/src/fw_cu/Components/Safety/Sfty_Cmn/SftyDmaDrvr/src/SftyDmaDrvr_cfg.c b/src/fw_cu/Components/Safety/Sfty_Cmn/SftyDmaDrvr/src/SftyDmaDrvr_cfg.c
+index a5dd03ff0..4e2a1c6a7 100644
+--- a/src/fw_cu/Components/Safety/Sfty_Cmn/SftyDmaDrvr/src/SftyDmaDrvr_cfg.c
++++ b/src/fw_cu/Components/Safety/Sfty_Cmn/SftyDmaDrvr/src/SftyDmaDrvr_cfg.c
+@@ -130,7 +130,7 @@ CONST(SftyDmaDrvrChannelCfg_Type, SFTY_DMA_DRVR_CALIB) SftyDmaDrvrChannelCfg[] =
+    {/** Fpga received data to SSW buffer */
+       .ChIndex             = SFTYDMADRVR_CH_IDX_FPGA_SLAVE_SFTY_TRIG,
+       .CH.SADR.U          = (uint32)(BSWFPGAIF_RXBUFFER), /* PRQA S 0306 */
+-      .CH.DADR.U          = (uint32)(SftyE2eFpgaDmaFrameRx),
++      .CH.DADR.U          = (uint32)(SftyDmaE2eFpgaFrameRx),
+       .CH.CHCFGR.B.PRSEL  = (uint32)SFTY_DMA_DRVR_PRSEL_DAISY_CHAIN,
+       .CH.CHCFGR.B.RROAT  = (uint32)SFTY_DMA_DRVR_RROAT_TRANSACTION,
+       .CH.CHCFGR.B.TREL   = 1U,                                 /* Transfer Reload Counter */
+@@ -157,7 +157,7 @@ CONST(SftyDmaDrvrChannelCfg_Type, SFTY_DMA_DRVR_CALIB) SftyDmaDrvrChannelCfg[] =
+    {/** Fpga received data to SSW buffer */
+       .ChIndex             = SFTYDMADRVR_CH_IDX_FPGA_SLAVE_SFTY_TRIG_TIMESTAMP,
+       .CH.SADR.U          = (uint32)(&DMA_TIME), /* PRQA S 0306 */
+-      .CH.DADR.U          = (uint32)(&(SftyE2eFpgaDmaFrameRx[0].Data.tiStamp)),
++      .CH.DADR.U          = (uint32)(&(SftyDmaE2eFpgaFrameRx[0].Data.tiStamp)),
+       .CH.CHCFGR.B.PRSEL  = (uint32)SFTY_DMA_DRVR_PRSEL_HW_TRIGGER,
+       .CH.CHCFGR.B.RROAT  = (uint32)SFTY_DMA_DRVR_RROAT_TRANSACTION,
+       .CH.CHCFGR.B.TREL   = 1U,                                 /* Transfer Reload Counter */
+diff --git a/src/fw_cu/Components/Safety/Sfty_Cmn/SftyE2eFpga/include/SftyE2eFpga_Type.h b/src/fw_cu/Components/Safety/Sfty_Cmn/SftyE2eFpga/include/SftyE2eFpga_Type.h
+index e9c79b7ee..207bb3ee0 100644
+--- a/src/fw_cu/Components/Safety/Sfty_Cmn/SftyE2eFpga/include/SftyE2eFpga_Type.h
++++ b/src/fw_cu/Components/Safety/Sfty_Cmn/SftyE2eFpga/include/SftyE2eFpga_Type.h
+@@ -287,11 +287,11 @@ typedef struct SftyE2eFpgaDmaASRxFrametype_
+ 
+ }SftyE2eFpgaDmaASRxFrametype;
+    
+-typedef union SftyE2eFpgaDmaFrameRxType_
++typedef union SftyDmaE2eFpgaFrameRxType_
+ {
+    /*
+     @@ ELEMENT = Data32
+-    @@ STRUCTURE = SftyE2eFpgaDmaFrameRxType
++    @@ STRUCTURE = SftyDmaE2eFpgaFrameRxType
+     @@ A2L_TYPE = MEASURE
+     @@ DATA_TYPE = ULONG
+     @@ DIMENSION = 9
+@@ -303,7 +303,7 @@ typedef union SftyE2eFpgaDmaFrameRxType_
+ 
+    /*
+     @@ ELEMENT = Data16
+-    @@ STRUCTURE = SftyE2eFpgaDmaFrameRxType
++    @@ STRUCTURE = SftyDmaE2eFpgaFrameRxType
+     @@ A2L_TYPE = MEASURE
+     @@ DATA_TYPE = UWORD
+     @@ DIMENSION = 18
+@@ -315,7 +315,7 @@ typedef union SftyE2eFpgaDmaFrameRxType_
+ 
+    /*
+     @@ ELEMENT = Data8
+-    @@ STRUCTURE = SftyE2eFpgaDmaFrameRxType
++    @@ STRUCTURE = SftyDmaE2eFpgaFrameRxType
+     @@ A2L_TYPE = MEASURE
+     @@ DATA_TYPE = UBYTE
+     @@ DIMENSION = 36
+@@ -327,13 +327,13 @@ typedef union SftyE2eFpgaDmaFrameRxType_
+ 
+    /*
+     @@ SUB_STRUCTURE = Data
+-    @@ STRUCTURE = SftyE2eFpgaDmaFrameRxType
++    @@ STRUCTURE = SftyDmaE2eFpgaFrameRxType
+     @@ DATA_TYPE = STRUCTURE SftyE2eFpgaDmaASRxFrametype
+     @@ END
+     */
+    SftyE2eFpgaDmaASRxFrametype Data;
+    
+-}SftyE2eFpgaDmaFrameRxType;
++}SftyDmaE2eFpgaFrameRxType;
+ 
+ 
+ typedef struct SftyE2eFpgalRxSSigType_
+diff --git a/src/fw_cu/Components/Safety/Sfty_Cmn/SftyE2eFpga/include/SftyE2eFpga_data.h b/src/fw_cu/Components/Safety/Sfty_Cmn/SftyE2eFpga/include/SftyE2eFpga_data.h
+index 4cb40cc66..413c6befe 100644
+--- a/src/fw_cu/Components/Safety/Sfty_Cmn/SftyE2eFpga/include/SftyE2eFpga_data.h
++++ b/src/fw_cu/Components/Safety/Sfty_Cmn/SftyE2eFpga/include/SftyE2eFpga_data.h
+@@ -38,7 +38,7 @@
+ #define SFTY_DMA_QM_SHARE_START_SEC_VAR_FAST_NO_INIT_ALIGN200HEX
+ #include "MemMap.h"
+ 
+-extern VAR(SftyE2eFpgaDmaFrameRxType, SFTYE2EFPGA_VAR) SftyE2eFpgaDmaFrameRx[SFTY_E2E_FPGA_SPI_RX_BUF_LEN];
++extern VAR(SftyDmaE2eFpgaFrameRxType, SFTYE2EFPGA_VAR) SftyDmaE2eFpgaFrameRx[SFTY_E2E_FPGA_SPI_RX_BUF_LEN];
+ 
+ #define SFTY_DMA_QM_SHARE_STOP_SEC_VAR_FAST_NO_INIT_ALIGN200HEX
+ #include "MemMap.h"
+@@ -46,8 +46,6 @@ extern VAR(SftyE2eFpgaDmaFrameRxType, SFTYE2EFPGA_VAR) SftyE2eFpgaDmaFrameRx[SFT
+ #define SFTYE2EFPGA_ASIL_C_START_SEC_VAR_FAST_CLEARED
+ #include "MemMap.h"
+ 
+-extern VAR(SftyE2eFpgaIpduRxType    , SFTYE2EFPGA_VAR) SftyE2eFpgaIpduRx;
+-
+ extern VAR(uint16,  SFTYE2EFPGA_VAR) SftyE2eFpgaCtrlBrdRawVal;
+ extern VAR(uint16,  SFTYE2EFPGA_VAR) SftyE2eFpgaDrvBrdRawVal;
+ extern VAR(sint16,  SFTYE2EFPGA_VAR) SftyE2eFpgaIPhaRawVal[SYSDEF_EM_PHA_SET_CNT_MAX][SYSDEF_EM_PHA_CNT_MAX];
+@@ -58,9 +56,10 @@ extern VAR(uint16,  SFTYE2EFPGA_VAR) SftyE2eFpgaP5HSRawVal;
+ extern VAR(uint16,  SFTYE2EFPGA_VAR) SftyE2eFpgaP5LSRawVal;
+ extern VAR(uint16,  SFTYE2EFPGA_VAR) SftyE2eFpgaPS16MultRawVal;
+ extern VAR(boolean, SFTYE2EFPGA_VAR) SftyE2eFpgaOverVoltVBatFltSts;
+-extern VAR(boolean, SFTYE2EFPGA_VAR) SftyE2eFpgaMeasCoherncFltSts;
++extern VAR(boolean, SFTYE2EFPGA_VAR) SftyE2eFpgaMeasCohrncFltSts;
+ extern VAR(boolean, SFTYE2EFPGA_VAR) SftyE2eFpgaEmgySWFltSts;
+-
++extern VAR(boolean, SFTYE2EFPGA_VAR) SftyE2eFpgaActvDchaActvFltSts;
++extern VAR(boolean, SFTYE2EFPGA_VAR) SftyE2eFpgaActvDchaInactvFltSts;
+ extern VAR(boolean, SFTYE2EFPGA_VAR) SftyE2eFpgaOverUnderCurUFltSts;
+ extern VAR(boolean, SFTYE2EFPGA_VAR) SftyE2eFpgaOverUnderCurVFltSts;
+ extern VAR(boolean, SFTYE2EFPGA_VAR) SftyE2eFpgaOverUnderCurWFltSts;
+@@ -68,7 +67,19 @@ extern VAR(boolean, SFTYE2EFPGA_VAR) SftyE2eFpgaScSpdReadyFltSts;
+ extern VAR(boolean, SFTYE2EFPGA_VAR) SftyE2eFpgaHsGateDrvrFltSts;
+ extern VAR(boolean, SFTYE2EFPGA_VAR) SftyE2eFpgaLoGateDrvrFltSts;
+ extern VAR(boolean, SFTYE2EFPGA_VAR) SftyE2eFpgaMidPointPhaFltSts[SYSDEF_EM_PHA_CNT_MAX];
+-extern VAR(uint8,   SFTYE2EFPGA_VAR) SftyE2eFpgaRxCrcErrMonrSt;
++extern VAR(uint8,   SFTYE2EFPGA_VAR) SftyE2eFpgaRxACrcErrMonrSt;
++extern VAR(uint8,   SFTYE2EFPGA_VAR) SftyE2eFpgaRxSCrcErrMonrSt;
++extern VAR(uint8,   SFTYE2EFPGA_VAR) SftyE2eFpgaLossComErrMonrSt;
++extern VAR(uint8,   SFTYE2EFPGA_VAR) SftyE2eFpgaSyncOutEarlyErrMonrSt;
++extern VAR(uint8,   SFTYE2EFPGA_VAR) SftyE2eFpgaSyncOutLateErrMonrSt;
++extern VAR(uint8,   SFTYE2EFPGA_VAR) SftyE2eFpgaTxCrcCtrlAErrMonrSt;
++extern VAR(uint8,   SFTYE2EFPGA_VAR) SftyE2eFpgaTxCrcCtrlSErrMonrSt;
++extern VAR(uint8,   SFTYE2EFPGA_VAR) SftyE2eFpgaRxMuxSeqErrMonrSt;
++extern VAR(uint8,   SFTYE2EFPGA_VAR) SftyE2eFpgaModPlausErrMonrSt;
++extern VAR(uint8,   SFTYE2EFPGA_VAR) SftyE2eFpgaPrmDlErrMonrSt;
++extern VAR(uint8,   SFTYE2EFPGA_VAR) SftyE2eFpgaDmaTiStampErrMonrSt;
++
++//extern VAR(boolean,   SFTYE2EFPGA_VAR) SftyActvDchaCtrlActvDchaReqViaR;
+ 
+ #define SFTYE2EFPGA_ASIL_C_STOP_SEC_VAR_FAST_CLEARED
+ #include "MemMap.h"
+@@ -96,10 +107,12 @@ extern CONST(uint8, SFTYE2EFPGA_CONST)  SftyE2eFpgaAlvCntrDeltaMax;
+ #define SFTYREPLCMT_START_SEC_CALIB_8
+ #include "MemMap.h"
+ 
+-extern CONST(uint8, SFTYREPLCMT_CALIB) SftyE2eFpgaStateReqEmgySwOvrdEna;
+-extern CONST(uint8, SFTYREPLCMT_CALIB) SftyE2eFpgaStateReqSCSpdReadyOvrdEna;
+-extern CONST(uint8, SFTYREPLCMT_CALIB) SftyE2eFpgaStateReqEmgySwOvrdVal;
+-extern CONST(uint8, SFTYREPLCMT_CALIB) SftyE2eFpgaStateReqSCSpdReadyOvrdVal;
++extern CONST(uint8, SFTYREPLCMT_CALIB)   SftyE2eFpgaStateReqEmgySwOvrdEna;
++extern CONST(uint8, SFTYREPLCMT_CALIB)   SftyE2eFpgaStateReqSCSpdReadyOvrdEna;
++extern CONST(uint8, SFTYREPLCMT_CALIB)   SftyE2eFpgaActvDchaReqOvrdEna;
++extern CONST(uint8, SFTYREPLCMT_CALIB)   SftyE2eFpgaStateReqEmgySwOvrdVal;
++extern CONST(uint8, SFTYREPLCMT_CALIB)   SftyE2eFpgaStateReqSCSpdReadyOvrdVal;
++extern CONST(boolean, SFTYREPLCMT_CALIB) SftyE2eFpgaActvDchaReqValOvrdVal;
+ 
+ #define SFTYREPLCMT_STOP_SEC_CALIB_8
+ #include "MemMap.h"
+diff --git a/src/fw_cu/Components/Safety/Sfty_Cmn/SftyE2eFpga/src/SftyE2eFpga.c b/src/fw_cu/Components/Safety/Sfty_Cmn/SftyE2eFpga/src/SftyE2eFpga.c
+index aad145cd9..f2165a369 100644
+--- a/src/fw_cu/Components/Safety/Sfty_Cmn/SftyE2eFpga/src/SftyE2eFpga.c
++++ b/src/fw_cu/Components/Safety/Sfty_Cmn/SftyE2eFpga/src/SftyE2eFpga.c
+@@ -53,20 +53,31 @@
+ #endif
+ /*================== [defines] ==============================================*/
+ 
+-#define SFTY_E2E_FPGA_ALV_CNTR_MAX       (3U)
+-#define SFTY_E2E_FPGA_ALV_CNTR_DELTA_MAX (1U)
+-#define SFTY_E2E_FPGA_LST_I_TI_STAMP     (0xDEADC0DEUL)
+-#define SFTY_E2E_FPGA_NO_REQ             (1u)
+-#define SFTY_E2E_FPGA_TRACTION           (1u)
+-#define SFTY_E2E_FPGA_MLI_TRACTION       (1u)
+-#define SFTY_E2E_FPGA_DFLT_MODE          (0u)
+-#define SFTY_E2E_FPGA_FLT_ST_DFLT        (0xFFFFU)
++#define SFTY_E2E_FPGA_ALV_CNTR_MAX        (3U)
++#define SFTY_E2E_FPGA_ALV_CNTR_DELTA_MAX  (1U)
++#define SFTY_E2E_FPGA_LST_I_TI_STAMP      (0xDEADC0DEUL)
++#define SFTY_E2E_FPGA_NO_REQ              (1u)
++#define SFTY_E2E_FPGA_TRACTION            (1u)
++#define SFTY_E2E_FPGA_MLI_TRACTION        (1u)
++#define SFTY_E2E_FPGA_DFLT_MODE           (0u)
++#define SFTY_E2E_FPGA_FLT_ST_DFLT         (0xFFFFU)
++#define SFTY_E2E_FPGA_ACC_MONR_STS_PASSED (0U)
++#define SFTY_E2E_FPGA_ACC_MONR_STS_FAILED (1U)
++#define SFTY_E2E_FPGA_INIT_MODE           (2U)
+ 
+ /*================== [definition of local data ] ============================*/
+ 
+ #define SFTYE2EFPGA_ASIL_C_START_SEC_VAR_FAST_CLEARED
+ #include "MemMap.h"
+ 
++/*! \\misra Warning  Msg(4:0759) union is needed to get access to every signals of the message data " */
++/*
++@@ INSTANCE = SftyE2eFpgaIpduRx
++@@ STRUCTURE = SftyE2eFpgaIpduRxType
++@@ END
++*/
++STATIC VAR(SftyE2eFpgaIpduRxType, SFTYE2EFPGA_VAR) SftyE2eFpgaIpduRx;/* PRQA S 0759 */
++
+ /*
+ @@ SYMBOL = SftyE2eFpgaFirstRunDone
+ @@ A2L_TYPE = MEASURE
+@@ -150,14 +161,14 @@ STATIC VAR(uint8, SftyE2eFpga) SftyE2eFpgaDmaDataLstIdx;
+ STATIC VAR(uint8, SftyE2eFpga) SftyE2eFpgaTiStampChkFirstRun;
+ 
+ /*
+-@@ SYMBOL = SftyE2eFpgaMeasCoherncFltStsAcc
++@@ SYMBOL = SftyE2eFpgaMeasCohrncFltStsAcc
+ @@ A2L_TYPE = MEASURE
+ @@ DATA_TYPE = UBYTE
+ @@ DESCRIPTION = "accumulated fault status"
+ @@ GROUP = SftyE2eFpga
+ @@ END
+ */
+-STATIC VAR(uint8, SFTYE2EFPGA_VAR) SftyE2eFpgaMeasCoherncFltStsAcc;
++STATIC VAR(uint8, SFTYE2EFPGA_VAR) SftyE2eFpgaMeasCohrncFltStsAcc;
+ 
+ /*
+ @@ SYMBOL = SftyE2eFpgaEmgySWFltStsAcc
+@@ -169,6 +180,76 @@ STATIC VAR(uint8, SFTYE2EFPGA_VAR) SftyE2eFpgaMeasCoherncFltStsAcc;
+ */
+ STATIC VAR(uint8, SFTYE2EFPGA_VAR) SftyE2eFpgaEmgySWFltStsAcc;
+ 
++/*
++@@ SYMBOL = SftyE2eFpgaActvDchaActvFltStsAcc
++@@ A2L_TYPE = MEASURE
++@@ DATA_TYPE = UBYTE
++@@ DESCRIPTION = "accumulated fault status"
++@@ GROUP = SftyE2eFpga
++@@ END
++*/
++STATIC VAR(uint8, SFTYE2EFPGA_VAR) SftyE2eFpgaActvDchaActvFltStsAcc;
++
++/*
++@@ SYMBOL = SftyE2eFpgaActvDchaInactvFltStsAcc
++@@ A2L_TYPE = MEASURE
++@@ DATA_TYPE = UBYTE
++@@ DESCRIPTION = "accumulated fault status"
++@@ GROUP = SftyE2eFpga
++@@ END
++*/
++STATIC VAR(uint8, SFTYE2EFPGA_VAR) SftyE2eFpgaActvDchaInactvFltStsAcc;
++
++/*
++@@ SYMBOL = SftyE2eFpgaLossComErrMonrStAcc
++@@ A2L_TYPE = MEASURE
++@@ DATA_TYPE = UBYTE
++@@ DESCRIPTION = "accumulated fault status"
++@@ GROUP = SftyE2eFpga
++@@ END
++*/
++STATIC VAR(uint8, SFTYE2EFPGA_VAR) SftyE2eFpgaLossComErrMonrStAcc;
++
++/*
++@@ SYMBOL = SftyE2eFpgaSyncOutEarlyErrMonrStAcc
++@@ A2L_TYPE = MEASURE
++@@ DATA_TYPE = UBYTE
++@@ DESCRIPTION = "accumulated fault status"
++@@ GROUP = SftyE2eFpga
++@@ END
++*/
++STATIC VAR(uint8, SFTYE2EFPGA_VAR) SftyE2eFpgaSyncOutEarlyErrMonrStAcc;
++
++/*
++@@ SYMBOL = SftyE2eFpgaSyncOutLateErrMonrStAcc
++@@ A2L_TYPE = MEASURE
++@@ DATA_TYPE = UBYTE
++@@ DESCRIPTION = "accumulated fault status"
++@@ GROUP = SftyE2eFpga
++@@ END
++*/
++STATIC VAR(uint8, SFTYE2EFPGA_VAR) SftyE2eFpgaSyncOutLateErrMonrStAcc;
++
++/*
++@@ SYMBOL = SftyE2eFpgaTxCrcCtrlAErrMonrStAcc
++@@ A2L_TYPE = MEASURE
++@@ DATA_TYPE = UBYTE
++@@ DESCRIPTION = "accumulated fault status"
++@@ GROUP = SftyE2eFpga
++@@ END
++*/
++STATIC VAR(uint8, SFTYE2EFPGA_VAR) SftyE2eFpgaTxCrcCtrlAErrMonrStAcc;
++
++/*
++@@ SYMBOL = SftyE2eFpgaTxCrcCtrlSErrMonrStAcc
++@@ A2L_TYPE = MEASURE
++@@ DATA_TYPE = UBYTE
++@@ DESCRIPTION = "accumulated fault status"
++@@ GROUP = SftyE2eFpga
++@@ END
++*/
++STATIC VAR(uint8, SFTYE2EFPGA_VAR) SftyE2eFpgaTxCrcCtrlSErrMonrStAcc;
++
+ /*
+ @@ SYMBOL = SftyE2eFpgaOverUnderCurUFltStsAcc
+ @@ A2L_TYPE = MEASURE
+@@ -250,6 +331,17 @@ STATIC VAR(uint8, SFTYE2EFPGA_VAR) SftyE2eFpgaLoGateDrvrFltStsAcc;
+ */
+ STATIC VAR(uint8, SFTYE2EFPGA_VAR) SftyE2eFpgaMidPointPhaFltStsAcc[SYSDEF_EM_PHA_CNT_MAX];
+ 
++/*
++@@ SYMBOL = SftyE2eFpgaModPlausErrMonrStAcc
++@@ A2L_TYPE = MEASURE
++@@ DATA_TYPE = UBYTE
++@@ DESCRIPTION = "accumulated fault status"
++@@ GROUP = SftyE2eFpga
++@@ END
++*/
++STATIC VAR(uint8, SFTYE2EFPGA_VAR) SftyE2eFpgaModPlausErrMonrStAcc;
++
++
+ /*
+ @@ SYMBOL = SftyE2eFpgaNoEmgySwReq
+ @@ A2L_TYPE = MEASURE
+@@ -271,36 +363,48 @@ STATIC VAR(uint8, SFTYE2EFPGA_VAR) SftyE2eFpgaNoEmgySwReq;
+ STATIC VAR(uint8, SFTYE2EFPGA_VAR) SftyE2eFpgaSCspdReady;
+ 
+ /*
+-@@ SYMBOL = SftyE2eFpgaDmaTiStampErrMonrSt
++@@ SYMBOL = SftyE2eFpgaCurrMod
+ @@ A2L_TYPE = MEASURE
+ @@ DATA_TYPE = UBYTE
+-@@ DESCRIPTION = "Error monitor"
+-@@ CONVERSION = TABLE 0 "INACTIVE" 1 "PASSED" 2 "FAILED"
++@@ DESCRIPTION = "Current PFGA Mode"
+ @@ GROUP = SftyE2eFpga
+ @@ END
+ */
+-STATIC VAR(uint8, SFTYE2EFPGA_VAR) SftyE2eFpgaDmaTiStampErrMonrSt;
++STATIC VAR(uint8, SFTYE2EFPGA_VAR) SftyE2eFpgaCurrMod;
+ 
+ /*
+-@@ SYMBOL = SftyE2eFpgaAlvCntrErrMonrSt
++@@ SYMBOL = SftyE2eFpgaActvDchaReq
+ @@ A2L_TYPE = MEASURE
+ @@ DATA_TYPE = UBYTE
+-@@ DESCRIPTION = "Error monitor"
+-@@ CONVERSION = TABLE 0 "INACTIVE" 1 "PASSED" 2 "FAILED"
++@@ DESCRIPTION = "Active discharge request"
+ @@ GROUP = SftyE2eFpga
+ @@ END
+ */
+-STATIC VAR(uint8, SFTYE2EFPGA_VAR) SftyE2eFpgaAlvCntrErrMonrSt;
++STATIC VAR(uint8, SFTYE2EFPGA_VAR) SftyE2eFpgaActvDchaReq;
++
++
+ 
+ #define SFTYE2EFPGA_ASIL_C_STOP_SEC_VAR_FAST_CLEARED
+ #include "MemMap.h"
+ 
++
++#define SFTYE2EFPGA_AREA_CMN_START_SEC_CODE_FAST
++#include "MemMap.h"
++
++
++STATIC FUNC(void, SFTYE2E_CODE) SftyE2eFpga_E2eFrameHndlr(uint8 frameIdx);
++STATIC FUNC(void, SFTYE2E_CODE) SftyE2eFpga_UpdFltSts(void);
++
++#define SFTYE2EFPGA_AREA_CMN_STOP_SEC_CODE_FAST
++#include "MemMap.h"
++
+ /*================== [definition of local functions] ========================*/
+ 
+ /******************************************************************/
+ /*!
+  * \\fn      uint8 SftyE2eFpga_DecIdx(uint8 idx, uint8 lastIdx)
+  * \\brief   This function decrements passed index, respecting overflow.
++ * * \\Parent_DD : SftyE2eFpga_GetCurrIdx
+  * \\param   [in]  lastIdx - last index of buffer
+  * \\param   [in]  idx - this index will be decremented
+  * \\return  uint8 - decremented index
+@@ -325,7 +429,7 @@ LOCAL_INLINE uint8 SftyE2eFpga_DecIdx(uint8 idx, uint8 lastIdx)
+ 
+ /******************************************************************/
+ /*!
+- * \\fn      uint8 SftyE2eFpga_GetCurrIdx(Dma_ChannelType dmaCh, const SftyE2eFpgaDmaFrameRxType* dataPtr, uint8 bufLen)
++ * \\fn      uint8 SftyE2eFpga_GetCurrIdx(Dma_ChannelType dmaCh, const SftyDmaE2eFpgaFrameRxType* dataPtr, uint8 bufLen)
+  * \\brief   This function returns newest usable from DMA array
+  * \\param   [in]  dmaCh   - DADR value of this channel will be returned
+  * \\param   [in]  dataPtr - Pointer to buffer where DMA saves corresponding data, needed for index calculation
+@@ -333,10 +437,10 @@ LOCAL_INLINE uint8 SftyE2eFpga_DecIdx(uint8 idx, uint8 lastIdx)
+  * \\return  uint8 - Newest usable index
+  */
+ /******************************************************************/
+-LOCAL_INLINE uint8 SftyE2eFpga_GetCurrIdx(Dma_ChannelType dmaCh, const SftyE2eFpgaDmaFrameRxType* dataPtr, uint8 bufLen)
++LOCAL_INLINE uint8 SftyE2eFpga_GetCurrIdx(Dma_ChannelType dmaCh, const SftyDmaE2eFpgaFrameRxType* dataPtr, uint8 bufLen)
+ {
+    /* ******** Variables declaration *********** */
+-   SftyE2eFpgaDmaFrameRxType* lstPtr;
++   SftyDmaE2eFpgaFrameRxType* lstPtr;
+    uint32            memDif;
+    uint8             idx;
+    /* ************* Source code **************** */
+@@ -345,7 +449,7 @@ LOCAL_INLINE uint8 SftyE2eFpga_GetCurrIdx(Dma_ChannelType dmaCh, const SftyE2eFp
+ 
+    /*! \\misra Warning No C2004:11.3 "Cast between a pointer to object and an integral type.
+     *                                No other way to cast register value to a pointer. Behaviour is correct" */
+-   lstPtr = ((SftyE2eFpgaDmaFrameRxType*)(MODULE_DMA.CH[(uint16)dmaCh].DADR.U)); /* PRQA S 0306 */
++   lstPtr = ((SftyDmaE2eFpgaFrameRxType*)(MODULE_DMA.CH[(uint16)dmaCh].DADR.U)); /* PRQA S 0306 */
+ 
+    /*! \\misra MISRA-C:2004 Rule 11.3 Warning No C0488:4 "Cast between a pointer to object and an integral type. Behavior is OK" */
+    /* Calculate memory offset */
+@@ -353,7 +457,7 @@ LOCAL_INLINE uint8 SftyE2eFpga_GetCurrIdx(Dma_ChannelType dmaCh, const SftyE2eFp
+ 
+    /*! \\misra MISRA-C:2004 Rule 17.4 Warning No C0488:4 "Performing pointer arithmetic. Calculating Index. Behavior is OK" */
+    /* Calculate indexes of current destination data */
+-   idx = (uint8)(memDif / sizeof(SftyE2eFpgaDmaFrameRxType)); /* PRQA S 0488 */
++   idx = (uint8)(memDif / sizeof(SftyDmaE2eFpgaFrameRxType)); /* PRQA S 0488 */
+ 
+    /* Decrement index, to be sure that this data is not being written right now */
+    idx = SftyE2eFpga_DecIdx(idx, (bufLen - 1U));
+@@ -365,6 +469,7 @@ LOCAL_INLINE uint8 SftyE2eFpga_GetCurrIdx(Dma_ChannelType dmaCh, const SftyE2eFp
+ /*!
+  * \\fn      uint16 SftyE2eFpga_u16SwapMsbLsb(uint16 u16Data)
+  * \\brief   This function swaps MSB and LSB of the passed data.
++ * * \\Parent_DD : SftyE2eFpga_E2eFrameHndlr
+  * \\param   [in]  u16Data - input to to be swaped
+  * \\return  uint16 - swaped data
+  */
+@@ -389,13 +494,14 @@ LOCAL_INLINE uint16 SftyE2eFpga_u16SwapMsbLsb(uint16 u16Data)
+ /******************************************************************/
+ LOCAL_INLINE uint8 SftyE2eFpga_GetAlvCntr(uint8 idx)
+ {
+-   return SftyE2eFpgaDmaFrameRx[idx].Data.RxA.Sig.Data8[3];
++   return SftyDmaE2eFpgaFrameRx[idx].Data.RxA.Sig.Data8[3];
+ }
+ 
+ /******************************************************************/
+ /*!
+  * \\fn      uint16 SftyE2eFpga_GetARxCrc(uint8 idx)
+  * \\brief   This function gets ARx CRC of the passed message.
++ * * \\Parent_DD : SftyE2eFpga_E2eFrameHndlr
+  * \\param   [in]  idx - index of the message
+  * \\return  uint16 - CRC of Async Rx message
+  */
+@@ -405,7 +511,7 @@ LOCAL_INLINE uint16 SftyE2eFpga_GetARxCrc(uint8 idx)
+    uint16 retVal;
+    uint16 recCrc;
+ 
+-   recCrc = SftyE2eFpgaDmaFrameRx[idx].Data.RxA.Sig.Crc;
++   recCrc = SftyDmaE2eFpgaFrameRx[idx].Data.RxA.Sig.Crc;
+ 
+    retVal = SftyE2eFpga_u16SwapMsbLsb(recCrc);
+ 
+@@ -416,6 +522,7 @@ LOCAL_INLINE uint16 SftyE2eFpga_GetARxCrc(uint8 idx)
+ /*!
+  * \\fn      uint16 SftyE2eFpga_GetSRxCrc(uint8 idx)
+  * \\brief   This function gets SRx CRC of the passed message.
++ * * \\Parent_DD : SftyE2eFpga_E2eFrameHndlr
+  * \\param   [in]  idx - index of the message
+  * \\return  uint16 - CRC of syn Rx message
+  */
+@@ -425,7 +532,7 @@ LOCAL_INLINE uint16 SftyE2eFpga_GetSRxCrc(uint8 idx)
+    uint16 retVal;
+    uint16 recCrc;
+ 
+-   recCrc = SftyE2eFpgaDmaFrameRx[idx].Data.RxS.Sig.Crc;
++   recCrc = SftyDmaE2eFpgaFrameRx[idx].Data.RxS.Sig.Crc;
+ 
+    retVal = SftyE2eFpga_u16SwapMsbLsb(recCrc);
+ 
+@@ -617,35 +724,35 @@ LOCAL_INLINE Std_ReturnType SftyE2eFpga_CrcEval(const uint8 crcData[], uint16 re
+ /******************************************************************/
+ LOCAL_INLINE void SftyE2eFpga_CopyARxDataFrameToIpdu(uint8 idx, uint8 alvCntr)
+ {
+-   SftyE2eFpgaIpduRx.Data.RxA.Id.MxA.Data32[0] = SftyE2eFpgaDmaFrameRx[idx].Data.RxA.Data32[0];
+-   SftyE2eFpgaIpduRx.Data.RxA.Id.MxA.Data32[1] = SftyE2eFpgaDmaFrameRx[idx].Data.RxA.Data32[1];
+-   SftyE2eFpgaIpduRx.Data.RxA.Id.MxA.Data32[2] = SftyE2eFpgaDmaFrameRx[idx].Data.RxA.Data32[2];
+-   SftyE2eFpgaIpduRx.Data.RxA.Id.MxA.Data32[3] = SftyE2eFpgaDmaFrameRx[idx].Data.RxA.Data32[3];
++   SftyE2eFpgaIpduRx.Data.RxA.Id.MxA.Data32[0] = SftyDmaE2eFpgaFrameRx[idx].Data.RxA.Data32[0];
++   SftyE2eFpgaIpduRx.Data.RxA.Id.MxA.Data32[1] = SftyDmaE2eFpgaFrameRx[idx].Data.RxA.Data32[1];
++   SftyE2eFpgaIpduRx.Data.RxA.Id.MxA.Data32[2] = SftyDmaE2eFpgaFrameRx[idx].Data.RxA.Data32[2];
++   SftyE2eFpgaIpduRx.Data.RxA.Id.MxA.Data32[3] = SftyDmaE2eFpgaFrameRx[idx].Data.RxA.Data32[3];
+ 
+    switch(alvCntr)
+    {
+       case 0x00:
+       {
+-         SftyE2eFpgaIpduRx.Data.RxA.IdMx[0].Data32[2] = SftyE2eFpgaDmaFrameRx[idx].Data.RxA.Data32[2];
+-         SftyE2eFpgaIpduRx.Data.RxA.IdMx[0].Data32[3] = SftyE2eFpgaDmaFrameRx[idx].Data.RxA.Data32[3];
++         SftyE2eFpgaIpduRx.Data.RxA.IdMx[0].Data32[2] = SftyDmaE2eFpgaFrameRx[idx].Data.RxA.Data32[2];
++         SftyE2eFpgaIpduRx.Data.RxA.IdMx[0].Data32[3] = SftyDmaE2eFpgaFrameRx[idx].Data.RxA.Data32[3];
+          break;
+       }
+       case 0x01:
+       {
+-         SftyE2eFpgaIpduRx.Data.RxA.IdMx[1].Data32[2] = SftyE2eFpgaDmaFrameRx[idx].Data.RxA.Data32[2];
+-         SftyE2eFpgaIpduRx.Data.RxA.IdMx[1].Data32[3] = SftyE2eFpgaDmaFrameRx[idx].Data.RxA.Data32[3];
++         SftyE2eFpgaIpduRx.Data.RxA.IdMx[1].Data32[2] = SftyDmaE2eFpgaFrameRx[idx].Data.RxA.Data32[2];
++         SftyE2eFpgaIpduRx.Data.RxA.IdMx[1].Data32[3] = SftyDmaE2eFpgaFrameRx[idx].Data.RxA.Data32[3];
+          break;
+       }
+       case 0x02:
+       {
+-         SftyE2eFpgaIpduRx.Data.RxA.IdMx[2].Data32[2] = SftyE2eFpgaDmaFrameRx[idx].Data.RxA.Data32[2];
+-         SftyE2eFpgaIpduRx.Data.RxA.IdMx[2].Data32[3] = SftyE2eFpgaDmaFrameRx[idx].Data.RxA.Data32[3];
++         SftyE2eFpgaIpduRx.Data.RxA.IdMx[2].Data32[2] = SftyDmaE2eFpgaFrameRx[idx].Data.RxA.Data32[2];
++         SftyE2eFpgaIpduRx.Data.RxA.IdMx[2].Data32[3] = SftyDmaE2eFpgaFrameRx[idx].Data.RxA.Data32[3];
+          break;
+       }
+       case 0x03:
+       {
+-         SftyE2eFpgaIpduRx.Data.RxA.IdMx[3].Data32[2] = SftyE2eFpgaDmaFrameRx[idx].Data.RxA.Data32[2];
+-         SftyE2eFpgaIpduRx.Data.RxA.IdMx[3].Data32[3] = SftyE2eFpgaDmaFrameRx[idx].Data.RxA.Data32[3];
++         SftyE2eFpgaIpduRx.Data.RxA.IdMx[3].Data32[2] = SftyDmaE2eFpgaFrameRx[idx].Data.RxA.Data32[2];
++         SftyE2eFpgaIpduRx.Data.RxA.IdMx[3].Data32[3] = SftyDmaE2eFpgaFrameRx[idx].Data.RxA.Data32[3];
+          break;
+       }
+       default:
+@@ -668,17 +775,35 @@ LOCAL_INLINE void SftyE2eFpga_CopyARxDataFrameToIpdu(uint8 idx, uint8 alvCntr)
+ /******************************************************************/
+ LOCAL_INLINE void SftyE2eFpga_CopySRxDataFrameToIpdu(uint8 idx)
+ {
+-   SftyE2eFpgaIpduRx.Data.RxS.Data32[0] = SftyE2eFpgaDmaFrameRx[idx].Data.RxS.Data32[0];
+-   SftyE2eFpgaIpduRx.Data.RxS.Data32[1] = SftyE2eFpgaDmaFrameRx[idx].Data.RxS.Data32[1];
+-   SftyE2eFpgaIpduRx.Data.RxS.Data32[2] = SftyE2eFpgaDmaFrameRx[idx].Data.RxS.Data32[2];
+-   SftyE2eFpgaIpduRx.Data.RxS.Data32[3] = SftyE2eFpgaDmaFrameRx[idx].Data.RxS.Data32[3];
++   SftyE2eFpgaIpduRx.Data.RxS.Data32[0] = SftyDmaE2eFpgaFrameRx[idx].Data.RxS.Data32[0];
++   SftyE2eFpgaIpduRx.Data.RxS.Data32[1] = SftyDmaE2eFpgaFrameRx[idx].Data.RxS.Data32[1];
++   SftyE2eFpgaIpduRx.Data.RxS.Data32[2] = SftyDmaE2eFpgaFrameRx[idx].Data.RxS.Data32[2];
++   SftyE2eFpgaIpduRx.Data.RxS.Data32[3] = SftyDmaE2eFpgaFrameRx[idx].Data.RxS.Data32[3];
+ 
+    return;
+ }
+ 
++
+ /******************************************************************/
+ /*!
+- * \\fn      void SftyE2eFpga_CopySRxDataFrameToIpdu(uint8 idx)
++ * \\fn      void SftyE2eFpga_ExtrCurrMod(void)
++ * \\brief   This function extracts current FPGA mode
++ * \\Parent_DD : SftyE2eFpga_E2eFrameHndlr
++ * \\param   -
++ * \\return  -
++ */
++/******************************************************************/
++LOCAL_INLINE void SftyE2eFpga_ExtrCurrMod(void)
++{
++   /* Extract current mode */
++   SftyE2eFpgaCurrMod    = (uint8)(SftyE2eFpgaIpduRx.Data.RxA.Id.MxA.Sig.StateRes.Field.ModeRes);
++
++   return;
++}
++
++/******************************************************************/
++/*!
++ * \\fn      void SftyE2eFpga_ExtrFltSts(void)
+  * \\brief   This function extracts fault status from the IPDU
+  * \\Parent_DD : SftyE2eFpga_E2eFrameHndlr
+  * \\param   -
+@@ -688,10 +813,13 @@ LOCAL_INLINE void SftyE2eFpga_CopySRxDataFrameToIpdu(uint8 idx)
+ LOCAL_INLINE void SftyE2eFpga_ExtrFltSts(void)
+ {
+    /* Extract accumulated status of fault group A */
+-   SftyE2eFpgaMeasCoherncFltStsAcc   |= ((uint8)(~(SftyE2eFpgaIpduRx.Data.RxA.Id.MxA.Sig.FltA.Field.MeasCohernc)) & 0x01u);
+-   SftyE2eFpgaEmgySWFltStsAcc        |= ((uint8)(~(SftyE2eFpgaIpduRx.Data.RxA.Id.MxA.Sig.FltA.Field.EmergencyStop)) & 0x01u);
+-   SftyE2eFpgaLoGateDrvrFltStsAcc    |= ((uint8)(~(SftyE2eFpgaIpduRx.Data.RxA.Id.MxA.Sig.FltA.Field.IgbtL)) & 0x01u);
+-   SftyE2eFpgaHsGateDrvrFltStsAcc    |= ((uint8)(~(SftyE2eFpgaIpduRx.Data.RxA.Id.MxA.Sig.FltA.Field.IgbtH)) & 0x01u);
++   SftyE2eFpgaMeasCohrncFltStsAcc     |= ((uint8)(~(SftyE2eFpgaIpduRx.Data.RxA.Id.MxA.Sig.FltA.Field.MeasCohernc)) & 0x01u);
++   SftyE2eFpgaEmgySWFltStsAcc         |= ((uint8)(~(SftyE2eFpgaIpduRx.Data.RxA.Id.MxA.Sig.FltA.Field.EmergencyStop)) & 0x01u);
++   SftyE2eFpgaLoGateDrvrFltStsAcc     |= ((uint8)(~(SftyE2eFpgaIpduRx.Data.RxA.Id.MxA.Sig.FltA.Field.IgbtL)) & 0x01u);
++   SftyE2eFpgaHsGateDrvrFltStsAcc     |= ((uint8)(~(SftyE2eFpgaIpduRx.Data.RxA.Id.MxA.Sig.FltA.Field.IgbtH)) & 0x01u);
++   SftyE2eFpgaActvDchaActvFltStsAcc   |= ((uint8)(~(SftyE2eFpgaIpduRx.Data.RxA.Id.MxA.Sig.FltA.Field.ActiveDisAc)) & 0x01u);
++   SftyE2eFpgaActvDchaInactvFltStsAcc |= ((uint8)(~(SftyE2eFpgaIpduRx.Data.RxA.Id.MxA.Sig.FltA.Field.ActiveDisIn)) & 0x01u);
++   SftyE2eFpgaLossComErrMonrStAcc     |= ((uint8)(~(SftyE2eFpgaIpduRx.Data.RxA.Id.MxA.Sig.FltA.Field.LossComSpi)) & 0x01u);
+ 
+    /* Extract accumulated status of fault group B */
+    SftyE2eFpgaOverUnderCurUFltStsAcc |=  ((uint8)(~(SftyE2eFpgaIpduRx.Data.RxA.Id.MxA.Sig.FltB.Field.OverUnderCurU)) & 0x01u);
+@@ -709,53 +837,7 @@ LOCAL_INLINE void SftyE2eFpga_ExtrFltSts(void)
+    return;
+ }
+ 
+-/******************************************************************/
+-/*!
+- * \\fn      void SftyE2eFpga_CopySRxDataFrameToIpdu(uint8 idx)
+- * \\brief   This function updates fault status of all IPDU
+- *          under processing.
+- * \\Parent_DD : SftyE2eFpga_MainFunction
+- * \\param   -
+- * \\return  -
+- */
+-/******************************************************************/
+-LOCAL_INLINE void SftyE2eFpga_UpdFltSts(void)
+-{
+-   /* Update fault status according to the accumulated fault status of group A */
+-   SftyE2eFpgaMeasCoherncFltSts   = ((uint8)(~SftyE2eFpgaMeasCoherncFltStsAcc) & 0x01u);
+-   SftyE2eFpgaEmgySWFltSts        = ((uint8)(~SftyE2eFpgaEmgySWFltStsAcc) & 0x01u);
+-   SftyE2eFpgaLoGateDrvrFltSts    = ((uint8)(~SftyE2eFpgaLoGateDrvrFltStsAcc) & 0x01u);
+-   SftyE2eFpgaHsGateDrvrFltSts    = ((uint8)(~SftyE2eFpgaHsGateDrvrFltStsAcc) & 0x01u);
+-
+-   /* Update fault status according to the accumulated fault status of group B */
+-   SftyE2eFpgaOverUnderCurUFltSts = ((uint8)(~SftyE2eFpgaOverUnderCurUFltStsAcc) & 0x01u);
+-   SftyE2eFpgaOverUnderCurVFltSts = ((uint8)(~SftyE2eFpgaOverUnderCurVFltStsAcc) & 0x01u);
+-   SftyE2eFpgaOverUnderCurWFltSts = ((uint8)(~SftyE2eFpgaOverUnderCurWFltStsAcc) & 0x01u);
+-   SftyE2eFpgaOverVoltVBatFltSts  = ((uint8)(~SftyE2eFpgaOverVoltVBatFltStsAcc)  & 0x01u);
+-
+-   SftyE2eFpgaMidPointPhaFltSts[SFTY_PHA_U] = ((uint8)(~SftyE2eFpgaMidPointPhaFltStsAcc[SFTY_PHA_U]) & 0x01u);
+-   SftyE2eFpgaMidPointPhaFltSts[SFTY_PHA_V] = ((uint8)(~SftyE2eFpgaMidPointPhaFltStsAcc[SFTY_PHA_V]) & 0x01u);
+-   SftyE2eFpgaMidPointPhaFltSts[SFTY_PHA_W] = ((uint8)(~SftyE2eFpgaMidPointPhaFltStsAcc[SFTY_PHA_W]) & 0x01u);
+-
+-   /* Update fault status according to the accumulated fault status of group C */
+-   SftyE2eFpgaScSpdReadyFltSts    = ((uint8)(~SftyE2eFpgaScSpdReadyFltStsAcc)  & 0x01u);
+-
+-   /* Reset status for next 200 us cycle */
+-   SftyE2eFpgaMeasCoherncFltStsAcc             = 0u;
+-   SftyE2eFpgaEmgySWFltStsAcc                  = 0u;
+-   SftyE2eFpgaOverUnderCurUFltStsAcc           = 0u;
+-   SftyE2eFpgaOverUnderCurVFltStsAcc           = 0u;
+-   SftyE2eFpgaOverUnderCurWFltStsAcc           = 0u;
+-   SftyE2eFpgaOverVoltVBatFltStsAcc            = 0u;
+-   SftyE2eFpgaScSpdReadyFltStsAcc              = 0u;
+-   SftyE2eFpgaLoGateDrvrFltStsAcc              = 0u;
+-   SftyE2eFpgaHsGateDrvrFltStsAcc              = 0u;
+-   SftyE2eFpgaMidPointPhaFltStsAcc[SFTY_PHA_U] = 0u;
+-   SftyE2eFpgaMidPointPhaFltStsAcc[SFTY_PHA_V] = 0u;
+-   SftyE2eFpgaMidPointPhaFltStsAcc[SFTY_PHA_W] = 0u;
+ 
+-   return;
+-}
+ 
+ /******************************************************************/
+ /*!
+@@ -847,6 +929,8 @@ LOCAL_INLINE void SftyE2eFpga_ExtrMx3Data(void)
+ /******************************************************************/
+ LOCAL_INLINE void SftyE2eFpga_ExtractARxDataFromIpdu(uint8 alvCntr)
+ {
++   SftyE2eFpga_ExtrCurrMod();
++
+    SftyE2eFpga_ExtrFltSts();
+ 
+    switch(alvCntr)
+@@ -903,15 +987,23 @@ LOCAL_INLINE void SftyE2eFpga_ExtractSRxDataFromIpdu(void)
+    SftyE2eFpgaIPhaRawVal[SYSDEF_PHA_SET_A][SYSDEF_PHA_W] = MLIB_S16U32( (uint32)((uint16)((uint16)SftyE2eFpgaIpduRx.Data.RxS.Sig.CurW_LSB4 |
+                                                                         (uint16)(((uint16)SftyE2eFpgaIpduRx.Data.RxS.Sig.CurW_MSB8) << 4U))));
+ 
+-   SftyE2eFpgaPS16MultRawVal                             = MLIB_S16U32( (uint32)((uint16)((uint16)SftyE2eFpgaIpduRx.Data.RxS.Sig.PwrSpl16VM_LSB4 |
++   SftyE2eFpgaPS16MultRawVal                             = MLIB_U16U32( (uint32)((uint16)((uint16)SftyE2eFpgaIpduRx.Data.RxS.Sig.PwrSpl16VM_LSB4 |
+                                                                         (uint16)(((uint16)SftyE2eFpgaIpduRx.Data.RxS.Sig.PwrSpl16VM_MSB8) << 4U))));
+ 
+-   SftyE2eFpgaP5LSRawVal                                 = MLIB_S16U32( (uint32)((uint16)((uint16)SftyE2eFpgaIpduRx.Data.RxS.Sig.PwrSup5VLs_LSB8 |
++   SftyE2eFpgaP5LSRawVal                                 = MLIB_U16U32( (uint32)((uint16)((uint16)SftyE2eFpgaIpduRx.Data.RxS.Sig.PwrSup5VLs_LSB8 |
+                                                                         (uint16)(((uint16)SftyE2eFpgaIpduRx.Data.RxS.Sig.PwrSup5VLs_MSB4) << 8U))));
+ 
+-   SftyE2eFpgaP5HSRawVal                                 = MLIB_S16U32( (uint32)((uint16)((uint16)SftyE2eFpgaIpduRx.Data.RxS.Sig.PwrSup5VHs_LSB4 |
++   SftyE2eFpgaP5HSRawVal                                 = MLIB_U16U32( (uint32)((uint16)((uint16)SftyE2eFpgaIpduRx.Data.RxS.Sig.PwrSup5VHs_LSB4 |
+                                                                         (uint16)(((uint16)SftyE2eFpgaIpduRx.Data.RxS.Sig.PwrSup5VHs_MSB8) << 4U))));
+ 
++   SftyE2eFpgaSyncOutEarlyErrMonrStAcc                   |= ((uint8)(~(SftyE2eFpgaIpduRx.Data.RxS.Sig.FDSts_SOE)) & 0x01u);
++
++   SftyE2eFpgaSyncOutLateErrMonrStAcc                    |= ((uint8)(~(SftyE2eFpgaIpduRx.Data.RxS.Sig.FDSts_SOL)) & 0x01u);
++
++   SftyE2eFpgaTxCrcCtrlAErrMonrStAcc                     |= ((uint8)(~(SftyE2eFpgaIpduRx.Data.RxS.Sig.FDSts_TxA)) & 0x01u);
++
++   SftyE2eFpgaTxCrcCtrlSErrMonrStAcc                     |= ((uint8)(~(SftyE2eFpgaIpduRx.Data.RxS.Sig.FDSts_TxS)) & 0x01u);
++
+    return;
+ }
+ 
+@@ -929,7 +1021,7 @@ LOCAL_INLINE uint8 SftyE2eFpga_ChkTiStamp(uint8 frameIdx)
+    uint8 retVal;
+ 
+    /* Get current timestamp */
+-   SftyE2eFpgaCurrTiStamp = SftyE2eFpgaDmaFrameRx[frameIdx].Data.tiStamp;
++   SftyE2eFpgaCurrTiStamp = SftyDmaE2eFpgaFrameRx[frameIdx].Data.tiStamp;
+ 
+    if(SftyE2eFpgaTiStampChkFirstRun == TRUE)
+    {
+@@ -998,23 +1090,172 @@ LOCAL_INLINE void SftyE2eFpga_UpdtC2cData(void)
+ 
+    SftyC2cData.FpgaStateReq.B.SCspdReady  = SftyE2eFpgaSCspdReady;
+ 
+-   if((SftyE2eFpgaDmaTiStampErrMonrSt == ERR_DEB_MONR_STS_PASSED) &&
+-      (SftyE2eFpgaAlvCntrErrMonrSt    == ERR_DEB_MONR_STS_PASSED) &&
+-      (SftyE2eFpgaRxCrcErrMonrSt      == ERR_DEB_MONR_STS_PASSED)
+-   )
++   if(SftyE2eFpgaActvDchaReqOvrdEna == FALSE)
+    {
+-      SftyC2cData.FpgaRxCrcErrMonrSt = ERR_DEB_MONR_STS_PASSED;
++      /* TODO remove comment SftyE2eFpgaActvDchaReq = SftyActvDchaCtrlActvDchaReqViaR; */
+    }
+-   else if((SftyE2eFpgaDmaTiStampErrMonrSt == ERR_DEB_MONR_STS_FAILED) ||
+-           (SftyE2eFpgaAlvCntrErrMonrSt    == ERR_DEB_MONR_STS_FAILED) ||
+-           (SftyE2eFpgaRxCrcErrMonrSt      == ERR_DEB_MONR_STS_FAILED))
++   else
+    {
+-      SftyC2cData.FpgaRxCrcErrMonrSt = ERR_DEB_MONR_STS_FAILED;
++      SftyE2eFpgaActvDchaReq = SftyE2eFpgaActvDchaReqValOvrdVal;
++   }
++
++   SftyC2cData.FpgaActvDchaReq = SftyE2eFpgaActvDchaReq;
++
++   return;
++}
++
++/******************************************************************/
++/*!
++ * \\fn      void SftyE2eFpga_AccModPlausChk(void)
++ * \\brief   This function performs accumulated mode plausibility check
++ * \\Parent_DD : SftyE2eFpga_MainFunction
++ * \\param   -
++ * \\return  void
++ */
++/******************************************************************/
++LOCAL_INLINE void SftyE2eFpga_AccModPlausChk(void)
++{
++   if( SftyInvActrStateReqMod == SftyE2eFpgaCurrMod )
++   {
++      SftyE2eFpgaModPlausErrMonrStAcc |= ERR_DEB_MONR_STS_PASSED;
+    }
+    else
+    {
+-      /* Do nothing */
++      SftyE2eFpgaModPlausErrMonrStAcc |= ERR_DEB_MONR_STS_FAILED;
+    }
++
++   return;
++}
++
++/*================== [definition of global functions] ========================*/
++
++#define SFTYE2EFPGA_AREA_CMN_START_SEC_CODE_FAST
++#include "MemMap.h"
++
++/******************************************************************/
++/*!
++ * \\fn      void SftyE2eFpga_CopySRxDataFrameToIpdu(uint8 idx)
++ * \\brief   This function updates fault status of all IPDU
++ *          under processing.
++ * \\Parent_DD : SftyE2eFpga_MainFunction
++ * \\param   -
++ * \\return  -
++ */
++/******************************************************************/
++STATIC FUNC(void, SFTYE2E_CODE) SftyE2eFpga_UpdFltSts(void)
++{
++   /* Update fault status according to the accumulated fault status of group A */
++   SftyE2eFpgaMeasCohrncFltSts    = ((uint8)(~SftyE2eFpgaMeasCohrncFltStsAcc) & 0x01u);
++   SftyE2eFpgaEmgySWFltSts         = ((uint8)(~SftyE2eFpgaEmgySWFltStsAcc) & 0x01u);
++   SftyE2eFpgaLoGateDrvrFltSts     = ((uint8)(~SftyE2eFpgaLoGateDrvrFltStsAcc) & 0x01u);
++   SftyE2eFpgaHsGateDrvrFltSts     = ((uint8)(~SftyE2eFpgaHsGateDrvrFltStsAcc) & 0x01u);
++   SftyE2eFpgaActvDchaActvFltSts   = ((uint8)(~SftyE2eFpgaActvDchaActvFltStsAcc) & 0x01u);
++   SftyE2eFpgaActvDchaInactvFltSts = ((uint8)(~SftyE2eFpgaActvDchaInactvFltStsAcc) & 0x01u);
++
++   if(SftyE2eFpgaLossComErrMonrStAcc == 0u)
++   {
++      SftyE2eFpgaLossComErrMonrSt = ERR_DEB_MONR_STS_PASSED;
++   }
++   else
++   {
++      SftyE2eFpgaLossComErrMonrSt = ERR_DEB_MONR_STS_FAILED;
++   }
++
++   /* Update fault status according to the accumulated fault status of group B */
++   SftyE2eFpgaOverUnderCurUFltSts = ((uint8)(~SftyE2eFpgaOverUnderCurUFltStsAcc) & 0x01u);
++   SftyE2eFpgaOverUnderCurVFltSts = ((uint8)(~SftyE2eFpgaOverUnderCurVFltStsAcc) & 0x01u);
++   SftyE2eFpgaOverUnderCurWFltSts = ((uint8)(~SftyE2eFpgaOverUnderCurWFltStsAcc) & 0x01u);
++   SftyE2eFpgaOverVoltVBatFltSts  = ((uint8)(~SftyE2eFpgaOverVoltVBatFltStsAcc)  & 0x01u);
++
++   SftyE2eFpgaMidPointPhaFltSts[SFTY_PHA_U] = ((uint8)(~SftyE2eFpgaMidPointPhaFltStsAcc[SFTY_PHA_U]) & 0x01u);
++   SftyE2eFpgaMidPointPhaFltSts[SFTY_PHA_V] = ((uint8)(~SftyE2eFpgaMidPointPhaFltStsAcc[SFTY_PHA_V]) & 0x01u);
++   SftyE2eFpgaMidPointPhaFltSts[SFTY_PHA_W] = ((uint8)(~SftyE2eFpgaMidPointPhaFltStsAcc[SFTY_PHA_W]) & 0x01u);
++
++   /* Update fault status according to the accumulated fault status of group C */
++   SftyE2eFpgaScSpdReadyFltSts    = ((uint8)(~SftyE2eFpgaScSpdReadyFltStsAcc)  & 0x01u);
++
++   /* Update fault status according to the accumulated fault status of group D */
++
++   if(SftyE2eFpgaSyncOutEarlyErrMonrStAcc == SFTY_E2E_FPGA_ACC_MONR_STS_PASSED)
++   {
++      SftyE2eFpgaSyncOutEarlyErrMonrSt = ERR_DEB_MONR_STS_PASSED;
++   }
++   else
++   {
++      SftyE2eFpgaSyncOutEarlyErrMonrSt = ERR_DEB_MONR_STS_FAILED;
++   }
++
++   if(SftyE2eFpgaSyncOutLateErrMonrStAcc == SFTY_E2E_FPGA_ACC_MONR_STS_PASSED)
++   {
++      SftyE2eFpgaSyncOutLateErrMonrSt = ERR_DEB_MONR_STS_PASSED;
++   }
++   else
++   {
++      SftyE2eFpgaSyncOutLateErrMonrSt = ERR_DEB_MONR_STS_FAILED;
++   }
++
++   if(SftyE2eFpgaTxCrcCtrlAErrMonrStAcc == SFTY_E2E_FPGA_ACC_MONR_STS_PASSED)
++   {
++      SftyE2eFpgaTxCrcCtrlAErrMonrSt  = ERR_DEB_MONR_STS_PASSED;
++   }
++   else
++   {
++      SftyE2eFpgaTxCrcCtrlAErrMonrSt  = ERR_DEB_MONR_STS_FAILED;
++   }
++
++   if(SftyE2eFpgaTxCrcCtrlSErrMonrStAcc == SFTY_E2E_FPGA_ACC_MONR_STS_PASSED)
++   {
++      SftyE2eFpgaTxCrcCtrlSErrMonrSt  = ERR_DEB_MONR_STS_PASSED;
++   }
++   else
++   {
++      SftyE2eFpgaTxCrcCtrlSErrMonrSt  = ERR_DEB_MONR_STS_FAILED;
++   }
++
++   if(SftyE2eFpgaModPlausErrMonrStAcc == SFTY_E2E_FPGA_ACC_MONR_STS_PASSED)
++   {
++      SftyE2eFpgaModPlausErrMonrSt  = ERR_DEB_MONR_STS_PASSED;
++   }
++   else
++   {
++      SftyE2eFpgaModPlausErrMonrSt  = ERR_DEB_MONR_STS_FAILED;
++   }
++
++   if((SftyE2eFpgaRxACrcErrMonrSt == ERR_DEB_MONR_STS_PASSED) &&
++      (SftyE2eFpgaRxSCrcErrMonrSt == ERR_DEB_MONR_STS_PASSED) &&
++      ((SftyE2eFpgaTxCrcCtrlAErrMonrSt == ERR_DEB_MONR_STS_PASSED) ||
++       (SftyE2eFpgaCurrMod             != SFTY_E2E_FPGA_INIT_MODE)
++      ))
++   {
++      SftyE2eFpgaPrmDlErrMonrSt = ERR_DEB_MONR_STS_PASSED;
++   }
++   else
++   {
++      SftyE2eFpgaPrmDlErrMonrSt = ERR_DEB_MONR_STS_FAILED;
++   }
++
++   /* Reset status for next 200 us cycle */
++   SftyE2eFpgaMeasCohrncFltStsAcc              = SFTY_E2E_FPGA_ACC_MONR_STS_PASSED;
++   SftyE2eFpgaEmgySWFltStsAcc                  = SFTY_E2E_FPGA_ACC_MONR_STS_PASSED;
++   SftyE2eFpgaOverUnderCurUFltStsAcc           = SFTY_E2E_FPGA_ACC_MONR_STS_PASSED;
++   SftyE2eFpgaOverUnderCurVFltStsAcc           = SFTY_E2E_FPGA_ACC_MONR_STS_PASSED;
++   SftyE2eFpgaOverUnderCurWFltStsAcc           = SFTY_E2E_FPGA_ACC_MONR_STS_PASSED;
++   SftyE2eFpgaOverVoltVBatFltStsAcc            = SFTY_E2E_FPGA_ACC_MONR_STS_PASSED;
++   SftyE2eFpgaScSpdReadyFltStsAcc              = SFTY_E2E_FPGA_ACC_MONR_STS_PASSED;
++   SftyE2eFpgaLoGateDrvrFltStsAcc              = SFTY_E2E_FPGA_ACC_MONR_STS_PASSED;
++   SftyE2eFpgaHsGateDrvrFltStsAcc              = SFTY_E2E_FPGA_ACC_MONR_STS_PASSED;
++   SftyE2eFpgaActvDchaActvFltStsAcc            = SFTY_E2E_FPGA_ACC_MONR_STS_PASSED;
++   SftyE2eFpgaActvDchaInactvFltStsAcc          = SFTY_E2E_FPGA_ACC_MONR_STS_PASSED;
++   SftyE2eFpgaLossComErrMonrStAcc              = SFTY_E2E_FPGA_ACC_MONR_STS_PASSED;
++   SftyE2eFpgaSyncOutEarlyErrMonrStAcc         = SFTY_E2E_FPGA_ACC_MONR_STS_PASSED;
++   SftyE2eFpgaSyncOutLateErrMonrStAcc          = SFTY_E2E_FPGA_ACC_MONR_STS_PASSED;
++   SftyE2eFpgaTxCrcCtrlAErrMonrStAcc           = SFTY_E2E_FPGA_ACC_MONR_STS_PASSED;
++   SftyE2eFpgaTxCrcCtrlSErrMonrStAcc           = SFTY_E2E_FPGA_ACC_MONR_STS_PASSED;
++   SftyE2eFpgaMidPointPhaFltStsAcc[SFTY_PHA_U] = SFTY_E2E_FPGA_ACC_MONR_STS_PASSED;
++   SftyE2eFpgaMidPointPhaFltStsAcc[SFTY_PHA_V] = SFTY_E2E_FPGA_ACC_MONR_STS_PASSED;
++   SftyE2eFpgaMidPointPhaFltStsAcc[SFTY_PHA_W] = SFTY_E2E_FPGA_ACC_MONR_STS_PASSED;
++   SftyE2eFpgaModPlausErrMonrStAcc             = SFTY_E2E_FPGA_ACC_MONR_STS_PASSED;
++
+    return;
+ }
+ 
+@@ -1026,14 +1267,15 @@ LOCAL_INLINE void SftyE2eFpga_UpdtC2cData(void)
+  * \\return  void
+  */
+ /******************************************************************/
+-LOCAL_INLINE void SftyE2eFpga_E2eFrameHndlr(uint8 frameIdx)
++STATIC FUNC(void, SFTYE2E_CODE) SftyE2eFpga_E2eFrameHndlr(uint8 frameIdx)
+ {
+    uint8  alvCntr;
+    uint16 recCrc;
+    Std_ReturnType res;
+ 
+-   SftyE2eFpgaAlvCntrErrMonrSt        = ERR_DEB_MONR_STS_INACTIVE;
+-   SftyE2eFpgaRxCrcErrMonrSt          = ERR_DEB_MONR_STS_INACTIVE;
++   SftyE2eFpgaRxMuxSeqErrMonrSt = ERR_DEB_MONR_STS_INACTIVE;
++   SftyE2eFpgaRxACrcErrMonrSt   = ERR_DEB_MONR_STS_INACTIVE;
++   SftyE2eFpgaRxSCrcErrMonrSt   = ERR_DEB_MONR_STS_INACTIVE;
+ 
+    /* Check timestamp */
+    SftyE2eFpgaDmaTiStampErrMonrSt = SftyE2eFpga_ChkTiStamp(frameIdx);
+@@ -1048,18 +1290,18 @@ LOCAL_INLINE void SftyE2eFpga_E2eFrameHndlr(uint8 frameIdx)
+ 
+       if(res == E_OK)
+       {
+-         SftyE2eFpgaAlvCntrErrMonrSt = ERR_DEB_MONR_STS_PASSED;
++         SftyE2eFpgaRxMuxSeqErrMonrSt = ERR_DEB_MONR_STS_PASSED;
+ 
+          /*                        ARx Frame Handling                                 */
+ 
+          /* Get received CRC */
+          recCrc = SftyE2eFpga_GetARxCrc(frameIdx);
+ 
+-         res = SftyE2eFpga_CrcEval(SftyE2eFpgaDmaFrameRx[frameIdx].Data.RxA.Data8, recCrc);
++         res = SftyE2eFpga_CrcEval(SftyDmaE2eFpgaFrameRx[frameIdx].Data.RxA.Data8, recCrc);
+ 
+          if(res == E_OK)
+          {
+-            SftyE2eFpgaRxCrcErrMonrSt = ERR_DEB_MONR_STS_PASSED;
++            SftyE2eFpgaRxACrcErrMonrSt = ERR_DEB_MONR_STS_PASSED;
+ 
+             /* Copy Data frame  to Ipdu deponding on the alive counter */
+             SftyE2eFpga_CopyARxDataFrameToIpdu(frameIdx, alvCntr);
+@@ -1067,16 +1309,19 @@ LOCAL_INLINE void SftyE2eFpga_E2eFrameHndlr(uint8 frameIdx)
+             /* Extract Data from Ipdu */
+             SftyE2eFpga_ExtractARxDataFromIpdu(alvCntr);
+ 
++            /* Perform mode plausibility check */
++            SftyE2eFpga_AccModPlausChk();
++
+             /*                        SRx Frame Handling                                 */
+ 
+             /* Get received CRC */
+             recCrc = SftyE2eFpga_GetSRxCrc(frameIdx);
+ 
+-            res = SftyE2eFpga_CrcEval(SftyE2eFpgaDmaFrameRx[frameIdx].Data.RxS.Data8, recCrc);
++            res = SftyE2eFpga_CrcEval(SftyDmaE2eFpgaFrameRx[frameIdx].Data.RxS.Data8, recCrc);
+ 
+             if(res == E_OK)
+             {
+-               SftyE2eFpgaRxCrcErrMonrSt = ERR_DEB_MONR_STS_PASSED;
++               SftyE2eFpgaRxSCrcErrMonrSt = ERR_DEB_MONR_STS_PASSED;
+ 
+                /* Copy Data frame  to Ipdu  */
+                SftyE2eFpga_CopySRxDataFrameToIpdu(frameIdx);
+@@ -1087,19 +1332,19 @@ LOCAL_INLINE void SftyE2eFpga_E2eFrameHndlr(uint8 frameIdx)
+             else
+             {
+                /* CRC error */
+-               SftyE2eFpgaRxCrcErrMonrSt = ERR_DEB_MONR_STS_FAILED;
++               SftyE2eFpgaRxSCrcErrMonrSt = ERR_DEB_MONR_STS_FAILED;
+             }
+          }
+          else
+          {
+             /* CRC error */
+-            SftyE2eFpgaRxCrcErrMonrSt = ERR_DEB_MONR_STS_FAILED;
++            SftyE2eFpgaRxACrcErrMonrSt = ERR_DEB_MONR_STS_FAILED;
+          }
+       }
+       else
+       {
+          /* Alive counter error */
+-         SftyE2eFpgaAlvCntrErrMonrSt = ERR_DEB_MONR_STS_FAILED;
++         SftyE2eFpgaRxMuxSeqErrMonrSt = ERR_DEB_MONR_STS_FAILED;
+       }
+    }
+    else
+@@ -1110,11 +1355,6 @@ LOCAL_INLINE void SftyE2eFpga_E2eFrameHndlr(uint8 frameIdx)
+ 
+    return;
+ }
+-/*================== [definition of global functions] ========================*/
+-
+-#define SFTYE2EFPGA_AREA_CMN_START_SEC_CODE_FAST
+-#include "MemMap.h"
+-
+ /******************************************************************/
+ /*!
+  * \\fn      void SftyE2eFpga_MainFunction(void)
+@@ -1133,10 +1373,16 @@ FUNC(void, SFTYE2EFPGA_CODE) SftyE2eFpga_MainFunction(void)
+    uint8 dmaIdx;
+ 
+    SftyE2eFpgaDmaTiStampErrMonrSt   = ERR_DEB_MONR_STS_INACTIVE;
+-   SftyC2cData.FpgaRxCrcErrMonrSt   = ERR_DEB_MONR_STS_INACTIVE;
++   SftyE2eFpgaLossComErrMonrSt      = ERR_DEB_MONR_STS_INACTIVE;
++   SftyE2eFpgaSyncOutEarlyErrMonrSt = ERR_DEB_MONR_STS_INACTIVE;
++   SftyE2eFpgaSyncOutLateErrMonrSt  = ERR_DEB_MONR_STS_INACTIVE;
++   SftyE2eFpgaTxCrcCtrlAErrMonrSt   = ERR_DEB_MONR_STS_INACTIVE;
++   SftyE2eFpgaTxCrcCtrlSErrMonrSt   = ERR_DEB_MONR_STS_INACTIVE;
++   SftyE2eFpgaModPlausErrMonrSt     = ERR_DEB_MONR_STS_INACTIVE;
++   SftyE2eFpgaPrmDlErrMonrSt        = ERR_DEB_MONR_STS_INACTIVE;
+ 
+    /* Get current index written in the ring buffer */
+-   SftyE2eFpgaDmaDataCurrIdx = SftyE2eFpga_GetCurrIdx(SFTYDMADRVR_CH_IDX_FPGA_SLAVE_SFTY_TRIG, SftyE2eFpgaDmaFrameRx, SFTY_E2E_FPGA_SPI_RX_BUF_LEN);
++   SftyE2eFpgaDmaDataCurrIdx = SftyE2eFpga_GetCurrIdx(SFTYDMADRVR_CH_IDX_FPGA_SLAVE_SFTY_TRIG, SftyDmaE2eFpgaFrameRx, SFTY_E2E_FPGA_SPI_RX_BUF_LEN);
+ 
+    /* Check whether the first run of the main function is done */
+    if( SftyE2eFpgaFirstRunDone == TRUE )
+@@ -1148,23 +1394,23 @@ FUNC(void, SFTYE2EFPGA_CODE) SftyE2eFpga_MainFunction(void)
+       if(dmaEntriesNr != 0u)
+       {
+          SftyE2eFpgaDmaTiStampErrMonrSt = ERR_DEB_MONR_STS_PASSED;
++
++         for(dmaIdx = 0u; dmaIdx < dmaEntriesNr; dmaIdx++)
++         {
++            /* Increment last index first since this index is already used */
++            SftyE2eFpgaDmaDataLstIdx = SftyE2eFpga_IncIdx(SftyE2eFpgaDmaDataLstIdx, (SFTY_E2E_FPGA_SPI_RX_BUF_LEN -1U));
++
++            /* Handle the frame corresponding to this index */
++            SftyE2eFpga_E2eFrameHndlr(SftyE2eFpgaDmaDataLstIdx);
++         }
++
++         /* Update fault status received from FPGA*/
++         SftyE2eFpga_UpdFltSts();
+       }
+       else
+       {
+          SftyE2eFpgaDmaTiStampErrMonrSt = ERR_DEB_MONR_STS_FAILED;
+       }
+-
+-      for(dmaIdx = 0u; dmaIdx < dmaEntriesNr; dmaIdx++)
+-      {
+-         /* Increment last index first since this index is already used */
+-         SftyE2eFpgaDmaDataLstIdx = SftyE2eFpga_IncIdx(SftyE2eFpgaDmaDataLstIdx, (SFTY_E2E_FPGA_SPI_RX_BUF_LEN -1U));
+-
+-         /* Handle the frame corresponding to this index */
+-         SftyE2eFpga_E2eFrameHndlr(SftyE2eFpgaDmaDataLstIdx);
+-      }
+-
+-      /* Update fault status received from FPGA*/
+-      SftyE2eFpga_UpdFltSts();
+    }
+    else /* This is the first run */
+    {
+@@ -1212,20 +1458,30 @@ FUNC(void, SFTYE2EFPGA_CODE) SftyE2eFpga_Init(void)
+ {
+    /* Initialization of data */
+ 
+-   SftyE2eFpgaOverVoltVBatFltStsAcc                      = 0u;
+-   SftyE2eFpgaMeasCoherncFltStsAcc                       = 0u;
+-   SftyE2eFpgaEmgySWFltStsAcc                            = 0u;
+-   SftyE2eFpgaOverUnderCurUFltStsAcc                     = 0u;
+-   SftyE2eFpgaOverUnderCurVFltStsAcc                     = 0u;
+-   SftyE2eFpgaOverUnderCurWFltStsAcc                     = 0u;
+-   SftyE2eFpgaScSpdReadyFltStsAcc                        = 0u;
+-   SftyE2eFpgaMidPointPhaFltStsAcc[SFTY_PHA_U]           = 0u;
+-   SftyE2eFpgaMidPointPhaFltStsAcc[SFTY_PHA_V]           = 0u;
+-   SftyE2eFpgaMidPointPhaFltStsAcc[SFTY_PHA_W]           = 0u;
+-   SftyE2eFpgaLoGateDrvrFltStsAcc                        = 0u;
+-   SftyE2eFpgaHsGateDrvrFltStsAcc                        = 0u;
+-   SftyE2eFpgaMeasCoherncFltSts                          = TRUE;
++   SftyE2eFpgaOverVoltVBatFltStsAcc                      = SFTY_E2E_FPGA_ACC_MONR_STS_PASSED;
++   SftyE2eFpgaMeasCohrncFltStsAcc                        = SFTY_E2E_FPGA_ACC_MONR_STS_PASSED;
++   SftyE2eFpgaEmgySWFltStsAcc                            = SFTY_E2E_FPGA_ACC_MONR_STS_PASSED;
++   SftyE2eFpgaOverUnderCurUFltStsAcc                     = SFTY_E2E_FPGA_ACC_MONR_STS_PASSED;
++   SftyE2eFpgaOverUnderCurVFltStsAcc                     = SFTY_E2E_FPGA_ACC_MONR_STS_PASSED;
++   SftyE2eFpgaOverUnderCurWFltStsAcc                     = SFTY_E2E_FPGA_ACC_MONR_STS_PASSED;
++   SftyE2eFpgaScSpdReadyFltStsAcc                        = SFTY_E2E_FPGA_ACC_MONR_STS_PASSED;
++   SftyE2eFpgaMidPointPhaFltStsAcc[SFTY_PHA_U]           = SFTY_E2E_FPGA_ACC_MONR_STS_PASSED;
++   SftyE2eFpgaMidPointPhaFltStsAcc[SFTY_PHA_V]           = SFTY_E2E_FPGA_ACC_MONR_STS_PASSED;
++   SftyE2eFpgaMidPointPhaFltStsAcc[SFTY_PHA_W]           = SFTY_E2E_FPGA_ACC_MONR_STS_PASSED;
++   SftyE2eFpgaLoGateDrvrFltStsAcc                        = SFTY_E2E_FPGA_ACC_MONR_STS_PASSED;
++   SftyE2eFpgaHsGateDrvrFltStsAcc                        = SFTY_E2E_FPGA_ACC_MONR_STS_PASSED;
++   SftyE2eFpgaActvDchaActvFltStsAcc                      = SFTY_E2E_FPGA_ACC_MONR_STS_PASSED;
++   SftyE2eFpgaActvDchaInactvFltStsAcc                    = SFTY_E2E_FPGA_ACC_MONR_STS_PASSED;
++   SftyE2eFpgaLossComErrMonrStAcc                        = SFTY_E2E_FPGA_ACC_MONR_STS_PASSED;
++   SftyE2eFpgaSyncOutEarlyErrMonrStAcc                   = SFTY_E2E_FPGA_ACC_MONR_STS_PASSED;
++   SftyE2eFpgaSyncOutLateErrMonrStAcc                    = SFTY_E2E_FPGA_ACC_MONR_STS_PASSED;
++   SftyE2eFpgaTxCrcCtrlAErrMonrStAcc                     = SFTY_E2E_FPGA_ACC_MONR_STS_PASSED;
++   SftyE2eFpgaTxCrcCtrlSErrMonrStAcc                     = SFTY_E2E_FPGA_ACC_MONR_STS_PASSED;
++   SftyE2eFpgaModPlausErrMonrStAcc                       = SFTY_E2E_FPGA_ACC_MONR_STS_PASSED;
++   SftyE2eFpgaMeasCohrncFltSts                           = TRUE;
+    SftyE2eFpgaEmgySWFltSts                               = TRUE;
++   SftyE2eFpgaActvDchaActvFltSts                         = TRUE;
++   SftyE2eFpgaActvDchaInactvFltSts                       = TRUE;
+    SftyE2eFpgaOverUnderCurUFltSts                        = TRUE;
+    SftyE2eFpgaOverUnderCurVFltSts                        = TRUE;
+    SftyE2eFpgaOverUnderCurWFltSts                        = TRUE;
+@@ -1237,8 +1493,16 @@ FUNC(void, SFTYE2EFPGA_CODE) SftyE2eFpga_Init(void)
+    SftyE2eFpgaMidPointPhaFltSts[SFTY_PHA_U]              = TRUE;
+    SftyE2eFpgaMidPointPhaFltSts[SFTY_PHA_U]              = TRUE;
+    SftyE2eFpgaDmaTiStampErrMonrSt                        = ERR_DEB_MONR_STS_INACTIVE;
+-   SftyE2eFpgaAlvCntrErrMonrSt                           = ERR_DEB_MONR_STS_INACTIVE;
+-   SftyE2eFpgaRxCrcErrMonrSt                             = ERR_DEB_MONR_STS_INACTIVE;
++   SftyE2eFpgaRxMuxSeqErrMonrSt                          = ERR_DEB_MONR_STS_INACTIVE;
++   SftyE2eFpgaRxACrcErrMonrSt                            = ERR_DEB_MONR_STS_INACTIVE;
++   SftyE2eFpgaRxSCrcErrMonrSt                            = ERR_DEB_MONR_STS_INACTIVE;
++   SftyE2eFpgaLossComErrMonrSt                           = ERR_DEB_MONR_STS_INACTIVE;
++   SftyE2eFpgaSyncOutEarlyErrMonrSt                      = ERR_DEB_MONR_STS_INACTIVE;
++   SftyE2eFpgaSyncOutLateErrMonrSt                       = ERR_DEB_MONR_STS_INACTIVE;
++   SftyE2eFpgaTxCrcCtrlAErrMonrSt                        = ERR_DEB_MONR_STS_INACTIVE;
++   SftyE2eFpgaTxCrcCtrlSErrMonrSt                        = ERR_DEB_MONR_STS_INACTIVE;
++   SftyE2eFpgaModPlausErrMonrSt                          = ERR_DEB_MONR_STS_INACTIVE;
++   SftyE2eFpgaPrmDlErrMonrSt                             = ERR_DEB_MONR_STS_INACTIVE;
+    SftyE2eFpgaFirstRunDone                               = FALSE;
+    SftyE2eFpgaFirstRunCntrChkDone                        = FALSE;
+    SftyE2eFpgaTiStampChkFirstRun                         = FALSE;
+@@ -1267,7 +1531,7 @@ FUNC(void, SFTYE2EFPGA_CODE) SftyE2eFpga_Init(void)
+    SftyC2cData.FpgaStateReq.B.Mode                       = SFTY_E2E_FPGA_DFLT_MODE;
+    SftyC2cData.FpgaTxDataFltBReinitSt.U                  = SFTY_E2E_FPGA_FLT_ST_DFLT;
+    SftyC2cData.FpgaTxDataFltAReinitSt.U                  = SFTY_E2E_FPGA_FLT_ST_DFLT;
+-   SftyC2cData.FpgaRxCrcErrMonrSt                        = ERR_DEB_MONR_STS_INACTIVE;
++   SftyC2cData.FpgaActvDchaReq                           = FALSE;
+    SftyE2eFpgaNoEmgySwReq                                = SFTY_E2E_FPGA_NO_REQ;
+    SftyE2eFpgaSCspdReady                                 = SFTY_E2E_FPGA_NO_REQ;
+ 
+diff --git a/src/fw_cu/Components/Safety/Sfty_Cmn/SftyE2eFpga/src/SftyE2eFpga_data.c b/src/fw_cu/Components/Safety/Sfty_Cmn/SftyE2eFpga/src/SftyE2eFpga_data.c
+index a978075ae..ad576e59f 100644
+--- a/src/fw_cu/Components/Safety/Sfty_Cmn/SftyE2eFpga/src/SftyE2eFpga_data.c
++++ b/src/fw_cu/Components/Safety/Sfty_Cmn/SftyE2eFpga/src/SftyE2eFpga_data.c
+@@ -21,11 +21,11 @@
+ #include "MemMap.h"
+ 
+ /*
+-@@ INSTANCE = SftyE2eFpgaDmaFrameRx
+-@@ STRUCTURE = SftyE2eFpgaDmaFrameRxType
++@@ INSTANCE = SftyDmaE2eFpgaFrameRx
++@@ STRUCTURE = SftyDmaE2eFpgaFrameRxType
+ @@ END
+ */
+-VAR(SftyE2eFpgaDmaFrameRxType, SFTYE2EFPGA_VAR) SftyE2eFpgaDmaFrameRx[SFTY_E2E_FPGA_SPI_RX_BUF_LEN];
++VAR(SftyDmaE2eFpgaFrameRxType, SFTYE2EFPGA_VAR) SftyDmaE2eFpgaFrameRx[SFTY_E2E_FPGA_SPI_RX_BUF_LEN];
+ 
+ #define SFTY_DMA_QM_SHARE_STOP_SEC_VAR_FAST_NO_INIT_ALIGN200HEX
+ #include "MemMap.h"
+@@ -34,14 +34,6 @@ VAR(SftyE2eFpgaDmaFrameRxType, SFTYE2EFPGA_VAR) SftyE2eFpgaDmaFrameRx[SFTY_E2E_F
+ #define SFTYE2EFPGA_ASIL_C_START_SEC_VAR_FAST_CLEARED
+ #include "MemMap.h"
+ 
+-/*! \\misra Warning  Msg(4:0759) union is needed to get access to every signals of the message data " */
+-/*
+-@@ INSTANCE = SftyE2eFpgaIpduRx
+-@@ STRUCTURE = SftyE2eFpgaIpduRxType
+-@@ END
+-*/
+-VAR(SftyE2eFpgaIpduRxType, SFTYE2EFPGA_VAR) SftyE2eFpgaIpduRx;/* PRQA S 0759 */
+-
+ /*
+ @@ SYMBOL = SftyE2eFpgaCtrlBrdRawVal
+ @@ A2L_TYPE = MEASURE
+@@ -146,14 +138,14 @@ VAR(uint16, SFTYE2EFPGA_VAR) SftyE2eFpgaPS16MultRawVal;
+ VAR(boolean, SFTYE2EFPGA_VAR) SftyE2eFpgaOverVoltVBatFltSts;
+ 
+ /*
+-@@ SYMBOL = SftyE2eFpgaMeasCoherncFltSts
++@@ SYMBOL = SftyE2eFpgaMeasCohrncFltSts
+ @@ A2L_TYPE = MEASURE
+ @@ DATA_TYPE = UBYTE
+ @@ DESCRIPTION = "current fault status"
+ @@ GROUP = SftyE2eFpga
+ @@ END
+ */
+-VAR(boolean, SFTYE2EFPGA_VAR) SftyE2eFpgaMeasCoherncFltSts;
++VAR(boolean, SFTYE2EFPGA_VAR) SftyE2eFpgaMeasCohrncFltSts;
+ 
+ /*
+ @@ SYMBOL = SftyE2eFpgaEmgySWFltSts
+@@ -165,6 +157,26 @@ VAR(boolean, SFTYE2EFPGA_VAR) SftyE2eFpgaMeasCoherncFltSts;
+ */
+ VAR(boolean, SFTYE2EFPGA_VAR) SftyE2eFpgaEmgySWFltSts;
+ 
++/*
++@@ SYMBOL = SftyE2eFpgaActvDchaActvFltSts
++@@ A2L_TYPE = MEASURE
++@@ DATA_TYPE = UBYTE
++@@ DESCRIPTION = "current fault status"
++@@ GROUP = SftyE2eFpga
++@@ END
++*/
++VAR(boolean, SFTYE2EFPGA_VAR) SftyE2eFpgaActvDchaActvFltSts;
++
++/*
++@@ SYMBOL = SftyE2eFpgaActvDchaInactvFltSts
++@@ A2L_TYPE = MEASURE
++@@ DATA_TYPE = UBYTE
++@@ DESCRIPTION = "current fault status"
++@@ GROUP = SftyE2eFpga
++@@ END
++*/
++VAR(boolean, SFTYE2EFPGA_VAR) SftyE2eFpgaActvDchaInactvFltSts;
++
+ /*
+ @@ SYMBOL = SftyE2eFpgaOverUnderCurUFltSts
+ @@ A2L_TYPE = MEASURE
+@@ -237,7 +249,117 @@ VAR(boolean, SFTYE2EFPGA_VAR) SftyE2eFpgaLoGateDrvrFltSts;
+ VAR(boolean, SFTYE2EFPGA_VAR) SftyE2eFpgaMidPointPhaFltSts[SYSDEF_EM_PHA_CNT_MAX];
+ 
+ /*
+-@@ SYMBOL = SftyE2eFpgaRxCrcErrMonrSt
++@@ SYMBOL = SftyE2eFpgaRxACrcErrMonrSt
++@@ A2L_TYPE = MEASURE
++@@ DATA_TYPE = UBYTE
++@@ DESCRIPTION = "Error monitor"
++@@ CONVERSION = TABLE 0 "INACTIVE" 1 "PASSED" 2 "FAILED"
++@@ GROUP = SftyE2eFpga
++@@ END
++*/
++VAR(uint8, SFTYE2EFPGA_VAR) SftyE2eFpgaRxACrcErrMonrSt;
++
++/*
++@@ SYMBOL = SftyE2eFpgaRxSCrcErrMonrSt
++@@ A2L_TYPE = MEASURE
++@@ DATA_TYPE = UBYTE
++@@ DESCRIPTION = "Error monitor"
++@@ CONVERSION = TABLE 0 "INACTIVE" 1 "PASSED" 2 "FAILED"
++@@ GROUP = SftyE2eFpga
++@@ END
++*/
++VAR(uint8, SFTYE2EFPGA_VAR) SftyE2eFpgaRxSCrcErrMonrSt;
++
++/*
++@@ SYMBOL = SftyE2eFpgaLossComErrMonrSt
++@@ A2L_TYPE = MEASURE
++@@ DATA_TYPE = UBYTE
++@@ DESCRIPTION = "Error monitor"
++@@ CONVERSION = TABLE 0 "INACTIVE" 1 "PASSED" 2 "FAILED"
++@@ GROUP = SftyE2eFpga
++@@ END
++*/
++VAR(uint8, SFTYE2EFPGA_VAR) SftyE2eFpgaLossComErrMonrSt;
++
++/*
++@@ SYMBOL = SftyE2eFpgaSyncOutEarlyErrMonrSt
++@@ A2L_TYPE = MEASURE
++@@ DATA_TYPE = UBYTE
++@@ DESCRIPTION = "Error monitor"
++@@ CONVERSION = TABLE 0 "INACTIVE" 1 "PASSED" 2 "FAILED"
++@@ GROUP = SftyE2eFpga
++@@ END
++*/
++VAR(uint8, SFTYE2EFPGA_VAR) SftyE2eFpgaSyncOutEarlyErrMonrSt;
++
++/*
++@@ SYMBOL = SftyE2eFpgaSyncOutLateErrMonrSt
++@@ A2L_TYPE = MEASURE
++@@ DATA_TYPE = UBYTE
++@@ DESCRIPTION = "Error monitor"
++@@ CONVERSION = TABLE 0 "INACTIVE" 1 "PASSED" 2 "FAILED"
++@@ GROUP = SftyE2eFpga
++@@ END
++*/
++VAR(uint8, SFTYE2EFPGA_VAR) SftyE2eFpgaSyncOutLateErrMonrSt;
++
++/*
++@@ SYMBOL = SftyE2eFpgaTxCrcCtrlAErrMonrSt
++@@ A2L_TYPE = MEASURE
++@@ DATA_TYPE = UBYTE
++@@ DESCRIPTION = "Error monitor"
++@@ CONVERSION = TABLE 0 "INACTIVE" 1 "PASSED" 2 "FAILED"
++@@ GROUP = SftyE2eFpga
++@@ END
++*/
++VAR(uint8, SFTYE2EFPGA_VAR) SftyE2eFpgaTxCrcCtrlAErrMonrSt;
++
++/*
++@@ SYMBOL = SftyE2eFpgaTxCrcCtrlSErrMonrSt
++@@ A2L_TYPE = MEASURE
++@@ DATA_TYPE = UBYTE
++@@ DESCRIPTION = "Error monitor"
++@@ CONVERSION = TABLE 0 "INACTIVE" 1 "PASSED" 2 "FAILED"
++@@ GROUP = SftyE2eFpga
++@@ END
++*/
++VAR(uint8, SFTYE2EFPGA_VAR) SftyE2eFpgaTxCrcCtrlSErrMonrSt;
++
++/*
++@@ SYMBOL = SftyE2eFpgaRxMuxSeqErrMonrSt
++@@ A2L_TYPE = MEASURE
++@@ DATA_TYPE = UBYTE
++@@ DESCRIPTION = "Error monitor"
++@@ CONVERSION = TABLE 0 "INACTIVE" 1 "PASSED" 2 "FAILED"
++@@ GROUP = SftyE2eFpga
++@@ END
++*/
++VAR(uint8, SFTYE2EFPGA_VAR) SftyE2eFpgaRxMuxSeqErrMonrSt;
++
++/*
++@@ SYMBOL = SftyE2eFpgaModPlausErrMonrSt
++@@ A2L_TYPE = MEASURE
++@@ DATA_TYPE = UBYTE
++@@ DESCRIPTION = "Error monitor"
++@@ CONVERSION = TABLE 0 "INACTIVE" 1 "PASSED" 2 "FAILED"
++@@ GROUP = SftyE2eFpga
++@@ END
++*/
++VAR(uint8, SFTYE2EFPGA_VAR) SftyE2eFpgaModPlausErrMonrSt;
++
++/*
++@@ SYMBOL = SftyE2eFpgaPrmDlErrMonrSt
++@@ A2L_TYPE = MEASURE
++@@ DATA_TYPE = UBYTE
++@@ DESCRIPTION = "Error monitor"
++@@ CONVERSION = TABLE 0 "INACTIVE" 1 "PASSED" 2 "FAILED"
++@@ GROUP = SftyE2eFpga
++@@ END
++*/
++VAR(uint8, SFTYE2EFPGA_VAR) SftyE2eFpgaPrmDlErrMonrSt;
++
++/*
++@@ SYMBOL = SftyE2eFpgaDmaTiStampErrMonrSt
+ @@ A2L_TYPE = MEASURE
+ @@ DATA_TYPE = UBYTE
+ @@ DESCRIPTION = "Error monitor"
+@@ -245,7 +367,8 @@ VAR(boolean, SFTYE2EFPGA_VAR) SftyE2eFpgaMidPointPhaFltSts[SYSDEF_EM_PHA_CNT_MAX
+ @@ GROUP = SftyE2eFpga
+ @@ END
+ */
+-VAR(uint8, SFTYE2EFPGA_VAR) SftyE2eFpgaRxCrcErrMonrSt;
++VAR(uint8, SFTYE2EFPGA_VAR) SftyE2eFpgaDmaTiStampErrMonrSt;
++
+ 
+ #define SFTYE2EFPGA_ASIL_C_STOP_SEC_VAR_FAST_CLEARED
+ #include "MemMap.h"
+@@ -309,6 +432,17 @@ CONST(uint8, SFTYREPLCMT_CALIB) SftyE2eFpgaStateReqEmgySwOvrdEna = FALSE;
+ */
+ CONST(uint8, SFTYREPLCMT_CALIB) SftyE2eFpgaStateReqSCSpdReadyOvrdEna = FALSE;
+ 
++/*
++@@ SYMBOL = SftyE2eFpgaActvDchaReqOvrdEna
++@@ A2L_TYPE = PARAMETER
++@@ DATA_TYPE = UBYTE
++@@ DESCRIPTION = "Enable stimulation of Speed ready for ASC exit"
++@@ GROUP = SftyHvDcUEvln
++@@ END
++*/
++CONST(uint8, SFTYREPLCMT_CALIB) SftyE2eFpgaActvDchaReqOvrdEna = TRUE;
++
++
+ /*
+ @@ SYMBOL = SftyE2eFpgaStateReqEmgySwOvrdVal
+ @@ A2L_TYPE = PARAMETER
+@@ -329,7 +463,15 @@ CONST(uint8, SFTYREPLCMT_CALIB) SftyE2eFpgaStateReqEmgySwOvrdVal = 1u;
+ */
+ CONST(uint8, SFTYREPLCMT_CALIB) SftyE2eFpgaStateReqSCSpdReadyOvrdVal = 1u;
+ 
+-
++/*
++@@ SYMBOL = SftyE2eFpgaActvDchaReqValOvrdVal
++@@ A2L_TYPE = PARAMETER
++@@ DATA_TYPE = UBYTE
++@@ DESCRIPTION = "Stimulation value of Speed ready for ASC exit"
++@@ GROUP = SftyHvDcUEvln
++@@ END
++*/
++CONST(boolean, SFTYREPLCMT_CALIB) SftyE2eFpgaActvDchaReqValOvrdVal = FALSE;
+ 
+ #define SFTYREPLCMT_STOP_SEC_CALIB_8
+ #include "MemMap.h"
+diff --git a/src/fw_cu/Components/Safety/Sfty_Inv/SftyAcEvln/src/SftyAcEvln.c b/src/fw_cu/Components/Safety/Sfty_Inv/SftyAcEvln/src/SftyAcEvln.c
+index f75f34adc..d55c7b862 100644
+--- a/src/fw_cu/Components/Safety/Sfty_Inv/SftyAcEvln/src/SftyAcEvln.c
++++ b/src/fw_cu/Components/Safety/Sfty_Inv/SftyAcEvln/src/SftyAcEvln.c
+@@ -126,7 +126,7 @@ LOCAL_INLINE void SftyAcEvln_GetAcIRawVal(uint8 idxPwrUnit)
+ #endif /* SERIES_PRODUCTION */
+ \t\t 
+ \t  {
+-\t\t SftyAcEvlnRxCrcErrMonrSt = SftyE2eFpgaRxCrcErrMonrSt;
++\t\t SftyAcEvlnRxCrcErrMonrSt = SftyE2eFpgaRxSCrcErrMonrSt;
+ \t  }
+ 
+    return;
+@@ -413,7 +413,7 @@ LOCAL_INLINE void SftyAcEvln_GetDataForAreaCmn(void)
+    /* ******** Variables declaration *********** */
+ \t  
+    /* ************* Source code **************** */
+-   /* Read SftyE2eFpgaMeasCoherncFltSts */
++   /* Read SftyE2eFpgaMeasCohrncFltSts */
+ 
+ #ifndef SERIES_PRODUCTION
+ 
+@@ -424,7 +424,7 @@ LOCAL_INLINE void SftyAcEvln_GetDataForAreaCmn(void)
+    else
+ #endif /* SERIES_PRODUCTION */  
+    {
+-      SftyAcEvlnMeasCoherFltSts = SftyE2eFpgaMeasCoherncFltSts; 
++      SftyAcEvlnMeasCoherFltSts = SftyE2eFpgaMeasCohrncFltSts;
+    }
+    return;
+ }
+diff --git a/src/fw_cu/Components/Safety/Sfty_Inv/SftyHvDcUEvln/include/SftyHvDcUEvln_data.h b/src/fw_cu/Components/Safety/Sfty_Inv/SftyHvDcUEvln/include/SftyHvDcUEvln_data.h
+index 0c82fc2be..abb37d02e 100644
+--- a/src/fw_cu/Components/Safety/Sfty_Inv/SftyHvDcUEvln/include/SftyHvDcUEvln_data.h
++++ b/src/fw_cu/Components/Safety/Sfty_Inv/SftyHvDcUEvln/include/SftyHvDcUEvln_data.h
+@@ -434,6 +434,11 @@ extern VAR(float32, SFTYDCEVLN_VAR) SftyHvDcUEvlnCtrlBdUdcVal;
+ #include "MemMap.h"
+ /* End: SFTYDCEVLN_STOP_SEC_VAR_AREA_2_FAST_INIT_32 (online) */
+ 
++
++
++
++
++
+ /*==================================== [Declaration for Calibration Variables] ====================================*/
+ 
+ /* ********************* Calibration Variables ********************* */
+diff --git a/src/fw_cu/Components/Safety/Sfty_Inv/SftyHvDcUEvln/src/SftyHvDcUEvln.c b/src/fw_cu/Components/Safety/Sfty_Inv/SftyHvDcUEvln/src/SftyHvDcUEvln.c
+index 8dc853d1b..705716f25 100644
+--- a/src/fw_cu/Components/Safety/Sfty_Inv/SftyHvDcUEvln/src/SftyHvDcUEvln.c
++++ b/src/fw_cu/Components/Safety/Sfty_Inv/SftyHvDcUEvln/src/SftyHvDcUEvln.c
+@@ -226,7 +226,7 @@ LOCAL_INLINE void SftyHvDcUEvln_GetDrvBdVal(void)
+ #endif /* SERIES_PRODUCTION */
+ \t  
+    {
+-      SftyHvDcUEvlnDrvBdE2eFpgaRxCrcErrMonrSt = SftyE2eFpgaRxCrcErrMonrSt;
++      SftyHvDcUEvlnDrvBdE2eFpgaRxCrcErrMonrSt = SftyE2eFpgaRxACrcErrMonrSt;
+    }
+ 
+ 
+@@ -295,7 +295,7 @@ LOCAL_INLINE void SftyHvDcUEvln_GetCtrlBdVal(void)
+ #endif /* SERIES_PRODUCTION */
+    
+    {
+-      SftyHvDcUEvlnCtrlBdE2eFpgaRxCrcErrMonrSt = SftyE2eFpgaRxCrcErrMonrSt;
++      SftyHvDcUEvlnCtrlBdE2eFpgaRxCrcErrMonrSt = SftyE2eFpgaRxACrcErrMonrSt;
+    }
+ 
+ 
+@@ -348,7 +348,7 @@ LOCAL_INLINE void SftyHvDcUEvln_GetDataForAreaCmn(void)
+    else
+ #endif /* SERIES_PRODUCTION */
+    {
+-      SftyHvDcUEvlnPlausHWFltSts = SftyE2eFpgaMeasCoherncFltSts;
++      SftyHvDcUEvlnPlausHWFltSts = SftyE2eFpgaMeasCohrncFltSts;
+    }
+ 
+    return;
+diff --git a/src/fw_cu/Components/Safety/Sfty_Inv/SftyInvActr/include/SftyInvActr_data.h b/src/fw_cu/Components/Safety/Sfty_Inv/SftyInvActr/include/SftyInvActr_data.h
+index 41fbe99fc..f3285c470 100644
+--- a/src/fw_cu/Components/Safety/Sfty_Inv/SftyInvActr/include/SftyInvActr_data.h
++++ b/src/fw_cu/Components/Safety/Sfty_Inv/SftyInvActr/include/SftyInvActr_data.h
+@@ -275,7 +275,7 @@ extern VAR(boolean, SFTYINVACTR_VAR) SftyInvActrSetLoGateDrvrReinitSt;
+ extern VAR(uint8, SFTYINVACTR_VAR) SftyInvActrSafeStReqIntel;
+ 
+ 
+-extern VAR(boolean, SFTYINVACTR_VAR) SftyInvActrStateReqMode;
++extern VAR(boolean, SFTYINVACTR_VAR) SftyInvActrStateReqMod;
+ extern VAR(boolean, SFTYINVACTR_VAR) SftyInvActrStateReqEmgySw;
+ extern VAR(boolean, SFTYINVACTR_VAR) SftyInvActrStateReqSCSpdReady;
+ 
+diff --git a/src/fw_cu/Components/Safety/Sfty_Inv/SftyInvActr/src/SftyInvActr.c b/src/fw_cu/Components/Safety/Sfty_Inv/SftyInvActr/src/SftyInvActr.c
+index 0b1e0e021..ba6e38021 100644
+--- a/src/fw_cu/Components/Safety/Sfty_Inv/SftyInvActr/src/SftyInvActr.c
++++ b/src/fw_cu/Components/Safety/Sfty_Inv/SftyInvActr/src/SftyInvActr.c
+@@ -353,7 +353,7 @@ LOCAL_INLINE void SftyInvActr_UpdSafeStCmd(void)
+    \t   (SftyInvActrSafeStReqIntel == LS_ASC_REQ))
+    {
+       /* ASC Commends */
+-      SftyInvActrStateReqMode       = 1U;
++      SftyInvActrStateReqMod       = 1U;
+ \t  SftyInvActrStateReqEmgySw     = 0U;
+ \t  SftyInvActrStateReqSCSpdReady = 1U;
+       
+@@ -363,7 +363,7 @@ LOCAL_INLINE void SftyInvActr_UpdSafeStCmd(void)
+    else if (SftyInvActrSafeStReqIntel == SPO_REQ)
+    {
+       /* SPO Commends */
+-      SftyInvActrStateReqMode       = 2U;
++      SftyInvActrStateReqMod       = 2U;
+ \t  SftyInvActrStateReqEmgySw     = 0U;
+ \t  SftyInvActrStateReqSCSpdReady = 0U;
+ 
+@@ -376,7 +376,7 @@ LOCAL_INLINE void SftyInvActr_UpdSafeStCmd(void)
+       if (MLIB_F32AbsF32(SftyInvActrMotorSpdFild) >= SftyInvActrSpdReadyHithd)
+       {
+          /* ASC Commends */
+-\t     SftyInvActrStateReqMode       = 1U;
++\t     SftyInvActrStateReqMod       = 1U;
+          SftyInvActrStateReqEmgySw     = 0U;
+ \t     SftyInvActrStateReqSCSpdReady = 1U;
+ 
+@@ -386,7 +386,7 @@ LOCAL_INLINE void SftyInvActr_UpdSafeStCmd(void)
+ \t  else
+       {
+          /* SPO Commends */
+-\t     SftyInvActrStateReqMode       = 2U;
++\t     SftyInvActrStateReqMod       = 2U;
+ \t\t SftyInvActrStateReqEmgySw     = 0U;
+ \t     SftyInvActrStateReqSCSpdReady = 0U;
+ 
+@@ -399,14 +399,14 @@ LOCAL_INLINE void SftyInvActr_UpdSafeStCmd(void)
+       if (MLIB_F32AbsF32(SftyInvActrMotorSpdFild) >= SftyInvActrSpdReadyHithd)
+       {
+          /* ASC without fault */
+-\t     SftyInvActrStateReqMode       = 1U;
++\t     SftyInvActrStateReqMod       = 1U;
+          SftyInvActrStateReqEmgySw     = 1U;
+ \t     SftyInvActrStateReqSCSpdReady = 1U;\t\t 
+       }
+ \t  else
+       {
+          /* SPO without fault */
+-\t     SftyInvActrStateReqMode       = 1U;
++\t     SftyInvActrStateReqMod       = 1U;
+ \t\t SftyInvActrStateReqEmgySw     = 1U;
+ \t     SftyInvActrStateReqSCSpdReady = 0U;\t\t 
+       }
+diff --git a/src/fw_cu/Components/Safety/Sfty_Inv/SftyInvActr/src/SftyInvActr_data.c b/src/fw_cu/Components/Safety/Sfty_Inv/SftyInvActr/src/SftyInvActr_data.c
+index 6273a1158..8dcab29f0 100644
+--- a/src/fw_cu/Components/Safety/Sfty_Inv/SftyInvActr/src/SftyInvActr_data.c
++++ b/src/fw_cu/Components/Safety/Sfty_Inv/SftyInvActr/src/SftyInvActr_data.c
+@@ -185,7 +185,7 @@ VAR(uint8, SFTYINVACTR_VAR) SftyInvActrSafeStReqIntel = 5U;
+ 
+ 
+ /*
+-@@ SYMBOL = SftyInvActrStateReqMode
++@@ SYMBOL = SftyInvActrStateReqMod
+ @@ A2L_TYPE = MEASURE
+ @@ DATA_TYPE = UBYTE [0 ... 3]
+ @@ CONVERSION = TABLE 0 "PWM Off" 1 "PWM Direct" 2 "PWM INIT" 3 "Active Discharge"
+@@ -193,7 +193,7 @@ VAR(uint8, SFTYINVACTR_VAR) SftyInvActrSafeStReqIntel = 5U;
+ @@ GROUP = SftyInvActr
+ @@ END
+ */
+-VAR(uint8, SFTYINVACTR_VAR) SftyInvActrStateReqMode = 1U;
++VAR(uint8, SFTYINVACTR_VAR) SftyInvActrStateReqMod = 1U;
+ 
+ 
+ /*
+diff --git a/src/fw_cu/Components/Safety/Sfty_Inv/SftyRslvrOffsHndlr/src/SftyRslvrOffsHndlr.c b/src/fw_cu/Components/Safety/Sfty_Inv/SftyRslvrOffsHndlr/src/SftyRslvrOffsHndlr.c
+index 150f769b9..4c9b5e9f1 100644
+--- a/src/fw_cu/Components/Safety/Sfty_Inv/SftyRslvrOffsHndlr/src/SftyRslvrOffsHndlr.c
++++ b/src/fw_cu/Components/Safety/Sfty_Inv/SftyRslvrOffsHndlr/src/SftyRslvrOffsHndlr.c
+@@ -315,7 +315,7 @@ LOCAL_INLINE void SftyRslvrOffsHndlr_CalcIacSum(void)
+    /* ************* Source code **************** */
+ 
+    /* Check the validity of the phase currents */
+-   if (SftyE2eFpgaRxCrcErrMonrSt == ERR_DEB_MONR_STS_PASSED)
++   if (SftyE2eFpgaRxSCrcErrMonrSt == ERR_DEB_MONR_STS_PASSED)
+    {
+      /* Copy the phase currents of PU A */
+       SftyRslvrOffsHndlrPhaIU    = SftyAcEvlnIPhaVal[SFTY_RSLVR_OFFS_SETA_IVAL_SELN][SFTY_PHA_U]; /* phase current U */
+diff --git a/src/fw_cu/build/a2l/Measurements-to-Timeslices-Mapping.csv b/src/fw_cu/build/a2l/Measurements-to-Timeslices-Mapping.csv
+index eea74a7ed..57960572f 100644
+--- a/src/fw_cu/build/a2l/Measurements-to-Timeslices-Mapping.csv
++++ b/src/fw_cu/build/a2l/Measurements-to-Timeslices-Mapping.csv
+@@ -5926,6 +5926,11 @@ SftyE2eSigDataVcuInvCtrl2.VcuInvCtrl2Crc,Core_1,Core_1_200us,0.2,,,SSW
+ SftyE2eSigDataVcuInvCtrl2.dataId,Core_1,Core_1_200us,0.2,,,SSW
+ SftyE2eTxMsgIdx,Core_1,Core_1_200us,0.2,,,SSW
+ SftyE2eCalcdCrcVal,Core_1,Core_1_200us,0.2,,,SSW
++SftyE2eFpgaActvDchaActvFltSts,Core_1,Core_1_200us,0.2,,,SSW
++SftyE2eFpgaActvDchaActvFltStsAcc,Core_1,Core_1_200us,0.2,,,SSW
++SftyE2eFpgaActvDchaInactvFltSts,Core_1,Core_1_200us,0.2,,,SSW
++SftyE2eFpgaActvDchaInactvFltStsAcc,Core_1,Core_1_200us,0.2,,,SSW
++SftyE2eFpgaActvDchaReq,Core_1,Core_1_200us,0.2,,,SSW
+ SftyE2eRxCrcVal,Core_1,Core_1_200us,0.2,,,SSW
+ SftyC2cE2eUpdCntVcuInvStat1,Core_1,Core_1_200us,0.2,,,SSW
+ SftyE2eRxVcuInvStat1LibChkSt.CurrMsgCntr,Core_1,Core_1_200us,0.2,,,SSW
+@@ -6106,7 +6111,7 @@ SftyC2cData.EMX_Status_EoHVL,Core_1,Core_1_200us,0.2,,,SSW
+ SftyC2cData.EMX_Status_Spgfreiheit,Core_1,Core_1_200us,0.2,,,SSW
+ SftyC2cData.ExtAdcFirstVldRxMsgFlg,Core_1,Core_1_200us,0.2,,,SSW
+ SftyC2cData.FltdEstimrElecMotTq,Core_1,Core_1_200us,0.2,,,SSW
+-SftyC2cData.FpgaRxCrcErrMonrSt,Core_1,Core_1_200us,0.2,,,SSW
++SftyC2cData.FpgaActvDchaReq,Core_1,Core_1_200us,0.2,,,SSW
+ SftyC2cData.FpgaStateReq.B.Mode,Core_1,Core_1_200us,0.2,,,SSW
+ SftyC2cData.FpgaStateReq.B.NoEmgySw,Core_1,Core_1_200us,0.2,,,SSW
+ SftyC2cData.FpgaStateReq.B.Operate,Core_1,Core_1_200us,0.2,,,SSW
+@@ -6688,9 +6693,31 @@ SftyCrashSigMonLstTiStamp,Core_1,Core_1_200us,0.2,,,SSW
+ SftyCrashSigMonRngHiErrMonrSt,Core_1,Core_1_200us,0.2,,,SSW
+ SftyCrashSigMonTiStampErrMonrSt,Core_1,Core_1_200us,0.2,,,SSW
+ SftyCrashSigMonUMeasVld,Core_1,Core_1_200us,0.2,,,SSW
++SftyDmaE2eFpgaFrameRx.Data.RxA.Data16,Core_1,Core_1_200us,0.2,,,SSW
++SftyDmaE2eFpgaFrameRx.Data.RxA.Data32,Core_1,Core_1_200us,0.2,,,SSW
++SftyDmaE2eFpgaFrameRx.Data.RxA.Data8,Core_1,Core_1_200us,0.2,,,SSW
++SftyDmaE2eFpgaFrameRx.Data.RxA.Sig.Crc,Core_1,Core_1_200us,0.2,,,SSW
++SftyDmaE2eFpgaFrameRx.Data.RxA.Sig.Data8,Core_1,Core_1_200us,0.2,,,SSW
++SftyDmaE2eFpgaFrameRx.Data.RxA.Sig.LastData,Core_1,Core_1_200us,0.2,,,SSW
++SftyDmaE2eFpgaFrameRx.Data.RxS.Data16,Core_1,Core_1_200us,0.2,,,SSW
++SftyDmaE2eFpgaFrameRx.Data.RxS.Data32,Core_1,Core_1_200us,0.2,,,SSW
++SftyDmaE2eFpgaFrameRx.Data.RxS.Data8,Core_1,Core_1_200us,0.2,,,SSW
++SftyDmaE2eFpgaFrameRx.Data.RxS.Sig.Align1_MSB8,Core_1,Core_1_200us,0.2,,,SSW
++SftyDmaE2eFpgaFrameRx.Data.RxS.Sig.Crc,Core_1,Core_1_200us,0.2,,,SSW
++SftyDmaE2eFpgaFrameRx.Data.RxS.Sig.Data8,Core_1,Core_1_200us,0.2,,,SSW
++SftyDmaE2eFpgaFrameRx.Data.RxS.Sig.FDStd_TxA,Core_1,Core_1_200us,0.2,,,SSW
++SftyDmaE2eFpgaFrameRx.Data.RxS.Sig.FDSts_SOE,Core_1,Core_1_200us,0.2,,,SSW
++SftyDmaE2eFpgaFrameRx.Data.RxS.Sig.FDSts_SOL,Core_1,Core_1_200us,0.2,,,SSW
++SftyDmaE2eFpgaFrameRx.Data.RxS.Sig.FDSts_TxS,Core_1,Core_1_200us,0.2,,,SSW
++SftyDmaE2eFpgaFrameRx.Data.RxS.Sig.PwSpl16Mlt_LSB4,Core_1,Core_1_200us,0.2,,,SSW
++SftyDmaE2eFpgaFrameRx.Data.tiStamp,Core_1,Core_1_200us,0.2,,,SSW
++SftyDmaE2eFpgaFrameRx.Data16,Core_1,Core_1_200us,0.2,,,SSW
++SftyDmaE2eFpgaFrameRx.Data32,Core_1,Core_1_200us,0.2,,,SSW
++SftyDmaE2eFpgaFrameRx.Data8,Core_1,Core_1_200us,0.2,,,SSW
+ SftyDmaVadcCrash,Core_1,Core_1_200us,0.2,,,SSW
+ SftyDmaVadcCrashTi,Core_1,Core_1_200us,0.2,,,SSW
+ SftyE2eFpgaCtrlBrdRawVal,Core_1,Core_1_200us,0.2,,,SSW
++SftyE2eFpgaCurrMod,Core_1,Core_1_200us,0.2,,,SSW
+ SftyE2eFpgaDrvBrdRawVal,Core_1,Core_1_200us,0.2,,,SSW
+ SftyE2eFpgaDrvTSnsrRawVal,Core_1,Core_1_200us,0.2,,,SSW
+ SftyE2eFpgaEmgySWFltSts,Core_1,Core_1_200us,0.2,,,SSW
+@@ -7615,32 +7642,10 @@ Tmm_SchMTaskPeriodViolation,Core_0,C0_1ms_TimeTask,1,,,BSW
+ Tmm_VX1000DAQTaskDurationViolation,Core_0,C0_1ms_TimeTask,1,,,BSW
+ Tmm_VX1000DAQTaskPeriodViolation,Core_0,C0_1ms_TimeTask,1,,,BSW
+ SftyE2eFpgaAlvCntr,Core_1,Core_1_200us,0.2,,,SSW
+-SftyE2eFpgaAlvCntrErrMonrSt,Core_1,Core_1_200us,0.2,,,SSW
+ SftyE2eFpgaCurrTiStamp,Core_1,Core_1_200us,0.2,,,SSW
+ SftyE2eFpgaCuTSnsrRawVal,Core_1,Core_1_200us,0.2,,,SSW
+ SftyE2eFpgaDmaDataCurrIdx,Core_1,Core_1_200us,0.2,,,SSW
+ SftyE2eFpgaDmaDataLstIdx,Core_1,Core_1_200us,0.2,,,SSW
+-SftyE2eFpgaDmaFrameRx.Data.RxA.Data16,Core_1,Core_1_200us,0.2,,,SSW
+-SftyE2eFpgaDmaFrameRx.Data.RxA.Data32,Core_1,Core_1_200us,0.2,,,SSW
+-SftyE2eFpgaDmaFrameRx.Data.RxA.Data8,Core_1,Core_1_200us,0.2,,,SSW
+-SftyE2eFpgaDmaFrameRx.Data.RxA.Sig.Crc,Core_1,Core_1_200us,0.2,,,SSW
+-SftyE2eFpgaDmaFrameRx.Data.RxA.Sig.Data8,Core_1,Core_1_200us,0.2,,,SSW
+-SftyE2eFpgaDmaFrameRx.Data.RxA.Sig.LastData,Core_1,Core_1_200us,0.2,,,SSW
+-SftyE2eFpgaDmaFrameRx.Data.RxS.Data16,Core_1,Core_1_200us,0.2,,,SSW
+-SftyE2eFpgaDmaFrameRx.Data.RxS.Data32,Core_1,Core_1_200us,0.2,,,SSW
+-SftyE2eFpgaDmaFrameRx.Data.RxS.Data8,Core_1,Core_1_200us,0.2,,,SSW
+-SftyE2eFpgaDmaFrameRx.Data.RxS.Sig.Align1_MSB8,Core_1,Core_1_200us,0.2,,,SSW
+-SftyE2eFpgaDmaFrameRx.Data.RxS.Sig.Crc,Core_1,Core_1_200us,0.2,,,SSW
+-SftyE2eFpgaDmaFrameRx.Data.RxS.Sig.Data8,Core_1,Core_1_200us,0.2,,,SSW
+-SftyE2eFpgaDmaFrameRx.Data.RxS.Sig.FDStd_TxA,Core_1,Core_1_200us,0.2,,,SSW
+-SftyE2eFpgaDmaFrameRx.Data.RxS.Sig.FDSts_SOE,Core_1,Core_1_200us,0.2,,,SSW
+-SftyE2eFpgaDmaFrameRx.Data.RxS.Sig.FDSts_SOL,Core_1,Core_1_200us,0.2,,,SSW
+-SftyE2eFpgaDmaFrameRx.Data.RxS.Sig.FDSts_TxS,Core_1,Core_1_200us,0.2,,,SSW
+-SftyE2eFpgaDmaFrameRx.Data.RxS.Sig.PwSpl16Mlt_LSB4,Core_1,Core_1_200us,0.2,,,SSW
+-SftyE2eFpgaDmaFrameRx.Data.tiStamp,Core_1,Core_1_200us,0.2,,,SSW
+-SftyE2eFpgaDmaFrameRx.Data16,Core_1,Core_1_200us,0.2,,,SSW
+-SftyE2eFpgaDmaFrameRx.Data32,Core_1,Core_1_200us,0.2,,,SSW
+-SftyE2eFpgaDmaFrameRx.Data8,Core_1,Core_1_200us,0.2,,,SSW
+ SftyE2eFpgaDmaTiStampErrMonrSt,Core_1,Core_1_200us,0.2,,,SSW
+ SftyE2eFpgaFirstRunCntrChkDone,Core_1,Core_1_200us,0.2,,,SSW
+ SftyE2eFpgaIpduRx.Data.RxA.Id.Mx0.Data16,Core_1,Core_1_200us,0.2,,,SSW
+@@ -8072,14 +8077,18 @@ SftyE2eFpgaIpduRx.Data8,Core_1,Core_1_200us,0.2,,,SSW
+ SftyE2eFpgaIPhaRawVal,Core_1,Core_1_200us,0.2,,,SSW
+ SftyE2eFpgaLoGateDrvrFltSts,Core_1,Core_1_200us,0.2,,,SSW
+ SftyE2eFpgaLoGateDrvrFltStsAcc,Core_1,Core_1_200us,0.2,,,SSW
++SftyE2eFpgaLossComErrMonrSt,Core_1,Core_1_200us,0.2,,,SSW
++SftyE2eFpgaLossComErrMonrStAcc,Core_1,Core_1_200us,0.2,,,SSW
+ SftyE2eFpgaLstTiStamp,Core_1,Core_1_200us,0.2,,,SSW
++SftyE2eFpgaMeasCohrncFltSts,Core_1,Core_1_200us,0.2,,,SSW
++SftyE2eFpgaMeasCohrncFltStsAcc,Core_1,Core_1_200us,0.2,,,SSW
+ SftyE2eFpgaFirstRunDone,Core_1,Core_1_200us,0.2,,,SSW
+ SftyE2eFpgaHsGateDrvrFltSts,Core_1,Core_1_200us,0.2,,,SSW
+ SftyE2eFpgaHsGateDrvrFltStsAcc,Core_1,Core_1_200us,0.2,,,SSW
+-SftyE2eFpgaMeasCoherncFltSts,Core_1,Core_1_200us,0.2,,,SSW
+-SftyE2eFpgaMeasCoherncFltStsAcc,Core_1,Core_1_200us,0.2,,,SSW
+ SftyE2eFpgaMidPointPhaFltSts,Core_1,Core_1_200us,0.2,,,SSW
+ SftyE2eFpgaMidPointPhaFltStsAcc,Core_1,Core_1_200us,0.2,,,SSW
++SftyE2eFpgaModPlausErrMonrSt,Core_1,Core_1_200us,0.2,,,SSW
++SftyE2eFpgaModPlausErrMonrStAcc,Core_1,Core_1_200us,0.2,,,SSW
+ SftyE2eFpgaNoEmgySwReq,Core_1,Core_1_200us,0.2,,,SSW
+ SftyE2eFpgaOverUnderCurUFltSts,Core_1,Core_1_200us,0.2,,,SSW
+ SftyE2eFpgaOverUnderCurUFltStsAcc,Core_1,Core_1_200us,0.2,,,SSW
+@@ -8091,12 +8100,23 @@ SftyE2eFpgaOverVoltVBatFltSts,Core_1,Core_1_200us,0.2,,,SSW
+ SftyE2eFpgaOverVoltVBatFltStsAcc,Core_1,Core_1_200us,0.2,,,SSW
+ SftyE2eFpgaP5HSRawVal,Core_1,Core_1_200us,0.2,,,SSW
+ SftyE2eFpgaP5LSRawVal,Core_1,Core_1_200us,0.2,,,SSW
++SftyE2eFpgaPrmDlErrMonrSt,Core_1,Core_1_200us,0.2,,,SSW
+ SftyE2eFpgaPS16MultRawVal,Core_1,Core_1_200us,0.2,,,SSW
+-SftyE2eFpgaRxCrcErrMonrSt,Core_1,Core_1_200us,0.2,,,SSW
++SftyE2eFpgaRxACrcErrMonrSt,Core_1,Core_1_200us,0.2,,,SSW
++SftyE2eFpgaRxMuxSeqErrMonrSt,Core_1,Core_1_200us,0.2,,,SSW
++SftyE2eFpgaRxSCrcErrMonrSt,Core_1,Core_1_200us,0.2,,,SSW
+ SftyE2eFpgaSCspdReady,Core_1,Core_1_200us,0.2,,,SSW
+ SftyE2eFpgaScSpdReadyFltSts,Core_1,Core_1_200us,0.2,,,SSW
+ SftyE2eFpgaScSpdReadyFltStsAcc,Core_1,Core_1_200us,0.2,,,SSW
++SftyE2eFpgaSyncOutEarlyErrMonrSt,Core_1,Core_1_200us,0.2,,,SSW
++SftyE2eFpgaSyncOutEarlyErrMonrStAcc,Core_1,Core_1_200us,0.2,,,SSW
++SftyE2eFpgaSyncOutLateErrMonrSt,Core_1,Core_1_200us,0.2,,,SSW
++SftyE2eFpgaSyncOutLateErrMonrStAcc,Core_1,Core_1_200us,0.2,,,SSW
+ SftyE2eFpgaTiStampChkFirstRun,Core_1,Core_1_200us,0.2,,,SSW
++SftyE2eFpgaTxCrcCtrlAErrMonrSt,Core_1,Core_1_200us,0.2,,,SSW
++SftyE2eFpgaTxCrcCtrlAErrMonrStAcc,Core_1,Core_1_200us,0.2,,,SSW
++SftyE2eFpgaTxCrcCtrlSErrMonrSt,Core_1,Core_1_200us,0.2,,,SSW
++SftyE2eFpgaTxCrcCtrlSErrMonrStAcc,Core_1,Core_1_200us,0.2,,,SSW
+ DrvCtrlSdlRbl1msFpgaSetTx.RunTi,Core_2,C2_1ms,1,,,SWIT
+ SftyAcEvlnRxCrcErrMonrSt,Core_1,Core_1_200us,0.2,,,SSW
+ SftyAcEvlnSetOverCurrPhaReinitSt,Core_1,Core_1_200us,0.2,,,SSW
+@@ -8134,7 +8154,7 @@ SftyInvActrFctldCoordLsAscSpoSfty,Core_1,Core_1_200us,0.2,,,SSW
+ SftyInvActrSafeStReqDrv,Core_1,Core_1_200us,0.2,,,SSW
+ SftyInvActrSafeStReqIntel,Core_1,Core_1_200us,0.2,,,SSW
+ SftyInvActrStateReqEmgySw,Core_1,Core_1_200us,0.2,,,SSW
+-SftyInvActrStateReqMode,Core_1,Core_1_200us,0.2,,,SSW
++SftyInvActrStateReqMod,Core_1,Core_1_200us,0.2,,,SSW
+ SftyInvActrStateReqSCSpdReady,Core_1,Core_1_200us,0.2,,,SSW
+ SftyInvActrMotorSpdFild,Core_1,Core_1_200us,0.2,,,SSW
+ SftyInvActrSafeStCompErrMonrSt,Core_1,Core_1_200us,0.2,,,SSW
+'

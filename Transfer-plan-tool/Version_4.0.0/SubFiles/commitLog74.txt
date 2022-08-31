@@ -1,0 +1,194 @@
+b'commit d6a5c484088eba65a0c2471892bfae8ca181602c
+Author: Adi GODAVARTHI (JV) <adi.godavarthi.jv@valeo.com>
+Date:   Wed Jan 12 18:03:33 2022 +0100
+
+    $100kW-49971$ - SftyE2EFpga - LlswFpga Unit Implementation
+    
+    Change-Id: I3abee94eeb5e870effec24c3cb768a30b149c6a6
+
+diff --git a/src/fw_cu/Components/Cmn/Shared/Intrpt/include/IntPrioDef.h b/src/fw_cu/Components/Cmn/Shared/Intrpt/include/IntPrioDef.h
+index cb566126e..8fb09d378 100644
+--- a/src/fw_cu/Components/Cmn/Shared/Intrpt/include/IntPrioDef.h
++++ b/src/fw_cu/Components/Cmn/Shared/Intrpt/include/IntPrioDef.h
+@@ -91,6 +91,9 @@
+ #define ISR_PRIO_TIM_TRIG_BY_DSADC_COS_RESULT   (0x21U)
+ 
+ #define ISR_VADC_G2CH0_RES_SIN_RESULT           (0x20U)
++
++#define ISR_GTM_TCALC                           (0x1FU)
++
+ #if 0
+ #define ISR_DSADC_SIN_RESULT                    (0x1BU) /* SRPN Resolver Sine signal DSADC */
+ #define ISR_DSADC_COS_RESULT                    (0x1AU) /* SRPN Resolver CoSine signal DSADC */
+diff --git a/src/fw_cu/Components/Cmn/Sys/GtmDrv/include/LlswGtm_TimCfg.h b/src/fw_cu/Components/Cmn/Sys/GtmDrv/include/LlswGtm_TimCfg.h
+index eb4de1ead..9a5d3c8dd 100644
+--- a/src/fw_cu/Components/Cmn/Sys/GtmDrv/include/LlswGtm_TimCfg.h
++++ b/src/fw_cu/Components/Cmn/Sys/GtmDrv/include/LlswGtm_TimCfg.h
+@@ -72,6 +72,7 @@ typedef enum
+    Gtm_Tim_FE_M_CS_OND,
+    Gtm_Tim_FE_M_CS_OND_DMAINT,
+    Gtm_Tim_M_EXCITATION_IN,
++   Gtm_Tim_RE_M_CS_OND_TCALC,
+ #ifdef GTMDRV_SW_TEST_EN
+     Gtm_Tim_Tst_Pwm_Mode,
+     Gtm_Tim_Tst_Event_Mode,
+diff --git a/src/fw_cu/Components/Cmn/Sys/GtmDrv/src/LlswGtm_PrjImpl.c b/src/fw_cu/Components/Cmn/Sys/GtmDrv/src/LlswGtm_PrjImpl.c
+index 7ae88b023..ad7ba3ab8 100644
+--- a/src/fw_cu/Components/Cmn/Sys/GtmDrv/src/LlswGtm_PrjImpl.c
++++ b/src/fw_cu/Components/Cmn/Sys/GtmDrv/src/LlswGtm_PrjImpl.c
+@@ -49,7 +49,7 @@
+ #include "dsadc.h"
+ //#include "LlswGtm_PrjImpl.h"
+ #include "EncCalcn_data.h"
+-
++#include "DrvCtrlErrDeb.h"
+ /*================== [configurations] =======================================*/
+ 
+ /* ************************************************* */
+@@ -68,7 +68,13 @@
+ #endif /* LLSWGTM_USE_DEBUG_VARIABLES */
+ 
+ /*================== [defines] ==============================================*/
++#define ISW_START_SEC_VAR_FAST_INIT
++#include <MemMap.h>
++
++extern VAR(boolean,FPGA_VAR) App_Timeout;
+ 
++#define ISW_STOP_SEC_VAR_FAST_INIT
++#include <MemMap.h>
+ /*================== [macros] ===============================================*/
+ 
+ /* Value in 10ns Ticks: 0xC80 = 3200 ==> 32 us. This value was measured experimentally */
+@@ -260,6 +266,12 @@ IFX_INTERRUPT(isr_tim_osm_resolver_excitation_start, VTABLE_CPU2, ISR_PRIO_RES_E
+ #endif /* RESOLVER_EXC_FREQ_DYN_ADJ */
+    }
+ 
++   if (App_Timeout == TRUE)
++   {
++      /* Set the event status to Failed for TCALC */
++      DrvCtrlErrDeb_SetEventStatus(ERR_ID_VSI_TI_OUT_TCALC, ERR_DEB_MONR_STS_FAILED);
++   }
++
+ }
+ 
+ #define LLSWGTM_STOP_SEC_CODE_FAST
+diff --git a/src/fw_cu/Components/Cmn/Sys/GtmDrv/src/LlswGtm_TimCfg.c b/src/fw_cu/Components/Cmn/Sys/GtmDrv/src/LlswGtm_TimCfg.c
+index 0e1b19d02..29a5dad2a 100644
+--- a/src/fw_cu/Components/Cmn/Sys/GtmDrv/src/LlswGtm_TimCfg.c
++++ b/src/fw_cu/Components/Cmn/Sys/GtmDrv/src/LlswGtm_TimCfg.c
+@@ -70,7 +70,7 @@
+ /*================== [defines] ==============================================*/
+ 
+ #define GTM_TIM0_INSEL_VAL { \\
+-    .B.CH0SEL  = 0x0U,   /* GTM_TIM0INSEL.B.CH0SEL: no connection. default value */  \\
++    .B.CH0SEL  = 0x9U,   /* GTM_TIM0INSEL.B.CH0SEL: no connection. default value */      /* TIM32, TIMERA, 33.10 */           \\
+     .B.CH1SEL  = 0x0U,   /* GTM_TIM0INSEL.B.CH1SEL: no connection. default value */ \\
+     .B.CH2SEL  = 0x0U,   /* GTM_TIM0INSEL.B.CH2SEL: no connection. default value */ \\
+     .B.CH3SEL  = 0x0U,   /* GTM_TIM0INSEL.B.CH3SEL: no connection. default value */ \\
+@@ -723,6 +723,50 @@ const LlswGtm_TimCh_CfgType Tim_M_EXCITATION_IN =
+ 
+ }; /* Tim_M_EXCITATION_IN */
+ 
++const LlswGtm_TimCh_CfgType Tim_RE_M_CS_OND_TCALC =
++{
++      /* ************************************************************************* */
++      /*                         Tim_RE_M_CS_OND_TCALC Configuration               */
++      /* ************************************************************************* */
++      /* GTM_TIM0_CH0_CTRL: TIM0 Channel 0 Control Register */
++      .CTRL.B.ARU_EN             = (uint32) GTM_TIM_CH_CTRL_ARU_EN_NOT_ROUTED,          /* register content not routed to ARU */
++      .CTRL.B.CICTRL             = (uint32) GTM_TIM_CH_CTRL_CICTRL_USE_X,               /* use TIM input_x for channel_x */
++      .CTRL.B.CLK_SEL            = (uint32) GTM_TIM_CH_CTRL_CLK_SEL_CMU_CLK0,           /* CMU_CLK0 selected */
++      .CTRL.B.FLT_CNT_FRQ        = (uint32) GTM_TIM_CH_CTRL_FLT_CNT_FRQ_CMU_CLK0,       /* CMU_CLK0 selected for filter count */
++      .CTRL.B.FLT_CTR_FE         = (uint32) GTM_TIM_CH_CTRL_FLT_CTR_UP_DOWN_CNTR,       /* up/down counter mode for falling edge*/
++      .CTRL.B.FLT_CTR_RE         = (uint32) GTM_TIM_CH_CTRL_FLT_CTR_UP_DOWN_CNTR,       /* up/down counter mode for rising edge*/
++      .CTRL.B.FLT_EN             = (uint32) GTM_TIM_CH_CTRL_FLT_EN_ENABLE,              /* filter is enabled */
++      .CTRL.B.FLT_MODE_FE        = (uint32) GTM_TIM_CH_CTRL_FLT_MODE_IMDT_EDGE_PROPG,   /* immediate edge propogation mode for falling edge*/
++      .CTRL.B.FLT_MODE_RE        = (uint32) GTM_TIM_CH_CTRL_FLT_MODE_DEGLITCH,          /* individual deglitch mode for rising edge*/
++      .CTRL.B.EGPR0_SEL          = (uint32) GTM_TIM_CH_CTRL_EXTENSION_GPR_SEL_BIT_CLEAR,/* no extended GPR0 mode */
++      .CTRL.B.EGPR1_SEL          = (uint32) GTM_TIM_CH_CTRL_EXTENSION_GPR_SEL_BIT_CLEAR,/* no extended GPR1 mode */
++      .CTRL.B.CNTS_SEL           = (uint32) GTM_TIM_CH_CTRL_CNTS_SEL_CNT,               /* CNTS gets CNT (if =1 gets TBU_TS0) warning: if =1 see errata GTM-IP-164 */
++      .CTRL.B.GPR0_SEL           = (uint32) GTM_TIM_CH_CTRL_GPR0_SEL_CNTS_F_OUT,        /* capture CNTS in GPR0 */
++      .CTRL.B.GPR1_SEL           = (uint32) GTM_TIM_CH_CTRL_GPR1_SEL_CNT,               /* capture CNT in GPR1 */
++      .CTRL.B.DSL                = (uint32) GTM_TIM_CH_CTRL_DSL_RISING_EDGE,            /* measure polarity 1 */
++      .CTRL.B.ISL                = (uint32) GTM_TIM_CH_CTRL_ISL_USE_DSL,                /* active signal level defined by DSL */
++      .CTRL.B.OSM                = (uint32) GTM_TIM_CH_CONTNS_OPER_MOD,                 /* continuous operation mode */
++      .CTRL.B.TIM_MODE           = (uint32) GTM_TIM_CH_CTRL_TIM_MODE_TIEM,              /* input event mode (TIEM) */
++      .CTRL.B.TIM_EN             = (uint32) GTM_TIM_CH_CTRL_TIM_EN_ENABLE,              /* enables the channel, resets registers ECNT, CNT, GPR0 and GPR1 */
++
++      .FLT_RE.B.FLT_RE           = 7100U, /*deglitch time for rising edge */
++      .FLT_FE.B.FLT_FE           = 0U,    /*deglitch time for falling edge */
++
++      .IRQ_EN.B.NEWVAL_IRQ_EN    = (uint32) GTM_TIM_CH_IRQ_EN_NEWVAL_IRQ_EN_ENABLE,  /* newval interrupt of CH0 visible outside GTM */
++      .IRQ_EN.B.TODET_IRQ_EN     = (uint32) GTM_TIM_CH_IRQ_EN_TODET_IRQ_EN_DISABLE,  /* timout interrupt of CH0 not visible outside GTM */
++
++      .idxTimMod_en  = LlswGtm_TIM0,
++      .idxTimChnl_en = TIM_CH0,
++
++      /* SRC_GTMTIM30: GTM TIM3 Shared Service Request 0 */
++      .SrcCfg.SrcSrcr.B.TOS    = TOS_CPU2,
++      .SrcCfg.SrcSrcr.B.SRPN   = (uint32) ISR_GTM_TCALC, /* set ISR priority number */
++      .SrcCfg.SrcSrcr.B.SRE    = SRC_SERVICE_REQUEST_ENABLE, /* Service Request Enable */
++      .SrcCfg.SrcSrcr.B.CLRR   = SRC_CLEAR_REQUEST, /* Request to reset the Service Request Flag */
++      .SrcCfg.SrcSrcr.B.IOVCLR = SRC_CLEAR_REQUEST, /* Clear Interrupt Trigger Overflow Bit */
++      .SrcCfg.SrcSrcr.B.SWSCLR = SRC_CLEAR_REQUEST, /* Clear SW Sticky Bit */
++
++}; /* Tim_RE_M_CS_OND_TCALC */
+ #ifdef GTMDRV_SW_TEST_EN
+ 
+ const LlswGtm_TimCh_CfgType Tim_Tst_Pwm_Mode =
+@@ -897,6 +941,7 @@ const LlswGtm_TimCh_CfgType *const Tim_ptrChCfg[LLSWGTM_TIM_NR_POST_BUILD_CONFIG
+         &Tim_FE_M_CS_OND,
+         &Tim_FE_M_CS_OND_DMAINT,
+         &Tim_M_EXCITATION_IN,
++        &Tim_RE_M_CS_OND_TCALC,
+ #ifdef GTMDRV_SW_TEST_EN
+         &Tim_Tst_Pwm_Mode,
+         &Tim_Tst_Event_Mode,
+diff --git a/src/fw_cu/Components/Cmn/Sys/GtmDrv/src/LlswGtm_TomCfg.c b/src/fw_cu/Components/Cmn/Sys/GtmDrv/src/LlswGtm_TomCfg.c
+index 79d99a396..eae47069c 100644
+--- a/src/fw_cu/Components/Cmn/Sys/GtmDrv/src/LlswGtm_TomCfg.c
++++ b/src/fw_cu/Components/Cmn/Sys/GtmDrv/src/LlswGtm_TomCfg.c
+@@ -84,7 +84,7 @@
+ #endif  /* USE_ORIG_TASKS_OFFSET_IMPL */
+ 
+ #define HB1_CTRL_PERIOD  10000  /* 10KHz signal operating with CLK0 */
+-#define HB1_CTRL_DUTY  5000  /* 10KHz signal operating with CLK0 */
++#define HB1_CTRL_DUTY  0  /* 10KHz signal operating with CLK0 */
+ /*================== [macros] ===============================================*/
+ 
+ /*================== [type definitions] =====================================*/
+diff --git a/src/fw_cu/Components/Inv/ValMeasAndProc/LlswFpgaIf/src/LlswFpgaIf.c b/src/fw_cu/Components/Inv/ValMeasAndProc/LlswFpgaIf/src/LlswFpgaIf.c
+index 9f411684b..cb82f582c 100644
+--- a/src/fw_cu/Components/Inv/ValMeasAndProc/LlswFpgaIf/src/LlswFpgaIf.c
++++ b/src/fw_cu/Components/Inv/ValMeasAndProc/LlswFpgaIf/src/LlswFpgaIf.c
+@@ -219,6 +219,9 @@ STATIC VAR(uint8,FPGA_VAR) FpgaRX_swapCRCbytes = 1U;
+ #define ISW_START_SEC_VAR_FAST_INIT
+ #include <MemMap.h>
+ VAR(boolean,FPGA_VAR) FpgaRx_DmaTransactionComplete = FALSE;
++VAR(boolean,FPGA_VAR) App_Complete = FALSE;
++VAR(boolean,FPGA_VAR) App_Timeout = FALSE;
++
+ volatile uint32 fpgadma_timeoutCntr = 0;
+ volatile uint32 fpgadma_isrExcCntr = 0;
+ volatile uint32 qspi_tx_Prev_timestamp = 0;
+@@ -274,6 +277,19 @@ void __interrupt( ISR_GTM_FPGA_RXDMA_TIMEOUT ) __vector_table(VTABLE_CPU2) __ena
+    }
+ }
+ 
++void __interrupt( ISR_GTM_TCALC ) __vector_table(VTABLE_CPU2) __enable_ isr_gtm_tcalc(void)
++{
++   if (FALSE == App_Complete)
++   {
++      App_Timeout = TRUE;
++      /* TODO: BSW function to trigger ASC to be called */
++   }
++   else
++   {
++      App_Complete = FALSE;
++   }
++}
++
+ FUNC(void, FPGA_CODE) LlswFpgaIf_Init(void)
+ {
+    /*assign buffer */
+'

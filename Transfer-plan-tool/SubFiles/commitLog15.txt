@@ -1,0 +1,185 @@
+b'commit 5d40f6c201e09dcec1c6871322f8621816fba233
+Author: Adi GODAVARTHI (JV) <adi.godavarthi.jv@valeo.com>
+Date:   Wed Mar 30 10:05:53 2022 +0200
+
+    $100kW-55049$ - [FCT_Control_Parking_Position] - SENT [implementation]
+    
+    Change-Id: Id67d83ce39074ff24871f6d78d04588da0cb127a
+
+diff --git a/src/fw_cu/Components/Cmn/ValMeasAndProc/LlswSENT/src/LlswSENT.c b/src/fw_cu/Components/Cmn/ValMeasAndProc/LlswSENT/src/LlswSENT.c
+index 780f25fd6..04365ee20 100644
+--- a/src/fw_cu/Components/Cmn/ValMeasAndProc/LlswSENT/src/LlswSENT.c
++++ b/src/fw_cu/Components/Cmn/ValMeasAndProc/LlswSENT/src/LlswSENT.c
+@@ -254,12 +254,12 @@ void LlswSENT_Init(void)                             /* PRQA S 4700*/ /* Metric
+     mytempINP.B.TDI       = 0U;                      /* Not needed. TDI not enabled */
+     mytempINP.B.TBI       = 0U;                      /* Not needed. TBI not enabled */
+     mytempINP.B.RSI       = 0U;                      /* Not needed. RSI not enabled */
++    mytempINP.B.WDI       = 0U;                      /* Watch-dog interrupt is not enabled */
+     mytempINP.B.RDI       = 0U;                      /* trigger0 (TRIG0). Route the fast channel to trigger0 interrupt  */
+-    mytempINP.B.WDI       = 1U;                      /* trigger1 (TRIG1). Route the watch-dog to trigger1 interrupt */
+-    mytempINP.B.SDI       = 2U;                      /* trigger2 (TRIG2). Route the slow channel to trigger2 interrupt */
+-    mytempINP.B.RBI       = 3U;                      /* trigger3 (TRIG3) */
+-    mytempINP.B.ERRI      = 3U;                      /* trigger3 (TRIG3). ERRI is one single node pointer for FRI + FDI + NNI + NVI + CRCI + WSI + SCRI
+-                                                        Route all the errors to trigger3 interrupt. trigger3 should go to CPU2 to monitor the errors. TRIG3-CPU2 is for development purpose */
++    mytempINP.B.SDI       = 1U;                      /* trigger1 (TRIGI). Route the slow channel to trigger1 interrupt */
++    mytempINP.B.RBI       = 2U;                      /* trigger2 (TRIG2) */
++    mytempINP.B.ERRI      = 2U;                      /* trigger2 (TRIG2). ERRI is one single node pointer for FRI + FDI + NNI + NVI + CRCI + WSI + SCRI
++                                                        Route all the errors to trigger2 interrupt. trigger2 should go to CPU2 to monitor the errors. TRIG2-CPU2 is for development purpose */
+     SENT_CH9_INP.U        = mytempINP.U;
+ 
+     mySENT_INTEN.U        = 0U;
+@@ -284,7 +284,7 @@ void LlswSENT_Init(void)                             /* PRQA S 4700*/ /* Metric
+ 
+     mySENT_INTEN.B.SCRI   =1U;                      /* Serial Data CRC Error */
+ 
+-    mySENT_INTEN.B.WDI    = 1U;
++    mySENT_INTEN.B.WDI    = 0U;                     /* Watch-dog interrupt is not enabled. SSW has to monitor this error and clear the interrupt */
+     SENT_CH9_INTEN.U      = mySENT_INTEN.U;
+ 
+     mySRC_SRCR.U          = 0U;
+@@ -294,28 +294,21 @@ void LlswSENT_Init(void)                             /* PRQA S 4700*/ /* Metric
+     mySRC_SRCR.B.CLRR     = 1U;
+     SRC_SENT0.U           = mySRC_SRCR.U;            /* TRIG0 goes to SRC0 */
+ 
+-    mySRC_SRCR.U          = 0U;
+-    mySRC_SRCR.B.SRPN     = (uint32)SFTY_DMA_DRVR_CH_IDX_SENT_TIMEOUT_STATUS;
+-    mySRC_SRCR.B.SRE      = 1U;
+-    mySRC_SRCR.B.TOS      = TOS_DMA;
+-    mySRC_SRCR.B.CLRR     = 1U;
+-    SRC_SENT1.U           = mySRC_SRCR.U;            /* TRIG1 goes to SRC1 */
+-
+     mySRC_SRCR.U          = 0U;
+     mySRC_SRCR.B.SRPN     = (uint32)SFTY_DMA_DRVR_CH_IDX_SENT_FAULTSTATUS;
+     mySRC_SRCR.B.SRE      = 1U;
+     mySRC_SRCR.B.TOS      = TOS_DMA;
+     mySRC_SRCR.B.CLRR     = 1U;
+-    SRC_SENT2.U           = mySRC_SRCR.U;            /* TRIG2 goes to SRC2 */
++    SRC_SENT1.U           = mySRC_SRCR.U;            /* TRIG1 goes to SRC1 */
+ 
+     mySRC_SRCR.U          = 0U;
+     mySRC_SRCR.B.SRPN     = (uint32)ISR_PRIORITY_SENT;
+-    mySRC_SRCR.B.SRE      = 1U;                      /* ------------- TODO -------------------------- */
++    mySRC_SRCR.B.SRE      = 1U;                      /* ------------- TODO. Disable  this interrupt after SSW testing -------------------------- */
+     mySRC_SRCR.B.TOS      = TOS_CPU2;
+     mySRC_SRCR.B.CLRR     = 1U;
+-    SRC_SENT3.U           = mySRC_SRCR.U;            /* TRIG3 goes to SRC3 */
++    SRC_SENT2.U           = mySRC_SRCR.U;            /* TRIG3 goes to SRC3 */
+ 
+-    SENT_CH9_RCR.B.CEN    = 0U;                      /* ------------- TODO -------------------------- */
++    SENT_CH9_RCR.B.CEN    = 1U;
+ 
+ }
+ 
+diff --git a/src/fw_cu/Components/Safety/Sfty_Cmn/SftyDmaDrvr/include/SftyDmaDrvr_cfg.h b/src/fw_cu/Components/Safety/Sfty_Cmn/SftyDmaDrvr/include/SftyDmaDrvr_cfg.h
+index 4c5b10854..710d70dd8 100644
+--- a/src/fw_cu/Components/Safety/Sfty_Cmn/SftyDmaDrvr/include/SftyDmaDrvr_cfg.h
++++ b/src/fw_cu/Components/Safety/Sfty_Cmn/SftyDmaDrvr/include/SftyDmaDrvr_cfg.h
+@@ -107,11 +107,12 @@
+ /**************SENT CHANNELS ******************/
+ #define SFTY_DMA_DRVR_CH_IDX_SENT_FAULTSTATUS_DMATIMESTAMP        (DMA_CHANNEL45)
+ #define SFTY_DMA_DRVR_CH_IDX_SENT_FAULTSTATUS                     (DMA_CHANNEL46)
+-#define SFTY_DMA_DRVR_CH_IDX_SENT_TSTAMP                          (DMA_CHANNEL47)
+-#define SFTY_DMA_DRVR_CH_IDX_SENT_CRC                             (DMA_CHANNEL48)
+-#define SFTY_DMA_DRVR_CH_IDX_SENT_RAWDATA                         (DMA_CHANNEL49)
+-#define SFTY_DMA_DRVR_CH_IDX_SENT_TIMEOUT_DMATIMESTAMP            (DMA_CHANNEL50)
+-#define SFTY_DMA_DRVR_CH_IDX_SENT_TIMEOUT_STATUS                  (DMA_CHANNEL51)
++
++#define SFTY_DMA_DRVR_CH_IDX_SENT_TIMEOUT_DMATIMESTAMP            (DMA_CHANNEL47)
++#define SFTY_DMA_DRVR_CH_IDX_SENT_TIMEOUT_STATUS                  (DMA_CHANNEL48)
++#define SFTY_DMA_DRVR_CH_IDX_SENT_TSTAMP                          (DMA_CHANNEL49)
++#define SFTY_DMA_DRVR_CH_IDX_SENT_CRC                             (DMA_CHANNEL50)
++#define SFTY_DMA_DRVR_CH_IDX_SENT_RAWDATA                         (DMA_CHANNEL51)
+ 
+ /*  ==== P15 ==== */
+ #if SYSCON_FTR_PSM == 1  /* Feature use IPM motor */
+diff --git a/src/fw_cu/Components/Safety/Sfty_Cmn/SftyDmaDrvr/src/SftyDmaDrvr_cfg.c b/src/fw_cu/Components/Safety/Sfty_Cmn/SftyDmaDrvr/src/SftyDmaDrvr_cfg.c
+index 622f946d3..7bbd8e702 100644
+--- a/src/fw_cu/Components/Safety/Sfty_Cmn/SftyDmaDrvr/src/SftyDmaDrvr_cfg.c
++++ b/src/fw_cu/Components/Safety/Sfty_Cmn/SftyDmaDrvr/src/SftyDmaDrvr_cfg.c
+@@ -62,13 +62,6 @@
+ 
+ /*================== [definition of global data] ============================*/
+ 
+-/* ------------- TODO: Remove these buffers after replacing with SSW buffers  --------------------------*/
+-#pragma align 0x10
+-SftyDma_ParkLockSENTDataType LLSW_SftyDmaParkLockPosnAcqnSENTSnrDataRx;
+-SftyDma_DataType LLSW_SftyDmaParkLockEvlnSENTStsInfoRx;
+-#pragma align restore
+-
+-
+ #define SFTY_DMA_DRVR_START_SEC_CONST_AREA_0
+ #include "MemMap.h"
+ 
+@@ -1122,8 +1115,7 @@ CONST(SftyDmaDrvrChannelCfg_Type, SFTY_DMA_DRVR_CALIB) SftyDmaDrvrChannelCfg[] =
+    {/** SENT RAWDATA */
+       .ChIndex            = SFTY_DMA_DRVR_CH_IDX_SENT_RAWDATA,
+       .CH.SADR.U          = (uint32)(&SENT_RDR9.U),
+-//    .CH.DADR.U          = (uint32)(&(SftyDmaParkLockPosnAcqnSENTSnrDataRx.SnsrData)),      /* TODO */
+-      .CH.DADR.U          = (uint32)(&(LLSW_SftyDmaParkLockPosnAcqnSENTSnrDataRx.SnsrData)), /* TODO */
++      .CH.DADR.U          = (uint32)(&(SftyDmaParkLockPosnAcqnSENTSnrDataRx.SnsrData)),
+       .CH.CHCFGR.B.PRSEL  = (uint32)SFTY_DMA_DRVR_PRSEL_DAISY_CHAIN,
+       .CH.CHCFGR.B.RROAT  = (uint32)SFTY_DMA_DRVR_RROAT_TRANSFER,
+       .CH.CHCFGR.B.TREL   = 1U,
+@@ -1151,8 +1143,7 @@ CONST(SftyDmaDrvrChannelCfg_Type, SFTY_DMA_DRVR_CALIB) SftyDmaDrvrChannelCfg[] =
+    {/** SENT CRC */
+       .ChIndex            = SFTY_DMA_DRVR_CH_IDX_SENT_CRC,
+       .CH.SADR.U          = (uint32)(&SENT_CH9_RSR.U),  /* RSR: receive status register */
+-   // .CH.DADR.U          = (uint32)(&(SftyDmaParkLockPosnAcqnSENTSnrDataRx.CrcData)),       /* TODO */
+-      .CH.DADR.U          = (uint32)(&(LLSW_SftyDmaParkLockPosnAcqnSENTSnrDataRx.CrcData)),  /* TODO */
++      .CH.DADR.U          = (uint32)(&(SftyDmaParkLockPosnAcqnSENTSnrDataRx.CrcData)),
+       .CH.CHCFGR.B.PRSEL  = (uint32)SFTY_DMA_DRVR_PRSEL_DAISY_CHAIN,
+       .CH.CHCFGR.B.RROAT  = (uint32)SFTY_DMA_DRVR_RROAT_TRANSFER,
+       .CH.CHCFGR.B.TREL   = 1U,
+@@ -1180,9 +1171,8 @@ CONST(SftyDmaDrvrChannelCfg_Type, SFTY_DMA_DRVR_CALIB) SftyDmaDrvrChannelCfg[] =
+    {/** SENT TSTAMP */
+       .ChIndex            = SFTY_DMA_DRVR_CH_IDX_SENT_TSTAMP,
+       .CH.SADR.U          = (uint32)(&SENT_RTS9.U),
+-    //.CH.DADR.U          = (uint32)(&(SftyDmaParkLockPosnAcqnSENTSnrDataRx.TiStampRts)),       /* TODO */
+-      .CH.DADR.U          = (uint32)(&(LLSW_SftyDmaParkLockPosnAcqnSENTSnrDataRx.TiStampRts)),  /* TODO */
+-      .CH.CHCFGR.B.PRSEL  = (uint32)SFTY_DMA_DRVR_PRSEL_HW_TRIGGER,
++      .CH.DADR.U          = (uint32)(&(SftyDmaParkLockPosnAcqnSENTSnrDataRx.TiStampRts)),
++      .CH.CHCFGR.B.PRSEL  = (uint32)SFTY_DMA_DRVR_PRSEL_DAISY_CHAIN,
+       .CH.CHCFGR.B.RROAT  = (uint32)SFTY_DMA_DRVR_RROAT_TRANSFER,
+       .CH.CHCFGR.B.TREL   = 1U,
+       .CH.CHCFGR.B.CHMODE = (uint32)SFTY_DMA_DRVR_CHMODE_CONTINUOUS_MODE,
+@@ -1209,8 +1199,7 @@ CONST(SftyDmaDrvrChannelCfg_Type, SFTY_DMA_DRVR_CALIB) SftyDmaDrvrChannelCfg[] =
+    {/** SENT TIMEOUT STATUS */
+       .ChIndex            = SFTY_DMA_DRVR_CH_IDX_SENT_TIMEOUT_STATUS,
+       .CH.SADR.U          = (uint32)(&SENT_CH9_INTSTAT.U),
+-//    .CH.DADR.U          = (uint32)(&(SftyDmaParkLockPosnAcqnSENTSnrDataRx.RxIntStat)),        /* TODO */
+-      .CH.DADR.U          = (uint32)(&(LLSW_SftyDmaParkLockPosnAcqnSENTSnrDataRx.RxIntStat)),   /* TODO */
++      .CH.DADR.U          = (uint32)(&(SftyDmaParkLockPosnAcqnSENTSnrDataRx.RxIntStat)),
+       .CH.CHCFGR.B.PRSEL  = (uint32)SFTY_DMA_DRVR_PRSEL_DAISY_CHAIN,
+       .CH.CHCFGR.B.RROAT  = (uint32)SFTY_DMA_DRVR_RROAT_TRANSFER,
+       .CH.CHCFGR.B.TREL   = 1U,
+@@ -1238,8 +1227,7 @@ CONST(SftyDmaDrvrChannelCfg_Type, SFTY_DMA_DRVR_CALIB) SftyDmaDrvrChannelCfg[] =
+    {/** SENT TIMEOUT - DMA TIMESTAMP */
+       .ChIndex            = SFTY_DMA_DRVR_CH_IDX_SENT_TIMEOUT_DMATIMESTAMP,
+       .CH.SADR.U          = (uint32)(&DMA_TIME.U),
+-//    .CH.DADR.U          = (uint32)(&(SftyDmaParkLockPosnAcqnSENTSnrDataRx.TiStampDma)),       /* TODO */
+-      .CH.DADR.U          = (uint32)(&(LLSW_SftyDmaParkLockPosnAcqnSENTSnrDataRx.TiStampDma)),  /* TODO */
++      .CH.DADR.U          = (uint32)(&(SftyDmaParkLockPosnAcqnSENTSnrDataRx.TiStampDma)),
+       .CH.CHCFGR.B.PRSEL  = (uint32)SFTY_DMA_DRVR_PRSEL_HW_TRIGGER,
+       .CH.CHCFGR.B.RROAT  = (uint32)SFTY_DMA_DRVR_RROAT_TRANSFER,
+       .CH.CHCFGR.B.TREL   = 1U,
+@@ -1267,8 +1255,7 @@ CONST(SftyDmaDrvrChannelCfg_Type, SFTY_DMA_DRVR_CALIB) SftyDmaDrvrChannelCfg[] =
+    {/** SENT TIMEOUT STATUS */
+       .ChIndex            = SFTY_DMA_DRVR_CH_IDX_SENT_FAULTSTATUS,
+       .CH.SADR.U          = (uint32)(&SENT_CH9_SDS.U),
+-//    .CH.DADR.U          = (uint32)(&(SftyDmaParkLockEvlnSENTStsInfoRx.data)),                /* TODO */
+-      .CH.DADR.U          = (uint32)(&(LLSW_SftyDmaParkLockEvlnSENTStsInfoRx.data)),           /* TODO */
++      .CH.DADR.U          = (uint32)(&(SftyDmaParkLockEvlnSENTStsInfoRx.data)),
+       .CH.CHCFGR.B.PRSEL  = (uint32)SFTY_DMA_DRVR_PRSEL_DAISY_CHAIN,
+       .CH.CHCFGR.B.RROAT  = (uint32)SFTY_DMA_DRVR_RROAT_TRANSFER,
+       .CH.CHCFGR.B.TREL   = 1U,
+@@ -1296,8 +1283,7 @@ CONST(SftyDmaDrvrChannelCfg_Type, SFTY_DMA_DRVR_CALIB) SftyDmaDrvrChannelCfg[] =
+    {/** SENT TIMEOUT - DMA TIMESTAMP */
+       .ChIndex            = SFTY_DMA_DRVR_CH_IDX_SENT_FAULTSTATUS_DMATIMESTAMP,
+       .CH.SADR.U          = (uint32)(&DMA_TIME.U),
+-//    .CH.DADR.U          = (uint32)(&(SftyDmaParkLockEvlnSENTStsInfoRx.tiStamp)),           /* TODO */
+-      .CH.DADR.U          = (uint32)(&(LLSW_SftyDmaParkLockEvlnSENTStsInfoRx.tiStamp)),      /* TODO */
++      .CH.DADR.U          = (uint32)(&(SftyDmaParkLockEvlnSENTStsInfoRx.tiStamp)),
+       .CH.CHCFGR.B.PRSEL  = (uint32)SFTY_DMA_DRVR_PRSEL_HW_TRIGGER,
+       .CH.CHCFGR.B.RROAT  = (uint32)SFTY_DMA_DRVR_RROAT_TRANSFER,
+       .CH.CHCFGR.B.TREL   = 1U,
+'

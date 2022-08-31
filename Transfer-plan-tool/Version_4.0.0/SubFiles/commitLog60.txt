@@ -1,0 +1,210 @@
+b'commit 9b6c294011c76a57602f4387f944e34c1431499a
+Author: Mohammed ANDALOUSSI (JV) <mohammed.andaloussi.jv@valeo.com>
+Date:   Thu Jan 20 16:06:48 2022 +0100
+
+    $100kW-51135$ - IGBT U and W temperature use the same look up tables.
+    
+    Change-Id: I21cf7351d195b6c47e3c906eb5bb14ab5683cbc8
+
+diff --git a/src/fw_cu/Components/Safety/Sfty_Cmn/SftyE2eFpga/src/SftyE2eFpga.c b/src/fw_cu/Components/Safety/Sfty_Cmn/SftyE2eFpga/src/SftyE2eFpga.c
+index 9110d20b4..816511fe4 100644
+--- a/src/fw_cu/Components/Safety/Sfty_Cmn/SftyE2eFpga/src/SftyE2eFpga.c
++++ b/src/fw_cu/Components/Safety/Sfty_Cmn/SftyE2eFpga/src/SftyE2eFpga.c
+@@ -1408,7 +1408,7 @@ LOCAL_INLINE void SftyE2eFpga_ExtrFltSts(void)
+ /******************************************************************/
+ LOCAL_INLINE void SftyE2eFpga_ExtractTempIGBTU(void)
+ {
+-   SftyE2eFpgaTempIGBTRawVal[SYSDEF_PHA_U] = (((uint16)(SftyE2eFpgaIpduRx.Data.RxA.Id.Mx1.Sig. IgbtTempU_LSB8)) |
++   SftyE2eFpgaTempIGBTRawVal[SYSDEF_PHA_U] = (((uint16)(SftyE2eFpgaIpduRx.Data.RxA.Id.Mx1.Sig.IgbtTempU_LSB8)) |
+                                                (uint16)(((uint16)SftyE2eFpgaIpduRx.Data.RxA.Id.Mx1.Sig.IgbtTempU_MSB4) << 8U));
+    return;
+ }
+diff --git a/src/fw_cu/Components/Safety/Sfty_Inv/SftyTempEvln/include/SftyTempEvln_data.h b/src/fw_cu/Components/Safety/Sfty_Inv/SftyTempEvln/include/SftyTempEvln_data.h
+index 743f8e7dd..e82865a9e 100644
+--- a/src/fw_cu/Components/Safety/Sfty_Inv/SftyTempEvln/include/SftyTempEvln_data.h
++++ b/src/fw_cu/Components/Safety/Sfty_Inv/SftyTempEvln/include/SftyTempEvln_data.h
+@@ -111,7 +111,10 @@ extern VAR(uint8, SFTYTEMPEVLN_VAR) SftyTempEvlnDcLinkTempHwpMonrSt;
+ extern _map CONST(float32, SFTYTEMPEVLN_CALIB) SftyTempEvlnMotStatorTSnsrLoChartcTPrmL[21];
+ 
+ /*! IGBT temperature values; unit \'degree C\' */
+-extern _map CONST(float32, SFTYTEMPEVLN_CALIB) SftyTempEvlnIgbtPhyValPhU_W[21];
++extern _map CONST(float32, SFTYTEMPEVLN_CALIB) SftyTempEvlnIgbtPhyValPhU[21];
++
++/*! IGBT temperature values; unit \'degree C\' */
++extern _map CONST(float32, SFTYTEMPEVLN_CALIB) SftyTempEvlnIgbtPhyValPhW[21];
+ 
+ /*! IGBT temperature values; unit \'degree C\' */
+ extern _map CONST(float32, SFTYTEMPEVLN_CALIB) SftyTempEvlnIgbtPhyValPhV[21];
+@@ -166,12 +169,15 @@ extern CONST(uint16, SFTYTEMPEVLN_CALIB) SftyTempEvlnIgbtTempHWPRngHiThd;
+ /*! \\cpar NTC Temperature threshold for Junction temperature error monitor; unit \'-\' */
+ extern CONST(uint16, SFTYTEMPEVLN_CALIB) SftyTempEvlnIgbtTempHWPRngLoThd;  /* change this value */
+ 
+-/*! IGBT temperature raw values; unit \'V\' */
+-extern CONST(uint16, SFTYTEMPEVLN_CALIB) SftyTempEvlnIgbtRawValU_W[22];
++/*! IGBT temperature raw values; unit \'U\' */
++extern CONST(uint16, SFTYTEMPEVLN_CALIB) SftyTempEvlnIgbtRawValU[22];
+ 
+ /*! IGBT temperature raw values; unit \'V\' */
+ extern CONST(uint16, SFTYTEMPEVLN_CALIB) SftyTempEvlnIgbtRawValV[22];
+ 
++/*! IGBT temperature raw values; unit \'W\' */
++extern CONST(uint16, SFTYTEMPEVLN_CALIB) SftyTempEvlnIgbtRawValW[22];
++
+ /*! Safety Motor stator temperature sensor characteristic input voltage value; unit \'V\' */
+ extern CONST(uint16, SFTYTEMPEVLN_CALIB) SftyTempEvlnMotStatorTSnsrLoChartcVPrmA[22];
+ 
+diff --git a/src/fw_cu/Components/Safety/Sfty_Inv/SftyTempEvln/src/SftyTempEvln.c b/src/fw_cu/Components/Safety/Sfty_Inv/SftyTempEvln/src/SftyTempEvln.c
+index d7f05eaae..ad3058cf7 100644
+--- a/src/fw_cu/Components/Safety/Sfty_Inv/SftyTempEvln/src/SftyTempEvln.c
++++ b/src/fw_cu/Components/Safety/Sfty_Inv/SftyTempEvln/src/SftyTempEvln.c
+@@ -659,16 +659,16 @@ LOCAL_INLINE void SftyTempEvln_IgbtTempRawToPhyValConv(void)
+   /* ************* Source code **************** */
+ 
+    /* Convert the Igbt raw temperature value to their physical value */
+-   SftyTempEvlnIGBTPhyVal[SYSDEF_PHA_U] = SftyTempEvln_ConvRawToPhy(SftyTempEvlnIgbtPhyValPhU_W
+-                                                               ,SftyTempEvlnIgbtRawValU_W
++   SftyTempEvlnIGBTPhyVal[SYSDEF_PHA_U] = SftyTempEvln_ConvRawToPhy(SftyTempEvlnIgbtPhyValPhU
++                                                               ,SftyTempEvlnIgbtRawValU
+                                                                ,SftyTempEvlnIgbtTRawVal[SYSDEF_PHA_U]);
+ 
+    SftyTempEvlnIGBTPhyVal[SYSDEF_PHA_V] = SftyTempEvln_ConvRawToPhy(SftyTempEvlnIgbtPhyValPhV
+                                                                ,SftyTempEvlnIgbtRawValV
+                                                                ,SftyTempEvlnIgbtTRawVal[SYSDEF_PHA_V]);
+ 
+-   SftyTempEvlnIGBTPhyVal[SYSDEF_PHA_W] = SftyTempEvln_ConvRawToPhy(SftyTempEvlnIgbtPhyValPhU_W
+-                                                               ,SftyTempEvlnIgbtRawValU_W
++   SftyTempEvlnIGBTPhyVal[SYSDEF_PHA_W] = SftyTempEvln_ConvRawToPhy(SftyTempEvlnIgbtPhyValPhW
++                                                               ,SftyTempEvlnIgbtRawValW
+                                                                ,SftyTempEvlnIgbtTRawVal[SYSDEF_PHA_W]);
+ 
+    /* Determine the maximum phase temperature*/
+diff --git a/src/fw_cu/Components/Safety/Sfty_Inv/SftyTempEvln/src/SftyTempEvln_data.c b/src/fw_cu/Components/Safety/Sfty_Inv/SftyTempEvln/src/SftyTempEvln_data.c
+index 5621a9669..bb9d1c75d 100644
+--- a/src/fw_cu/Components/Safety/Sfty_Inv/SftyTempEvln/src/SftyTempEvln_data.c
++++ b/src/fw_cu/Components/Safety/Sfty_Inv/SftyTempEvln/src/SftyTempEvln_data.c
+@@ -258,21 +258,63 @@ VAR(uint8, SFTYTEMPEVLN_VAR) SftyTempEvlnIgbtTempWPlausErrMonrSt = 0U;
+ #define SFTYTEMPEVLN_START_SEC_CALIB_32
+ #include "MemMap.h"
+ 
++/*
++@@ SYMBOL = SftyTempEvlnMotStatorTSnsrLoChartcTPrmL
++@@ A2L_TYPE = PARAMETER
++@@ DATA_TYPE = FLOAT
++@@ DIMENSION = 21
++@@ DESCRIPTION = "Motor temperature sensor characteristic input temperature values"
++@@ GROUP = SftyTempEvln
++@@ END
++*/
+ /*! Safety Motor temperature sensor characteristic input temperature values; unit \'degree\' */
+ _map CONST(float32, SFTYTEMPEVLN_CALIB) SftyTempEvlnMotStatorTSnsrLoChartcTPrmL[21] =
+    {210.f,197.f,184.f,171.f,158.f,145.f,132.f,119.f,106.f,93.f,80.f,67.f,54.f,41.f,
+    28.f,15.f,2.f,-11.f,-24.f,-37.f,-50.f};
+ 
++/*
++@@ SYMBOL = SftyTempEvlnIgbtPhyValPhU
++@@ A2L_TYPE = PARAMETER
++@@ DATA_TYPE = FLOAT
++@@ DIMENSION = 21
++@@ DESCRIPTION = "IGBT temperature values U"
++@@ GROUP = SftyTempEvln
++@@ END
++*/
+ /*! IGBT temperature values; unit \'degree C\' */
+-_map CONST(float32, SFTYTEMPEVLN_CALIB) SftyTempEvlnIgbtPhyValPhU_W[21] =
++_map CONST(float32, SFTYTEMPEVLN_CALIB) SftyTempEvlnIgbtPhyValPhU[21] =
+    {171.f,161.f,151.f,141.f,131.f,121.f,111.f,101.f,91.f,81.f,70.f,59.f,48.f,37.f,
+    26.f,15.f,-4.f,-14.f,-25.f,-35.f,-45.f};
+ 
++/*
++@@ SYMBOL = SftyTempEvlnIgbtPhyValPhV
++@@ A2L_TYPE = PARAMETER
++@@ DATA_TYPE = FLOAT
++@@ DIMENSION = 21
++@@ DESCRIPTION = "IGBT temperature values V"
++@@ GROUP = SftyTempEvln
++@@ END
++*/
+ /*! IGBT temperature values; unit \'degree C\' */
+ _map CONST(float32, SFTYTEMPEVLN_CALIB) SftyTempEvlnIgbtPhyValPhV[21] =
+    {171.f,161.f,151.f,141.f,131.f,121.f,111.f,101.f,91.f,81.f,70.f,59.f,48.f,37.f,
+    26.f,15.f,-4.f,-14.f,-25.f,-35.f,-45.f};
+ 
++
++/*
++@@ SYMBOL = SftyTempEvlnIgbtPhyValPhW
++@@ A2L_TYPE = PARAMETER
++@@ DATA_TYPE = FLOAT
++@@ DIMENSION = 21
++@@ DESCRIPTION = "IGBT temperature values W"
++@@ GROUP = SftyTempEvln
++@@ END
++*/
++/*! IGBT temperature values; unit \'degree C\' */
++_map CONST(float32, SFTYTEMPEVLN_CALIB) SftyTempEvlnIgbtPhyValPhW[21] =
++   {171.f,161.f,151.f,141.f,131.f,121.f,111.f,101.f,91.f,81.f,70.f,59.f,48.f,37.f,
++   26.f,15.f,-4.f,-14.f,-25.f,-35.f,-45.f};
++
+ /*
+ @@ SYMBOL = SftyTempEvlnPlausChkTimOutinUs
+ @@ A2L_TYPE = PARAMETER
+@@ -490,16 +532,57 @@ CONST(uint16, SFTYTEMPEVLN_CALIB) SftyTempEvlnIgbtTempHWPRngHiThd =  170U;
+ /*! \\cpar NTC Temperature threshold for Junction temperature error monitor; unit \'-\' */
+ CONST(uint16, SFTYTEMPEVLN_CALIB) SftyTempEvlnIgbtTempHWPRngLoThd =  875U;  /* change this value */
+ 
+-/*! IGBT temperature raw values; unit \'V\' */
+-CONST(uint16, SFTYTEMPEVLN_CALIB) SftyTempEvlnIgbtRawValU_W[22] =
++/*
++@@ SYMBOL = SftyTempEvlnIgbtRawValU
++@@ A2L_TYPE = PARAMETER
++@@ DATA_TYPE = UWORD
++@@ DIMENSION = 22
++@@ DESCRIPTION = "IGBT temperature raw values U"
++@@ GROUP = SftyTempEvln
++@@ END
++*/
++/*! IGBT temperature raw values; unit \'U\' */
++CONST(uint16, SFTYTEMPEVLN_CALIB) SftyTempEvlnIgbtRawValU[22] =
+    {21U,428U,501U,588U,693U,818U,967U,1143U,1348U,1583U,1846U,2176U,2502U,2840U,
+    3133U,3391U,3604U,3861U,3946U,4009U,4045U,4068U};
+ 
++/*
++@@ SYMBOL = SftyTempEvlnIgbtRawValV
++@@ A2L_TYPE = PARAMETER
++@@ DATA_TYPE = UWORD
++@@ DIMENSION = 22
++@@ DESCRIPTION = "IGBT temperature raw values V"
++@@ GROUP = SftyTempEvln
++@@ END
++*/
+ /*! IGBT temperature raw values; unit \'V\' */
+ CONST(uint16, SFTYTEMPEVLN_CALIB) SftyTempEvlnIgbtRawValV[22] =
+    {21U,428U,501U,588U,693U,818U,967U,1143U,1348U,1583U,1846U,2176U,2502U,2840U,
+    3133U,3391U,3604U,3861U,3946U,4009U,4045U,4068U};
+ 
++/*
++@@ SYMBOL = SftyTempEvlnIgbtRawValW
++@@ A2L_TYPE = PARAMETER
++@@ DATA_TYPE = UWORD
++@@ DIMENSION = 22
++@@ DESCRIPTION = "IGBT temperature raw values W"
++@@ GROUP = SftyTempEvln
++@@ END
++*/
++/*! IGBT temperature raw values; unit \'W\' */
++CONST(uint16, SFTYTEMPEVLN_CALIB) SftyTempEvlnIgbtRawValW[22] =
++   {21U,428U,501U,588U,693U,818U,967U,1143U,1348U,1583U,1846U,2176U,2502U,2840U,
++   3133U,3391U,3604U,3861U,3946U,4009U,4045U,4068U};
++
++/*
++@@ SYMBOL = SftyTempEvlnMotStatorTSnsrLoChartcVPrmA
++@@ A2L_TYPE = PARAMETER
++@@ DATA_TYPE = UWORD
++@@ DIMENSION = 22
++@@ DESCRIPTION = "Motor stator temperature sensor characteristic input voltage value"
++@@ GROUP = SftyTempEvln
++@@ END
++*/
+ /*! Safety Motor stator temperature sensor characteristic input voltage value; unit \'V\' */
+ CONST(uint16, SFTYTEMPEVLN_CALIB) SftyTempEvlnMotStatorTSnsrLoChartcVPrmA[22] =
+    {21U,80U,99U,123U,155U,196U,252U,327U,428U,565U,748U,992U,1306U,1693U,
+'

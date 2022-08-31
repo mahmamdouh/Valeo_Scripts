@@ -1,0 +1,3466 @@
+b'commit f56aa8616867634506c25c88dfafceff82263ec6
+Author: Xingge XU (JV) <xingge.xu.jv@valeo.com>
+Date:   Wed Nov 24 15:43:46 2021 +0800
+
+    $100kW-46673$ - [WBS] FCT_MngFaiSw (Update) - Release SW Code - SW BSW
+    
+    Change-Id: I131568679165d9339ab33c0d69c39da34effb510
+
+diff --git a/src/fw_cu/Components/Cmn/MngFlts/BswErrDeb/src/BswErrDeb.c b/src/fw_cu/Components/Cmn/MngFlts/BswErrDeb/src/BswErrDeb.c
+index ec365dbf5..ce4b312c8 100644
+--- a/src/fw_cu/Components/Cmn/MngFlts/BswErrDeb/src/BswErrDeb.c
++++ b/src/fw_cu/Components/Cmn/MngFlts/BswErrDeb/src/BswErrDeb.c
+@@ -8,15 +8,15 @@
+ /* I DT EC R&D                                                            */
+ /*                                                                        */
+ /* First author: Christian Zebelein                                       */
+-/* Other authors:                                                         */
++/* Other authors:  Xingge Xu                                                       */
+ /* ********************************************************************** */
+-/* Copyright (C) Siemens AG 2015                                          */
++/* Copyright (C) Siemens AG 2021                                          */
+ /* All Rights Reserved. Confidential                                      */
+ /* ********************************************************************** */
+ 
+ 
+ /*!
+-* \\defgroup BswErrDeb - Drive control error debouncer
++* \\defgroup BswErrDeb - Core0 error debouncer
+ * \\ingroup SystemServices
+ * @{
+ */
+@@ -202,37 +202,7 @@ const boolean BswErrDebObdDtcVisy[DEM_NUMBER_OF_EVENT_CLASSES] =
+ /* !! NOTE !! This list must correspond to the ConstantSpecification elements of the BswErrDeb.arxml !! */
+ static const ErrDeb_ErrIdType BswErrDebErrIdLut[] =
+ {
+-   ERR_ID_CAN_BUS_OFF,
+-   /* comments code for new FM v1.1.0*/
+-   /*
+-   ERR_ID_CAN_TI_OUT_BMS_20,
+-   ERR_ID_CAN_TI_OUT_DIAGNOSE_01,
+-   ERR_ID_CAN_TI_OUT_ESC_51,
+-   ERR_ID_CAN_TI_OUT_ESP_20,
+-   ERR_ID_CAN_TI_OUT_ETM_01,
+-   ERR_ID_CAN_TI_OUT_GLB,
+-   ERR_ID_CAN_TI_OUT_IPA_02,
+-   ERR_ID_CAN_TI_OUT_KLEMMEN_STATUS_01,
+-   ERR_ID_CAN_TI_OUT_KLEMMEN_STATUS_02,
+-   ERR_ID_CAN_TI_OUT_KLIMA_SENSOR_02,
+-   ERR_ID_CAN_TI_OUT_MOTOR_54,
+-   ERR_ID_CAN_TI_OUT_MOTOR_57,
+-   ERR_ID_CAN_TI_OUT_MSG_HYB_30,
+-   0U / *ERR_ID_CAN_TI_OUT_ORU_01* /,
+-   ERR_ID_CAN_TI_OUT_SOK_NOAUTHENTICTIME_01,
+-   ERR_ID_CAN_TI_OUT_SYSTEMINFO_01,
+-   ERR_ID_CAN_TI_OUT_VIN_01,
+-   ERR_ID_CAN_TI_OUT_ZEITMASTER_01,
+-   ERR_ID_IMO_DEACTVD,
+-   ERR_ID_IMO_LOCKD,
+-   ERR_ID_IMO_NVM_INVLD,
+-   ERR_ID_IMO_PWR_CLASS_FLT,
+-   ERR_ID_INV_WHL_SPD_HW_OFFS,
+-   ERR_ID_INV_WHL_SPD_HW_PLAUS,
+-   ERR_ID_INV_WHL_SPD_STEP_CHG,
+-   ERR_ID_VW_APPL_VRNT_PLAUS,
+-   ERR_ID_IMO_PLTPARK_OVRSPD,
+-   ERR_ID_SECDIAG_ROLE_UNLOCKED*/
++   ERR_ID_CAN_BUS_OFF
+ };
+ 
+ static const uint32 BswErrDebErrIdLutSize = sizeof(BswErrDebErrIdLut)/sizeof(ErrDeb_ErrIdType);
+@@ -240,22 +210,7 @@ static const uint32 BswErrDebErrIdLutSize = sizeof(BswErrDebErrIdLut)/sizeof(Err
+ #if 0 /* comments code for new FM v1.1.0*/
+ static const ErrDeb_FctIdType BswErrDebFctIdLut[] =
+ {
+-         /* comments code for new FM v1.1.0*/
+          0
+-         /*
+-   FCT_ID_NMAXCTL_VW,
+-   FCT_ID_NMECOSCD2T2_VW,
+-   FCT_ID_NMECPDT2_VW,
+-   FCT_ID_NMINCTL_VW,
+-   FCT_ID_NWHLHW_VW,
+-   FCT_ID_NWHLHWOFS_VW,
+-   FCT_ID_NWHLHWPLAUS_VW,
+-   FCT_ID_NWHLHWSTEPCHG_VW,
+-   FCT_ID_TQSP_VW,
+-   FCT_ID_STCALVARPLAUS_VW,
+-   FCT_ID_CAN_SIG_INVLD_EMX_ISTDREHZAHL,
+-   FCT_ID_ESP_V_SIGNAL_INVLD,
+-   FCT_ID_TQ_REQ_INVLD,*/
+ };
+ 
+ static const uint32 BswErrDebFctIdLutSize = sizeof(BswErrDebFctIdLut)/sizeof(ErrDeb_FctIdType);
+@@ -273,7 +228,7 @@ static const uint32 BswErrDebFctIdLutSize = sizeof(BswErrDebFctIdLut)/sizeof(Err
+ 
+ #define BswErrDeb_START_SEC_CODE
+ #include "MemMap.h"
+-
++/*Traceability: 100kW-32801*/
+ LOCAL_INLINE void BswErrDeb_DemSetEventSts(uint16 id, uint8 sts)
+ {
+    /* TODO: Use only SWC if possible and only if we can provide the Event ID as an argument to the function!
+@@ -291,7 +246,7 @@ LOCAL_INLINE void BswErrDeb_DemSetEventSts(uint16 id, uint8 sts)
+    }
+    return;
+ }
+-
++/*Traceability: 100kW-32802*/
+ LOCAL_INLINE void BswErrDeb_ReportFlts(void)
+ {
+    uint32 i;
+@@ -329,7 +284,7 @@ LOCAL_INLINE void BswErrDeb_ReportFlts(void)
+    }
+ }
+ 
+-
++/*Traceability: 100kW-32812*/
+ LOCAL_INLINE void BswErrDeb_FltRstKl15(void)
+ {
+    boolean TaskRstSts;
+@@ -352,7 +307,7 @@ LOCAL_INLINE void BswErrDeb_FltRstKl15(void)
+       BswErrDebFltRstAckKl15 = ErrDebFltRstReqKl15;
+    }
+ }
+-
++/*Traceability: 100kW-32813*/
+ LOCAL_INLINE void BswErrDeb_FltRstClrDtc(void)
+ {
+    boolean TaskRstSts;
+@@ -402,7 +357,7 @@ LOCAL_INLINE void BswErrDeb_FltRstSecu(void)
+       BswErrDebFltRstAckSecu = ErrDebFltRstReqSecu;
+    }
+ }
+-
++/*Traceability: 100kW-32814*/
+ LOCAL_INLINE void BswErrDeb_FltRstHandler(void)
+ {
+    /* Check reset requests */
+@@ -421,7 +376,7 @@ LOCAL_INLINE void BswErrDeb_FltRstHandler(void)
+ 
+    return;
+ }
+-
++/*Traceability: 100kW-32939*/
+ LOCAL_INLINE void BswErrDeb_NvmHandler(void)
+ {
+    if(ErrDebNvmWrReq != ErrDebNvmWrAck)
+@@ -482,7 +437,7 @@ void BswErrDeb_SetDtcSuppression(void)
+ 
+    return;
+ }
+-
++/*Traceability: 100kW-32828*/
+ void BswErrDeb_SetEventStatus(ErrDeb_ErrIdType ErrId, ErrDeb_MonrStsType MonrSts)
+ {
+    if(ErrId <= ERR_DEB_FLT_CNT)
+@@ -490,7 +445,7 @@ void BswErrDeb_SetEventStatus(ErrDeb_ErrIdType ErrId, ErrDeb_MonrStsType MonrSts
+       ErrDebFltCfg[ErrId].FltData->MonrStsAsync = MonrSts;
+    }
+ }
+-
++/*Traceability: 100kW-32829*/
+ ErrDeb_FctInhbnStsType BswErrDeb_GetLockedStatus(ErrDeb_ErrIdType ErrId)
+ {
+    return ErrDebFltCfg[ErrId].FltData->LockedSts;
+@@ -500,7 +455,7 @@ ErrDeb_FltStsType BswErrDeb_GetFaultStatus1(ErrDeb_ErrIdType ErrId)
+ {
+    return ErrDebFltCfg[ErrId].FltData->FltSts1QualSts;
+ }
+-
++/*Traceability: 100kW-32830*/
+ void BswErrDeb_SetFltReportLockClrDtc(void)
+ {
+    /* This is set before clearing the DTCs to prevent fault reports until after
+@@ -536,25 +491,19 @@ boolean BswErrDeb_SecuFltRstFinished(void)
+ {
+    return (boolean)(ErrDebFltRstReqSecu == BswErrDebFltRstAckSecu);
+ }
+-
++/*Traceability: 100kW-32834*/
+ void BswErrDeb_MainFunctionFltRst (void)
+ {
+    BswErrDeb_FltRstHandler();
+    BswErrDeb_NvmHandler();
+ }
+-
++/*Traceability: 100kW-32835*/
+ void BswErrDeb_MainFunctionFltDeb (void)
+ {
+-#if 0/* comments code for new FM v1.1.0*/
+-   /* New approach for tDiagStart_KL15 */
+-   BswErrDeb_SetEventStatus(ERR_ID_ENA_CDN_CAN_T_DIAG_START_KL15, ERR_DEB_MONR_STS_PASSED);
+-#endif
+-   
+-   
+    ErrDeb_DebFlts(ERR_DEB_TASK_ID_CORE0_1MS, BswErrDebFctInhbnSts.U);
+    ErrDeb_FidColl(ERR_DEB_TASK_ID_CORE0_1MS, BswErrDebFctInhbnSts.U, FALSE);
+ }
+-
++/*Traceability: 100kW-32836*/
+ void BswErrDeb_MainFunctionFltColl (void)
+ {
+    /* Only report the faults if the ClearDTC is not currently ongoing. */
+@@ -564,17 +513,17 @@ void BswErrDeb_MainFunctionFltColl (void)
+       BswErrDeb_ReportFlts();
+    }
+ }
+-
++/*Traceability: 100kW-32770*/
+ void BswErrDeb_PreInit(void)
+ {
+    ErrDeb_PreInitFlts(ERR_DEB_TASK_ID_CORE0_1MS);
+ }
+-
++/*Traceability: 100kW-32774*/
+ void BswErrDeb_Init(void)
+ {
+    ErrDeb_InitFlts(ERR_DEB_TASK_ID_CORE0_1MS);
+ }
+-
++/*Traceability: 100kW-32775*/
+ void BswErrDeb_PreRun(void)
+ {
+    ErrDeb_FidColl(ERR_DEB_TASK_ID_CORE0_1MS, BswErrDebFctInhbnSts.U, FALSE);
+@@ -657,14 +606,8 @@ FUNC(Std_ReturnType, RTE_CODE) BswErrDeb_RteSetEventDisabled (Dem_EventIdType Ev
+ {
+ } /* FUNC(Std_ReturnType, RTE_CODE) BswErrDeb_RteSetEventDisabled (Dem_EventIdType EventId) */
+ #endif
+-/******************************************************************************
+- * \\brief   Name:           BswErrDeb_EventStatusChangedCallback
+- * \
+       Description:    Sets the WIR bit if CDTC bit is set 0->1
+- * \\param   [in] Dem_EventIdType: Event Identifier
+- * \\param   [in] EventStatusOld: Old event status
+- * \\param   [in] EventStatusNew: Actual event status
+- * \\return  void
+- *****************************************************************************/
++
++
+ void BswErrDeb_EventStatusChangedCallback(Dem_EventIdType EventId,
+                                           Dem_EventStatusExtendedType EventStatusOld,
+                                           Dem_EventStatusExtendedType EventStatusNew)
+diff --git a/test/50_L5_Units_Parts/10_SWUT/40_BSW/30_packages/BswErrDeb/BswErrDeb.ptu b/test/50_L5_Units_Parts/10_SWUT/40_BSW/30_packages/BswErrDeb/BswErrDeb.ptu
+index de3021b02..a26993655 100644
+--- a/test/50_L5_Units_Parts/10_SWUT/40_BSW/30_packages/BswErrDeb/BswErrDeb.ptu
++++ b/test/50_L5_Units_Parts/10_SWUT/40_BSW/30_packages/BswErrDeb/BswErrDeb.ptu
+@@ -10,7 +10,15 @@
+ --*                                                                              *
+ --********************************************************************************
+ HEADER BswErrDeb, , 
+-
++##ifndef ERRDEB_PRIV_H
++##define ERRDEB_PRIV_H
++##endif
++##include "ErrDeb.h"
++#void ErrDeb_InitFlts(ErrDeb_TaskIdType taskId);
++#void ErrDeb_FidColl(ErrDeb_TaskIdType taskId, ErrDeb_FctIdBitFieUType fctInhbnSts, boolean useSftyMask);
++#void ErrDeb_DebFlts(ErrDeb_TaskIdType taskId, const ErrDeb_FctIdBitFieUType fctInhbnStsAct);
++#void ErrDeb_PreInitFlts(ErrDeb_TaskIdType TaskId);
++#boolean ErrDeb_GetBit(const uint32 BitFie[], uint32 Bit);
+ --------------------------------------------------------------------------------
+ --
+ -- INCLUDED FILE DECLARATIONS (-INCLUDED OPTION)
+@@ -28,7 +36,7 @@ BEGIN
+ -- STUB DECLARATIONS OF THE TESTED OR INTEGRATED UNITS
+ --
+ --------------------------------------------------------------------------------
+-
++    #ErrDeb_FltDataType ErrDebFltData_CAN_BUS_OFF;
+     #uint8 Dem_OBDDTCSuppression[((104+7)/8)]; /* ../../../../../../src/fw_cu/Components/Extern/AutoCore/eclipse/plugins/Dem_TS_TxDxM6I3R0/include/Dem_Int.h */
+     #uint8 Dem_UDSDTCSuppression[((104+7)/8)]; /* ../../../../../../src/fw_cu/Components/Extern/AutoCore/eclipse/plugins/Dem_TS_TxDxM6I3R0/include/Dem_Int.h */
+     #Dem_EventDescType Dem_EventDesc[104]; /* ../../../../../../src/fw_cu/Components/Extern/AutoCore/eclipse/plugins/Dem_TS_TxDxM6I3R0/include/Dem_Int.h */
+@@ -51,6 +59,7 @@ BEGIN
+     #ErrDeb_TaskDataType ErrDebTaskData[3]; /* ../../../../../../src/fw_cu/Components/Cmn/MngFlts/ErrDeb/include/ErrDeb_data.h */
+     #ErrDeb_FltGrpPrmType ErrDebFltGrpPrm[32]; /* ../../../../../../src/fw_cu/Components/Cmn/MngFlts/ErrDeb/include/ErrDeb_cfg.h */
+ 
++
+ DEFINE STUB BswErrDeb_c
+     #Std_ReturnType NvM_ASR40_WriteBlock(NvM_ASR40_BlockIdType  _in BlockId, void * _in NvM_SrcPtr); /* ../../../../../../src/fw_cu/Components/Extern/AutoCore/eclipse/plugins/NvM_TS_TxDxM6I17R0/include/NvM_BSW.h */
+     #Std_ReturnType NvM_ASR40_SetRamBlockStatus(NvM_ASR40_BlockIdType  _in BlockId, boolean  _in BlockChanged); /* ../../../../../../src/fw_cu/Components/Extern/AutoCore/eclipse/plugins/NvM_TS_TxDxM6I17R0/include/NvM_BSW.h */
+@@ -59,13 +68,13 @@ DEFINE STUB BswErrDeb_c
+     #Dem_EventKindType Dem_GbiEventKind(Dem_EventIdType  _in EventId); /* ../../../../../../src/fw_cu/Components/Extern/AutoCore/eclipse/plugins/Dem_TS_TxDxM6I3R0/include/Dem_Int.h */
+     #int __insert(int a, int b, int c, int d);
+     #unsigned int __extru(int a, int b, int c);
++#void ErrDeb_InitFlts(ErrDeb_TaskIdType _in taskId);
++    #void ErrDeb_FidColl(ErrDeb_TaskIdType _in taskId, ErrDeb_FctIdBitFieUType _in fctInhbnSts, boolean _in useSftyMask);
++    #void ErrDeb_DebFlts(ErrDeb_TaskIdType  _in  taskId, const ErrDeb_FctIdBitFieUType  _in  fctInhbnStsAct);
++    #void ErrDeb_PreInitFlts(ErrDeb_TaskIdType _in TaskId);
++    #boolean ErrDeb_GetBit( uint32 _in *BitFie, uint32 _in Bit);
+ END DEFINE
+ 
+---------------------------------------------------------------------------------
+---
+--- ENVIRONMENTS DECLARATIONS
+---
+---------------------------------------------------------------------------------
+ 
+ --------------------------------------------------------------------------------
+ -- INCLUDED FILE ENVIRONNEMENT
+@@ -79,7 +88,9 @@ ENVIRONMENT ENV_BswErrDeb_c
+   VAR BswErrDebDemReports,\t\tinit = 0,\t\tev = init
+   VAR BswErrDebFltRstAckClrDtc,\t\tinit = 0,\t\tev = init
+   VAR BswErrDebFltRstAckKl15,\t\tinit = 0,\t\tev = init
+---  VAR BswErrDebFctInhbnSts,\t\tinit = { U => { others => 0 } },\t\tev = init -- C-Union: We need  to stimulate BswErrDebFctInhbnSts.U and BswErrDebFctInhbnSts.B
++  VAR BswErrDebFctInhbnSts,\t\tinit = { U => 0, others =>{ 0 } },\t\tev = init -- C-Union: We need  to stimulate BswErrDebFctInhbnSts.U and BswErrDebFctInhbnSts.B
++--  VAR BswErrDebFctInhbnSts.U        init = 0,\t\tev = init
++--  VAR BswErrDebFctInhbnSts.B        init = 0,\t\tev = init
+ END ENVIRONMENT -- ENV_BswErrDeb_c
+ USE ENV_BswErrDeb_c
+ 
+@@ -101,9 +112,9 @@ SERVICE_TYPE inline
+ 
+         ELEMENT
+ COMMENT*************************************************************************
+-COMMENT ** Author (mschrein)
+-COMMENT ** Test Case modification date (2019-05-24)
+-COMMENT ** Verifies GLIB-58193
++COMMENT ** Author (Xingge)
++COMMENT ** Test Case modification date (2021-11-16)
++COMMENT ** Verifies 100kW-32812
+ COMMENT **
+ COMMENT ** Test Technique:
+ COMMENT **  Functional
+@@ -151,9 +162,9 @@ COMMENT ************************************************************************
+ 
+         ELEMENT
+ COMMENT*************************************************************************
+-COMMENT ** Author (mschrein)
+-COMMENT ** Test Case modification date (2019-05-27)
+-COMMENT ** Verifies GLIB-58193
++COMMENT ** Author (Xingge)
++COMMENT ** Test Case modification date (2021-11-16)
++COMMENT ** Verifies 100kW-32812
+ COMMENT **
+ COMMENT ** Test Technique:
+ COMMENT **  Functional
+@@ -211,7 +222,7 @@ SERVICE_TYPE extern
+ 
+         ELEMENT
+ COMMENT*************************************************************************
+-COMMENT ** Author (mschrein)
++COMMENT ** Author (Xingge)
+ COMMENT ** Test Case modification date (2019-05-27)
+ COMMENT ** Verifies GLIB-60276
+ COMMENT **
+@@ -262,9 +273,9 @@ SERVICE_TYPE extern
+ 
+         ELEMENT
+ COMMENT*************************************************************************
+-COMMENT ** Author (mschrein)
+-COMMENT ** Test Case modification date (2019-05-27)
+-COMMENT ** Verifies GLIB-58343
++COMMENT ** Author (Xingge)
++COMMENT ** Test Case modification date (2021-11-16)
++COMMENT ** Verifies 100kW-32774
+ COMMENT **
+ COMMENT ** Test Technique:
+ COMMENT **  Functional
+@@ -300,22 +311,19 @@ COMMENT ************************************************************************
+ 
+ END SERVICE -- BswErrDeb_Init
+ 
+-
+ --------------------------------------------------------------------------------
+ -- Declaration of the service BswErrDeb_PreRun
+ --------------------------------------------------------------------------------
+ SERVICE BswErrDeb_PreRun
+ SERVICE_TYPE extern
+-
+-
+     TEST BswErrDeb_PreRun_FUNC.1
+     FAMILY nominal
+ 
+         ELEMENT
+ COMMENT*************************************************************************
+-COMMENT ** Author (mschrein)
+-COMMENT ** Test Case modification date (2019-05-27)
+-COMMENT ** Verifies GLIB-58344
++COMMENT ** Author (Xingge)
++COMMENT ** Test Case modification date (2021-11-16)
++COMMENT ** Verifies 100kW-32775
+ COMMENT **
+ COMMENT ** Test Technique:
+ COMMENT **  Functional
+@@ -355,56 +363,40 @@ END SERVICE -- BswErrDeb_PreRun
+ 
+ 
+ --------------------------------------------------------------------------------
+--- Declaration of the service BswErrDeb_MainFunctionFltRst
++-- Declaration of the service BswErrDeb_FltRstHandler
+ --------------------------------------------------------------------------------
+-SERVICE BswErrDeb_MainFunctionFltRst
+-SERVICE_TYPE extern
++SERVICE BswErrDeb_FltRstHandler
++SERVICE_TYPE inline
+ 
+ 
+-    TEST BswErrDeb_MainFunctionFltRst_FUNC.1
++    TEST BswErrDeb_FltRstHandler_FUNC.1
+     FAMILY nominal
+ 
+         ELEMENT
+ COMMENT*************************************************************************
+-COMMENT ** Author (mschrein)
+-COMMENT ** Test Case modification date (2019-05-29)
+-COMMENT ** Verifies GLIB-58338
++COMMENT ** Author (Xingge)
++COMMENT ** Test Case modification date (2021-11-16)
++COMMENT ** Verifies 100kW-32814
+ COMMENT **
+ COMMENT ** Test Technique:
+ COMMENT **  Functional
+ COMMENT **
+ COMMENT ** Description:
+-COMMENT **  This test case verifies, if the function BswErrDeb_MainFunctionFltRst() with the following input variables
+-COMMENT **  - BswErrDebFctInhbnSts.B.FctIdCanSigInvldAsg = ERR_DEB_FCT_INHBN_INACTIVE
+-COMMENT **  - BswErrDebFctInhbnSts.B.FctIdCanSigInvldBcm = ERR_DEB_FCT_INHBN_INACTIVE
+-COMMENT **  - BswErrDebFctInhbnSts.B.FctIdCanSigInvldEsp = ERR_DEB_FCT_INHBN_INACTIVE
+-COMMENT **  - BswErrDebFctInhbnSts.B.FctIdCanSigInvldIcas1 = ERR_DEB_FCT_INHBN_INACTIVE
+-COMMENT **  - BswErrDebFctInhbnSts.B.FctIdCanTDiagStartKl15 = ERR_DEB_FCT_INHBN_INACTIVE
+-COMMENT **  - BswErrDebFctInhbnSts.B.FctIdCanTDiagStartKl30Ov = ERR_DEB_FCT_INHBN_INACTIVE
+-COMMENT **  - BswErrDebFctInhbnSts.B.FctIdCanTDiagStartKl30Uv = ERR_DEB_FCT_INHBN_INACTIVE
+-COMMENT **  - BswErrDebFctInhbnSts.B.FctIdCanTDiagStartTiOutGlb = ERR_DEB_FCT_INHBN_INACTIVE
+-COMMENT **  calls the following functions
+-COMMENT **  - BswErrDeb_FltRstHandler()
+-COMMENT **  - BswErrDeb_NvmHandler()
+-COMMENT **  - BswErrDeb_SetEventStatus(ERR_ID_CAN_SIG_INVLD_ASG, ERR_DEB_MONR_STS_PASSED)
+-COMMENT **  - BswErrDeb_SetEventStatus(ERR_ID_CAN_SIG_INVLD_BCM, ERR_DEB_MONR_STS_PASSED)
+-COMMENT **  - BswErrDeb_SetEventStatus(ERR_ID_CAN_SIG_INVLD_ESP, ERR_DEB_MONR_STS_PASSED)
+-COMMENT **  - BswErrDeb_SetEventStatus(ERR_ID_CAN_SIG_INVLD_ICAS1, ERR_DEB_MONR_STS_PASSED)
+-COMMENT **  - BswErrDeb_SetEventStatus(ERR_ID_ENA_CDN_CAN_T_DIAG_START_KL15, ERR_DEB_MONR_STS_PASSED)
+-COMMENT **  - BswErrDeb_SetEventStatus(ERR_ID_ENA_CDN_CAN_T_DIAG_START_KL30_OV, ERR_DEB_MONR_STS_PASSED)
+-COMMENT **  - BswErrDeb_SetEventStatus(ERR_ID_ENA_CDN_CAN_T_DIAG_START_KL30_UV, ERR_DEB_MONR_STS_PASSED)
+-COMMENT **  - BswErrDeb_SetEventStatus(ERR_ID_ENA_CDN_CAN_T_DIAG_START_TI_OUT_GLB, ERR_DEB_MONR_STS_PASSED)
+-COMMENT **  Note: For the BswErrDeb_FltRstHandler() function call  test case
+-COMMENT **  BswErrDeb_FltRstHandler_FUNC.1 and for the BswErrDeb_NvmHandler() function call  test case
+-COMMENT **  BswErrDeb_NvmHandler_FUNC.3 are reused. For the BswErrDeb_SetEventStatus() function call test case
+-COMMENT **  BswErrDeb_SetEventStatus_FUNC.1 is reused and therefore the following output variable has to be set
+-COMMENT **  - ErrDebFltCfg[ErrId].FltData->MonrStsAsync = ERR_DEB_MONR_STS_PASSED
++COMMENT **  This test case verifies, if the function BswErrDeb_FltRstHandler() with the following input variables
++COMMENT **  - ErrDebFltRstReqKl15 = 0
++COMMENT **  - BswErrDebFltRstAckKl15 = 1
++COMMENT **  - ErrDebFltRstReqClrDtc = 1
++COMMENT **  - BswErrDebFltRstAckClrDtc = 1
++COMMENT **  - ErrDebFltRstReqSecu = 2
++COMMENT **  - BswErrDebFltRstAckSecu = 2
++COMMENT **  calls the following function
++COMMENT **  - BswErrDeb_FltRstKl15()
++COMMENT **  Note: For the BswErrDeb_FltRstKl15() function call  test case
++COMMENT **  BswErrDeb_FltRstKl15_FUNC.1 is reused and therefore the following output variable has to be set
++COMMENT **  - BswErrDebFltRstAckKl15 = 0
+ COMMENT*************************************************************************
+ COMMENT ** Global variables
+ COMMENT *************************************************************************
+-\tVAR BswErrDebFctInhbnSts.B.FctIdStandbyMode, init = ERR_DEB_FCT_INHBN_INACTIVE, ev = init
+-\tVAR BswErrDebFctInhbnSts.B.FctIdFailureMode, init = ERR_DEB_FCT_INHBN_INACTIVE, ev = init
+-
+ \tVAR ErrDebFltRstReqKl15 , init = 0, ev = init
+ \tVAR BswErrDebFltRstAckKl15  , init = 1, ev = ErrDebFltRstReqKl15
+ \tVAR ErrDebFltRstReqClrDtc , init = 1, ev = init
+@@ -414,15 +406,6 @@ COMMENT ************************************************************************
+ \tVAR ErrDebTaskData[0].FltRstAckKl15, init = ErrDebFltRstReqKl15, ev = init
+ \tVAR ErrDebTaskData[1].FltRstAckKl15, init = ErrDebFltRstReqKl15, ev = init
+ \tVAR ErrDebTaskData[2].FltRstAckKl15, init = ErrDebFltRstReqKl15, ev = init
+-
+-\tVAR ErrDebNvmWrReq, init = 0, ev = init
+-\tVAR ErrDebNvmWrAck, init = 0, ev = init
+-\tVAR ErrDebNvmRdReq, init = 1, ev = init
+-\tVAR ErrDebNvmRdAck, init = 0, ev = ErrDebNvmRdReq
+-
+-\tVAR ErrDebFltCfg[ERR_ID_CAN_BUS_OFF].FltData->MonrStsAsync, init = ERR_DEB_MONR_STS_INACTIVE, ev = ERR_DEB_MONR_STS_PASSED
+-\tVAR ErrDebFltCfg[ERR_ID_CAN_TOUT_GLB].FltData->MonrStsAsync, init = ERR_DEB_MONR_STS_INACTIVE, ev = ERR_DEB_MONR_STS_PASSED
+-
+ COMMENT *************************************************************************
+         COMMENT ** Tester defined variables
+ COMMENT ***********************************************************************
+@@ -434,80 +417,53 @@ COMMENT ************************************************************************
+ COMMENT *************************************************************************
+        COMMENT ** STUB definitions
+ COMMENT *************************************************************************
+-\tCOMMENT None.
++\tCOMMENT ** None.
+ COMMENT*************************************************************************
+        COMMENT ** Return value
+ COMMENT *************************************************************************
+-\tCOMMENT ** None
+-COMMENT *************************************************************************
+-        #BswErrDeb_MainFunctionFltRst();
+-        #BswErrDeb_SetEventStatus(ERR_ID_CAN_BUS_OFF,ERR_DEB_MONR_STS_PASSED);
+-        #BswErrDeb_SetEventStatus(ERR_ID_CAN_TOUT_GLB,ERR_DEB_MONR_STS_PASSED);
++       COMMENT None.
++        #BswErrDeb_FltRstHandler();
+         END ELEMENT
+ 
+-    END TEST -- TEST BswErrDeb_MainFunctionFltRst_FUNC.1
++    END TEST -- TEST BswErrDeb_FltRstHandler_FUNC.1
+ 
+-    TEST BswErrDeb_MainFunctionFltRst_FUNC.2
++   TEST BswErrDeb_FltRstHandler_FUNC.2
+     FAMILY nominal
+ 
+         ELEMENT
+ COMMENT*************************************************************************
+-COMMENT ** Author (mschrein)
+-COMMENT ** Test Case modification date (2019-05-29)
+-COMMENT ** Verifies GLIB-58338
++COMMENT ** Author (Xingge)
++COMMENT ** Test Case modification date (2021-11-16)
++COMMENT ** Verifies 100kW-32814
+ COMMENT **
+ COMMENT ** Test Technique:
+ COMMENT **  Functional
+ COMMENT **
+ COMMENT ** Description:
+-COMMENT **  This test case verifies, if the function BswErrDeb_MainFunctionFltRst() with the following input variables
+-COMMENT **  - BswErrDebFctInhbnSts.B.FctIdCanSigInvldAsg = ERR_DEB_FCT_INHBN_ACTIVE
+-COMMENT **  - BswErrDebFctInhbnSts.B.FctIdCanSigInvldBcm = ERR_DEB_FCT_INHBN_ACTIVE
+-COMMENT **  - BswErrDebFctInhbnSts.B.FctIdCanSigInvldEsp = ERR_DEB_FCT_INHBN_ACTIVE
+-COMMENT **  - BswErrDebFctInhbnSts.B.FctIdCanSigInvldIcas1 = ERR_DEB_FCT_INHBN_ACTIVE
+-COMMENT **  - BswErrDebFctInhbnSts.B.FctIdCanTDiagStartKl15 = ERR_DEB_FCT_INHBN_ACTIVE
+-COMMENT **  - BswErrDebFctInhbnSts.B.FctIdCanTDiagStartKl30Ov = ERR_DEB_FCT_INHBN_ACTIVE
+-COMMENT **  - BswErrDebFctInhbnSts.B.FctIdCanTDiagStartKl30Uv = ERR_DEB_FCT_INHBN_ACTIVE
+-COMMENT **  - BswErrDebFctInhbnSts.B.FctIdCanTDiagStartTiOutGlb = ERR_DEB_FCT_INHBN_ACTIVE
+-COMMENT **  calls the following functions
+-COMMENT **  - BswErrDeb_FltRstHandler()
+-COMMENT **  - BswErrDeb_NvmHandler()
+-COMMENT **  - BswErrDeb_SetEventStatus(ERR_ID_CAN_SIG_INVLD_ASG, ERR_DEB_MONR_STS_FAILED)
+-COMMENT **  - BswErrDeb_SetEventStatus(ERR_ID_CAN_SIG_INVLD_BCM, ERR_DEB_MONR_STS_FAILED)
+-COMMENT **  - BswErrDeb_SetEventStatus(ERR_ID_CAN_SIG_INVLD_ESP, ERR_DEB_MONR_STS_FAILED)
+-COMMENT **  - BswErrDeb_SetEventStatus(ERR_ID_CAN_SIG_INVLD_ICAS1, ERR_DEB_MONR_STS_FAILED)
+-COMMENT **  - BswErrDeb_SetEventStatus(ERR_ID_ENA_CDN_CAN_T_DIAG_START_KL15, ERR_DEB_MONR_STS_FAILED)
+-COMMENT **  - BswErrDeb_SetEventStatus(ERR_ID_ENA_CDN_CAN_T_DIAG_START_KL30_OV, ERR_DEB_MONR_STS_FAILED)
+-COMMENT **  - BswErrDeb_SetEventStatus(ERR_ID_ENA_CDN_CAN_T_DIAG_START_KL30_UV, ERR_DEB_MONR_STS_FAILED)
+-COMMENT **  - BswErrDeb_SetEventStatus(ERR_ID_ENA_CDN_CAN_T_DIAG_START_TI_OUT_GLB, ERR_DEB_MONR_STS_FAILED)
+-COMMENT **  Note: For the BswErrDeb_FltRstHandler() function call  test case
+-COMMENT **  BswErrDeb_FltRstHandler_FUNC.1 and for the BswErrDeb_NvmHandler() function call  test case
+-COMMENT **  BswErrDeb_NvmHandler_FUNC.3 are reused. For the BswErrDeb_SetEventStatus() function call test case
+-COMMENT **  BswErrDeb_SetEventStatus_FUNC.1 is reused and therefore the following output variable has to be set
+-COMMENT **  - ErrDebFltCfg[ErrId].FltData->MonrStsAsync = ERR_DEB_MONR_STS_FAILED
++COMMENT **  This test case verifies, if the function BswErrDeb_FltRstHandler() with the following input variables
++COMMENT **  - ErrDebFltRstReqKl15 = 0
++COMMENT **  - BswErrDebFltRstAckKl15 = 0
++COMMENT **  - ErrDebFltRstReqClrDtc = 1
++COMMENT **  - BswErrDebFltRstAckClrDtc = 2
++COMMENT **  - ErrDebFltRstReqSecu = 2
++COMMENT **  - BswErrDebFltRstAckSecu = 2
++COMMENT **  calls the following function
++COMMENT **  - BswErrDeb_FltRstClrDtc()
++COMMENT **  Note: For the BswErrDeb_FltRstClrDtc() function call  test case
++COMMENT **  BswErrDeb_FltRstClrDtc_FUNC.1 is reused and therefore the following output variable has to be set
++COMMENT **  - BswErrDebFltRstAckClrDtc = 1
+ COMMENT*************************************************************************
+ COMMENT ** Global variables
+ COMMENT *************************************************************************
+-\tVAR BswErrDebFctInhbnSts.B.FctIdStandbyMode, init = ERR_DEB_FCT_INHBN_INACTIVE, ev = init
+-\tVAR BswErrDebFctInhbnSts.B.FctIdFailureMode, init = ERR_DEB_FCT_INHBN_INACTIVE, ev = init
+-
+ \tVAR ErrDebFltRstReqKl15 , init = 0, ev = init
+-\tVAR BswErrDebFltRstAckKl15  , init = 1, ev = ErrDebFltRstReqKl15
++\tVAR BswErrDebFltRstAckKl15  , init = 0, ev = init
+ \tVAR ErrDebFltRstReqClrDtc , init = 1, ev = init
+-\tVAR BswErrDebFltRstAckClrDtc , init = 1, ev = init
++\tVAR BswErrDebFltRstAckClrDtc , init = 2, ev = ErrDebFltRstReqClrDtc
+ \tVAR ErrDebFltRstReqSecu , init = 2, ev = init
+ \tVAR BswErrDebFltRstAckSecu , init = 2, ev = init
+-\tVAR ErrDebTaskData[0].FltRstAckKl15, init = ErrDebFltRstReqKl15, ev = init
+-\tVAR ErrDebTaskData[1].FltRstAckKl15, init = ErrDebFltRstReqKl15, ev = init
+-\tVAR ErrDebTaskData[2].FltRstAckKl15, init = ErrDebFltRstReqKl15, ev = init
+-
+-\tVAR ErrDebNvmWrReq, init = 0, ev = init
+-\tVAR ErrDebNvmWrAck, init = 0, ev = init
+-\tVAR ErrDebNvmRdReq, init = 1, ev = init
+-\tVAR ErrDebNvmRdAck, init = 0, ev = ErrDebNvmRdReq
+-
+-\tVAR ErrDebFltCfg[ERR_ID_CAN_BUS_OFF].FltData->MonrStsAsync, init = ERR_DEB_MONR_STS_INACTIVE, ev = ERR_DEB_MONR_STS_FAILED
+-\tVAR ErrDebFltCfg[ERR_ID_CAN_TOUT_GLB].FltData->MonrStsAsync, init = ERR_DEB_MONR_STS_INACTIVE, ev = ERR_DEB_MONR_STS_FAILED
++\tVAR ErrDebTaskData[0].FltRstAckClrDtc, init = ErrDebFltRstReqClrDtc, ev = init
++\tVAR ErrDebTaskData[1].FltRstAckClrDtc, init = ErrDebFltRstReqClrDtc, ev = init
++\tVAR ErrDebTaskData[2].FltRstAckClrDtc, init = ErrDebFltRstReqClrDtc, ev = init
+ COMMENT *************************************************************************
+         COMMENT ** Tester defined variables
+ COMMENT ***********************************************************************
+@@ -519,58 +475,53 @@ COMMENT ************************************************************************
+ COMMENT *************************************************************************
+        COMMENT ** STUB definitions
+ COMMENT *************************************************************************
+-\tCOMMENT None.
++\tCOMMENT ** None.
+ COMMENT*************************************************************************
+        COMMENT ** Return value
+ COMMENT *************************************************************************
+-\tCOMMENT ** None
+-COMMENT *************************************************************************
+-        #BswErrDeb_MainFunctionFltRst();
+-        #BswErrDeb_SetEventStatus(ERR_ID_CAN_BUS_OFF,ERR_DEB_MONR_STS_FAILED);
+-        #BswErrDeb_SetEventStatus(ERR_ID_CAN_TOUT_GLB,ERR_DEB_MONR_STS_FAILED);
++       COMMENT None.
++        #BswErrDeb_FltRstHandler();
+         END ELEMENT
+ 
+-    END TEST -- TEST BswErrDeb_MainFunctionFltRst_FUNC.2
+-
+-END SERVICE -- BswErrDeb_MainFunctionFltRst
+-
+-
+---------------------------------------------------------------------------------
+--- Declaration of the service BswErrDeb_ReportFlts
+---------------------------------------------------------------------------------
+-SERVICE BswErrDeb_ReportFlts
+-SERVICE_TYPE inline
+-
++    END TEST -- TEST BswErrDeb_FltRstHandler_FUNC.2
+ 
+-    TEST BswErrDeb_ReportFlts_FUNC.1
++    TEST BswErrDeb_FltRstHandler_FUNC.3
+     FAMILY nominal
+ 
+         ELEMENT
+ COMMENT*************************************************************************
+-COMMENT ** Author (mschrein)
+-COMMENT ** Test Case modification date (2019-05-24)
+-COMMENT ** Verifies GLIB-58188
++COMMENT ** Author (Xingge)
++COMMENT ** Test Case modification date (2021-11-16)
++COMMENT ** Verifies 100kW-32814
+ COMMENT **
+ COMMENT ** Test Technique:
+ COMMENT **  Functional
+ COMMENT **
+ COMMENT ** Description:
+-COMMENT **  This test case verifies, if the function BswErrDeb_ReportFlts() with the following input variables
+-COMMENT **  - BswErrDebDemEveId = 0
+-COMMENT **  - ErrDebDemFltSts[0] = ERR_DEB_FLT_STS_PASSED
+-COMMENT **  - ErrDebDemFltSts[1] = ERR_DEB_MONR_STS_INACTIVE
+-COMMENT **  -\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0 :\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0 :
+-COMMENT **  - ErrDebDemFltSts[DEM_NUMBER_OF_EVENTS - 1] = ERR_DEB_MONR_STS_INACTIVE
+-COMMENT **  returns the following values for the output variables
+-COMMENT **  - BswErrDebDemReports = 0
+-COMMENT **  - BswErrDebDemEveId = 0
+-COMMENT **  Note: DEM_NUMBER_OF_EVENTS has to be greater than BswErrDebMaxDemReports.
++COMMENT **  This test case verifies, if the function BswErrDeb_FltRstHandler() with the following input variables
++COMMENT **  - ErrDebFltRstReqKl15 = 0
++COMMENT **  - BswErrDebFltRstAckKl15 = 0
++COMMENT **  - ErrDebFltRstReqClrDtc = 1
++COMMENT **  - BswErrDebFltRstAckClrDtc = 1
++COMMENT **  - ErrDebFltRstReqSecu = 2
++COMMENT **  - BswErrDebFltRstAckSecu = 0
++COMMENT **  calls the following function
++COMMENT **  - BswErrDeb_FltRstSecu)
++COMMENT **  Note: For the BswErrDeb_FltRstSecu() function call  test case
++COMMENT **  BswErrDeb_FltRstSecu_FUNC.1 is reused and therefore the following output variable has to be set
++COMMENT **  - BswErrDebFltRstAckClrDtc = 2
+ COMMENT*************************************************************************
+ COMMENT ** Global variables
+ COMMENT *************************************************************************
+-\tVAR BswErrDebDemEveId, init = 0, ev = init
+-\tARRAY ErrDebDemFltSts, init = {ERR_DEB_FLT_STS_PASSED, others => ERR_DEB_MONR_STS_INACTIVE}, ev= init
+-\tVAR BswErrDebDemReports, init = 1, ev = 0
++\tVAR ErrDebFltRstReqKl15 , init = 0, ev = init
++\tVAR BswErrDebFltRstAckKl15  , init = 0, ev = init
++\tVAR ErrDebFltRstReqClrDtc , init = 1, ev = init
++\tVAR BswErrDebFltRstAckClrDtc , init = 1, ev = init
++\tVAR ErrDebFltRstReqSecu , init = 2, ev = init
++\tVAR BswErrDebFltRstAckSecu , init = 0, ev = ErrDebFltRstReqSecu
++\tVAR ErrDebTaskData[0].FltRstAckSecu, init = ErrDebFltRstReqSecu, ev = init
++\tVAR ErrDebTaskData[1].FltRstAckSecu, init = ErrDebFltRstReqSecu, ev = init
++\tVAR ErrDebTaskData[2].FltRstAckSecu, init = ErrDebFltRstReqSecu, ev = init
+ COMMENT *************************************************************************
+         COMMENT ** Tester defined variables
+ COMMENT ***********************************************************************
+@@ -586,45 +537,49 @@ COMMENT ************************************************************************
+ COMMENT*************************************************************************
+        COMMENT ** Return value
+ COMMENT *************************************************************************
+-\tCOMMENT ** None
+-COMMENT *************************************************************************
+-        #BswErrDeb_ReportFlts();
++       COMMENT None.
++        #BswErrDeb_FltRstHandler();
+         END ELEMENT
+ 
+-    END TEST -- TEST BswErrDeb_ReportFlts_FUNC.1
++    END TEST -- TEST BswErrDeb_FltRstHandler_FUNC.3
+ 
+-    TEST BswErrDeb_ReportFlts_FUNC.2
++END SERVICE -- BswErrDeb_FltRstHandler
++
++
++--------------------------------------------------------------------------------
++-- Declaration of the service BswErrDeb_CvtDemEveStsType
++--------------------------------------------------------------------------------
++SERVICE BswErrDeb_CvtDemEveStsType
++SERVICE_TYPE inline
++
++    -- Tested service parameters declarations
++    #Dem_EventStatusType EventStatus;
++    -- By function returned type declaration
++    #ErrDeb_MonrStsType ret_BswErrDeb_CvtDemEveStsType;
++
++ 
++
++    TEST BswErrDeb_CvtDemEveStsType_FUNC.1
+     FAMILY nominal
+ 
+         ELEMENT
+ COMMENT*************************************************************************
+-COMMENT ** Author (mschrein)
+-COMMENT ** Test Case modification date (2019-05-24)
+-COMMENT ** Verifies GLIB-58188
++COMMENT ** Author (Xingge)
++COMMENT ** Test Case modification date (2021-11-16)
++COMMENT ** Verifies GLIB-58390
+ COMMENT **
+ COMMENT ** Test Technique:
+ COMMENT **  Functional
+ COMMENT **
+ COMMENT ** Description:
+-COMMENT **  This test case verifies, if the function BswErrDeb_ReportFlts() with the following input variables
+-COMMENT **  - BswErrDebDemEveId = 0
+-COMMENT **  - ErrDebDemFltSts[0] = ERR_DEB_FLT_STS_FAILED
+-COMMENT **  - ErrDebDemFltSts[1] = ERR_DEB_FLT_STS_FAILED
+-COMMENT **  - ErrDebDemFltSts[2] = ERR_DEB_FLT_STS_DSBLD
+-COMMENT **  -\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0 :\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0 :
+-COMMENT **  - ErrDebDemFltSts[DEM_NUMBER_OF_EVENTS - 1] = ERR_DEB_FLT_STS_DSBLD
+-COMMENT **  calls the following function
+-COMMENT **  - BswErrDeb_DemSetEventSts(1, DEM_EVENT_STATUS_FAILED)
+-COMMENT **  and returns the following values for the output variables
+-COMMENT **  - BswErrDebDemReports = 1
+-COMMENT **  - BswErrDebDemEveId = 0
+-COMMENT **  Note: DEM_NUMBER_OF_EVENTS has to be greater than BswErrDebMaxDemReports.
++COMMENT **  This test case verifies, if the function BswErrDeb_CvtDemEveStsType(EventStatus) with the following input variable
++COMMENT **  - EventStatus = DEM_EVENT_STATUS_PASSED
++COMMENT **  returns the following Monitor Status
++COMMENT **  - return value = ERR_DEB_MONR_STS_PASSED
+ COMMENT*************************************************************************
+ COMMENT ** Global variables
+ COMMENT *************************************************************************
+-\tVAR BswErrDebDemEveId, init = 0, ev = init
+-\tARRAY ErrDebDemFltSts, init = {ERR_DEB_FLT_STS_FAILED, ERR_DEB_FLT_STS_FAILED, others => ERR_DEB_FLT_STS_DSBLD}, ev= init
+-\tVAR BswErrDebDemReports, init = 0, ev = 1
++        VAR EventStatus,\t\tinit = DEM_EVENT_STATUS_PASSED,\t\tev = init
+ COMMENT *************************************************************************
+         COMMENT ** Tester defined variables
+ COMMENT ***********************************************************************
+@@ -636,50 +591,37 @@ COMMENT ************************************************************************
+ COMMENT *************************************************************************
+        COMMENT ** STUB definitions
+ COMMENT *************************************************************************
+-\tSTUB Dem_GbiEventKind(1) DEM_EVENT_KIND_SWC
+-\tSTUB Dem_SetEventStatus(1, DEM_EVENT_STATUS_FAILED) E_OK
++\tCOMMENT None.
+ COMMENT*************************************************************************
+        COMMENT ** Return value
+ COMMENT *************************************************************************
+-\tCOMMENT ** None
+-COMMENT *************************************************************************
+-        #BswErrDeb_ReportFlts();
++        VAR ret_BswErrDeb_CvtDemEveStsType,\t\tinit = ERR_DEB_MONR_STS_INACTIVE,\t\tev = ERR_DEB_MONR_STS_PASSED
++        #ret_BswErrDeb_CvtDemEveStsType = BswErrDeb_CvtDemEveStsType(EventStatus);
+         END ELEMENT
+ 
+-    END TEST -- TEST BswErrDeb_ReportFlts_FUNC.2
++    END TEST -- TEST BswErrDeb_CvtDemEveStsType_FUNC.1
+ 
+-    TEST BswErrDeb_ReportFlts_FUNC.3
++    TEST BswErrDeb_CvtDemEveStsType_FUNC.2
+     FAMILY nominal
+ 
+         ELEMENT
+ COMMENT*************************************************************************
+-COMMENT ** Author (mschrein)
+-COMMENT ** Test Case modification date (2019-05-24)
+-COMMENT ** Verifies GLIB-58188
++COMMENT ** Author (Xingge)
++COMMENT ** Test Case modification date (2019-05-28)
++COMMENT ** Verifies GLIB-58390
+ COMMENT **
+ COMMENT ** Test Technique:
+ COMMENT **  Functional
+ COMMENT **
+ COMMENT ** Description:
+-COMMENT **  This test case verifies, if the function BswErrDeb_ReportFlts() with the following input variables
+-COMMENT **  - BswErrDebDemEveId = 2
+-COMMENT **  - ErrDebDemFltSts[0] = ERR_DEB_FLT_STS_PASSED
+-COMMENT **  - ErrDebDemFltSts[1] = ERR_DEB_FLT_STS_PASSED
+-COMMENT **  - ErrDebDemFltSts[2] = ERR_DEB_MONR_STS_INACTIVE
+-COMMENT **  -\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0 :\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0 :
+-COMMENT **  - ErrDebDemFltSts[DEM_NUMBER_OF_EVENTS - 1] = ERR_DEB_MONR_STS_INACTIVE
+-COMMENT **  calls the following function
+-COMMENT **  - BswErrDeb_DemSetEventSts(1, DEM_EVENT_STATUS_PASSED)
+-COMMENT **  and returns the following values for the output variables
+-COMMENT **  - BswErrDebDemReports = 1
+-COMMENT **  - BswErrDebDemEveId = 2
+-COMMENT **  Note: DEM_NUMBER_OF_EVENTS has to be greater than BswErrDebMaxDemReports.
++COMMENT **  This test case verifies, if the function BswErrDeb_CvtDemEveStsType(EventStatus) with the following input variable
++COMMENT **  - EventStatus = DEM_EVENT_STATUS_FAILED
++COMMENT **  returns the following Monitor Status
++COMMENT **  - return value = ERR_DEB_MONR_STS_FAILED
+ COMMENT*************************************************************************
+ COMMENT ** Global variables
+ COMMENT *************************************************************************
+-\tVAR BswErrDebDemEveId, init = 2, ev = init
+-\tARRAY ErrDebDemFltSts, init = {ERR_DEB_FLT_STS_PASSED, ERR_DEB_FLT_STS_PASSED, others => ERR_DEB_MONR_STS_INACTIVE}, ev= init
+-\tVAR BswErrDebDemReports, init = 0, ev = 1
++        VAR EventStatus,\t\tinit = DEM_EVENT_STATUS_FAILED,\t\tev = init
+ COMMENT *************************************************************************
+         COMMENT ** Tester defined variables
+ COMMENT ***********************************************************************
+@@ -691,54 +633,37 @@ COMMENT ************************************************************************
+ COMMENT *************************************************************************
+        COMMENT ** STUB definitions
+ COMMENT *************************************************************************
+-\tSTUB Dem_GbiEventKind(1) DEM_EVENT_KIND_SWC
+-\tSTUB Dem_SetEventStatus(1, DEM_EVENT_STATUS_PASSED) E_OK
++\tCOMMENT None.
+ COMMENT*************************************************************************
+        COMMENT ** Return value
+ COMMENT *************************************************************************
+-\tCOMMENT ** None
+-COMMENT *************************************************************************
+-        #BswErrDeb_ReportFlts();
++        VAR ret_BswErrDeb_CvtDemEveStsType,\t\tinit = ERR_DEB_MONR_STS_INACTIVE,\t\tev = ERR_DEB_MONR_STS_FAILED
++        #ret_BswErrDeb_CvtDemEveStsType = BswErrDeb_CvtDemEveStsType(EventStatus);
+         END ELEMENT
+ 
+-    END TEST -- TEST BswErrDeb_ReportFlts_FUNC.3
++    END TEST -- TEST BswErrDeb_CvtDemEveStsType_FUNC.2
+ 
+-    TEST BswErrDeb_ReportFlts_FUNC.4
++    TEST BswErrDeb_CvtDemEveStsType_FUNC.3
+     FAMILY nominal
+ 
+         ELEMENT
+ COMMENT*************************************************************************
+-COMMENT ** Author (mschrein)
+-COMMENT ** Test Case modification date (2019-05-24)
+-COMMENT ** Verifies GLIB-58188
++COMMENT ** Author (Xingge)
++COMMENT ** Test Case modification date (2021-11-16)
++COMMENT ** Verifies GLIB-58390
+ COMMENT **
+ COMMENT ** Test Technique:
+ COMMENT **  Functional
+ COMMENT **
+ COMMENT ** Description:
+-COMMENT **  This test case verifies, if the function BswErrDeb_ReportFlts() with the following input variables
+-COMMENT **  - BswErrDebDemEveId = 0
+-COMMENT **  - ErrDebDemFltSts[0] = ERR_DEB_FLT_STS_PASSED
+-COMMENT **  - ErrDebDemFltSts[1] = ERR_DEB_FLT_STS_FAILED
+-COMMENT **  - ErrDebDemFltSts[2] = ERR_DEB_FLT_STS_PASSED
+-COMMENT **  -\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0 :\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0 :
+-COMMENT **  - ErrDebDemFltSts[DEM_NUMBER_OF_EVENTS - 1] = ERR_DEB_FLT_STS_FAILED
+-COMMENT **  calls the following functions
+-COMMENT **  - BswErrDeb_DemSetEventSts([1,3,5,7,9], DEM_EVENT_STATUS_FAILED)
+-COMMENT **  - BswErrDeb_DemSetEventSts([2,4,6,8,10], DEM_EVENT_STATUS_PASSED)
+-COMMENT **  and returns the following values for the output variables
+-COMMENT **  - BswErrDebDemReports = 10
+-COMMENT **  - BswErrDebDemEveId = 11
+-COMMENT **  Note: DEM_NUMBER_OF_EVENTS has to be greater than BswErrDebMaxDemReports.
++COMMENT **  This test case verifies, if the function BswErrDeb_CvtDemEveStsType(EventStatus) with the following input variable
++COMMENT **  - EventStatus = DEM_EVENT_STATUS_PREPASSED
++COMMENT **  returns the following Monitor Status
++COMMENT **  - return value = ERR_DEB_MONR_STS_PASSED
+ COMMENT*************************************************************************
+ COMMENT ** Global variables
+ COMMENT *************************************************************************
+-\tVAR BswErrDebDemEveId, init = 0, ev = 11
+-\tARRAY ErrDebDemFltSts, init = {ERR_DEB_FLT_STS_PASSED, ERR_DEB_FLT_STS_FAILED, ERR_DEB_FLT_STS_PASSED, ERR_DEB_FLT_STS_FAILED, ERR_DEB_FLT_STS_PASSED,
+-\t\t\t\t\t\t\t\t\t& ERR_DEB_FLT_STS_FAILED, ERR_DEB_FLT_STS_PASSED, ERR_DEB_FLT_STS_FAILED, ERR_DEB_FLT_STS_PASSED, ERR_DEB_FLT_STS_FAILED,
+-\t\t\t\t\t\t\t\t\t& ERR_DEB_FLT_STS_PASSED, ERR_DEB_FLT_STS_FAILED, ERR_DEB_FLT_STS_PASSED, ERR_DEB_FLT_STS_FAILED, ERR_DEB_FLT_STS_PASSED,
+-\t\t\t\t\t\t\t\t\t& ERR_DEB_FLT_STS_FAILED, ERR_DEB_FLT_STS_PASSED, ERR_DEB_FLT_STS_FAILED, ERR_DEB_FLT_STS_PASSED, ERR_DEB_FLT_STS_FAILED, others => ERR_DEB_FLT_STS_FAILED}, ev= init
+-\tVAR BswErrDebDemReports, init = 0, ev = 10
++        VAR EventStatus,\t\tinit = DEM_EVENT_STATUS_PREPASSED,\t\tev = init
+ COMMENT *************************************************************************
+         COMMENT ** Tester defined variables
+ COMMENT ***********************************************************************
+@@ -750,65 +675,37 @@ COMMENT ************************************************************************
+ COMMENT *************************************************************************
+        COMMENT ** STUB definitions
+ COMMENT *************************************************************************
+-\tSTUB Dem_GbiEventKind(1) DEM_EVENT_KIND_SWC
+-\tSTUB Dem_GbiEventKind(2) DEM_EVENT_KIND_SWC
+-\tSTUB Dem_GbiEventKind(3) DEM_EVENT_KIND_SWC
+-\tSTUB Dem_GbiEventKind(4) DEM_EVENT_KIND_SWC
+-\tSTUB Dem_GbiEventKind(5) DEM_EVENT_KIND_SWC
+-\tSTUB Dem_GbiEventKind(6) DEM_EVENT_KIND_SWC
+-\tSTUB Dem_GbiEventKind(7) DEM_EVENT_KIND_SWC
+-\tSTUB Dem_GbiEventKind(8) DEM_EVENT_KIND_SWC
+-\tSTUB Dem_GbiEventKind(9) DEM_EVENT_KIND_SWC
+-\tSTUB Dem_GbiEventKind(10) DEM_EVENT_KIND_SWC
+-\tSTUB Dem_SetEventStatus(1, DEM_EVENT_STATUS_FAILED) E_OK
+-\tSTUB Dem_SetEventStatus(2, DEM_EVENT_STATUS_PASSED) E_OK
+-\tSTUB Dem_SetEventStatus(3, DEM_EVENT_STATUS_FAILED) E_OK
+-\tSTUB Dem_SetEventStatus(4, DEM_EVENT_STATUS_PASSED) E_OK
+-\tSTUB Dem_SetEventStatus(5, DEM_EVENT_STATUS_FAILED) E_OK
+-\tSTUB Dem_SetEventStatus(6, DEM_EVENT_STATUS_PASSED) E_OK
+-\tSTUB Dem_SetEventStatus(7, DEM_EVENT_STATUS_FAILED) E_OK
+-\tSTUB Dem_SetEventStatus(8, DEM_EVENT_STATUS_PASSED) E_OK
+-\tSTUB Dem_SetEventStatus(9, DEM_EVENT_STATUS_FAILED) E_OK
+-\tSTUB Dem_SetEventStatus(10, DEM_EVENT_STATUS_PASSED) E_OK
++\tCOMMENT None.
+ COMMENT*************************************************************************
+        COMMENT ** Return value
+ COMMENT *************************************************************************
+-\tCOMMENT ** None
+-COMMENT *************************************************************************
+-        #BswErrDeb_ReportFlts();
++        VAR ret_BswErrDeb_CvtDemEveStsType,\t\tinit = ERR_DEB_MONR_STS_INACTIVE,\t\tev = ERR_DEB_MONR_STS_PASSED
++        #ret_BswErrDeb_CvtDemEveStsType = BswErrDeb_CvtDemEveStsType(EventStatus);
+         END ELEMENT
+ 
+-    END TEST -- TEST BswErrDeb_ReportFlts_FUNC.4
+-
+-END SERVICE -- BswErrDeb_ReportFlts
+-
+-
+---------------------------------------------------------------------------------
+--- Declaration of the service BswErrDeb_SetFltReportLockClrDtc
+---------------------------------------------------------------------------------
+-SERVICE BswErrDeb_SetFltReportLockClrDtc
+-SERVICE_TYPE extern
+-
++    END TEST -- TEST BswErrDeb_CvtDemEveStsType_FUNC.3
+ 
+-    TEST BswErrDeb_SetFltReportLockClrDtc_FUNC.1
++    TEST BswErrDeb_CvtDemEveStsType_FUNC.4
+     FAMILY nominal
+ 
+         ELEMENT
+ COMMENT*************************************************************************
+-COMMENT ** Author (mschrein)
+-COMMENT ** Test Case modification date (2019-05-27)
+-COMMENT ** Verifies GLIB-58336
++COMMENT ** Author (Xingge)
++COMMENT ** Test Case modification date (2021-11-16)
++COMMENT ** Verifies GLIB-58390
+ COMMENT **
+ COMMENT ** Test Technique:
+ COMMENT **  Functional
+ COMMENT **
+ COMMENT ** Description:
+-COMMENT **  This test case verifies, if the function BswErrDeb_SetFltReportLockClrDtc() sets the following value for the output variable
+-COMMENT **  - BswErrDebDemReportLockClrDtc = TRUE
++COMMENT **  This test case verifies, if the function BswErrDeb_CvtDemEveStsType(EventStatus) with the following input variable
++COMMENT **  - EventStatus = DEM_EVENT_STATUS_PREFAILED
++COMMENT **  returns the following Monitor Status
++COMMENT **  - return value = ERR_DEB_MONR_STS_FAILED
+ COMMENT*************************************************************************
+ COMMENT ** Global variables
+ COMMENT *************************************************************************
+-\tVAR BswErrDebDemReportLockClrDtc, init = FALSE, ev = TRUE
++        VAR EventStatus,\t\tinit = DEM_EVENT_STATUS_PREFAILED,\t\tev = init
+ COMMENT *************************************************************************
+         COMMENT ** Tester defined variables
+ COMMENT ***********************************************************************
+@@ -824,49 +721,33 @@ COMMENT ************************************************************************
+ COMMENT*************************************************************************
+        COMMENT ** Return value
+ COMMENT *************************************************************************
+-\tCOMMENT ** None
+-COMMENT *************************************************************************
+-        #BswErrDeb_SetFltReportLockClrDtc();
++        VAR ret_BswErrDeb_CvtDemEveStsType,\t\tinit = ERR_DEB_MONR_STS_INACTIVE,\t\tev = ERR_DEB_MONR_STS_FAILED
++        #ret_BswErrDeb_CvtDemEveStsType = BswErrDeb_CvtDemEveStsType(EventStatus);
+         END ELEMENT
+ 
+-    END TEST -- TEST BswErrDeb_SetFltReportLockClrDtc_FUNC.1
+-
+-END SERVICE -- BswErrDeb_SetFltReportLockClrDtc
+-
+-
+---------------------------------------------------------------------------------
+--- Declaration of the service BswErrDeb_MainFunctionFltColl
+---------------------------------------------------------------------------------
+-SERVICE BswErrDeb_MainFunctionFltColl
+-SERVICE_TYPE extern
+-
++    END TEST -- TEST BswErrDeb_CvtDemEveStsType_FUNC.4
+ 
+-    TEST BswErrDeb_MainFunctionFltColl_FUNC.1
++    TEST BswErrDeb_CvtDemEveStsType_FUNC.5
+     FAMILY nominal
+ 
+         ELEMENT
+ COMMENT*************************************************************************
+-COMMENT ** Author (mschrein)
+-COMMENT ** Test Case modification date (2019-05-28)
+-COMMENT ** Verifies GLIB-58341
++COMMENT ** Author (Xingge)
++COMMENT ** Test Case modification date (2021-11-16)
++COMMENT ** Verifies GLIB-58390
+ COMMENT **
+ COMMENT ** Test Technique:
+ COMMENT **  Functional
+ COMMENT **
+ COMMENT ** Description:
+-COMMENT **  This test case verifies, if the function BswErrDeb_MainFunctionFltColl() with the following input variable
+-COMMENT **  - BswErrDebDemReportLockClrDtc = FALSE
+-COMMENT **  calls the following function
+-COMMENT **  - BswErrDeb_ReportFlts()
+-COMMENT **  Note: For the BswErrDeb_ReportFlts() function call  test case
+-COMMENT **  BswErrDeb_ReportFlts_FUNC.1 is reused.
++COMMENT **  This test case verifies, if the function BswErrDeb_CvtDemEveStsType(EventStatus) with the following input variable
++COMMENT **  - EventStatus = 4
++COMMENT **  returns the following Monitor Status
++COMMENT **  - return value = ERR_DEB_MONR_STS_INACTIVE
+ COMMENT*************************************************************************
+ COMMENT ** Global variables
+ COMMENT *************************************************************************
+-\tVAR BswErrDebDemReportLockClrDtc, init = FALSE, ev = init
+-\tVAR BswErrDebDemEveId, init = 0, ev = init
+-\tARRAY ErrDebDemFltSts, init = {ERR_DEB_FLT_STS_PASSED, others => ERR_DEB_MONR_STS_INACTIVE}, ev= init
+-\tVAR BswErrDebDemReports, init = 1, ev = 0
++        VAR EventStatus,\t\tinit = 4,\t\tev = init
+ COMMENT *************************************************************************
+         COMMENT ** Tester defined variables
+ COMMENT ***********************************************************************
+@@ -882,36 +763,50 @@ COMMENT ************************************************************************
+ COMMENT*************************************************************************
+        COMMENT ** Return value
+ COMMENT *************************************************************************
+-\tCOMMENT ** None
+-COMMENT *************************************************************************
+-        #BswErrDeb_MainFunctionFltColl();
++        VAR ret_BswErrDeb_CvtDemEveStsType,\t\tinit = ERR_DEB_MONR_STS_PASSED,\t\tev = ERR_DEB_MONR_STS_INACTIVE
++        #ret_BswErrDeb_CvtDemEveStsType = BswErrDeb_CvtDemEveStsType(EventStatus);
+         END ELEMENT
+ 
+-    END TEST -- TEST BswErrDeb_MainFunctionFltColl_FUNC.1
++    END TEST -- TEST BswErrDeb_CvtDemEveStsType_FUNC.5
+ 
+-    TEST BswErrDeb_MainFunctionFltColl_FUNC.2
++END SERVICE -- BswErrDeb_CvtDemEveStsType
++
++--------------------------------------------------------------------------------
++-- Declaration of the service BswErrDeb_ReportFlts
++--------------------------------------------------------------------------------
++SERVICE BswErrDeb_ReportFlts
++SERVICE_TYPE inline
++
++
++    TEST BswErrDeb_ReportFlts_FUNC.1
+     FAMILY nominal
+ 
+         ELEMENT
+ COMMENT*************************************************************************
+-COMMENT ** Author (mschrein)
+-COMMENT ** Test Case modification date (2019-05-28)
+-COMMENT ** Verifies GLIB-58341
++COMMENT ** Author (Xingge)
++COMMENT ** Test Case modification date (2019-05-24)
++COMMENT ** Verifies 100kW-32802
+ COMMENT **
+ COMMENT ** Test Technique:
+ COMMENT **  Functional
+ COMMENT **
+ COMMENT ** Description:
+-COMMENT **  This test case verifies, if the function BswErrDeb_MainFunctionFltColl() with the following input variable
+-COMMENT **  - BswErrDebDemReportLockClrDtc = TRUE
+-COMMENT **  does not call any functions
++COMMENT **  This test case verifies, if the function BswErrDeb_ReportFlts() with the following input variables
++COMMENT **  - BswErrDebDemEveId = 0
++COMMENT **  - ErrDebDemFltSts[0] = ERR_DEB_FLT_STS_PASSED
++COMMENT **  - ErrDebDemFltSts[1] = ERR_DEB_MONR_STS_INACTIVE
++COMMENT **  -             :                                         :
++COMMENT **  - ErrDebDemFltSts[DEM_NUMBER_OF_EVENTS - 1] = ERR_DEB_MONR_STS_INACTIVE
++COMMENT **  returns the following values for the output variables
++COMMENT **  - BswErrDebDemReports = 0
++COMMENT **  - BswErrDebDemEveId = 0
++COMMENT **  Note: DEM_NUMBER_OF_EVENTS has to be greater than BswErrDebMaxDemReports.
+ COMMENT*************************************************************************
+ COMMENT ** Global variables
+ COMMENT *************************************************************************
+-\tVAR BswErrDebDemReportLockClrDtc, init = TRUE, ev = init
+ \tVAR BswErrDebDemEveId, init = 0, ev = init
+ \tARRAY ErrDebDemFltSts, init = {ERR_DEB_FLT_STS_PASSED, others => ERR_DEB_MONR_STS_INACTIVE}, ev= init
+-\tVAR BswErrDebDemReports, init = 1, ev = init
++\tVAR BswErrDebDemReports, init = 1, ev = 0
+ COMMENT *************************************************************************
+         COMMENT ** Tester defined variables
+ COMMENT ***********************************************************************
+@@ -923,53 +818,50 @@ COMMENT ************************************************************************
+ COMMENT *************************************************************************
+        COMMENT ** STUB definitions
+ COMMENT *************************************************************************
+-\tCOMMENT None.
++\tCOMMENT ** None.
+ COMMENT*************************************************************************
+        COMMENT ** Return value
+ COMMENT *************************************************************************
+ \tCOMMENT ** None
+ COMMENT *************************************************************************
+-        #BswErrDeb_MainFunctionFltColl();
++        #BswErrDeb_ReportFlts();
+         END ELEMENT
+ 
+-    END TEST -- TEST BswErrDeb_MainFunctionFltColl_FUNC.2
+-
+-END SERVICE -- BswErrDeb_MainFunctionFltColl
+-
++    END TEST -- TEST BswErrDeb_ReportFlts_FUNC.1
+ 
+---------------------------------------------------------------------------------
+--- Declaration of the service BswErrDeb_DemSetEventSts
+---------------------------------------------------------------------------------
+-SERVICE BswErrDeb_DemSetEventSts
+-SERVICE_TYPE inline
+ 
+-    -- Tested service parameters declarations
+-    #uint16 id;
+-    #uint8 sts;
+ 
+-    TEST BswErrDeb_DemSetEventSts_FUNC.1
++    TEST BswErrDeb_ReportFlts_FUNC.2
+     FAMILY nominal
+ 
+         ELEMENT
+ COMMENT*************************************************************************
+-COMMENT ** Author (mschrein)
+-COMMENT ** Test Case modification date (2019-05-22)
+-COMMENT ** Verifies GLIB-58145
++COMMENT ** Author (Xingge)
++COMMENT ** Test Case modification date (2021-11-16)
++COMMENT ** Verifies 100kW-32802
+ COMMENT **
+ COMMENT ** Test Technique:
+ COMMENT **  Functional
+ COMMENT **
+ COMMENT ** Description:
+-COMMENT **  This test case verifies, if the function BswErrDeb_DemSetEventSts(id, sts) with the following input variables
+-COMMENT **  - id = DEM_EVENT_KIND_SWC
+-COMMENT **  - sts = 1
++COMMENT **  This test case verifies, if the function BswErrDeb_ReportFlts() with the following input variables
++COMMENT **  - BswErrDebDemEveId = 0
++COMMENT **  - ErrDebDemFltSts[0] = ERR_DEB_FLT_STS_FAILED
++COMMENT **  - ErrDebDemFltSts[1] = ERR_DEB_FLT_STS_FAILED
++COMMENT **  - ErrDebDemFltSts[2] = ERR_DEB_FLT_STS_DSBLD
++COMMENT **  -             :                                         :
++COMMENT **  - ErrDebDemFltSts[DEM_NUMBER_OF_EVENTS - 1] = ERR_DEB_FLT_STS_DSBLD
+ COMMENT **  calls the following function
+-COMMENT **  - Dem_SetEventStatus(id, sts)
++COMMENT **  and returns the following values for the output variables
++COMMENT **  - BswErrDebDemReports = 1
++COMMENT **  - BswErrDebDemEveId = 0
++COMMENT **  Note: DEM_NUMBER_OF_EVENTS has to be greater than BswErrDebMaxDemReports.
+ COMMENT*************************************************************************
+ COMMENT ** Global variables
+ COMMENT *************************************************************************
+-        VAR id,\t\tinit = DEM_EVENT_KIND_SWC,\t\tev = init
+-        VAR sts,\t\tinit = 1,\t\tev = init
++\tVAR BswErrDebDemEveId, init = 0, ev = init
++\tARRAY ErrDebDemFltSts, init = {ERR_DEB_FLT_STS_FAILED, ERR_DEB_FLT_STS_FAILED, others => ERR_DEB_FLT_STS_DSBLD}, ev= init
++\tVAR BswErrDebDemReports, init = 0, ev = 1
+ COMMENT *************************************************************************
+         COMMENT ** Tester defined variables
+ COMMENT ***********************************************************************
+@@ -981,42 +873,50 @@ COMMENT ************************************************************************
+ COMMENT *************************************************************************
+        COMMENT ** STUB definitions
+ COMMENT *************************************************************************
+-\tSTUB Dem_GbiEventKind(id) id
+-\tSTUB Dem_SetEventStatus(id, sts) E_OK
++\tSTUB Dem_GbiEventKind(1) DEM_EVENT_KIND_SWC
++\tSTUB Dem_SetEventStatus(1, DEM_EVENT_STATUS_FAILED) E_OK
+ COMMENT*************************************************************************
+        COMMENT ** Return value
+ COMMENT *************************************************************************
+ \tCOMMENT ** None
+ COMMENT *************************************************************************
+-        #BswErrDeb_DemSetEventSts(id, sts);
++        #BswErrDeb_ReportFlts();
+         END ELEMENT
+ 
+-    END TEST -- TEST BswErrDeb_DemSetEventSts_FUNC.1
+-
++    END TEST -- TEST BswErrDeb_ReportFlts_FUNC.2
+ 
+-    TEST BswErrDeb_DemSetEventSts_FUNC.2
++    TEST BswErrDeb_ReportFlts_FUNC.3
+     FAMILY nominal
+ 
+         ELEMENT
+ COMMENT*************************************************************************
+-COMMENT ** Author (mschrein)
+-COMMENT ** Test Case modification date (2019-05-22)
+-COMMENT ** Verifies GLIB-58145
++COMMENT ** Author (Xingge)
++COMMENT ** Test Case modification date (2021-11-16)
++COMMENT ** Verifies 100kW-32802
+ COMMENT **
+ COMMENT ** Test Technique:
+ COMMENT **  Functional
+ COMMENT **
+ COMMENT ** Description:
+-COMMENT **  This test case verifies, if the function BswErrDeb_DemSetEventSts(id, sts) with the following input variables
+-COMMENT **  - id = DEM_EVENT_KIND_SWC
+-COMMENT **  - sts = 1
++COMMENT **  This test case verifies, if the function BswErrDeb_ReportFlts() with the following input variables
++COMMENT **  - BswErrDebDemEveId = 2
++COMMENT **  - ErrDebDemFltSts[0] = ERR_DEB_FLT_STS_PASSED
++COMMENT **  - ErrDebDemFltSts[1] = ERR_DEB_FLT_STS_PASSED
++COMMENT **  - ErrDebDemFltSts[2] = ERR_DEB_MONR_STS_INACTIVE
++COMMENT **  -             :                                         :
++COMMENT **  - ErrDebDemFltSts[DEM_NUMBER_OF_EVENTS - 1] = ERR_DEB_MONR_STS_INACTIVE
+ COMMENT **  calls the following function
+-COMMENT **  - Dem_SetEventStatus(id, sts)
++COMMENT **  - BswErrDeb_DemSetEventSts(1, DEM_EVENT_STATUS_PASSED)
++COMMENT **  and returns the following values for the output variables
++COMMENT **  - BswErrDebDemReports = 1
++COMMENT **  - BswErrDebDemEveId = 2
++COMMENT **  Note: DEM_NUMBER_OF_EVENTS has to be greater than BswErrDebMaxDemReports.
+ COMMENT*************************************************************************
+ COMMENT ** Global variables
+ COMMENT *************************************************************************
+-        VAR id,\t\tinit = DEM_EVENT_KIND_BSW,\t\tev = init
+-        VAR sts,\t\tinit = 1,\t\tev = init
++\tVAR BswErrDebDemEveId, init = 2, ev = init
++\tARRAY ErrDebDemFltSts, init = {ERR_DEB_FLT_STS_PASSED, ERR_DEB_FLT_STS_PASSED, others => ERR_DEB_MONR_STS_INACTIVE}, ev= init
++\tVAR BswErrDebDemReports, init = 0, ev = 1
+ COMMENT *************************************************************************
+         COMMENT ** Tester defined variables
+ COMMENT ***********************************************************************
+@@ -1028,55 +928,54 @@ COMMENT ************************************************************************
+ COMMENT *************************************************************************
+        COMMENT ** STUB definitions
+ COMMENT *************************************************************************
+-\tSTUB Dem_GbiEventKind(id) id
++\tSTUB Dem_GbiEventKind(1) DEM_EVENT_KIND_SWC
++\tSTUB Dem_SetEventStatus(1, DEM_EVENT_STATUS_PASSED) E_OK
+ COMMENT*************************************************************************
+        COMMENT ** Return value
+ COMMENT *************************************************************************
+ \tCOMMENT ** None
+ COMMENT *************************************************************************
+-        #BswErrDeb_DemSetEventSts(id, sts);
++        #BswErrDeb_ReportFlts();
+         END ELEMENT
+ 
+-    END TEST -- TEST BswErrDeb_DemSetEventSts_FUNC.2
+-
+-END SERVICE -- BswErrDeb_DemSetEventSts
+-
+-
+---------------------------------------------------------------------------------
+--- Declaration of the service BswErrDeb_FltRstSecu
+---------------------------------------------------------------------------------
+-SERVICE BswErrDeb_FltRstSecu
+-SERVICE_TYPE inline
+-
++    END TEST -- TEST BswErrDeb_ReportFlts_FUNC.3
+ 
+-    TEST BswErrDeb_FltRstSecu_FUNC.1
++    TEST BswErrDeb_ReportFlts_FUNC.4
+     FAMILY nominal
+ 
+         ELEMENT
+ COMMENT*************************************************************************
+-COMMENT ** Author (mschrein)
+-COMMENT ** Test Case modification date (2019-05-27)
+-COMMENT ** Verifies GLIB-60275
++COMMENT ** Author (Xingge)
++COMMENT ** Test Case modification date (2021-11-16)
++COMMENT ** Verifies 100kW-32802
+ COMMENT **
+ COMMENT ** Test Technique:
+ COMMENT **  Functional
+ COMMENT **
+ COMMENT ** Description:
+-COMMENT **  This test case verifies, if the function BswErrDeb_FltRstSecu() with the following input variables
+-COMMENT **  - ErrDebFltRstReqSecu = 1
+-COMMENT **  - ErrDebTaskData[0].FltRstAckSecu = 1
+-COMMENT **  - ErrDebTaskData[1].FltRstAckSecu = 1
+-COMMENT **  - ErrDebTaskData[2].FltRstAckSecu = 1
+-COMMENT **  returns the following values for the output variable
+-COMMENT **  - BswErrDebFltRstAckSecu = 1
++COMMENT **  This test case verifies, if the function BswErrDeb_ReportFlts() with the following input variables
++COMMENT **  - BswErrDebDemEveId = 0
++COMMENT **  - ErrDebDemFltSts[0] = ERR_DEB_FLT_STS_PASSED
++COMMENT **  - ErrDebDemFltSts[1] = ERR_DEB_FLT_STS_FAILED
++COMMENT **  - ErrDebDemFltSts[2] = ERR_DEB_FLT_STS_PASSED
++COMMENT **  -             :                                         :
++COMMENT **  - ErrDebDemFltSts[DEM_NUMBER_OF_EVENTS - 1] = ERR_DEB_FLT_STS_FAILED
++COMMENT **  calls the following functions
++COMMENT **  - BswErrDeb_DemSetEventSts([1,3,5,7,9], DEM_EVENT_STATUS_FAILED)
++COMMENT **  - BswErrDeb_DemSetEventSts([2,4,6,8,10], DEM_EVENT_STATUS_PASSED)
++COMMENT **  and returns the following values for the output variables
++COMMENT **  - BswErrDebDemReports = 10
++COMMENT **  - BswErrDebDemEveId = 11
++COMMENT **  Note: DEM_NUMBER_OF_EVENTS has to be greater than BswErrDebMaxDemReports.
+ COMMENT*************************************************************************
+ COMMENT ** Global variables
+ COMMENT *************************************************************************
+-\tVAR ErrDebFltRstReqSecu, init = 1, ev = init
+-\tVAR ErrDebTaskData[0].FltRstAckSecu, init = 1, ev = init
+-\tVAR ErrDebTaskData[1].FltRstAckSecu, init = 1, ev = init
+-\tVAR ErrDebTaskData[2].FltRstAckSecu, init = 1, ev = init
+-\tVAR BswErrDebFltRstAckSecu, init = 0, ev = 1
++\tVAR BswErrDebDemEveId, init = 0, ev = 11
++\tARRAY ErrDebDemFltSts, init = {ERR_DEB_FLT_STS_PASSED, ERR_DEB_FLT_STS_FAILED, ERR_DEB_FLT_STS_PASSED, ERR_DEB_FLT_STS_FAILED, ERR_DEB_FLT_STS_PASSED,
++\t\t\t\t\t\t\t\t\t& ERR_DEB_FLT_STS_FAILED, ERR_DEB_FLT_STS_PASSED, ERR_DEB_FLT_STS_FAILED, ERR_DEB_FLT_STS_PASSED, ERR_DEB_FLT_STS_FAILED,
++\t\t\t\t\t\t\t\t\t& ERR_DEB_FLT_STS_PASSED, ERR_DEB_FLT_STS_FAILED, ERR_DEB_FLT_STS_PASSED, ERR_DEB_FLT_STS_FAILED, ERR_DEB_FLT_STS_PASSED,
++\t\t\t\t\t\t\t\t\t& ERR_DEB_FLT_STS_FAILED, ERR_DEB_FLT_STS_PASSED, ERR_DEB_FLT_STS_FAILED, ERR_DEB_FLT_STS_PASSED, ERR_DEB_FLT_STS_FAILED, others => ERR_DEB_FLT_STS_FAILED}, ev= init
++\tVAR BswErrDebDemReports, init = 0, ev = 10
+ COMMENT *************************************************************************
+         COMMENT ** Tester defined variables
+ COMMENT ***********************************************************************
+@@ -1088,106 +987,71 @@ COMMENT ************************************************************************
+ COMMENT *************************************************************************
+        COMMENT ** STUB definitions
+ COMMENT *************************************************************************
+-\tCOMMENT ** None.
+-COMMENT*************************************************************************
+-       COMMENT ** Return value
+-COMMENT *************************************************************************
+-       COMMENT None.
+-        #BswErrDeb_FltRstSecu();
+-        END ELEMENT
+-
+-    END TEST -- TEST BswErrDeb_FltRstSecu_FUNC.1
+-
+-    TEST BswErrDeb_FltRstSecu_FUNC.2
+-    FAMILY nominal
+-
+-        ELEMENT
+-COMMENT*************************************************************************
+-COMMENT ** Author (mschrein)
+-COMMENT ** Test Case modification date (2019-05-27)
+-COMMENT ** Verifies GLIB-60275
+-COMMENT **
+-COMMENT ** Test Technique:
+-COMMENT **  Functional
+-COMMENT **
+-COMMENT ** Description:
+-COMMENT **  This test case verifies, if the function BswErrDeb_FltRstSecu() with the following input variables
+-COMMENT **  - ErrDebFltRstReqSecu = 1
+-COMMENT **  - ErrDebTaskData[0].FltRstAckSecu = 1
+-COMMENT **  - ErrDebTaskData[1].FltRstAckSecu = 1
+-COMMENT **  - ErrDebTaskData[2].FltRstAckSecu = 2
+-COMMENT **  returns the following values for the output variable
+-COMMENT **  - BswErrDebFltRstAckSecu = 1
+-COMMENT*************************************************************************
+-COMMENT ** Global variables
+-COMMENT *************************************************************************
+-\tVAR ErrDebFltRstReqSecu, init = 1, ev = init
+-\tVAR ErrDebTaskData[0].FltRstAckSecu, init = 1, ev = init
+-\tVAR ErrDebTaskData[1].FltRstAckSecu, init = 1, ev = init
+-\tVAR ErrDebTaskData[2].FltRstAckSecu, init = 2, ev = init
+-\tVAR BswErrDebFltRstAckSecu, init = 0, ev = init
+-COMMENT *************************************************************************
+-        COMMENT ** Tester defined variables
+-COMMENT ***********************************************************************
+-\tCOMMENT ** None.
+-COMMENT *************************************************************************
+-       COMMENT ** Function parameters
+-COMMENT *************************************************************************
+-\tCOMMENT None.
+-COMMENT *************************************************************************
+-       COMMENT ** STUB definitions
+-COMMENT *************************************************************************
+-\tCOMMENT ** None.
++\tSTUB Dem_GbiEventKind(1) DEM_EVENT_KIND_SWC
++\tSTUB Dem_GbiEventKind(2) DEM_EVENT_KIND_SWC
++\tSTUB Dem_GbiEventKind(3) DEM_EVENT_KIND_SWC
++\tSTUB Dem_GbiEventKind(4) DEM_EVENT_KIND_SWC
++\tSTUB Dem_GbiEventKind(5) DEM_EVENT_KIND_SWC
++\tSTUB Dem_GbiEventKind(6) DEM_EVENT_KIND_SWC
++\tSTUB Dem_GbiEventKind(7) DEM_EVENT_KIND_SWC
++\tSTUB Dem_GbiEventKind(8) DEM_EVENT_KIND_SWC
++\tSTUB Dem_GbiEventKind(9) DEM_EVENT_KIND_SWC
++\tSTUB Dem_GbiEventKind(10) DEM_EVENT_KIND_SWC
++\tSTUB Dem_SetEventStatus(1, DEM_EVENT_STATUS_FAILED) E_OK
++\tSTUB Dem_SetEventStatus(2, DEM_EVENT_STATUS_PASSED) E_OK
++\tSTUB Dem_SetEventStatus(3, DEM_EVENT_STATUS_FAILED) E_OK
++\tSTUB Dem_SetEventStatus(4, DEM_EVENT_STATUS_PASSED) E_OK
++\tSTUB Dem_SetEventStatus(5, DEM_EVENT_STATUS_FAILED) E_OK
++\tSTUB Dem_SetEventStatus(6, DEM_EVENT_STATUS_PASSED) E_OK
++\tSTUB Dem_SetEventStatus(7, DEM_EVENT_STATUS_FAILED) E_OK
++\tSTUB Dem_SetEventStatus(8, DEM_EVENT_STATUS_PASSED) E_OK
++\tSTUB Dem_SetEventStatus(9, DEM_EVENT_STATUS_FAILED) E_OK
++\tSTUB Dem_SetEventStatus(10, DEM_EVENT_STATUS_PASSED) E_OK
+ COMMENT*************************************************************************
+        COMMENT ** Return value
+ COMMENT *************************************************************************
+-       COMMENT None.
+-        #BswErrDeb_FltRstSecu();
++\tCOMMENT ** None
++COMMENT *************************************************************************
++        #BswErrDeb_ReportFlts();
+         END ELEMENT
+ 
+-    END TEST -- TEST BswErrDeb_FltRstSecu_FUNC.2
+-
+-END SERVICE -- BswErrDeb_FltRstSecu
++    END TEST -- TEST BswErrDeb_ReportFlts_FUNC.4
+ 
++END SERVICE -- BswErrDeb_ReportFlts
+ 
+ --------------------------------------------------------------------------------
+--- Declaration of the service BswErrDeb_NvmHandler
++-- Declaration of the service BswErrDeb_MainFunctionFltColl
+ --------------------------------------------------------------------------------
+-SERVICE BswErrDeb_NvmHandler
+-SERVICE_TYPE inline
++SERVICE BswErrDeb_MainFunctionFltColl
++SERVICE_TYPE extern
+ 
+ 
+-    TEST BswErrDeb_NvmHandler_FUNC.1
++    TEST BswErrDeb_MainFunctionFltColl_FUNC.1
+     FAMILY nominal
+ 
+         ELEMENT
+ COMMENT*************************************************************************
+-COMMENT ** Author (mschrein)
+-COMMENT ** Test Case modification date (2019-05-27)
+-COMMENT ** Verifies GLIB-58197
++COMMENT ** Author (Xingge)
++COMMENT ** Test Case modification date (2021-11-16)
++COMMENT ** Verifies 100kW-32836
+ COMMENT **
+ COMMENT ** Test Technique:
+ COMMENT **  Functional
+ COMMENT **
+ COMMENT ** Description:
+-COMMENT **  This test case verifies, if the function BswErrDeb_NvmHandler() with the following input variables
+-COMMENT **  - ErrDebNvmWrReq = 0
+-COMMENT **  - ErrDebNvmWrAck = 1
+-COMMENT **  - ErrDebNvmRdReq = 1
+-COMMENT **  - ErrDebNvmRdAck = 2
+-COMMENT **  calls the following functions
+-COMMENT **  - NvM_SetRamBlockStatus(NvMConf_NvMBlockDescriptor_NvM_BLOCK_ERRDEB, TRUE)
+-COMMENT **  - NvM_WriteBlock(NvMConf_NvMBlockDescriptor_NvM_BLOCK_ERRDEB, NULL_PTR)
+-COMMENT **  and returns the following values for the output variables
+-COMMENT **  - ErrDebNvmWrAck = 0
+-COMMENT **  - ErrDebNvmRdAck = 1
++COMMENT **  This test case verifies, if the function BswErrDeb_MainFunctionFltColl() with the following input variable
++COMMENT **  - BswErrDebDemReportLockClrDtc = FALSE
++COMMENT **  calls the following function
++COMMENT **  - BswErrDeb_ReportFlts()
++COMMENT **  Note: For the BswErrDeb_ReportFlts() function call  test case
++COMMENT **  BswErrDeb_ReportFlts_FUNC.1 is reused.
+ COMMENT*************************************************************************
+ COMMENT ** Global variables
+ COMMENT *************************************************************************
+-\tVAR ErrDebNvmWrReq, init = 0, ev = init
+-\tVAR ErrDebNvmWrAck, init = 1, ev = ErrDebNvmWrReq
+-\tVAR ErrDebNvmRdReq, init = 1, ev = init
+-\tVAR ErrDebNvmRdAck, init = 2, ev = ErrDebNvmRdReq
++\tVAR BswErrDebDemReportLockClrDtc, init = FALSE, ev = init
++\tVAR BswErrDebDemEveId, init = 0, ev = init
++\tARRAY ErrDebDemFltSts, init = {ERR_DEB_FLT_STS_PASSED, others => ERR_DEB_MONR_STS_INACTIVE}, ev= init
++\tVAR BswErrDebDemReports, init = 1, ev = 0
+ COMMENT *************************************************************************
+         COMMENT ** Tester defined variables
+ COMMENT ***********************************************************************
+@@ -1198,99 +1062,41 @@ COMMENT ************************************************************************
+ \tCOMMENT None.
+ COMMENT *************************************************************************
+        COMMENT ** STUB definitions
+-COMMENT *************************************************************************
+-\tSTUB NvM_ASR40_SetRamBlockStatus(NvMConf_NvMBlockDescriptor_NvM_BLOCK_ERRDEB, TRUE) E_NOT_OK
+-\tSTUB NvM_ASR40_WriteBlock(NvMConf_NvMBlockDescriptor_NvM_BLOCK_ERRDEB, NULL_PTR) E_NOT_OK
+-COMMENT*************************************************************************
+-       COMMENT ** Return value
+-COMMENT *************************************************************************
+-       COMMENT None.
+-        #BswErrDeb_NvmHandler();
+-        END ELEMENT
+-
+-    END TEST -- TEST BswErrDeb_NvmHandler_FUNC.1
+-
+-    TEST BswErrDeb_NvmHandler_FUNC.2
+-    FAMILY nominal
+-
+-        ELEMENT
+-COMMENT*************************************************************************
+-COMMENT ** Author (mschrein)
+-COMMENT ** Test Case modification date (2019-05-27)
+-COMMENT ** Verifies GLIB-58197
+-COMMENT **
+-COMMENT ** Test Technique:
+-COMMENT **  Functional
+-COMMENT **
+-COMMENT ** Description:
+-COMMENT **  This test case verifies, if the function BswErrDeb_NvmHandler() with the following input variables
+-COMMENT **  - ErrDebNvmWrReq = 0
+-COMMENT **  - ErrDebNvmWrAck = 1
+-COMMENT **  - ErrDebNvmRdReq = 1
+-COMMENT **  - ErrDebNvmRdAck = 1
+-COMMENT **  calls the following functions
+-COMMENT **  - NvM_SetRamBlockStatus(NvMConf_NvMBlockDescriptor_NvM_BLOCK_ERRDEB, TRUE)
+-COMMENT **  - NvM_WriteBlock(NvMConf_NvMBlockDescriptor_NvM_BLOCK_ERRDEB, NULL_PTR)
+-COMMENT **  and returns the following values for the output variables
+-COMMENT **  - ErrDebNvmWrAck = 0
+-COMMENT **  - ErrDebNvmRdAck = 1
+-COMMENT*************************************************************************
+-COMMENT ** Global variables
+-COMMENT *************************************************************************
+-\tVAR ErrDebNvmWrReq, init = 0, ev = init
+-\tVAR ErrDebNvmWrAck, init = 1, ev = ErrDebNvmWrReq
+-\tVAR ErrDebNvmRdReq, init = 1, ev = init
+-\tVAR ErrDebNvmRdAck, init = 1, ev = init
+-COMMENT *************************************************************************
+-        COMMENT ** Tester defined variables
+-COMMENT ***********************************************************************
+-\tCOMMENT ** None.
+-COMMENT *************************************************************************
+-       COMMENT ** Function parameters
+ COMMENT *************************************************************************
+ \tCOMMENT None.
+-COMMENT *************************************************************************
+-       COMMENT ** STUB definitions
+-COMMENT *************************************************************************
+-\tSTUB NvM_ASR40_SetRamBlockStatus(NvMConf_NvMBlockDescriptor_NvM_BLOCK_ERRDEB, TRUE) E_NOT_OK
+-\tSTUB NvM_ASR40_WriteBlock(NvMConf_NvMBlockDescriptor_NvM_BLOCK_ERRDEB, NULL_PTR) E_NOT_OK
+ COMMENT*************************************************************************
+        COMMENT ** Return value
+ COMMENT *************************************************************************
+-       COMMENT None.
+-        #BswErrDeb_NvmHandler();
++\tCOMMENT ** None
++COMMENT *************************************************************************
++        #BswErrDeb_MainFunctionFltColl();
+         END ELEMENT
+ 
+-    END TEST -- TEST BswErrDeb_NvmHandler_FUNC.2
++    END TEST -- TEST BswErrDeb_MainFunctionFltColl_FUNC.1
+ 
+-    TEST BswErrDeb_NvmHandler_FUNC.3
++    TEST BswErrDeb_MainFunctionFltColl_FUNC.2
+     FAMILY nominal
+ 
+         ELEMENT
+ COMMENT*************************************************************************
+-COMMENT ** Author (mschrein)
+-COMMENT ** Test Case modification date (2019-05-27)
+-COMMENT ** Verifies GLIB-58197
++COMMENT ** Author (Xingge)
++COMMENT ** Test Case modification date (2021-11-16)
++COMMENT ** Verifies GLIB-58341
+ COMMENT **
+ COMMENT ** Test Technique:
+ COMMENT **  Functional
+ COMMENT **
+ COMMENT ** Description:
+-COMMENT **  This test case verifies, if the function BswErrDeb_NvmHandler() with the following input variables
+-COMMENT **  - ErrDebNvmWrReq = 0
+-COMMENT **  - ErrDebNvmWrAck = 0
+-COMMENT **  - ErrDebNvmRdReq = 1
+-COMMENT **  - ErrDebNvmRdAck = 0
+-COMMENT **  returns the following values for the output variables
+-COMMENT **  - ErrDebNvmWrAck = 0
+-COMMENT **  - ErrDebNvmRdAck = 1
++COMMENT **  This test case verifies, if the function BswErrDeb_MainFunctionFltColl() with the following input variable
++COMMENT **  - BswErrDebDemReportLockClrDtc = TRUE
++COMMENT **  does not call any functions
+ COMMENT*************************************************************************
+ COMMENT ** Global variables
+ COMMENT *************************************************************************
+-\tVAR ErrDebNvmWrReq, init = 0, ev = init
+-\tVAR ErrDebNvmWrAck, init = 0, ev = init
+-\tVAR ErrDebNvmRdReq, init = 1, ev = init
+-\tVAR ErrDebNvmRdAck, init = 0, ev = ErrDebNvmRdReq
++\tVAR BswErrDebDemReportLockClrDtc, init = TRUE, ev = init
++\tVAR BswErrDebDemEveId, init = 0, ev = init
++\tARRAY ErrDebDemFltSts, init = {ERR_DEB_FLT_STS_PASSED, others => ERR_DEB_MONR_STS_INACTIVE}, ev= init
++\tVAR BswErrDebDemReports, init = 1, ev = init
+ COMMENT *************************************************************************
+         COMMENT ** Tester defined variables
+ COMMENT ***********************************************************************
+@@ -1306,57 +1112,48 @@ COMMENT ************************************************************************
+ COMMENT*************************************************************************
+        COMMENT ** Return value
+ COMMENT *************************************************************************
+-       COMMENT None.
+-        #BswErrDeb_NvmHandler();
++\tCOMMENT ** None
++COMMENT *************************************************************************
++        #BswErrDeb_MainFunctionFltColl();
+         END ELEMENT
+ 
+-    END TEST -- TEST BswErrDeb_NvmHandler_FUNC.3
+-
+-END SERVICE -- BswErrDeb_NvmHandler
++    END TEST -- TEST BswErrDeb_MainFunctionFltColl_FUNC.2
+ 
++END SERVICE -- BswErrDeb_MainFunctionFltColl
+ 
+ --------------------------------------------------------------------------------
+--- Declaration of the service BswErrDeb_RteSetEventStatus
++-- Declaration of the service BswErrDeb_DemSetEventSts
+ --------------------------------------------------------------------------------
+-SERVICE BswErrDeb_RteSetEventStatus
+-SERVICE_TYPE extern
++SERVICE BswErrDeb_DemSetEventSts
++SERVICE_TYPE inline
+ 
+     -- Tested service parameters declarations
+-    #Dem_EventIdType EventId;
+-    #Dem_EventStatusType EventStatus;
+-    -- By function returned type declaration
+-    #Std_ReturnType ret_BswErrDeb_RteSetEventStatus;
++    #uint16 id;
++    #uint8 sts;
+ 
+-    TEST BswErrDeb_RteSetEventStatus_FUNC.1
++    TEST BswErrDeb_DemSetEventSts_FUNC.1
+     FAMILY nominal
+ 
+         ELEMENT
+ COMMENT*************************************************************************
+-COMMENT ** Author (mschrein)
+-COMMENT ** Test Case modification date (2019-05-27)
+-COMMENT ** Verifies GLIB-58391
++COMMENT ** Author (Xingge)
++COMMENT ** Test Case modification date (2021-11-16)
++COMMENT ** Verifies 100kW-32801
+ COMMENT **
+ COMMENT ** Test Technique:
+ COMMENT **  Functional
+ COMMENT **
+ COMMENT ** Description:
+-COMMENT **  This test case verifies, if the function BswErrDeb_RteSetEventStatus(EventId, EventStatus) with the following input variables
+-COMMENT **  - EventId = 0
+-COMMENT **  - EventStatus = DEM_EVENT_STATUS_PASSED
+-COMMENT **  calls the following functions
+-COMMENT **  - monrSt = BswErrDeb_CvtDemEveStsType(EventStatus)
+-COMMENT **  - BswErrDeb_SetEventStatus(BswErrDebErrIdLut[EventId], monrSt)
+-COMMENT **  and returns the correct Std_ReturnType
+-COMMENT **  - return value = E_OK
+-COMMENT **  Note: For the BswErrDeb_SetEventStatus() function call  test case
+-COMMENT **  BswErrDeb_SetEventStatus_FUNC.1 is reused and therefore the following output variable has to be set
+-COMMENT **  - ErrDebFltCfg[BswErrDebErrIdLut[EventId]].FltData->MonrStsAsync = ERR_DEB_MONR_STS_PASSED
++COMMENT **  This test case verifies, if the function BswErrDeb_DemSetEventSts(id, sts) with the following input variables
++COMMENT **  - id = DEM_EVENT_KIND_SWC
++COMMENT **  - sts = 1
++COMMENT **  calls the following function
++COMMENT **  - Dem_SetEventStatus(id, sts)
+ COMMENT*************************************************************************
+ COMMENT ** Global variables
+ COMMENT *************************************************************************
+-        VAR EventId,\t\tinit = 0,\t\tev = init
+-        VAR EventStatus,\t\tinit = DEM_EVENT_STATUS_PASSED,\t\tev = init
+-        VAR ErrDebFltCfg[BswErrDebErrIdLut[EventId]].FltData->MonrStsAsync, init = ERR_DEB_MONR_STS_INACTIVE, ev = ERR_DEB_MONR_STS_PASSED
++        VAR id,\t\tinit = DEM_EVENT_KIND_SWC,\t\tev = init
++        VAR sts,\t\tinit = 1,\t\tev = init
+ COMMENT *************************************************************************
+         COMMENT ** Tester defined variables
+ COMMENT ***********************************************************************
+@@ -1368,39 +1165,42 @@ COMMENT ************************************************************************
+ COMMENT *************************************************************************
+        COMMENT ** STUB definitions
+ COMMENT *************************************************************************
+-\tCOMMENT None.
++\tSTUB Dem_GbiEventKind(id) id
++\tSTUB Dem_SetEventStatus(id, sts) E_OK
+ COMMENT*************************************************************************
+        COMMENT ** Return value
+ COMMENT *************************************************************************
+-        VAR ret_BswErrDeb_RteSetEventStatus,\t\tinit = E_NOT_OK,\t\tev = E_OK
+-        #ret_BswErrDeb_RteSetEventStatus = BswErrDeb_RteSetEventStatus(EventId, EventStatus);
++\tCOMMENT ** None
++COMMENT *************************************************************************
++        #BswErrDeb_DemSetEventSts(id, sts);
+         END ELEMENT
+ 
+-    END TEST -- TEST BswErrDeb_RteSetEventStatus_FUNC.1
++    END TEST -- TEST BswErrDeb_DemSetEventSts_FUNC.1
+ 
+-    TEST BswErrDeb_RteSetEventStatus_FUNC.2
++
++    TEST BswErrDeb_DemSetEventSts_FUNC.2
+     FAMILY nominal
+ 
+         ELEMENT
+ COMMENT*************************************************************************
+-COMMENT ** Author (mschrein)
+-COMMENT ** Test Case modification date (2019-05-27)
+-COMMENT ** Verifies GLIB-58391
++COMMENT ** Author (Xingge)
++COMMENT ** Test Case modification date (2021-11-16)
++COMMENT ** Verifies 100kW-32801
+ COMMENT **
+ COMMENT ** Test Technique:
+ COMMENT **  Functional
+ COMMENT **
+ COMMENT ** Description:
+-COMMENT **  This test case verifies, if the function BswErrDeb_RteSetEventStatus(EventId, EventStatus) with the following input variables
+-COMMENT - EventId = BswErrDebErrIdLutSize
+-COMMENT - EventStatus = DEM_EVENT_STATUS_PASSED
+-COMMENT returns the correct Std_ReturnType
+-COMMENT - return value = E_NOT_OK
++COMMENT **  This test case verifies, if the function BswErrDeb_DemSetEventSts(id, sts) with the following input variables
++COMMENT **  - id = DEM_EVENT_KIND_SWC
++COMMENT **  - sts = 1
++COMMENT **  calls the following function
++COMMENT **  - Dem_SetEventStatus(id, sts)
+ COMMENT*************************************************************************
+ COMMENT ** Global variables
+ COMMENT *************************************************************************
+-        VAR EventId,\t\tinit = BswErrDebErrIdLutSize,\t\tev = init
+-        VAR EventStatus,\t\tinit = DEM_EVENT_STATUS_PASSED,\t\tev = init
++        VAR id,\t\tinit = DEM_EVENT_KIND_BSW,\t\tev = init
++        VAR sts,\t\tinit = 1,\t\tev = init
+ COMMENT *************************************************************************
+         COMMENT ** Tester defined variables
+ COMMENT ***********************************************************************
+@@ -1412,51 +1212,55 @@ COMMENT ************************************************************************
+ COMMENT *************************************************************************
+        COMMENT ** STUB definitions
+ COMMENT *************************************************************************
+-\tCOMMENT None.
++\tSTUB Dem_GbiEventKind(id) id
+ COMMENT*************************************************************************
+        COMMENT ** Return value
+ COMMENT *************************************************************************
+-        VAR ret_BswErrDeb_RteSetEventStatus,\t\tinit = E_OK,\t\tev = E_NOT_OK
+-        #ret_BswErrDeb_RteSetEventStatus = BswErrDeb_RteSetEventStatus(EventId, EventStatus);
++\tCOMMENT ** None
++COMMENT *************************************************************************
++        #BswErrDeb_DemSetEventSts(id, sts);
+         END ELEMENT
+ 
+-    END TEST -- TEST BswErrDeb_RteSetEventStatus_FUNC.2
+-
+-END SERVICE -- BswErrDeb_RteSetEventStatus
++    END TEST -- TEST BswErrDeb_DemSetEventSts_FUNC.2
+ 
++END SERVICE -- BswErrDeb_DemSetEventSts
+ 
+ --------------------------------------------------------------------------------
+--- Declaration of the service BswErrDeb_SecuFltRstFinished
++-- Declaration of the service BswErrDeb_FltRstClrDtc
+ --------------------------------------------------------------------------------
+-SERVICE BswErrDeb_SecuFltRstFinished
+-SERVICE_TYPE extern
+-
+-    -- By function returned type declaration
+-    #boolean ret_BswErrDeb_SecuFltRstFinished;
++SERVICE BswErrDeb_FltRstClrDtc
++SERVICE_TYPE inline
+ 
+-    TEST BswErrDeb_SecuFltRstFinished_FUNC.1
++    TEST BswErrDeb_FltRstClrDtc_FUNC.1
+     FAMILY nominal
+ 
+         ELEMENT
+ COMMENT*************************************************************************
+-COMMENT ** Author (mschrein)
+-COMMENT ** Test Case modification date (2019-05-27)
+-COMMENT ** Verifies GLIB-60279
++COMMENT ** Author (Xingge)
++COMMENT ** Test Case modification date (2021-11-16)
++COMMENT ** Verifies 100kW-32813
+ COMMENT **
+ COMMENT ** Test Technique:
+ COMMENT **  Functional
+ COMMENT **
+ COMMENT ** Description:
+-COMMENT **  This test case verifies, if the function BswErrDeb_SecuFltRstFinished() with the following input variables
+-COMMENT **  - ErrDebFltRstReqSecu = 1
+-COMMENT **  - BswErrDebFltRstAckSecu = 1
+-COMMENT **  returns the correct boolean value
+-COMMENT **  - return value = TRUE
++COMMENT **  This test case verifies, if the function BswErrDeb_FltRstClrDtc() with the following input variables
++COMMENT **  - ErrDebFltRstReqClrDtc = 1
++COMMENT **  - ErrDebTaskData[0].FltRstAckClrDtc = 1
++COMMENT **  - ErrDebTaskData[1].FltRstAckClrDtc = 1
++COMMENT **  - ErrDebTaskData[2].FltRstAckClrDtc = 1
++COMMENT **  returns the following values for the output variables
++COMMENT **  - BswErrDebDemReportLockClrDtc = FALSE
++COMMENT **  - BswErrDebFltRstAckClrDtc = 1
+ COMMENT*************************************************************************
+ COMMENT ** Global variables
+ COMMENT *************************************************************************
+-        VAR ErrDebFltRstReqSecu, init = 1, ev = init
+-        VAR BswErrDebFltRstAckSecu, init = 1, ev = init
++\tVAR ErrDebFltRstReqClrDtc, init = 1, ev = init
++\tVAR ErrDebTaskData[0].FltRstAckClrDtc, init = 1, ev = init
++\tVAR ErrDebTaskData[1].FltRstAckClrDtc, init = 1, ev = init
++\tVAR ErrDebTaskData[2].FltRstAckClrDtc, init = 1, ev = init
++\tVAR BswErrDebDemReportLockClrDtc, init = TRUE, ev = FALSE
++\tVAR BswErrDebFltRstAckClrDtc, init = 0, ev = 1
+ COMMENT *************************************************************************
+         COMMENT ** Tester defined variables
+ COMMENT ***********************************************************************
+@@ -1468,39 +1272,46 @@ COMMENT ************************************************************************
+ COMMENT *************************************************************************
+        COMMENT ** STUB definitions
+ COMMENT *************************************************************************
+-\tCOMMENT None.
++\tCOMMENT ** None.
+ COMMENT*************************************************************************
+        COMMENT ** Return value
+ COMMENT *************************************************************************
+-        VAR ret_BswErrDeb_SecuFltRstFinished,\t\tinit = FALSE,\t\tev = TRUE
+-        #ret_BswErrDeb_SecuFltRstFinished = BswErrDeb_SecuFltRstFinished();
++       COMMENT None.
++        #BswErrDeb_FltRstClrDtc();
+         END ELEMENT
+ 
+-    END TEST -- TEST BswErrDeb_SecuFltRstFinished_FUNC.1
++    END TEST -- TEST BswErrDeb_FltRstClrDtc_FUNC.1
+ 
+-    TEST BswErrDeb_SecuFltRstFinished_FUNC.2
++TEST BswErrDeb_FltRstClrDtc_FUNC.2
+     FAMILY nominal
+ 
+         ELEMENT
+ COMMENT*************************************************************************
+-COMMENT ** Author (mschrein)
+-COMMENT ** Test Case modification date (2019-05-27)
+-COMMENT ** Verifies GLIB-60279
++COMMENT ** Author (Xingge)
++COMMENT ** Test Case modification date (2021-11-16)
++COMMENT ** Verifies 00kW-32813
+ COMMENT **
+ COMMENT ** Test Technique:
+ COMMENT **  Functional
+ COMMENT **
+ COMMENT ** Description:
+-COMMENT **  This test case verifies, if the function BswErrDeb_SecuFltRstFinished() with the following input variables
+-COMMENT **  - ErrDebFltRstReqSecu = 0
+-COMMENT **  - BswErrDebFltRstAckSecu = 1
+-COMMENT **  returns the correct boolean value
+-COMMENT **  - return value = FALSE
++COMMENT **  This test case verifies, if the function BswErrDeb_FltRstClrDtc() with the following input variables
++COMMENT **  - ErrDebFltRstReqClrDtc = 1
++COMMENT **  - ErrDebTaskData[0].FltRstAckClrDtc = 1
++COMMENT **  - ErrDebTaskData[1].FltRstAckClrDtc = 1
++COMMENT **  - ErrDebTaskData[2].FltRstAckClrDtc = 2
++COMMENT **  returns the following values for the output variables
++COMMENT **  - BswErrDebDemReportLockClrDtc = TRUE
++COMMENT **  - BswErrDebFltRstAckClrDtc = 0
+ COMMENT*************************************************************************
+ COMMENT ** Global variables
+ COMMENT *************************************************************************
+-        VAR ErrDebFltRstReqSecu, init = 0, ev = init
+-        VAR BswErrDebFltRstAckSecu, init = 1, ev = init
++\tVAR ErrDebFltRstReqClrDtc, init = 1, ev = init
++\tVAR ErrDebTaskData[0].FltRstAckClrDtc, init = 1, ev = init
++\tVAR ErrDebTaskData[1].FltRstAckClrDtc, init = 1, ev = init
++\tVAR ErrDebTaskData[2].FltRstAckClrDtc, init = 2, ev = init
++\tVAR BswErrDebDemReportLockClrDtc, init = TRUE, ev = init
++\tVAR BswErrDebFltRstAckClrDtc, init = 0, ev = init
+ COMMENT *************************************************************************
+         COMMENT ** Tester defined variables
+ COMMENT ***********************************************************************
+@@ -1512,18 +1323,17 @@ COMMENT ************************************************************************
+ COMMENT *************************************************************************
+        COMMENT ** STUB definitions
+ COMMENT *************************************************************************
+-\tCOMMENT None.
++\tCOMMENT ** None.
+ COMMENT*************************************************************************
+        COMMENT ** Return value
+ COMMENT *************************************************************************
+-        VAR ret_BswErrDeb_SecuFltRstFinished,\t\tinit = TRUE,\t\tev = FALSE
+-        #ret_BswErrDeb_SecuFltRstFinished = BswErrDeb_SecuFltRstFinished();
++       COMMENT None.
++        #BswErrDeb_FltRstClrDtc();
+         END ELEMENT
+ 
+-    END TEST -- TEST BswErrDeb_SecuFltRstFinished_FUNC.2
+-
+-END SERVICE -- BswErrDeb_SecuFltRstFinished
++    END TEST -- TEST BswErrDeb_FltRstClrDtc_FUNC.2
+ 
++END SERVICE -- BswErrDeb_FltRstClrDtc
+ 
+ --------------------------------------------------------------------------------
+ -- Declaration of the service BswErrDeb_SetEventStatus
+@@ -1534,31 +1344,31 @@ SERVICE_TYPE extern
+     -- Tested service parameters declarations
+     #ErrDeb_ErrIdType ErrId;
+     #ErrDeb_MonrStsType MonrSts;
+-
+     TEST BswErrDeb_SetEventStatus_FUNC.1
+     FAMILY nominal
+ 
+         ELEMENT
+ COMMENT*************************************************************************
+-COMMENT ** Author (mschrein)
+-COMMENT ** Test Case modification date (2019-05-27)
+-COMMENT ** Verifies GLIB-58335
++COMMENT ** Author (Xingge)
++COMMENT ** Test Case modification date (2021-11-16)
++COMMENT ** Verifies 100kW-32828
+ COMMENT **
+ COMMENT ** Test Technique:
+ COMMENT **  Functional
+ COMMENT **
+ COMMENT ** Description:
+ COMMENT **  This test case verifies, if the function BswErrDeb_SetEventStatus(ErrId, MonrSts) with the following input variables
+-COMMENT **  - ErrId = 1
++COMMENT **  - ErrId = ERR_ID_CAN_BUS_OFF
+ COMMENT **  - MonrSts = ERR_DEB_MONR_STS_PASSED
+ COMMENT **  returns the following values for the output variable
+ COMMENT **  - ErrDebFltCfg[ErrId].FltData->MonrStsAsync = ERR_DEB_MONR_STS_PASSED
+ COMMENT*************************************************************************
+ COMMENT ** Global variables
+ COMMENT *************************************************************************
+-        VAR ErrId,\t\tinit = 1,\t\tev = init
++        VAR ErrId,\t\tinit = ERR_ID_CAN_BUS_OFF,\t\tev = init
+         VAR MonrSts,\t\tinit = ERR_DEB_MONR_STS_PASSED,\t\tev = init
+-        VAR ErrDebFltCfg[ErrId].FltData->MonrStsAsync, init = ERR_DEB_MONR_STS_INACTIVE, ev = MonrSts
++        VAR ErrDebFltCfg[ERR_ID_CAN_BUS_OFF].FltData, init=&ErrDebFltData_CAN_BUS_OFF, ev = init
++        VAR ErrDebFltCfg[ERR_ID_CAN_BUS_OFF].FltData->MonrStsAsync, init = ERR_DEB_MONR_STS_INACTIVE, ev = MonrSts
+ COMMENT *************************************************************************
+         COMMENT ** Tester defined variables
+ COMMENT ***********************************************************************
+@@ -1578,16 +1388,14 @@ COMMENT ************************************************************************
+         #BswErrDeb_SetEventStatus(ErrId, MonrSts);
+         END ELEMENT
+ 
+-    END TEST -- TEST BswErrDeb_SetEventStatus_FUNC.1
+-
+     TEST BswErrDeb_SetEventStatus_FUNC.2
+     FAMILY nominal
+ 
+         ELEMENT
+ COMMENT*************************************************************************
+-COMMENT ** Author (mschrein)
+-COMMENT ** Test Case modification date (2019-05-27)
+-COMMENT ** Verifies GLIB-58335
++COMMENT ** Author (Xingge)
++COMMENT ** Test Case modification date (2021-11-16)
++COMMENT ** Verifies 100kW-32828
+ COMMENT **
+ COMMENT ** Test Technique:
+ COMMENT **  Functional
+@@ -1603,7 +1411,6 @@ COMMENT ** Global variables
+ COMMENT *************************************************************************
+         VAR ErrId,\t\tinit = ERR_DEB_FLT_CNT+1,\t\tev = init
+         VAR MonrSts,\t\tinit = ERR_DEB_MONR_STS_PASSED,\t\tev = init
+-        VAR ErrDebFltCfg[ErrId].FltData->MonrStsAsync, init = ERR_DEB_MONR_STS_INACTIVE, ev = init
+ COMMENT *************************************************************************
+         COMMENT ** Tester defined variables
+ COMMENT ***********************************************************************
+@@ -1625,42 +1432,36 @@ COMMENT ************************************************************************
+ 
+     END TEST -- TEST BswErrDeb_SetEventStatus_FUNC.2
+ 
++
+ END SERVICE -- BswErrDeb_SetEventStatus
+ 
+ 
+ --------------------------------------------------------------------------------
+--- Declaration of the service BswErrDeb_SetDtcSuppression
++-- Declaration of the service BswErrDeb_SetFltReportLockClrDtc
+ --------------------------------------------------------------------------------
+-SERVICE BswErrDeb_SetDtcSuppression
++SERVICE BswErrDeb_SetFltReportLockClrDtc
+ SERVICE_TYPE extern
+ 
+ 
+-    TEST BswErrDeb_SetDtcSuppression_FUNC.1
++    TEST BswErrDeb_SetFltReportLockClrDtc_FUNC.1
+     FAMILY nominal
+ 
+         ELEMENT
+ COMMENT*************************************************************************
+-COMMENT ** Author (mschrein)
+-COMMENT ** Test Case modification date (2019-05-29)
+-COMMENT ** Verifies GLIB-58334
++COMMENT ** Author (Xingge)
++COMMENT ** Test Case modification date (2021-11-16)
++COMMENT ** Verifies 100kW-32830
+ COMMENT **
+ COMMENT ** Test Technique:
+ COMMENT **  Functional
+ COMMENT **
+ COMMENT ** Description:
+-COMMENT **  This test case verifies, if the function BswErrDeb_SetDtcSuppression() with the following input variables
+-COMMENT **  - BswErrDebUdsDtcVisy[eventClass] = FALSE
+-COMMENT **  - BswErrDebObdDtcVisy[eventClass] = FALSE
+-COMMENT **  calls the following functions
+-COMMENT **  - DEM_GBI_EVENTCLASSDESCIDX(eventId)
+-COMMENT **  - DEM_MODIFY_BIT_IN_ARRAY(Dem_UDSDTCSuppression, eventId, TRUE)
+-COMMENT **  - DEM_MODIFY_BIT_IN_ARRAY(Dem_OBDDTCSuppression, eventId, TRUE)
++COMMENT **  This test case verifies, if the function BswErrDeb_SetFltReportLockClrDtc() sets the following value for the output variable
++COMMENT **  - BswErrDebDemReportLockClrDtc = TRUE
+ COMMENT*************************************************************************
+ COMMENT ** Global variables
+ COMMENT *************************************************************************
+-COMMENT ** Test case does not work because the Dem_Makros cause issues in the test environment.
+-COMMENT ** These Markos shall only be used by Dem_Gbi...() functions. Wrote variable check only to cause test failure.
+-COMMENT ** Please delete the following line, when the Dem_Makros are removed from the software.
++\tVAR BswErrDebDemReportLockClrDtc, init = FALSE, ev = TRUE
+ COMMENT *************************************************************************
+         COMMENT ** Tester defined variables
+ COMMENT ***********************************************************************
+@@ -1672,40 +1473,58 @@ COMMENT ************************************************************************
+ COMMENT *************************************************************************
+        COMMENT ** STUB definitions
+ COMMENT *************************************************************************
+-COMMENT ** The following lines do not work. It is not possible to stub the Dem_Makros.
+-COMMENT ** Therefore the code coverage requirement can not be fullfilled.
+-VAR Dem_EventDesc[(0)].EvConf2, init=0x0, ev=init
++\tCOMMENT None.
+ COMMENT*************************************************************************
+        COMMENT ** Return value
+ COMMENT *************************************************************************
+-       COMMENT None.
+-        #BswErrDeb_SetDtcSuppression();
++\tCOMMENT ** None
++COMMENT *************************************************************************
++        #BswErrDeb_SetFltReportLockClrDtc();
+         END ELEMENT
+ 
+-    END TEST -- TEST BswErrDeb_SetDtcSuppression_FUNC.1
++    END TEST -- TEST BswErrDeb_SetFltReportLockClrDtc_FUNC.1
+ 
+-    TEST BswErrDeb_SetDtcSuppression_FUNC.2
++END SERVICE -- BswErrDeb_SetFltReportLockClrDtc
++
++
++--------------------------------------------------------------------------------
++-- Declaration of the service BswErrDeb_NvmHandler
++--------------------------------------------------------------------------------
++SERVICE BswErrDeb_NvmHandler
++SERVICE_TYPE inline
++
++
++    TEST BswErrDeb_NvmHandler_FUNC.1
+     FAMILY nominal
+ 
+         ELEMENT
+ COMMENT*************************************************************************
+-COMMENT ** Author (mschrein)
+-COMMENT ** Test Case modification date (2019-05-29)
+-COMMENT ** Verifies GLIB-58334
++COMMENT ** Author (Xingge)
++COMMENT ** Test Case modification date (2021-11-16)
++COMMENT ** Verifies 100kW-32939
+ COMMENT **
+ COMMENT ** Test Technique:
+ COMMENT **  Functional
+ COMMENT **
+ COMMENT ** Description:
+-COMMENT **  This test case verifies, if the function BswErrDeb_SetDtcSuppression() with the following input variables
+-COMMENT **  - BswErrDebUdsDtcVisy[eventClass] = TRUE
+-COMMENT **  - BswErrDebObdDtcVisy[eventClass] = TRUE
++COMMENT **  This test case verifies, if the function BswErrDeb_NvmHandler() with the following input variables
++COMMENT **  - ErrDebNvmWrReq = 0
++COMMENT **  - ErrDebNvmWrAck = 1
++COMMENT **  - ErrDebNvmRdReq = 1
++COMMENT **  - ErrDebNvmRdAck = 2
+ COMMENT **  calls the following functions
+-COMMENT **  - DEM_GBI_EVENTCLASSDESCIDX(eventId)
+-COMMENT **  - DEM_MODIFY_BIT_IN_ARRAY(Dem_UDSDTCSuppression, eventId, TRUE)
++COMMENT **  - NvM_SetRamBlockStatus(NvMConf_NvMBlockDescriptor_NvM_BLOCK_ERRDEB, TRUE)
++COMMENT **  - NvM_WriteBlock(NvMConf_NvMBlockDescriptor_NvM_BLOCK_ERRDEB, NULL_PTR)
++COMMENT **  and returns the following values for the output variables
++COMMENT **  - ErrDebNvmWrAck = 0
++COMMENT **  - ErrDebNvmRdAck = 1
+ COMMENT*************************************************************************
+ COMMENT ** Global variables
+ COMMENT *************************************************************************
++\tVAR ErrDebNvmWrReq, init = 0, ev = init
++\tVAR ErrDebNvmWrAck, init = 1, ev = ErrDebNvmWrReq
++\tVAR ErrDebNvmRdReq, init = 1, ev = init
++\tVAR ErrDebNvmRdAck, init = 2, ev = ErrDebNvmRdReq
+ COMMENT *************************************************************************
+         COMMENT ** Tester defined variables
+ COMMENT ***********************************************************************
+@@ -1717,50 +1536,97 @@ COMMENT ************************************************************************
+ COMMENT *************************************************************************
+        COMMENT ** STUB definitions
+ COMMENT *************************************************************************
+-COMMENT ** The following lines do not work. It is not possible to stub the Dem_Makros.
+-COMMENT ** Therefore the code coverage requirement can not be fullfilled.
+-\tVAR Dem_EventDesc[(0)].EvConf2, init=0x200000, ev=init
++\tSTUB NvM_ASR40_SetRamBlockStatus(NvMConf_NvMBlockDescriptor_NvM_BLOCK_ERRDEB, TRUE) E_NOT_OK
++\tSTUB NvM_ASR40_WriteBlock(NvMConf_NvMBlockDescriptor_NvM_BLOCK_ERRDEB, NULL_PTR) E_NOT_OK
+ COMMENT*************************************************************************
+        COMMENT ** Return value
+ COMMENT *************************************************************************
+        COMMENT None.
+-        #BswErrDeb_SetDtcSuppression();
++        #BswErrDeb_NvmHandler();
+         END ELEMENT
+ 
+-    END TEST -- TEST BswErrDeb_SetDtcSuppression_FUNC.2
+-
+-END SERVICE -- BswErrDeb_SetDtcSuppression
+-
++    END TEST -- TEST BswErrDeb_NvmHandler_FUNC.1
++    TEST BswErrDeb_NvmHandler_FUNC.2
++    FAMILY nominal
+ 
+---------------------------------------------------------------------------------
+--- Declaration of the service BswErrDeb_MainFunctionFltDeb
+---------------------------------------------------------------------------------
+-SERVICE BswErrDeb_MainFunctionFltDeb
+-SERVICE_TYPE extern
++        ELEMENT
++COMMENT*************************************************************************
++COMMENT ** Author (Xingge)
++COMMENT ** Test Case modification date (2021-11-16)
++COMMENT ** Verifies 100kW-32939
++COMMENT **
++COMMENT ** Test Technique:
++COMMENT **  Functional
++COMMENT **
++COMMENT ** Description:
++COMMENT **  This test case verifies, if the function BswErrDeb_NvmHandler() with the following input variables
++COMMENT **  - ErrDebNvmWrReq = 0
++COMMENT **  - ErrDebNvmWrAck = 1
++COMMENT **  - ErrDebNvmRdReq = 1
++COMMENT **  - ErrDebNvmRdAck = 1
++COMMENT **  calls the following functions
++COMMENT **  - NvM_SetRamBlockStatus(NvMConf_NvMBlockDescriptor_NvM_BLOCK_ERRDEB, TRUE)
++COMMENT **  - NvM_WriteBlock(NvMConf_NvMBlockDescriptor_NvM_BLOCK_ERRDEB, NULL_PTR)
++COMMENT **  and returns the following values for the output variables
++COMMENT **  - ErrDebNvmWrAck = 0
++COMMENT **  - ErrDebNvmRdAck = 1
++COMMENT*************************************************************************
++COMMENT ** Global variables
++COMMENT *************************************************************************
++\tVAR ErrDebNvmWrReq, init = 0, ev = init
++\tVAR ErrDebNvmWrAck, init = 1, ev = ErrDebNvmWrReq
++\tVAR ErrDebNvmRdReq, init = 1, ev = init
++\tVAR ErrDebNvmRdAck, init = 1, ev = init
++COMMENT *************************************************************************
++        COMMENT ** Tester defined variables
++COMMENT ***********************************************************************
++\tCOMMENT ** None.
++COMMENT *************************************************************************
++       COMMENT ** Function parameters
++COMMENT *************************************************************************
++\tCOMMENT None.
++COMMENT *************************************************************************
++       COMMENT ** STUB definitions
++COMMENT *************************************************************************
++\tSTUB NvM_ASR40_SetRamBlockStatus(NvMConf_NvMBlockDescriptor_NvM_BLOCK_ERRDEB, TRUE) E_NOT_OK
++\tSTUB NvM_ASR40_WriteBlock(NvMConf_NvMBlockDescriptor_NvM_BLOCK_ERRDEB, NULL_PTR) E_NOT_OK
++COMMENT*************************************************************************
++       COMMENT ** Return value
++COMMENT *************************************************************************
++       COMMENT None.
++        #BswErrDeb_NvmHandler();
++        END ELEMENT
+ 
++    END TEST -- TEST BswErrDeb_NvmHandler_FUNC.2
+ 
+-    TEST BswErrDeb_MainFunctionFltDeb_FUNC.1
++    TEST BswErrDeb_NvmHandler_FUNC.3
+     FAMILY nominal
+ 
+         ELEMENT
+ COMMENT*************************************************************************
+-COMMENT ** Author (mschrein)
+-COMMENT ** Test Case modification date (2019-05-27)
+-COMMENT ** Verifies GLIB-58339
++COMMENT ** Author (Xingge)
++COMMENT ** Test Case modification date (2021-11-16)
++COMMENT ** Verifies 100kW-32939
+ COMMENT **
+ COMMENT ** Test Technique:
+ COMMENT **  Functional
+ COMMENT **
+ COMMENT ** Description:
+-COMMENT **  This test case verifies, if the function BswErrDeb_MainFunctionFltDeb() with the following input variable
+-COMMENT **  - BswErrDebFctInhbnSts.U = 0
+-COMMENT **  calls the following functions
+-COMMENT **  - ErrDeb_DebFlts(ERR_DEB_TASK_ID_CORE0_1MS, BswErrDebFctInhbnSts.U)
+-COMMENT **  - ErrDeb_FidColl(ERR_DEB_TASK_ID_CORE0_1MS, BswErrDebFctInhbnSts.U, FALSE)
++COMMENT **  This test case verifies, if the function BswErrDeb_NvmHandler() with the following input variables
++COMMENT **  - ErrDebNvmWrReq = 0
++COMMENT **  - ErrDebNvmWrAck = 0
++COMMENT **  - ErrDebNvmRdReq = 1
++COMMENT **  - ErrDebNvmRdAck = 0
++COMMENT **  returns the following values for the output variables
++COMMENT **  - ErrDebNvmWrAck = 0
++COMMENT **  - ErrDebNvmRdAck = 1
+ COMMENT*************************************************************************
+ COMMENT ** Global variables
+ COMMENT *************************************************************************
+-\tVAR BswErrDebFctInhbnSts.U, init = 0, ev = init
++\tVAR ErrDebNvmWrReq, init = 0, ev = init
++\tVAR ErrDebNvmWrAck, init = 0, ev = init
++\tVAR ErrDebNvmRdReq, init = 1, ev = init
++\tVAR ErrDebNvmRdAck, init = 0, ev = ErrDebNvmRdReq
+ COMMENT *************************************************************************
+         COMMENT ** Tester defined variables
+ COMMENT ***********************************************************************
+@@ -1772,57 +1638,52 @@ COMMENT ************************************************************************
+ COMMENT *************************************************************************
+        COMMENT ** STUB definitions
+ COMMENT *************************************************************************
+-\tSTUB ErrDeb_DebFlts(ERR_DEB_TASK_ID_CORE0_1MS, BswErrDebFctInhbnSts.U)
+-\tSTUB ErrDeb_FidColl(ERR_DEB_TASK_ID_CORE0_1MS, BswErrDebFctInhbnSts.U, FALSE)
++\tCOMMENT None.
+ COMMENT*************************************************************************
+        COMMENT ** Return value
+ COMMENT *************************************************************************
+        COMMENT None.
+-        #BswErrDeb_MainFunctionFltDeb();
++        #BswErrDeb_NvmHandler();
+         END ELEMENT
+ 
+-    END TEST -- TEST BswErrDeb_MainFunctionFltDeb_FUNC.1
+-
+-END SERVICE -- BswErrDeb_MainFunctionFltDeb
++    END TEST -- TEST BswErrDeb_NvmHandler_FUNC.3
+ 
++END SERVICE -- BswErrDeb_NvmHandler
+ 
+ --------------------------------------------------------------------------------
+--- Declaration of the service BswErrDeb_FltRstClrDtc
++-- Declaration of the service BswErrDeb_SetDtcSuppression
+ --------------------------------------------------------------------------------
+-SERVICE BswErrDeb_FltRstClrDtc
+-SERVICE_TYPE inline
++SERVICE BswErrDeb_SetDtcSuppression
++SERVICE_TYPE extern
+ 
+ 
+-    TEST BswErrDeb_FltRstClrDtc_FUNC.1
++    TEST BswErrDeb_SetDtcSuppression_FUNC.1
+     FAMILY nominal
+ 
+         ELEMENT
+ COMMENT*************************************************************************
+-COMMENT ** Author (mschrein)
+-COMMENT ** Test Case modification date (2019-05-27)
+-COMMENT ** Verifies GLIB-58194
++COMMENT ** Author (xingge)
++COMMENT ** Test Case modification date (2021-11-22)
++COMMENT ** Verifies 100kw-
+ COMMENT **
+ COMMENT ** Test Technique:
+ COMMENT **  Functional
+ COMMENT **
+ COMMENT ** Description:
+-COMMENT **  This test case verifies, if the function BswErrDeb_FltRstClrDtc() with the following input variables
+-COMMENT **  - ErrDebFltRstReqClrDtc = 1
+-COMMENT **  - ErrDebTaskData[0].FltRstAckClrDtc = 1
+-COMMENT **  - ErrDebTaskData[1].FltRstAckClrDtc = 1
+-COMMENT **  - ErrDebTaskData[2].FltRstAckClrDtc = 1
+-COMMENT **  returns the following values for the output variables
+-COMMENT **  - BswErrDebDemReportLockClrDtc = FALSE
+-COMMENT **  - BswErrDebFltRstAckClrDtc = 1
++COMMENT **  This test case verifies, if the function BswErrDeb_SetDtcSuppression() with the following input variables
++COMMENT **  - BswErrDebUdsDtcVisy[eventClass] = FALSE
++COMMENT **  - BswErrDebObdDtcVisy[eventClass] = FALSE
++COMMENT **  calls the following functions
++COMMENT **  - DEM_GBI_EVENTCLASSDESCIDX(eventId)
++COMMENT **  - DEM_MODIFY_BIT_IN_ARRAY(Dem_UDSDTCSuppression, eventId, TRUE)
++COMMENT **  - DEM_MODIFY_BIT_IN_ARRAY(Dem_OBDDTCSuppression, eventId, TRUE)
+ COMMENT*************************************************************************
+ COMMENT ** Global variables
+ COMMENT *************************************************************************
+-\tVAR ErrDebFltRstReqClrDtc, init = 1, ev = init
+-\tVAR ErrDebTaskData[0].FltRstAckClrDtc, init = 1, ev = init
+-\tVAR ErrDebTaskData[1].FltRstAckClrDtc, init = 1, ev = init
+-\tVAR ErrDebTaskData[2].FltRstAckClrDtc, init = 1, ev = init
+-\tVAR BswErrDebDemReportLockClrDtc, init = TRUE, ev = FALSE
+-\tVAR BswErrDebFltRstAckClrDtc, init = 0, ev = 1
++COMMENT ** Test case does not work because the Dem_Makros cause issues in the test environment.
++COMMENT ** These Markos shall only be used by Dem_Gbi...() functions. Wrote variable check only to cause test failure.
++COMMENT ** Please delete the following line, when the Dem_Makros are removed from the software.
++\tVAR BswErrDebFltRstAckSecu, init = 0, ev = 0
+ COMMENT *************************************************************************
+         COMMENT ** Tester defined variables
+ COMMENT ***********************************************************************
+@@ -1834,46 +1695,46 @@ COMMENT ************************************************************************
+ COMMENT *************************************************************************
+        COMMENT ** STUB definitions
+ COMMENT *************************************************************************
+-\tCOMMENT ** None.
++COMMENT ** The following lines do not work. It is not possible to stub the Dem_Makros.
++COMMENT ** Therefore the code coverage requirement can not be fullfilled.
++\tSTUB DEM_GBI_EVENTCLASSDESCIDX(0U) 0
++\tSTUB DEM_MODIFY_BIT_IN_ARRAY(Dem_UDSDTCSuppression, 0U, TRUE)
++\tSTUB DEM_MODIFY_BIT_IN_ARRAY(Dem_OBDDTCSuppression, 0U, TRUE)
+ COMMENT*************************************************************************
+        COMMENT ** Return value
+ COMMENT *************************************************************************
+        COMMENT None.
+-        #BswErrDeb_FltRstClrDtc();
++        #BswErrDeb_SetDtcSuppression();
+         END ELEMENT
+ 
+-    END TEST -- TEST BswErrDeb_FltRstClrDtc_FUNC.1
++    END TEST -- TEST BswErrDeb_SetDtcSuppression_FUNC.1
+ 
+-TEST BswErrDeb_FltRstClrDtc_FUNC.2
++    TEST BswErrDeb_SetDtcSuppression_FUNC.2
+     FAMILY nominal
+ 
+         ELEMENT
+ COMMENT*************************************************************************
+-COMMENT ** Author (mschrein)
+-COMMENT ** Test Case modification date (2019-05-27)
+-COMMENT ** Verifies GLIB-58194
+-COMMENT **
+-COMMENT ** Test Technique:
+-COMMENT **  Functional
+-COMMENT **
+-COMMENT ** Description:
+-COMMENT **  This test case verifies, if the function BswErrDeb_FltRstClrDtc() with the following input variables
+-COMMENT **  - ErrDebFltRstReqClrDtc = 1
+-COMMENT **  - ErrDebTaskData[0].FltRstAckClrDtc = 1
+-COMMENT **  - ErrDebTaskData[1].FltRstAckClrDtc = 1
+-COMMENT **  - ErrDebTaskData[2].FltRstAckClrDtc = 2
+-COMMENT **  returns the following values for the output variables
+-COMMENT **  - BswErrDebDemReportLockClrDtc = TRUE
+-COMMENT **  - BswErrDebFltRstAckClrDtc = 0
++COMMENT ** Author (xingge)
++COMMENT ** Test Case modification date (2021-11-22))
++COMMENT ** Verifies 100kw
++COMMENT **
++COMMENT ** Test Technique:
++COMMENT **  Functional
++COMMENT **
++COMMENT ** Description:
++COMMENT **  This test case verifies, if the function BswErrDeb_SetDtcSuppression() with the following input variables
++COMMENT **  - BswErrDebUdsDtcVisy[eventClass] = FALSE
++COMMENT **  - BswErrDebObdDtcVisy[eventClass] = TRUE
++COMMENT **  calls the following functions
++COMMENT **  - DEM_GBI_EVENTCLASSDESCIDX(eventId)
++COMMENT **  - DEM_MODIFY_BIT_IN_ARRAY(Dem_UDSDTCSuppression, eventId, TRUE)
+ COMMENT*************************************************************************
+ COMMENT ** Global variables
+ COMMENT *************************************************************************
+-\tVAR ErrDebFltRstReqClrDtc, init = 1, ev = init
+-\tVAR ErrDebTaskData[0].FltRstAckClrDtc, init = 1, ev = init
+-\tVAR ErrDebTaskData[1].FltRstAckClrDtc, init = 1, ev = init
+-\tVAR ErrDebTaskData[2].FltRstAckClrDtc, init = 2, ev = init
+-\tVAR BswErrDebDemReportLockClrDtc, init = TRUE, ev = init
+-\tVAR BswErrDebFltRstAckClrDtc, init = 0, ev = init
++COMMENT ** Test case does not work because the Dem_Makros cause issues in the test environment.
++COMMENT ** These Markos shall only be used by Dem_Gbi...() functions. Wrote variable check only to cause test failure.
++COMMENT ** Please delete the following line, when the Dem_Makros are removed from the software.
++\tVAR BswErrDebFltRstAckSecu, init = 0, ev = 0
+ COMMENT *************************************************************************
+         COMMENT ** Tester defined variables
+ COMMENT ***********************************************************************
+@@ -1885,63 +1746,46 @@ COMMENT ************************************************************************
+ COMMENT *************************************************************************
+        COMMENT ** STUB definitions
+ COMMENT *************************************************************************
+-\tCOMMENT ** None.
++\t-- BswErrDebUdsDtcVisy[eventClass] = FALSE and BswErrDebObdDtcVisy[eventClass] = TRUE is not possible, because
++\t-- the only index where UdsDtcVisy[] is FALSE is 0, and  ObdDtcVisy[0] = FALSE. We try to test TRUE/TRUE here.
++COMMENT ** The following lines do not work. It is not possible to stub the Dem_Makros.
++COMMENT ** Therefore the code coverage requirement can not be fullfilled.
++\tSTUB DEM_GBI_EVENTCLASSDESCIDX(0U) 1
+ COMMENT*************************************************************************
+        COMMENT ** Return value
+ COMMENT *************************************************************************
+        COMMENT None.
+-        #BswErrDeb_FltRstClrDtc();
++        #BswErrDeb_SetDtcSuppression();
+         END ELEMENT
+ 
+-    END TEST -- TEST BswErrDeb_FltRstClrDtc_FUNC.2
+-
+-END SERVICE -- BswErrDeb_FltRstClrDtc
+-
+-
+---------------------------------------------------------------------------------
+--- Declaration of the service BswErrDeb_FltRstHandler
+---------------------------------------------------------------------------------
+-SERVICE BswErrDeb_FltRstHandler
+-SERVICE_TYPE inline
+-
++    END TEST -- TEST BswErrDeb_SetDtcSuppression_FUNC.2
+ 
+-    TEST BswErrDeb_FltRstHandler_FUNC.1
++    TEST BswErrDeb_SetDtcSuppression_FUNC.3
+     FAMILY nominal
+ 
+         ELEMENT
+ COMMENT*************************************************************************
+-COMMENT ** Author (mschrein)
+-COMMENT ** Test Case modification date (2019-05-27)
+-COMMENT ** Verifies GLIB-58195
++COMMENT ** Author (xingge)
++COMMENT ** Test Case modification date (2021-11-22))
++COMMENT ** Verifies 100kw
+ COMMENT **
+ COMMENT ** Test Technique:
+ COMMENT **  Functional
+ COMMENT **
+ COMMENT ** Description:
+-COMMENT **  This test case verifies, if the function BswErrDeb_FltRstHandler() with the following input variables
+-COMMENT **  - ErrDebFltRstReqKl15 = 0
+-COMMENT **  - BswErrDebFltRstAckKl15 = 1
+-COMMENT **  - ErrDebFltRstReqClrDtc = 1
+-COMMENT **  - BswErrDebFltRstAckClrDtc = 1
+-COMMENT **  - ErrDebFltRstReqSecu = 2
+-COMMENT **  - BswErrDebFltRstAckSecu = 2
+-COMMENT **  calls the following function
+-COMMENT **  - BswErrDeb_FltRstKl15()
+-COMMENT **  Note: For the BswErrDeb_FltRstKl15() function call  test case
+-COMMENT **  BswErrDeb_FltRstKl15_FUNC.1 is reused and therefore the following output variable has to be set
+-COMMENT **  - BswErrDebFltRstAckKl15 = 0
++COMMENT **  This test case verifies, if the function BswErrDeb_SetDtcSuppression() with the following input variables
++COMMENT **  - BswErrDebUdsDtcVisy[eventClass] = TRUE
++COMMENT **  - BswErrDebObdDtcVisy[eventClass] = FALSE
++COMMENT **  calls the following functions
++COMMENT **  - DEM_GBI_EVENTCLASSDESCIDX(eventId)
++COMMENT **  - DEM_MODIFY_BIT_IN_ARRAY(Dem_OBDDTCSuppression, eventId, TRUE)
+ COMMENT*************************************************************************
+ COMMENT ** Global variables
+ COMMENT *************************************************************************
+-\tVAR ErrDebFltRstReqKl15 , init = 0, ev = init
+-\tVAR BswErrDebFltRstAckKl15  , init = 1, ev = ErrDebFltRstReqKl15
+-\tVAR ErrDebFltRstReqClrDtc , init = 1, ev = init
+-\tVAR BswErrDebFltRstAckClrDtc , init = 1, ev = init
+-\tVAR ErrDebFltRstReqSecu , init = 2, ev = init
+-\tVAR BswErrDebFltRstAckSecu , init = 2, ev = init
+-\tVAR ErrDebTaskData[0].FltRstAckKl15, init = ErrDebFltRstReqKl15, ev = init
+-\tVAR ErrDebTaskData[1].FltRstAckKl15, init = ErrDebFltRstReqKl15, ev = init
+-\tVAR ErrDebTaskData[2].FltRstAckKl15, init = ErrDebFltRstReqKl15, ev = init
++COMMENT ** Test case does not work because the Dem_Makros cause issues in the test environment.
++COMMENT ** These Markos shall only be used by Dem_Gbi...() functions. Wrote variable check only to cause test failure.
++COMMENT ** Please delete the following line, when the Dem_Makros are removed from the software.
++\tVAR BswErrDebFltRstAckSecu, init = 0, ev = 0
+ COMMENT *************************************************************************
+         COMMENT ** Tester defined variables
+ COMMENT ***********************************************************************
+@@ -1953,53 +1797,55 @@ COMMENT ************************************************************************
+ COMMENT *************************************************************************
+        COMMENT ** STUB definitions
+ COMMENT *************************************************************************
+-\tCOMMENT ** None.
++COMMENT ** The following lines do not work. It is not possible to stub the Dem_Makros.
++COMMENT ** Therefore the code coverage requirement can not be fullfilled.
++\tSTUB DEM_GBI_EVENTCLASSDESCIDX(0U) 4
++\tSTUB DEM_MODIFY_BIT_IN_ARRAY(Dem_OBDDTCSuppression, 0U, TRUE)
+ COMMENT*************************************************************************
+        COMMENT ** Return value
+ COMMENT *************************************************************************
+        COMMENT None.
+-        #BswErrDeb_FltRstHandler();
++        #BswErrDeb_SetDtcSuppression();
+         END ELEMENT
+ 
+-    END TEST -- TEST BswErrDeb_FltRstHandler_FUNC.1
++    END TEST -- TEST BswErrDeb_SetDtcSuppression_FUNC.3
++
++END SERVICE -- BswErrDeb_SetDtcSuppression
++
++
++--------------------------------------------------------------------------------
++-- Declaration of the service BswErrDeb_ResetFltReportLockClrDtc
++--------------------------------------------------------------------------------
++SERVICE BswErrDeb_ResetFltReportLockClrDtc
++SERVICE_TYPE extern
+ 
+-    TEST BswErrDeb_FltRstHandler_FUNC.2
++    -- Tested service parameters declarations
++    #boolean RstReq;
++
++    TEST BswErrDeb_ResetFltReportLockClrDtc_FUNC.1
+     FAMILY nominal
+ 
+         ELEMENT
+ COMMENT*************************************************************************
+-COMMENT ** Author (mschrein)
+-COMMENT ** Test Case modification date (2019-05-27)
+-COMMENT ** Verifies GLIB-58195
++COMMENT ** Author (xingge)
++COMMENT ** Test Case modification date (2021-11-22)
++COMMENT ** Verifie100kw
+ COMMENT **
+ COMMENT ** Test Technique:
+ COMMENT **  Functional
+ COMMENT **
+ COMMENT ** Description:
+-COMMENT **  This test case verifies, if the function BswErrDeb_FltRstHandler() with the following input variables
+-COMMENT **  - ErrDebFltRstReqKl15 = 0
+-COMMENT **  - BswErrDebFltRstAckKl15 = 0
++COMMENT **  This test case verifies, if the function BswErrDeb_ResetFltReportLockClrDtc(RstReq) with the following input variable
++COMMENT **  - RstReq = TRUE
++COMMENT **  returns the following values for the output variables
+ COMMENT **  - ErrDebFltRstReqClrDtc = 1
+-COMMENT **  - BswErrDebFltRstAckClrDtc = 2
+-COMMENT **  - ErrDebFltRstReqSecu = 2
+-COMMENT **  - BswErrDebFltRstAckSecu = 2
+-COMMENT **  calls the following function
+-COMMENT **  - BswErrDeb_FltRstClrDtc()
+-COMMENT **  Note: For the BswErrDeb_FltRstClrDtc() function call  test case
+-COMMENT **  BswErrDeb_FltRstClrDtc_FUNC.1 is reused and therefore the following output variable has to be set
+-COMMENT **  - BswErrDebFltRstAckClrDtc = 1
++COMMENT **  - BswErrDebDemReportLockClrDtc = TRUE
+ COMMENT*************************************************************************
+ COMMENT ** Global variables
+ COMMENT *************************************************************************
+-\tVAR ErrDebFltRstReqKl15 , init = 0, ev = init
+-\tVAR BswErrDebFltRstAckKl15  , init = 0, ev = init
+-\tVAR ErrDebFltRstReqClrDtc , init = 1, ev = init
+-\tVAR BswErrDebFltRstAckClrDtc , init = 2, ev = ErrDebFltRstReqClrDtc
+-\tVAR ErrDebFltRstReqSecu , init = 2, ev = init
+-\tVAR BswErrDebFltRstAckSecu , init = 2, ev = init
+-\tVAR ErrDebTaskData[0].FltRstAckClrDtc, init = ErrDebFltRstReqClrDtc, ev = init
+-\tVAR ErrDebTaskData[1].FltRstAckClrDtc, init = ErrDebFltRstReqClrDtc, ev = init
+-\tVAR ErrDebTaskData[2].FltRstAckClrDtc, init = ErrDebFltRstReqClrDtc, ev = init
++        VAR RstReq,\t\tinit = TRUE,\t\tev = init
++        VAR ErrDebFltRstReqClrDtc, init = 0, ev = 1
++        VAR BswErrDebDemReportLockClrDtc, init = TRUE, ev = init
+ COMMENT *************************************************************************
+         COMMENT ** Tester defined variables
+ COMMENT ***********************************************************************
+@@ -2016,48 +1862,35 @@ COMMENT*************************************************************************
+        COMMENT ** Return value
+ COMMENT *************************************************************************
+        COMMENT None.
+-        #BswErrDeb_FltRstHandler();
++        #BswErrDeb_ResetFltReportLockClrDtc(RstReq);
+         END ELEMENT
+ 
+-    END TEST -- TEST BswErrDeb_FltRstHandler_FUNC.2
++    END TEST -- TEST BswErrDeb_ResetFltReportLockClrDtc_FUNC.1
+ 
+-    TEST BswErrDeb_FltRstHandler_FUNC.3
++    TEST BswErrDeb_ResetFltReportLockClrDtc_FUNC.2
+     FAMILY nominal
+ 
+         ELEMENT
+ COMMENT*************************************************************************
+-COMMENT ** Author (mschrein)
+-COMMENT ** Test Case modification date (2019-05-27)
+-COMMENT ** Verifies GLIB-58195
++COMMENT ** Author (xingge)
++COMMENT ** Test Case modification date (2021-11-22)
++COMMENT ** Verifies 100kw
+ COMMENT **
+ COMMENT ** Test Technique:
+ COMMENT **  Functional
+ COMMENT **
+ COMMENT ** Description:
+-COMMENT **  This test case verifies, if the function BswErrDeb_FltRstHandler() with the following input variables
+-COMMENT **  - ErrDebFltRstReqKl15 = 0
+-COMMENT **  - BswErrDebFltRstAckKl15 = 0
+-COMMENT **  - ErrDebFltRstReqClrDtc = 1
+-COMMENT **  - BswErrDebFltRstAckClrDtc = 1
+-COMMENT **  - ErrDebFltRstReqSecu = 2
+-COMMENT **  - BswErrDebFltRstAckSecu = 0
+-COMMENT **  calls the following function
+-COMMENT **  - BswErrDeb_FltRstSecu)
+-COMMENT **  Note: For the BswErrDeb_FltRstSecu() function call  test case
+-COMMENT **  BswErrDeb_FltRstSecu_FUNC.1 is reused and therefore the following output variable has to be set
+-COMMENT **  - BswErrDebFltRstAckClrDtc = 2
++COMMENT **  This test case verifies, if the function BswErrDeb_ResetFltReportLockClrDtc(RstReq) with the following input variable
++COMMENT **  - RstReq = FALSE
++COMMENT **  returns the following values for the output variables
++COMMENT **  - ErrDebFltRstReqClrDtc = 0
++COMMENT **  - BswErrDebDemReportLockClrDtc = FALSE
+ COMMENT*************************************************************************
+ COMMENT ** Global variables
+ COMMENT *************************************************************************
+-\tVAR ErrDebFltRstReqKl15 , init = 0, ev = init
+-\tVAR BswErrDebFltRstAckKl15  , init = 0, ev = init
+-\tVAR ErrDebFltRstReqClrDtc , init = 1, ev = init
+-\tVAR BswErrDebFltRstAckClrDtc , init = 1, ev = init
+-\tVAR ErrDebFltRstReqSecu , init = 2, ev = init
+-\tVAR BswErrDebFltRstAckSecu , init = 0, ev = ErrDebFltRstReqSecu
+-\tVAR ErrDebTaskData[0].FltRstAckSecu, init = ErrDebFltRstReqSecu, ev = init
+-\tVAR ErrDebTaskData[1].FltRstAckSecu, init = ErrDebFltRstReqSecu, ev = init
+-\tVAR ErrDebTaskData[2].FltRstAckSecu, init = ErrDebFltRstReqSecu, ev = init
++        VAR RstReq,\t\tinit = FALSE,\t\tev = init
++        VAR ErrDebFltRstReqClrDtc, init = 0, ev = init
++        VAR BswErrDebDemReportLockClrDtc, init = TRUE, ev = FALSE
+ COMMENT *************************************************************************
+         COMMENT ** Tester defined variables
+ COMMENT ***********************************************************************
+@@ -2074,46 +1907,45 @@ COMMENT*************************************************************************
+        COMMENT ** Return value
+ COMMENT *************************************************************************
+        COMMENT None.
+-        #BswErrDeb_FltRstHandler();
++        #BswErrDeb_ResetFltReportLockClrDtc(RstReq);
+         END ELEMENT
+ 
+-    END TEST -- TEST BswErrDeb_FltRstHandler_FUNC.3
+-
+-END SERVICE -- BswErrDeb_FltRstHandler
++    END TEST -- TEST BswErrDeb_ResetFltReportLockClrDtc_FUNC.2
+ 
++END SERVICE -- BswErrDeb_ResetFltReportLockClrDtc
+ 
+ --------------------------------------------------------------------------------
+--- Declaration of the service BswErrDeb_CvtDemEveStsType
++-- Declaration of the service BswErrDeb_SecuFltRstFinished
+ --------------------------------------------------------------------------------
+-SERVICE BswErrDeb_CvtDemEveStsType
+-SERVICE_TYPE inline
++SERVICE BswErrDeb_SecuFltRstFinished
++SERVICE_TYPE extern
+ 
+-    -- Tested service parameters declarations
+-    #Dem_EventStatusType EventStatus;
+     -- By function returned type declaration
+-    #ErrDeb_MonrStsType ret_BswErrDeb_CvtDemEveStsType;
++    #boolean ret_BswErrDeb_SecuFltRstFinished;
+ 
+-    TEST BswErrDeb_CvtDemEveStsType_FUNC.1
++    TEST BswErrDeb_SecuFltRstFinished_FUNC.1
+     FAMILY nominal
+ 
+         ELEMENT
+ COMMENT*************************************************************************
+-COMMENT ** Author (mschrein)
+-COMMENT ** Test Case modification date (2019-05-28)
+-COMMENT ** Verifies GLIB-58390
++COMMENT ** Author (xingge)
++COMMENT ** Test Case modification date (2021-11-22)
++COMMENT ** Verifies 100kw
+ COMMENT **
+ COMMENT ** Test Technique:
+ COMMENT **  Functional
+ COMMENT **
+ COMMENT ** Description:
+-COMMENT **  This test case verifies, if the function BswErrDeb_CvtDemEveStsType(EventStatus) with the following input variable
+-COMMENT **  - EventStatus = DEM_EVENT_STATUS_PASSED
+-COMMENT **  returns the following Monitor Status
+-COMMENT **  - return value = ERR_DEB_MONR_STS_PASSED
++COMMENT **  This test case verifies, if the function BswErrDeb_SecuFltRstFinished() with the following input variables
++COMMENT **  - ErrDebFltRstReqSecu = 1
++COMMENT **  - BswErrDebFltRstAckSecu = 1
++COMMENT **  returns the correct boolean value
++COMMENT **  - return value = TRUE
+ COMMENT*************************************************************************
+ COMMENT ** Global variables
+ COMMENT *************************************************************************
+-        VAR EventStatus,\t\tinit = DEM_EVENT_STATUS_PASSED,\t\tev = init
++        VAR ErrDebFltRstReqSecu, init = 1, ev = init
++        VAR BswErrDebFltRstAckSecu, init = 1, ev = init
+ COMMENT *************************************************************************
+         COMMENT ** Tester defined variables
+ COMMENT ***********************************************************************
+@@ -2129,33 +1961,35 @@ COMMENT ************************************************************************
+ COMMENT*************************************************************************
+        COMMENT ** Return value
+ COMMENT *************************************************************************
+-        VAR ret_BswErrDeb_CvtDemEveStsType,\t\tinit = ERR_DEB_MONR_STS_INACTIVE,\t\tev = ERR_DEB_MONR_STS_PASSED
+-        #ret_BswErrDeb_CvtDemEveStsType = BswErrDeb_CvtDemEveStsType(EventStatus);
++        VAR ret_BswErrDeb_SecuFltRstFinished,\t\tinit = FALSE,\t\tev = TRUE
++        #ret_BswErrDeb_SecuFltRstFinished = BswErrDeb_SecuFltRstFinished();
+         END ELEMENT
+ 
+-    END TEST -- TEST BswErrDeb_CvtDemEveStsType_FUNC.1
++    END TEST -- TEST BswErrDeb_SecuFltRstFinished_FUNC.1
+ 
+-    TEST BswErrDeb_CvtDemEveStsType_FUNC.2
++    TEST BswErrDeb_SecuFltRstFinished_FUNC.2
+     FAMILY nominal
+ 
+         ELEMENT
+ COMMENT*************************************************************************
+-COMMENT ** Author (mschrein)
+-COMMENT ** Test Case modification date (2019-05-28)
+-COMMENT ** Verifies GLIB-58390
++COMMENT ** Author (xingge)
++COMMENT ** Test Case modification date (2021-11-22)
++COMMENT ** Verifies 100kw
+ COMMENT **
+ COMMENT ** Test Technique:
+ COMMENT **  Functional
+ COMMENT **
+ COMMENT ** Description:
+-COMMENT **  This test case verifies, if the function BswErrDeb_CvtDemEveStsType(EventStatus) with the following input variable
+-COMMENT **  - EventStatus = DEM_EVENT_STATUS_FAILED
+-COMMENT **  returns the following Monitor Status
+-COMMENT **  - return value = ERR_DEB_MONR_STS_FAILED
++COMMENT **  This test case verifies, if the function BswErrDeb_SecuFltRstFinished() with the following input variables
++COMMENT **  - ErrDebFltRstReqSecu = 0
++COMMENT **  - BswErrDebFltRstAckSecu = 1
++COMMENT **  returns the correct boolean value
++COMMENT **  - return value = FALSE
+ COMMENT*************************************************************************
+ COMMENT ** Global variables
+ COMMENT *************************************************************************
+-        VAR EventStatus,\t\tinit = DEM_EVENT_STATUS_FAILED,\t\tev = init
++        VAR ErrDebFltRstReqSecu, init = 0, ev = init
++        VAR BswErrDebFltRstAckSecu, init = 1, ev = init
+ COMMENT *************************************************************************
+         COMMENT ** Tester defined variables
+ COMMENT ***********************************************************************
+@@ -2171,33 +2005,66 @@ COMMENT ************************************************************************
+ COMMENT*************************************************************************
+        COMMENT ** Return value
+ COMMENT *************************************************************************
+-        VAR ret_BswErrDeb_CvtDemEveStsType,\t\tinit = ERR_DEB_MONR_STS_INACTIVE,\t\tev = ERR_DEB_MONR_STS_FAILED
+-        #ret_BswErrDeb_CvtDemEveStsType = BswErrDeb_CvtDemEveStsType(EventStatus);
++        VAR ret_BswErrDeb_SecuFltRstFinished,\t\tinit = TRUE,\t\tev = FALSE
++        #ret_BswErrDeb_SecuFltRstFinished = BswErrDeb_SecuFltRstFinished();
+         END ELEMENT
+ 
+-    END TEST -- TEST BswErrDeb_CvtDemEveStsType_FUNC.2
++    END TEST -- TEST BswErrDeb_SecuFltRstFinished_FUNC.2
+ 
+-    TEST BswErrDeb_CvtDemEveStsType_FUNC.3
++END SERVICE -- BswErrDeb_SecuFltRstFinished
++
++--------------------------------------------------------------------------------
++-- Declaration of the service BswErrDeb_MainFunctionFltRst
++--------------------------------------------------------------------------------
++SERVICE BswErrDeb_MainFunctionFltRst
++SERVICE_TYPE extern
++
++
++    TEST BswErrDeb_MainFunctionFltRst_FUNC.1
+     FAMILY nominal
+ 
+         ELEMENT
+ COMMENT*************************************************************************
+-COMMENT ** Author (mschrein)
+-COMMENT ** Test Case modification date (2019-05-28)
+-COMMENT ** Verifies GLIB-58390
++COMMENT ** Author (xingge
++COMMENT ** Test Case modification date (2021-11-22)
++COMMENT ** Verifies 100kW-32834
+ COMMENT **
+ COMMENT ** Test Technique:
+ COMMENT **  Functional
+ COMMENT **
+ COMMENT ** Description:
+-COMMENT **  This test case verifies, if the function BswErrDeb_CvtDemEveStsType(EventStatus) with the following input variable
+-COMMENT **  - EventStatus = DEM_EVENT_STATUS_PREPASSED
+-COMMENT **  returns the following Monitor Status
+-COMMENT **  - return value = ERR_DEB_MONR_STS_PASSED
++COMMENT **  This test case verifies, if the function BswErrDeb_MainFunctionFltRst() with the following input variables
++COMMENT **  calls the following functions
++COMMENT **  - BswErrDeb_FltRstHandler()
++COMMENT **  - BswErrDeb_NvmHandler()
++COMMENT **  - BswErrDeb_SetEventStatus(ERR_ID_CAN_BUS_OFF, ERR_DEB_MONR_STS_PASSED)
++COMMENT **  Note: For the BswErrDeb_FltRstHandler() function call  test case
++COMMENT **  BswErrDeb_FltRstHandler_FUNC.1 and for the BswErrDeb_NvmHandler() function call  test case
++COMMENT **  BswErrDeb_NvmHandler_FUNC.3 are reused. For the BswErrDeb_SetEventStatus() function call test case
++COMMENT **  BswErrDeb_SetEventStatus_FUNC.1 is reused and therefore the following output variable has to be set
++COMMENT **  - ErrDebFltCfg[ErrId].FltData->MonrStsAsync = ERR_DEB_MONR_STS_PASSED
+ COMMENT*************************************************************************
+ COMMENT ** Global variables
+ COMMENT *************************************************************************
+-        VAR EventStatus,\t\tinit = DEM_EVENT_STATUS_PREPASSED,\t\tev = init
++
++       VAR ErrDebFltCfg[ERR_ID_CAN_BUS_OFF].FltData, init=&ErrDebFltData_CAN_BUS_OFF, ev = init
++\tVAR ErrDebFltRstReqKl15 , init = 0, ev = init
++\tVAR BswErrDebFltRstAckKl15  , init = 1, ev = ErrDebFltRstReqKl15
++\tVAR ErrDebFltRstReqClrDtc , init = 1, ev = init
++\tVAR BswErrDebFltRstAckClrDtc , init = 1, ev = init
++\tVAR ErrDebFltRstReqSecu , init = 2, ev = init
++\tVAR BswErrDebFltRstAckSecu , init = 2, ev = init
++\tVAR ErrDebTaskData[0].FltRstAckKl15, init = ErrDebFltRstReqKl15, ev = init
++\tVAR ErrDebTaskData[1].FltRstAckKl15, init = ErrDebFltRstReqKl15, ev = init
++\tVAR ErrDebTaskData[2].FltRstAckKl15, init = ErrDebFltRstReqKl15, ev = init
++
++\tVAR ErrDebNvmWrReq, init = 0, ev = init
++\tVAR ErrDebNvmWrAck, init = 0, ev = init
++\tVAR ErrDebNvmRdReq, init = 1, ev = init
++\tVAR ErrDebNvmRdAck, init = 0, ev = ErrDebNvmRdReq
++
++\tVAR ErrDebFltCfg[ERR_ID_CAN_BUS_OFF].FltData->MonrStsAsync, init = ERR_DEB_MONR_STS_INACTIVE , ev = ERR_DEB_MONR_STS_PASSED
++
+ COMMENT *************************************************************************
+         COMMENT ** Tester defined variables
+ COMMENT ***********************************************************************
+@@ -2213,33 +2080,58 @@ COMMENT ************************************************************************
+ COMMENT*************************************************************************
+        COMMENT ** Return value
+ COMMENT *************************************************************************
+-        VAR ret_BswErrDeb_CvtDemEveStsType,\t\tinit = ERR_DEB_MONR_STS_INACTIVE,\t\tev = ERR_DEB_MONR_STS_PASSED
+-        #ret_BswErrDeb_CvtDemEveStsType = BswErrDeb_CvtDemEveStsType(EventStatus);
++\tCOMMENT ** None
++COMMENT *************************************************************************
++         #BswErrDeb_SetEventStatus(ERR_ID_CAN_BUS_OFF, ERR_DEB_MONR_STS_PASSED);
++         #BswErrDeb_MainFunctionFltRst();
+         END ELEMENT
+ 
+-    END TEST -- TEST BswErrDeb_CvtDemEveStsType_FUNC.3
++    END TEST -- TEST BswErrDeb_MainFunctionFltRst_FUNC.1
+ 
+-    TEST BswErrDeb_CvtDemEveStsType_FUNC.4
++    TEST BswErrDeb_MainFunctionFltRst_FUNC.2
+     FAMILY nominal
+ 
+         ELEMENT
+ COMMENT*************************************************************************
+-COMMENT ** Author (mschrein)
+-COMMENT ** Test Case modification date (2019-05-28)
+-COMMENT ** Verifies GLIB-58390
++COMMENT ** Author (xingge)
++COMMENT ** Test Case modification date (2021-11-22)
++COMMENT ** Verifies 100kW-32834
+ COMMENT **
+ COMMENT ** Test Technique:
+ COMMENT **  Functional
+ COMMENT **
+ COMMENT ** Description:
+-COMMENT **  This test case verifies, if the function BswErrDeb_CvtDemEveStsType(EventStatus) with the following input variable
+-COMMENT **  - EventStatus = DEM_EVENT_STATUS_PREFAILED
+-COMMENT **  returns the following Monitor Status
+-COMMENT **  - return value = ERR_DEB_MONR_STS_FAILED
++COMMENT **  This test case verifies, if the function BswErrDeb_MainFunctionFltRst() with the following input variables
++COMMENT **  calls the following functions
++COMMENT **  - BswErrDeb_FltRstHandler()
++COMMENT **  - BswErrDeb_NvmHandler()
++COMMENT **  - BswErrDeb_SetEventStatus(ERR_ID_CAN_BUS_OFF, ERR_DEB_MONR_STS_FAILED)
++COMMENT **  Note: For the BswErrDeb_FltRstHandler() function call  test case
++COMMENT **  BswErrDeb_FltRstHandler_FUNC.1 and for the BswErrDeb_NvmHandler() function call  test case
++COMMENT **  BswErrDeb_NvmHandler_FUNC.3 are reused. For the BswErrDeb_SetEventStatus() function call test case
++COMMENT **  BswErrDeb_SetEventStatus_FUNC.1 is reused and therefore the following output variable has to be set
++COMMENT **  - ErrDebFltCfg[ErrId].FltData->MonrStsAsync = ERR_DEB_MONR_STS_FAILED
+ COMMENT*************************************************************************
+ COMMENT ** Global variables
+ COMMENT *************************************************************************
+-        VAR EventStatus,\t\tinit = DEM_EVENT_STATUS_PREFAILED,\t\tev = init
++       VAR ErrDebFltCfg[ERR_ID_CAN_BUS_OFF].FltData, init=&ErrDebFltData_CAN_BUS_OFF, ev = init
++
++\tVAR ErrDebFltRstReqKl15 , init = 0, ev = init
++\tVAR BswErrDebFltRstAckKl15  , init = 1, ev = ErrDebFltRstReqKl15
++\tVAR ErrDebFltRstReqClrDtc , init = 1, ev = init
++\tVAR BswErrDebFltRstAckClrDtc , init = 1, ev = init
++\tVAR ErrDebFltRstReqSecu , init = 2, ev = init
++\tVAR BswErrDebFltRstAckSecu , init = 2, ev = init
++\tVAR ErrDebTaskData[0].FltRstAckKl15, init = ErrDebFltRstReqKl15, ev = init
++\tVAR ErrDebTaskData[1].FltRstAckKl15, init = ErrDebFltRstReqKl15, ev = init
++\tVAR ErrDebTaskData[2].FltRstAckKl15, init = ErrDebFltRstReqKl15, ev = init
++
++\tVAR ErrDebNvmWrReq, init = 0, ev = init
++\tVAR ErrDebNvmWrAck, init = 0, ev = init
++\tVAR ErrDebNvmRdReq, init = 1, ev = init
++\tVAR ErrDebNvmRdAck, init = 0, ev = ErrDebNvmRdReq
++
++\tVAR ErrDebFltCfg[ERR_ID_CAN_BUS_OFF].FltData->MonrStsAsync, init = ERR_DEB_MONR_STS_INACTIVE, ev = ERR_DEB_MONR_STS_FAILED
+ COMMENT *************************************************************************
+         COMMENT ** Tester defined variables
+ COMMENT ***********************************************************************
+@@ -2255,33 +2147,45 @@ COMMENT ************************************************************************
+ COMMENT*************************************************************************
+        COMMENT ** Return value
+ COMMENT *************************************************************************
+-        VAR ret_BswErrDeb_CvtDemEveStsType,\t\tinit = ERR_DEB_MONR_STS_INACTIVE,\t\tev = ERR_DEB_MONR_STS_FAILED
+-        #ret_BswErrDeb_CvtDemEveStsType = BswErrDeb_CvtDemEveStsType(EventStatus);
++\tCOMMENT ** None
++COMMENT *************************************************************************
++        #BswErrDeb_SetEventStatus(ERR_ID_CAN_BUS_OFF, ERR_DEB_MONR_STS_FAILED);
++        #BswErrDeb_MainFunctionFltRst();
+         END ELEMENT
+ 
+-    END TEST -- TEST BswErrDeb_CvtDemEveStsType_FUNC.4
++    END TEST -- TEST BswErrDeb_MainFunctionFltRst_FUNC.2
+ 
+-    TEST BswErrDeb_CvtDemEveStsType_FUNC.5
++END SERVICE -- BswErrDeb_MainFunctionFltRst
++
++--------------------------------------------------------------------------------
++-- Declaration of the service BswErrDeb_MainFunctionFltDeb
++--------------------------------------------------------------------------------
++SERVICE BswErrDeb_MainFunctionFltDeb
++SERVICE_TYPE extern
++
++
++    TEST BswErrDeb_MainFunctionFltDeb_FUNC.1
+     FAMILY nominal
+ 
+         ELEMENT
+ COMMENT*************************************************************************
+-COMMENT ** Author (mschrein)
+-COMMENT ** Test Case modification date (2019-05-28)
+-COMMENT ** Verifies GLIB-58390
++COMMENT ** Author (xingge)
++COMMENT ** Test Case modification date (2021-11-22)
++COMMENT ** Verifies 100kW-32835
+ COMMENT **
+ COMMENT ** Test Technique:
+ COMMENT **  Functional
+ COMMENT **
+ COMMENT ** Description:
+-COMMENT **  This test case verifies, if the function BswErrDeb_CvtDemEveStsType(EventStatus) with the following input variable
+-COMMENT **  - EventStatus = 4
+-COMMENT **  returns the following Monitor Status
+-COMMENT **  - return value = ERR_DEB_MONR_STS_INACTIVE
++COMMENT **  This test case verifies, if the function BswErrDeb_MainFunctionFltDeb() with the following input variable
++COMMENT **  - BswErrDebFctInhbnSts.U = 0
++COMMENT **  calls the following functions
++COMMENT **  - ErrDeb_DebFlts(ERR_DEB_TASK_ID_CORE0_1MS, BswErrDebFctInhbnSts.U)
++COMMENT **  - ErrDeb_FidColl(ERR_DEB_TASK_ID_CORE0_1MS, BswErrDebFctInhbnSts.U, FALSE)
+ COMMENT*************************************************************************
+ COMMENT ** Global variables
+ COMMENT *************************************************************************
+-        VAR EventStatus,\t\tinit = 4,\t\tev = init
++\tVAR BswErrDebFctInhbnSts.U, init = 0, ev = init
+ COMMENT *************************************************************************
+         COMMENT ** Tester defined variables
+ COMMENT ***********************************************************************
+@@ -2293,18 +2197,18 @@ COMMENT ************************************************************************
+ COMMENT *************************************************************************
+        COMMENT ** STUB definitions
+ COMMENT *************************************************************************
+-\tCOMMENT None.
++\tSTUB ErrDeb_DebFlts(ERR_DEB_TASK_ID_CORE0_1MS, BswErrDebFctInhbnSts.U)
++\tSTUB ErrDeb_FidColl(ERR_DEB_TASK_ID_CORE0_1MS, BswErrDebFctInhbnSts.U, FALSE)
+ COMMENT*************************************************************************
+        COMMENT ** Return value
+ COMMENT *************************************************************************
+-        VAR ret_BswErrDeb_CvtDemEveStsType,\t\tinit = ERR_DEB_MONR_STS_PASSED,\t\tev = ERR_DEB_MONR_STS_INACTIVE
+-        #ret_BswErrDeb_CvtDemEveStsType = BswErrDeb_CvtDemEveStsType(EventStatus);
++       COMMENT None.
++        #BswErrDeb_MainFunctionFltDeb();
+         END ELEMENT
+ 
+-    END TEST -- TEST BswErrDeb_CvtDemEveStsType_FUNC.5
+-
+-END SERVICE -- BswErrDeb_CvtDemEveStsType
++    END TEST -- TEST BswErrDeb_MainFunctionFltDeb_FUNC.1
+ 
++END SERVICE -- BswErrDeb_MainFunctionFltDeb
+ 
+ --------------------------------------------------------------------------------
+ -- Declaration of the service BswErrDeb_PreInit
+@@ -2318,9 +2222,9 @@ SERVICE_TYPE extern
+ 
+         ELEMENT
+ COMMENT*************************************************************************
+-COMMENT ** Author (mschrein)
+-COMMENT ** Test Case modification date (2019-05-28)
+-COMMENT ** Verifies GLIB-58342
++COMMENT ** Author (xingge)
++COMMENT ** Test Case modification date (2021-11-22)
++COMMENT ** Verifies 100kW-32770
+ COMMENT **
+ COMMENT ** Test Technique:
+ COMMENT **  Functional
+@@ -2355,40 +2259,48 @@ COMMENT ************************************************************************
+ 
+ END SERVICE -- BswErrDeb_PreInit
+ 
+-
+ --------------------------------------------------------------------------------
+--- Declaration of the service BswErrDeb_ResetFltReportLockClrDtc
++-- Declaration of the service BswErrDeb_RteSetEventStatus
+ --------------------------------------------------------------------------------
+-SERVICE BswErrDeb_ResetFltReportLockClrDtc
++SERVICE BswErrDeb_RteSetEventStatus
+ SERVICE_TYPE extern
+ 
+     -- Tested service parameters declarations
+-    #boolean RstReq;
++    #Dem_EventIdType EventId;
++    #Dem_EventStatusType EventStatus;
++    -- By function returned type declaration
++    #Std_ReturnType ret_BswErrDeb_RteSetEventStatus;
+ 
+-    TEST BswErrDeb_ResetFltReportLockClrDtc_FUNC.1
++    TEST BswErrDeb_RteSetEventStatus_FUNC.1
+     FAMILY nominal
+ 
+         ELEMENT
+ COMMENT*************************************************************************
+-COMMENT ** Author (mschrein)
+-COMMENT ** Test Case modification date (2019-05-28)
+-COMMENT ** Verifies GLIB-58337
++COMMENT ** Author (xingge)
++COMMENT ** Test Case modification date (2021-11-22)
++COMMENT ** Verifies GLIB-58391
+ COMMENT **
+ COMMENT ** Test Technique:
+ COMMENT **  Functional
+ COMMENT **
+ COMMENT ** Description:
+-COMMENT **  This test case verifies, if the function BswErrDeb_ResetFltReportLockClrDtc(RstReq) with the following input variable
+-COMMENT **  - RstReq = TRUE
+-COMMENT **  returns the following values for the output variables
+-COMMENT **  - ErrDebFltRstReqClrDtc = 1
+-COMMENT **  - BswErrDebDemReportLockClrDtc = TRUE
++COMMENT **  This test case verifies, if the function BswErrDeb_RteSetEventStatus(EventId, EventStatus) with the following input variables
++COMMENT **  - EventId = 0
++COMMENT **  - EventStatus = DEM_EVENT_STATUS_PASSED
++COMMENT **  calls the following functions
++COMMENT **  - monrSt = BswErrDeb_CvtDemEveStsType(EventStatus)
++COMMENT **  - BswErrDeb_SetEventStatus(BswErrDebErrIdLut[EventId], monrSt)
++COMMENT **  and returns the correct Std_ReturnType
++COMMENT **  - return value = E_OK
++COMMENT **  Note: For the BswErrDeb_SetEventStatus() function call  test case
++COMMENT **  BswErrDeb_SetEventStatus_FUNC.1 is reused and therefore the following output variable has to be set
++COMMENT **  - ErrDebFltCfg[BswErrDebErrIdLut[EventId]].FltData->MonrStsAsync = ERR_DEB_MONR_STS_PASSED
+ COMMENT*************************************************************************
+ COMMENT ** Global variables
+ COMMENT *************************************************************************
+-        VAR RstReq,\t\tinit = TRUE,\t\tev = init
+-        VAR ErrDebFltRstReqClrDtc, init = 0, ev = 1
+-        VAR BswErrDebDemReportLockClrDtc, init = TRUE, ev = init
++        VAR EventId,\t\tinit = 0,\t\tev = init
++        VAR EventStatus,\t\tinit = DEM_EVENT_STATUS_PASSED,\t\tev = init
++        VAR ErrDebFltCfg[BswErrDebErrIdLut[EventId]].FltData->MonrStsAsync, init = ERR_DEB_MONR_STS_INACTIVE, ev = ERR_DEB_MONR_STS_PASSED
+ COMMENT *************************************************************************
+         COMMENT ** Tester defined variables
+ COMMENT ***********************************************************************
+@@ -2400,40 +2312,39 @@ COMMENT ************************************************************************
+ COMMENT *************************************************************************
+        COMMENT ** STUB definitions
+ COMMENT *************************************************************************
+-\tCOMMENT ** None.
++\tCOMMENT None.
+ COMMENT*************************************************************************
+        COMMENT ** Return value
+ COMMENT *************************************************************************
+-       COMMENT None.
+-        #BswErrDeb_ResetFltReportLockClrDtc(RstReq);
++        VAR ret_BswErrDeb_RteSetEventStatus,\t\tinit = E_NOT_OK,\t\tev = E_OK
++        #ret_BswErrDeb_RteSetEventStatus = BswErrDeb_RteSetEventStatus(EventId, EventStatus);
+         END ELEMENT
+ 
+-    END TEST -- TEST BswErrDeb_ResetFltReportLockClrDtc_FUNC.1
++    END TEST -- TEST BswErrDeb_RteSetEventStatus_FUNC.1
+ 
+-    TEST BswErrDeb_ResetFltReportLockClrDtc_FUNC.2
++    TEST BswErrDeb_RteSetEventStatus_FUNC.2
+     FAMILY nominal
+ 
+         ELEMENT
+ COMMENT*************************************************************************
+-COMMENT ** Author (mschrein)
+-COMMENT ** Test Case modification date (2019-05-28)
+-COMMENT ** Verifies GLIB-58337
++COMMENT ** Author (xingge)
++COMMENT ** Test Case modification date (2021-11-22)
++COMMENT ** Verifies GLIB-58391
+ COMMENT **
+ COMMENT ** Test Technique:
+ COMMENT **  Functional
+ COMMENT **
+ COMMENT ** Description:
+-COMMENT **  This test case verifies, if the function BswErrDeb_ResetFltReportLockClrDtc(RstReq) with the following input variable
+-COMMENT **  - RstReq = FALSE
+-COMMENT **  returns the following values for the output variables
+-COMMENT **  - ErrDebFltRstReqClrDtc = 0
+-COMMENT **  - BswErrDebDemReportLockClrDtc = FALSE
++COMMENT **  This test case verifies, if the function BswErrDeb_RteSetEventStatus(EventId, EventStatus) with the following input variables
++COMMENT - EventId = BswErrDebErrIdLutSize
++COMMENT - EventStatus = DEM_EVENT_STATUS_PASSED
++COMMENT returns the correct Std_ReturnType
++COMMENT - return value = E_NOT_OK
+ COMMENT*************************************************************************
+ COMMENT ** Global variables
+ COMMENT *************************************************************************
+-        VAR RstReq,\t\tinit = FALSE,\t\tev = init
+-        VAR ErrDebFltRstReqClrDtc, init = 0, ev = init
+-        VAR BswErrDebDemReportLockClrDtc, init = TRUE, ev = FALSE
++        VAR EventId,\t\tinit = BswErrDebErrIdLutSize,\t\tev = init
++        VAR EventStatus,\t\tinit = DEM_EVENT_STATUS_PASSED,\t\tev = init
+ COMMENT *************************************************************************
+         COMMENT ** Tester defined variables
+ COMMENT ***********************************************************************
+@@ -2445,21 +2356,36 @@ COMMENT ************************************************************************
+ COMMENT *************************************************************************
+        COMMENT ** STUB definitions
+ COMMENT *************************************************************************
+-\tCOMMENT ** None.
++\tCOMMENT None.
+ COMMENT*************************************************************************
+        COMMENT ** Return value
+ COMMENT *************************************************************************
+-       COMMENT None.
+-        #BswErrDeb_ResetFltReportLockClrDtc(RstReq);
++        VAR ret_BswErrDeb_RteSetEventStatus,\t\tinit = E_OK,\t\tev = E_NOT_OK
++        #ret_BswErrDeb_RteSetEventStatus = BswErrDeb_RteSetEventStatus(EventId, EventStatus);
+         END ELEMENT
+ 
+-    END TEST -- TEST BswErrDeb_ResetFltReportLockClrDtc_FUNC.2
++    END TEST -- TEST BswErrDeb_RteSetEventStatus_FUNC.2
+ 
+-END SERVICE -- BswErrDeb_ResetFltReportLockClrDtc
++END SERVICE -- BswErrDeb_RteSetEventStatus
+ 
+ --------------------------------------------------------------------------------
+ -- Declaration of the service BswErrDeb_GetLockedStatus
+ --------------------------------------------------------------------------------
++COMMENT*************************************************************************
++COMMENT ** Author ( xingge )
++COMMENT ** Test Case modification date (2021-11-22)
++COMMENT ** Verifies 100kW-32829
++COMMENT **
++COMMENT ** Test Technique:
++COMMENT **  Functional
++COMMENT **
++COMMENT ** Description:
++COMMENT **  This test case verifies, This function shall return the locked status from the fault data at a specific error ID.
++COMMENT - EventId = ERR_ID_CAN_BUS_OFF
++COMMENT - EventStatus = DEM_EVENT_STATUS_PASSED
++COMMENT returns the correct ErrDeb_FctInhbnStsType
++COMMENT - return value = DEM_EVENT_STATUS_PASSED
++COMMENT*************************************************************************
+ SERVICE BswErrDeb_GetLockedStatus
+ SERVICE_TYPE extern
+ 
+@@ -2472,80 +2398,42 @@ SERVICE_TYPE extern
+     FAMILY nominal
+ 
+         ELEMENT
+-COMMENT*************************************************************************
+-COMMENT ** Author (mschrein)
+-COMMENT ** Test Case modification date (2019-05-28)
+-COMMENT ** Verifies GLIB-58337
+-COMMENT **
+-COMMENT ** Test Technique:
+-COMMENT **  Functional
+-COMMENT **
+-COMMENT ** Description:
+-COMMENT **  This test case verifies, if the function BswErrDeb_GetLockedStatus(RstReq) with the following input variable
+-COMMENT **  - ErrId = ERR_ID_CAN_BUS_OFF
+-COMMENT **  - ErrDebFltCfg[ERR_ID_CAN_BUS_OFF].FltData->LockedSts = LOCKED
+-COMMENT **  returns the following values for the output variables
+-COMMENT **  -ErrDebFltCfg[ERR_ID_CAN_BUS_OFF].FltData->LockedSts = LOCKED
+-COMMENT*************************************************************************
+-COMMENT ** Global variables
+-COMMENT *************************************************************************
+-\t VAR ErrId,\t\tinit = ERR_ID_CAN_BUS_OFF,\t\tev = init
+-        VAR ErrDebFltCfg[ERR_ID_CAN_BUS_OFF].FltData->LockedSts, init = 1, ev = init
+-COMMENT *************************************************************************
+-        COMMENT ** Tester defined variables
+-COMMENT ***********************************************************************
+-\tCOMMENT ** None.
+-COMMENT *************************************************************************
+-       COMMENT ** Function parameters
+-COMMENT *************************************************************************
+-\tCOMMENT None.
+-COMMENT *************************************************************************
+-       COMMENT ** STUB definitions
+-COMMENT *************************************************************************
+-\tCOMMENT ** None.
+-COMMENT*************************************************************************
+-       COMMENT ** Return value
+-COMMENT *************************************************************************
+-       COMMENT None.
+-        #BswErrDeb_GetLockedStatus(ErrId);
++        VAR ErrDebFltCfg[ERR_ID_CAN_BUS_OFF].FltData, init=&ErrDebFltData_CAN_BUS_OFF, ev = init
++        VAR ErrId,\t\tinit = ERR_ID_CAN_BUS_OFF,\t\tev = init     
++        VAR ErrDebFltCfg[ErrId].FltData->LockedSts,  init = DEM_EVENT_STATUS_PASSED,\t\tev = init
++        VAR ret_BswErrDeb_GetLockedStatus,\t\tinit = 0,\t\tev = DEM_EVENT_STATUS_PASSED
++        #ret_BswErrDeb_GetLockedStatus = BswErrDeb_GetLockedStatus(ErrId);
+         END ELEMENT
+ 
+-    END TEST -- TEST BswErrDeb_GetLockedStatus_FUNC.1
++    END TEST -- BswErrDeb_GetLockedStatus_FUNC.1
+ 
+ END SERVICE -- BswErrDeb_GetLockedStatus
+ 
+ --------------------------------------------------------------------------------
+--- Declaration of the service BswErrDeb_GetFaultStatus1
++-- Declaration of the service BswErrDeb_ReqClrDtcFltRst
+ --------------------------------------------------------------------------------
+-SERVICE BswErrDeb_GetFaultStatus1
++SERVICE BswErrDeb_ReqClrDtcFltRst
+ SERVICE_TYPE extern
+ 
+-    -- Tested service parameters declarations
+-    #ErrDeb_ErrIdType ErrId;
+-    -- By function returned type declaration
+-    #ErrDeb_FltStsType ret_BswErrDeb_GetFaultStatus1;
+-    TEST BswErrDeb_GetFaultStatus1_FUNC.1
++    TEST BswErrDeb_ReqClrDtcFltRst_FUNC.1
+     FAMILY nominal
++
+         ELEMENT
+ COMMENT*************************************************************************
+-COMMENT ** Author (mschrein)
+-COMMENT ** Test Case modification date (2019-05-28)
+-COMMENT ** Verifies GLIB-58337
++COMMENT ** Author (Xingge)
++COMMENT ** Test Case modification date (2021-11-22)
++COMMENT ** Verifies GLIB-60276
+ COMMENT **
+ COMMENT ** Test Technique:
+ COMMENT **  Functional
+ COMMENT **
+ COMMENT ** Description:
+-COMMENT **  This test case verifies, if the function BswErrDeb_GetLockedStatus(RstReq) with the following input variable
+-COMMENT **  - ErrId = ERR_ID_CAN_BUS_OFF
+-COMMENT **  - ErrDebFltCfg[ErrId].FltData->FltSts1QualSts = PASSED
+-COMMENT **  returns the following values for the output variables
+-COMMENT **  -ErrDebFltCfg[ErrId].FltData->FltSts1QualSts = PASSED
++COMMENT **  This test case verifies, if the function BswErrDeb_ReqClrDtcFltRst() increases the value for the following output variable by one
++COMMENT **  - ErrDebFltRstReqClrDtc += 1
+ COMMENT*************************************************************************
+ COMMENT ** Global variables
+ COMMENT *************************************************************************
+-\t VAR ErrId,\t\tinit = ERR_ID_CAN_BUS_OFF,\t\tev = init
+-        VAR ErrDebFltCfg[ErrId].FltData->FltSts1QualSts, init = 1, ev = init
++\tVAR ErrDebFltRstReqClrDtc, init = 0, ev = 1
+ COMMENT *************************************************************************
+         COMMENT ** Tester defined variables
+ COMMENT ***********************************************************************
+@@ -2561,43 +2449,46 @@ COMMENT ************************************************************************
+ COMMENT*************************************************************************
+        COMMENT ** Return value
+ COMMENT *************************************************************************
+-       COMMENT None.
+-        #BswErrDeb_GetFaultStatus1(ErrId);
++\tCOMMENT ** None
++COMMENT *************************************************************************
++        #BswErrDeb_ReqClrDtcFltRst();
+         END ELEMENT
+ 
+-    END TEST -- TEST BswErrDeb_GetFaultStatus1_FUNC.1
+-
+-END SERVICE -- BswErrDeb_GetFaultStatus1
++    END TEST -- BswErrDeb_ReqClrDtcFltRst_FUNC.1
+ 
++END SERVICE -- BswErrDeb_ReqClrDtcFltRst
+ 
+ --------------------------------------------------------------------------------
+--- Declaration of the service BswErrDeb_ReqClrDtcFltRst
++-- Declaration of the service BswErrDeb_GetFaultStatus1
+ --------------------------------------------------------------------------------
+-SERVICE BswErrDeb_ReqClrDtcFltRst
++SERVICE BswErrDeb_GetFaultStatus1
+ SERVICE_TYPE extern
+ 
++    -- Tested service parameters declarations
++    #ErrDeb_ErrIdType ErrId;
++    -- By function returned type declaration
++    #ErrDeb_FltStsType ret_BswErrDeb_GetFaultStatus1;
+ 
+-    TEST BswErrDeb_ReqClrDtcFltRst_FUNC.1
++    TEST BswErrDeb_GetFaultStatus1_FUNC.1
+     FAMILY nominal
+ 
+         ELEMENT
+ COMMENT*************************************************************************
+-COMMENT ** Author (mschrein)
+-COMMENT ** Test Case modification date (2019-05-28)
+-COMMENT ** Verifies GLIB-58337
++COMMENT ** Author (Xingge)
++COMMENT ** Test Case modification date (2021-11-22)
++COMMENT ** Verifies GLIB-60276
+ COMMENT **
+ COMMENT ** Test Technique:
+ COMMENT **  Functional
+ COMMENT **
+ COMMENT ** Description:
+-COMMENT **  This test case verifies, if the function BswErrDeb_GetLockedStatus(RstReq) with the following input variable
+-COMMENT **  - ErrDebFltRstReqClrDtc = 1
+-COMMENT **  returns the following values for the output variables
+-COMMENT **  -ErrDebFltRstReqClrDtc = 2
+ COMMENT*************************************************************************
+ COMMENT ** Global variables
+ COMMENT *************************************************************************
+-\t VAR ErrDebFltRstReqClrDtc,\t\tinit = 1,\t\tev = 2
++\t  VAR ErrId,\t\tinit = ERR_ID_CAN_BUS_OFF,\t\tev = init      
++        VAR ErrDebFltCfg[ERR_ID_CAN_BUS_OFF].FltData, init=&ErrDebFltData_CAN_BUS_OFF, ev = init
++        VAR ErrDebFltCfg[ErrId].FltData->FltSts1QualSts,  init = DEM_EVENT_STATUS_PASSED,\t\tev = init
++        VAR ret_BswErrDeb_GetFaultStatus1,\t\tinit = 0,\t\tev = DEM_EVENT_STATUS_PASSED
+ COMMENT *************************************************************************
+         COMMENT ** Tester defined variables
+ COMMENT ***********************************************************************
+@@ -2613,13 +2504,20 @@ COMMENT ************************************************************************
+ COMMENT*************************************************************************
+        COMMENT ** Return value
+ COMMENT *************************************************************************
+-       COMMENT None.
+-        #BswErrDeb_ReqClrDtcFltRst();
++\tCOMMENT ** None
++COMMENT *************************************************************************
++        #ret_BswErrDeb_GetFaultStatus1 = BswErrDeb_GetFaultStatus1(ErrId);
+         END ELEMENT
+ 
+-    END TEST -- TEST BswErrDeb_ReqClrDtcFltRst_FUNC.1
++    END TEST -- BswErrDeb_GetFaultStatus1_FUNC.1
+ 
+-END SERVICE -- BswErrDeb_ReqClrDtcFltRst
++END SERVICE -- BswErrDeb_GetFaultStatus1
++
++--------------------------------------------------------------------------------
++--
++-- SERVICES DECLARATIONS
++--
++--------------------------------------------------------------------------------
+ 
+ --------------------------------------------------------------------------------
+ -- Declaration of the service BswErrDeb_EventStatusChangedCallback
+@@ -2637,21 +2535,20 @@ SERVICE_TYPE extern
+ 
+         ELEMENT
+ COMMENT*************************************************************************
+-COMMENT ** Author (mschrein)
+-COMMENT ** Test Case modification date (2019-05-28)
+-COMMENT ** Verifies GLIB-58337
++COMMENT ** Author (Xingge)
++COMMENT ** Test Case modification date (2021-11-22)
++COMMENT ** Verifies GLIB-60276
+ COMMENT **
+ COMMENT ** Test Technique:
+ COMMENT **  Functional
+ COMMENT **
+ COMMENT ** Description:
+-COMMENT **  This test case is only for function coverage
+ COMMENT*************************************************************************
+ COMMENT ** Global variables
+ COMMENT *************************************************************************
+-\t VAR EventId,\t\tinit = ERR_ID_CAN_BUS_OFF,\t\tev = init
+-        VAR EventStatusOld,\t\tinit = 0,\t\tev = 0
+-        VAR EventStatusNew,\t\tinit = 0,\t\tev = 0
++        VAR EventId,\t\tinit = 0,\t\tev = init
++        VAR EventStatusOld,\t\tinit = 0,\t\tev = init
++        VAR EventStatusNew,\t\tinit = 0,\t\tev = init
+ COMMENT *************************************************************************
+         COMMENT ** Tester defined variables
+ COMMENT ***********************************************************************
+@@ -2667,19 +2564,13 @@ COMMENT ************************************************************************
+ COMMENT*************************************************************************
+        COMMENT ** Return value
+ COMMENT *************************************************************************
+-       COMMENT None.
+-        #BswErrDeb_EventStatusChangedCallback(EventId,EventStatusOld, EventStatusNew);
++\tCOMMENT ** None
++COMMENT *************************************************************************
++        #BswErrDeb_EventStatusChangedCallback(EventId, EventStatusOld, EventStatusNew);
+         END ELEMENT
+ 
+-    END TEST -- TEST BswErrDeb_ReqClrDtcFltRst_FUNC.1
++    END TEST -- BswErrDeb_EventStatusChangedCallback_FUNC.1
+ 
+ END SERVICE -- BswErrDeb_EventStatusChangedCallback
+ 
+ 
+-
+-
+-
+-
+-
+-
+-
+diff --git a/test/50_L5_Units_Parts/10_SWUT/40_BSW/30_packages/BswErrDeb/BswErrDeb.rtp b/test/50_L5_Units_Parts/10_SWUT/40_BSW/30_packages/BswErrDeb/BswErrDeb.rtp
+index dba954b86..49be394e4 100644
+--- a/test/50_L5_Units_Parts/10_SWUT/40_BSW/30_packages/BswErrDeb/BswErrDeb.rtp
++++ b/test/50_L5_Units_Parts/10_SWUT/40_BSW/30_packages/BswErrDeb/BswErrDeb.rtp
+@@ -18,7 +18,7 @@
+       <configuration_list>
+         <configuration>
+           <name>C Aurix TC27x Tasking Compiler - Trace32 Debugger</name>
+-          <cflags>-Ctc27x -N0 -Z0 -t --source -O2R -OP --iso=99 --tradeoff=2 --language=+comments#comma#-gcc#comma#-volatile#comma#+strings --switch=auto --eabi=-half-word-align --align=4 --default-a0-size=0 --default-a1-size=0 -Wc-w529 -Wc-w544 -Wc-w581 -Wc-w588 -g</cflags>
++          <tcflags>UNIT_TESTING#comma# ERR_DEB_PRIV_INCLUDE#comma# _TASKING_C_TRICORE_#comma# TS_ARCH_FAMILY#comma# TS_ARCH_DERIVATE</tcflags>
+           <ge_incdir>..\\..\\..\\..\\..\\..\\tools\\ots\\tasking\\ctc\\include,..\\..\\..\\..\\..\\..\\test\\50_L5_Units_Parts\\10_SWUT\\40_BSW\\10_configurations\\include,..\\..\\..\\..\\..\\..\\test\\50_L5_Units_Parts\\10_SWUT\\40_BSW\\30_packages\\BswErrDeb\\include,..\\..\\..\\..\\..\\..\\src\\fw_cu\\workspace\\Tresos\
+extgen\\output\\generated\\include,..\\..\\..\\..\\..\\..\\src\\fw_cu\\Components\\Cmn\\MngFlts\\ErrDeb\\include,..\\..\\..\\..\\..\\..\\src\\fw_cu\\Components\\Cmn\\Shared\\MemMap\\include,..\\..\\..\\..\\..\\..\\src\\fw_cu\\Components\\Extern\\AutoCore\\eclipse\\plugins\\Rte_TS_TxDxM6I4R0\\include,..\\..\\..\\..\\..\\..\\src\\fw_cu\\Components\\Extern\\AutoCore\\eclipse\\plugins\\NvM_TS_TxDxM6I17R0\\include,..\\..\\..\\..\\..\\..\\src\\fw_cu\\Components\\Cmn\\MngFlts\\BswErrDeb\\include,..\\..\\..\\..\\..\\..\\src\\fw_cu\\Components\\Extern\\AutoCore\\eclipse\\plugins\\Com_TS_TxDxM6I3R0\\include,..\\..\\..\\..\\..\\..\\src\\fw_cu\\Components\\Extern\\AutoCore\\eclipse\\plugins\\Det_TS_TxDxM6I5R0\\include,..\\..\\..\\..\\..\\..\\src\\fw_cu\\Components\\Extern\\AutoCore\\eclipse\\plugins\\Dem_TS_TxDxM6I3R0\\include,..\\..\\..\\..\\..\\..\\src\\fw_cu\\Components\\Extern\\AutoCore\\eclipse\\plugins\\Dcm_TS_TxDxM5I0R0\\include,..\\..\\..\\..\\..\\..\\src\\fw_cu\\Components\\Cmn\\MngFlts\\Exc\\include,..\\..\\..\\..\\..\\..\\src\\fw_cu\\Components\\Cmn\\Shared\\Config\\include,..\\..\\..\\..\\..\\..\\src\\fw_cu\\Components\\Cmn\\MngFlts\\BswErrDeb\\src,..\\..\\..\\..\\..\\..\\src\\fw_cu\\Components\\Extern\\AutoCore\\eclipse\\plugins\\Base_TS_TxDxM5I0R0\\include,..\\..\\..\\..\\..\\..\\src\\fw_cu\\Components\\Extern\\AutoCore\\eclipse\\plugins\\ResourceM_Aurix2GAS422\\include,..\\..\\..\\..\\..\\..\\src\\fw_cu\\Components\\Extern\\AutoCore\\eclipse\\plugins\\Base_TS_TxDxM5I0R0\\include,..\\..\\..\\..\\..\\..\\src\\fw_cu\\Components\\Extern\\AutoCore\\eclipse\\plugins\\Base_TS_TxDxM5I0R0\\include,F:\\src\\fw_cu\\Components\\Cmn\\Shared\\MathLib\\include,F:\\src\\fw_cu\\Components\\Cmn\\Diagc\\include</ge_incdir>
+         </configuration>
+         <configuration>
+@@ -35,7 +35,7 @@
+               <quid>683053091</quid>
+               <renameable>true</renameable>
+               <deletable>true</deletable>
+-              <open>false</open>
++              <open>true</open>
+               <sorted>false</sorted>
+               <executionResult>0</executionResult>
+             </data>
+@@ -45,7 +45,7 @@
+             <outfilename_list>
+               <outfilename>
+                 <filetype>1563769615_#OK</filetype>
+-                <filepath>.\\47</filepath>
++                <filepath>.\\29</filepath>
+               </outfilename>
+               <outfilename>
+                 <filetype>1563769615_DUM</filetype>
+@@ -154,48 +154,30 @@
+                   <cas>BswErrDeb_ReqSecuFltRst.BswErrDeb_ReqSecuFltRst_FUNC.1</cas>
+                   <cas>BswErrDeb_Init.BswErrDeb_Init_FUNC.1</cas>
+                   <cas>BswErrDeb_PreRun.BswErrDeb_PreRun_FUNC.1</cas>
+-                  <cas>BswErrDeb_MainFunctionFltRst.BswErrDeb_MainFunctionFltRst_FUNC.1</cas>
+-                  <cas>BswErrDeb_MainFunctionFltRst.BswErrDeb_MainFunctionFltRst_FUNC.2</cas>
++                  <cas>BswErrDeb_FltRstHandler.BswErrDeb_FltRstHandler_FUNC.1</cas>
++                  <cas>BswErrDeb_FltRstHandler.BswErrDeb_FltRstHandler_FUNC.2</cas>
++                  <cas>BswErrDeb_FltRstHandler.BswErrDeb_FltRstHandler_FUNC.3</cas>
++                  <cas>BswErrDeb_CvtDemEveStsType.BswErrDeb_CvtDemEveStsType_FUNC.1</cas>
++                  <cas>BswErrDeb_CvtDemEveStsType.BswErrDeb_CvtDemEveStsType_FUNC.2</cas>
++                  <cas>BswErrDeb_CvtDemEveStsType.BswErrDeb_CvtDemEveStsType_FUNC.3</cas>
++                  <cas>BswErrDeb_CvtDemEveStsType.BswErrDeb_CvtDemEveStsType_FUNC.4</cas>
++                  <cas>BswErrDeb_CvtDemEveStsType.BswErrDeb_CvtDemEveStsType_FUNC.5</cas>
+                   <cas>BswErrDeb_ReportFlts.BswErrDeb_ReportFlts_FUNC.1</cas>
+                   <cas>BswErrDeb_ReportFlts.BswErrDeb_ReportFlts_FUNC.2</cas>
+                   <cas>BswErrDeb_ReportFlts.BswErrDeb_ReportFlts_FUNC.3</cas>
+                   <cas>BswErrDeb_ReportFlts.BswErrDeb_ReportFlts_FUNC.4</cas>
+-                  <cas>BswErrDeb_SetFltReportLockClrDtc.BswErrDeb_SetFltReportLockClrDtc_FUNC.1</cas>
+                   <cas>BswErrDeb_MainFunctionFltColl.BswErrDeb_MainFunctionFltColl_FUNC.1</cas>
+                   <cas>BswErrDeb_MainFunctionFltColl.BswErrDeb_MainFunctionFltColl_FUNC.2</cas>
+                   <cas>BswErrDeb_DemSetEventSts.BswErrDeb_DemSetEventSts_FUNC.1</cas>
+                   <cas>BswErrDeb_DemSetEventSts.BswErrDeb_DemSetEventSts_FUNC.2</cas>
+-                  <cas>BswErrDeb_FltRstSecu.BswErrDeb_FltRstSecu_FUNC.1</cas>
+-                  <cas>BswErrDeb_FltRstSecu.BswErrDeb_FltRstSecu_FUNC.2</cas>
++                  <cas>BswErrDeb_FltRstClrDtc.BswErrDeb_FltRstClrDtc_FUNC.1</cas>
++                  <cas>BswErrDeb_FltRstClrDtc.BswErrDeb_FltRstClrDtc_FUNC.2</cas>
++                  <cas>BswErrDeb_SetEventStatus.BswErrDeb_SetEventStatus_FUNC.1</cas>
++                  <cas>BswErrDeb_SetEventStatus.BswErrDeb_SetEventStatus_FUNC.2</cas>
++                  <cas>BswErrDeb_SetFltReportLockClrDtc.BswErrDeb_SetFltReportLockClrDtc_FUNC.1</cas>
+                   <cas>BswErrDeb_NvmHandler.BswErrDeb_NvmHandler_FUNC.1</cas>
+                   <cas>BswErrDeb_NvmHandler.BswErrDeb_NvmHandler_FUNC.2</cas>
+                   <cas>BswErrDeb_NvmHandler.BswErrDeb_NvmHandler_FUNC.3</cas>
+-                  <cas>BswErrDeb_RteSetEventStatus.BswErrDeb_RteSetEventStatus_FUNC.1</cas>
+-                  <cas>BswErrDeb_RteSetEventStatus.BswErrDeb_RteSetEventStatus_FUNC.2</cas>
+-                  <cas>BswErrDeb_SecuFltRstFinished.BswErrDeb_SecuFltRstFinished_FUNC.1</cas>
+-                  <cas>BswErrDeb_SecuFltRstFinished.BswErrDeb_SecuFltRstFinished_FUNC.2</cas>
+-                  <cas>BswErrDeb_SetEventStatus.BswErrDeb_SetEventStatus_FUNC.1</cas>
+-                  <cas>BswErrDeb_SetEventStatus.BswErrDeb_SetEventStatus_FUNC.2</cas>
+-                  <cas>BswErrDeb_SetDtcSuppression.BswErrDeb_SetDtcSuppression_FUNC.1</cas>
+-                  <cas>BswErrDeb_SetDtcSuppression.BswErrDeb_SetDtcSuppression_FUNC.2</cas>
+-                  <cas>BswErrDeb_MainFunctionFltDeb.BswErrDeb_MainFunctionFltDeb_FUNC.1</cas>
+-                  <cas>BswErrDeb_FltRstClrDtc.BswErrDeb_FltRstClrDtc_FUNC.1</cas>
+-                  <cas>BswErrDeb_FltRstClrDtc.BswErrDeb_FltRstClrDtc_FUNC.2</cas>
+-                  <cas>BswErrDeb_FltRstHandler.BswErrDeb_FltRstHandler_FUNC.1</cas>
+-                  <cas>BswErrDeb_FltRstHandler.BswErrDeb_FltRstHandler_FUNC.2</cas>
+-                  <cas>BswErrDeb_FltRstHandler.BswErrDeb_FltRstHandler_FUNC.3</cas>
+-                  <cas>BswErrDeb_CvtDemEveStsType.BswErrDeb_CvtDemEveStsType_FUNC.1</cas>
+-                  <cas>BswErrDeb_CvtDemEveStsType.BswErrDeb_CvtDemEveStsType_FUNC.2</cas>
+-                  <cas>BswErrDeb_CvtDemEveStsType.BswErrDeb_CvtDemEveStsType_FUNC.3</cas>
+-                  <cas>BswErrDeb_CvtDemEveStsType.BswErrDeb_CvtDemEveStsType_FUNC.4</cas>
+-                  <cas>BswErrDeb_CvtDemEveStsType.BswErrDeb_CvtDemEveStsType_FUNC.5</cas>
+-                  <cas>BswErrDeb_PreInit.BswErrDeb_PreInit_FUNC.1</cas>
+-                  <cas>BswErrDeb_ResetFltReportLockClrDtc.BswErrDeb_ResetFltReportLockClrDtc_FUNC.1</cas>
+-                  <cas>BswErrDeb_ResetFltReportLockClrDtc.BswErrDeb_ResetFltReportLockClrDtc_FUNC.2</cas>
+-                  <cas>BswErrDeb_GetLockedStatus.BswErrDeb_GetLockedStatus_FUNC.1</cas>
+-                  <cas>BswErrDeb_GetFaultStatus1.BswErrDeb_GetFaultStatus1_FUNC.1</cas>
+-                  <cas>BswErrDeb_ReqClrDtcFltRst.BswErrDeb_ReqClrDtcFltRst_FUNC.1</cas>
+-                  <cas>BswErrDeb_EventStatusChangedCallback.BswErrDeb_EventStatusChangedCallback_FUNC.1</cas>
+                 </cas_all>
+                 <fam_all>
+                   <fam>nominal</fam>
+@@ -254,29 +236,11 @@
+               <deletable>true</deletable>
+               <open>true</open>
+               <sorted>false</sorted>
+-              <executionResult>0</executionResult>
++              <executionResult>5</executionResult>
+             </data>
+             <current_configuration>C Aurix TC27x Tasking Compiler - Trace32 Debugger</current_configuration>
+-            <state>0</state>
++            <state>1</state>
+             <background>false</background>
+-            <outfilename_list>
+-              <outfilename>
+-                <filetype>1563769615_DUM</filetype>
+-                <filepath>.\\cwinAurixTrace32\\BswErrDeb.i,.\\cwinAurixTrace32\\BswErrDeb_aug.c</filepath>
+-              </outfilename>
+-              <outfilename>
+-                <filetype>1563769615_FDC</filetype>
+-                <filepath>.\\ERRDEB.H.fdc,.\\MLIB_ABS.H.fdc,.\\MLIB_ABSDIF.H.fdc,.\\MLIB_ADD.H.fdc,.\\MLIB_BIT.H.fdc,.\\MLIB_CAST.H.fdc,.\\MLIB_DIV.H.fdc,.\\MLIB_MAXMIN.H.fdc,.\\MLIB_MUL.H.fdc,.\\MLIB_SHIFT.H.fdc,.\\MLIB_SUB.H.fdc,.\\MLIB_SQRT.H.fdc,.\\MLIB_RADCONV.H.fdc,.\\ERRDEB_PRIV.H.fdc,.\\BSWERRDEB.C.fdc</filepath>
+-              </outfilename>
+-              <outfilename>
+-                <filetype>1563769615_OBJ</filetype>
+-                <filepath>.\\cwinAurixTrace32\\BswErrDeb.o</filepath>
+-              </outfilename>
+-              <outfilename>
+-                <filetype>1563769615_TIO</filetype>
+-                <filepath>.\\cwinAurixTrace32\\BswErrDeb.c.tio</filepath>
+-              </outfilename>
+-            </outfilename_list>
+             <perlscript_after_child>Source.pl</perlscript_after_child>
+             <configuration_list>
+               <configuration>
+@@ -289,7 +253,7 @@
+           </node>
+           <filepath>..\\..\\..\\..\\..\\..\\src\\fw_cu\\Components\\Cmn\\MngFlts\\BswErrDeb\\src\\BswErrDeb.c</filepath>
+         </nodefile_ref>
+-      <integrated>false</integrated>
++      <integrated>true</integrated>
+       <source_child>
+       </source_child>
+       </source>
+'

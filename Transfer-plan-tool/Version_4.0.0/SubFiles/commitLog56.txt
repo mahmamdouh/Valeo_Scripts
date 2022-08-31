@@ -1,0 +1,1716 @@
+b'commit 2820dd77817165e74f5c2e222fc57869305016be
+Author: Mohammed ANDALOUSSI (JV) <mohammed.andaloussi.jv@valeo.com>
+Date:   Sun Jan 23 23:03:02 2022 +0100
+
+    $100kW-51201$ HIS warnings and QAC fix
+    
+    Change-Id: I0d019561cc1e5896a09c1e73324fdb322c16a870
+
+diff --git a/src/fw_cu/Components/Safety/Sfty_Cmn/SftyCrc/src/SftyCrc.c b/src/fw_cu/Components/Safety/Sfty_Cmn/SftyCrc/src/SftyCrc.c
+index bb7291702..89efd8614 100644
+--- a/src/fw_cu/Components/Safety/Sfty_Cmn/SftyCrc/src/SftyCrc.c
++++ b/src/fw_cu/Components/Safety/Sfty_Cmn/SftyCrc/src/SftyCrc.c
+@@ -372,7 +372,7 @@ FUNC (uint8, SFTYCRC) SftyCrc_CalcCRC8
+  */
+ /**************************************************************************************************************/
+ /* PRQA S 4700 1 # Justification for STM29. SftyCrc_CalcCRC16 API is a utility function. It will be used by other SW-Components */
+-FUNC (uint16, SFTYCRC) SftyCrc_CalcCRC16
++FUNC (uint16, SFTYCRC) SftyCrc_CalcCRC16 /* PRQA S 4700*/
+ (
+   const uint8 Crc_Data[],
+   uint32      Crc_Length,
+diff --git a/src/fw_cu/Components/Safety/Sfty_Cmn/SftyE2eCompst_Cfg/SftyE2eRx_Cfg/src/SftyE2eRx_cfg.c b/src/fw_cu/Components/Safety/Sfty_Cmn/SftyE2eCompst_Cfg/SftyE2eRx_Cfg/src/SftyE2eRx_cfg.c
+index 915c8c634..493f1e70a 100644
+--- a/src/fw_cu/Components/Safety/Sfty_Cmn/SftyE2eCompst_Cfg/SftyE2eRx_Cfg/src/SftyE2eRx_cfg.c
++++ b/src/fw_cu/Components/Safety/Sfty_Cmn/SftyE2eCompst_Cfg/SftyE2eRx_Cfg/src/SftyE2eRx_cfg.c
+@@ -483,7 +483,7 @@ const SftyE2eRxConfigType SftyE2eRxConfig[SFTY_E2E_RX_MSG_NR] =
+  * \\retval FALSE : Value not correct
+  */
+ /***********************************************************************************************************/
+-LOCAL_INLINE FUNC(boolean, SFTYE2E_CODE) SftyE2eRx_ChkLimAndScal(uint32 Val, const SftyE2eCanDataRngType* RngData, float32* PhysVal) /* PRQA S 4700 # This function is inline function so HIS warning STM29 can be suppressed since there is no call and the code will be only copied */
++LOCAL_INLINE boolean SftyE2eRx_ChkLimAndScal(uint32 Val, const SftyE2eCanDataRngType* RngData, float32* PhysVal) /* PRQA S 4700 # This function is inline function so HIS warning STM29 can be suppressed since there is no call and the code will be only copied */
+ {
+ #ifdef SWIT_FC_Active
+ if((SWIT_SftyE2eRx_EN_KEY==SWIT_First_HookEnableKey))
+diff --git a/src/fw_cu/Components/Safety/Sfty_Cmn/SftyModMgr/src/SftyModMgr.c b/src/fw_cu/Components/Safety/Sfty_Cmn/SftyModMgr/src/SftyModMgr.c
+index e46b3fef4..37f6327b7 100644
+--- a/src/fw_cu/Components/Safety/Sfty_Cmn/SftyModMgr/src/SftyModMgr.c
++++ b/src/fw_cu/Components/Safety/Sfty_Cmn/SftyModMgr/src/SftyModMgr.c
+@@ -761,89 +761,6 @@ LOCAL_INLINE void SftyModMgr_HndlKl15(void)
+ #ifdef SWIT_FC_Active
+ if((SWIT_SftyModMgr_EN_KEY==SWIT_First_HookEnableKey))
+    SWIT_SftyModMgr_HndlKl15_BgnHook ();
+-#endif
+-
+-#if 0
+-/* ******** Variables declaration *********** */
+-ErrDeb_FltStsType   kl15DebSt;
+-
+-   /* ************* Source code **************** */
+-
+-   /* Overwriting KL15-Signal is not requested, use sensor value */
+-   if(BswC2cData.ReqRstKl15 == REQ_RST_KL15_NOT_REQUESTED)
+-   {
+-      if(SftyDcEvlnKl15State == KL15_STATE_ON)
+-      {
+-         SftyModMgrKl15OffErrMonrSt = ERR_DEB_MONR_STS_PASSED;
+-      }
+-      else if(SftyDcEvlnKl15State == KL15_STATE_OFF)
+-      {
+-         SftyModMgrKl15OffErrMonrSt = ERR_DEB_MONR_STS_FAILED;
+-      }
+-      else /* (SftyDcEvlnKl15State == KL15_STATE_UNKNOWN */
+-      {
+-         SftyModMgrKl15OffErrMonrSt = ERR_DEB_MONR_STS_INACTIVE;
+-      }
+-   }
+-   else if(BswC2cData.ReqRstKl15 == REQ_RST_KL15_KL15_ACTIVE)
+-   {
+-      /* Overwrite value with KL15_ON */
+-      SftyModMgrKl15OffErrMonrSt = ERR_DEB_MONR_STS_PASSED;
+-   }
+-   else
+-   {
+-      /* Overwrite value with KL15_OFF */
+-      SftyModMgrKl15OffErrMonrSt = ERR_DEB_MONR_STS_FAILED;
+-   }
+-
+-   kl15DebSt = ErrDebFltData_ENA_CDN_KL15_ACTV.FltSts1QualSts;
+-
+-   /* State machine to reset normal operation errors in case of complete KL15 cycle */
+-   if(kl15DebSt == ERR_DEB_FLT_STS_FAILED)
+-   {
+-      SftyModMgrKl15St = KL15_STATE_OFF;
+-      SftyC2cData.Kl15St = STS_KL15_OFF;
+-   }
+-   else if(kl15DebSt == ERR_DEB_FLT_STS_PASSED)
+-   {
+-      if(SftyModMgrKl15St == KL15_STATE_OFF)
+-      {
+-         /* Issue KL15 fault reset request */
+-         SftyModMgrFltRstReqKl15++;
+-         /* KL15 reset request must be seen by other cores also */
+-         ErrDebFltRstReqKl15 = SftyModMgrFltRstReqKl15;
+-
+-         /* Set new KL15 state */
+-         SftyModMgrKl15St = KL15_STATE_ON;
+-         SftyC2cData.Kl15St = STS_KL15_ON;
+-
+-#if SYSCON_FTR_PSM == 1 /* USE_IPMCTRL_CONTROL */
+-         /* Reevaluate NVM resolver offset */
+-         SftyRslvrOffsHndlr_ValidateRslvrDataNvm();
+-#endif
+-      }
+-      else if(SftyModMgrKl15St == KL15_STATE_ON)
+-      {
+-         /* KL15 is already on, do nothing */
+-      }
+-      else /* SftyModMgrKl15St == KL15_STATE_UNKNOWN */
+-      {
+-         /* Start was done and now we know the status of KL15 */
+-         /* Set new KL15 state */
+-         SftyModMgrKl15St = KL15_STATE_ON;
+-         SftyC2cData.Kl15St = STS_KL15_ON;
+-      }
+-   }
+-   else
+-   {
+-      /* Do nothing, debouncing not finished */
+-   }
+-
+-#ifdef SWIT_IT_Active
+-   if((SWIT_SftyModMgr_EN_KEY==SWIT_First_HookEnableKey)||(SWIT_SftyModMgr_EN_KEY==SWIT_Second_HookEnableKey)||(SWIT_SftyModMgr_EN_KEY==SWIT_Third_HookEnableKey))
+-      SWIT_SftyModMgr_HndlKl15_EndHook();
+-#endif
+-
+ #endif
+ 
+    if(SFTY_KL15_PORT_PIN == STD_LOW)
+@@ -891,25 +808,7 @@ FUNC(void, SFTY_MOD_MGR_CODE) SftyModMgr_MainFunction(void)
+    /* ******** Variables declaration *********** */
+ 
+    /* ************* Source code **************** */
+-#if 0
+-   /* State machine for shutoffpath and overcurrent protection tests */
+-   SftyModMgr_StrtUpDiag();
+-
+-   /* State machine for diagnostics of power supply during sepic is off */
+-   SftyModMgr_SepicOffDiag();
+-
+-   /* Check stability of power supply, SEPIC only */
+-   SftyModMgr_ChkStabPwrSplySepic();
+-
+-   /* Check stability of power supply that is generated from SEPIC OR HvLv converter */
+-   SftyModMgr_ChkStabPwrSplySepicOrHvLv();
+-
+-   /* Evaluation of mode plausibility */
+-   SftyModMgr_ChkModPlaus();
+-
+-
+-#endif
+-
++   /* PRQA S 4700 1 # Justification for STVOC2. SWIT hook logik is causing the warning. This code is disabled and no risk is present */
+ #ifdef SWIT_Active
+ if((SWIT_SftyModMgr_EN_KEY==SWIT_First_HookEnableKey)||(SWIT_SftyModMgr_EN_KEY==SWIT_Second_HookEnableKey)||(SWIT_SftyModMgr_EN_KEY==SWIT_Third_HookEnableKey))
+    SWIT_SftyModMgr_MainFunction_EndHook ();
+@@ -927,6 +826,7 @@ if((SWIT_SftyModMgr_EN_KEY==SWIT_First_HookEnableKey)||(SWIT_SftyModMgr_EN_KEY==
+    SWIT_SftyModMgr_SbcSleepModeHndlr_EndHook();
+    }
+    #endif
++
+    return;
+ }
+ 
+diff --git a/src/fw_cu/Components/Safety/Sfty_Inv/SftyActvDchaCtrl/src/SftyActvDchaCtrl.c b/src/fw_cu/Components/Safety/Sfty_Inv/SftyActvDchaCtrl/src/SftyActvDchaCtrl.c
+index df86fc0a0..6d8f34549 100644
+--- a/src/fw_cu/Components/Safety/Sfty_Inv/SftyActvDchaCtrl/src/SftyActvDchaCtrl.c
++++ b/src/fw_cu/Components/Safety/Sfty_Inv/SftyActvDchaCtrl/src/SftyActvDchaCtrl.c
+@@ -51,8 +51,8 @@
+ 
+ /*================== [defines] ================================================*/
+ 
+-
+-
++#define SFTY_ACTV_DCHA_CTRL_ADIS_R_TM_CTR_MAX        (0xFFFFFFFFU)
++#define SFTY_ACTV_DCHA_CTRL_EFCTV_FAIL_TM_R_CTR_MAX  (0xFFU)
+ /*================== [type definitions] =======================================*/
+ 
+ /* Begin: SFTYACTVDCHACTRL_START_SEC_VAR_AREA_CMN_FAST_INIT_8 (online) */
+@@ -144,14 +144,14 @@ STATIC VAR(uint8, SFTYACTVDCHACTRL_VAR) SftyActvDhaCtrlAdisOperSts = ADIS_OPER_S
+ 
+ 
+ /*
+-@@ SYMBOL = SftyActvDhaCtrlDvDtChkDelayTimAdisByRCnt
++@@ SYMBOL = SftyActvDchaCtrlDvDtChkDlyTimAdisByRCnt
+ @@ A2L_TYPE = MEASURE
+ @@ DATA_TYPE = UBYTE [0 ... 100]
+ @@ DESCRIPTION = "Delay time countor for start checking the dv/dt for active discharge by resistor"
+ @@ GROUP = SftyActvDchaCtrl
+ @@ END
+ */
+-STATIC VAR(uint8, SFTYACTVDCHACTRL_VAR) SftyActvDhaCtrlDvDtChkDelayTimAdisByRCnt = 0U;
++STATIC VAR(uint8, SFTYACTVDCHACTRL_VAR) SftyActvDchaCtrlDvDtChkDlyTimAdisByRCnt = 0U;
+ 
+ 
+ /*
+@@ -265,6 +265,8 @@ STATIC VAR(uint32, SFTYACTVDCHACTRL_VAR) SftyActvDchaCtrlAdisFaultTimeCnt = 0UL;
+ */
+ STATIC VAR(float32, SFTYACTVDCHACTRL_VAR) SftyActvDchaCtrlHvDcUValPre = 0.0f;
+ 
++STATIC VAR(ErrDeb_MonrStsType, SFTYACTVDCHACTRL_VAR) SftyActvDchaCtrlEfcErrMonrStInRow = ERR_DEB_MONR_STS_INACTIVE;
++STATIC VAR(ErrDeb_MonrStsType, SFTYACTVDCHACTRL_VAR) SftyActvDchaCtrlEfcErrMonrStTotal = ERR_DEB_MONR_STS_INACTIVE;
+ 
+ 
+ #define SFTYACTVDCHACTRL_STOP_SEC_VAR_AREA_CMN_FAST_INIT_32
+@@ -346,8 +348,8 @@ LOCAL_INLINE void SftyActvDchaCtrl_GetInputData(void)
+ #endif /* SERIES_PRODUCTION */
+ 
+    {
+-\t  SftyActvDchaCtrlActvFltSts   = SftyE2eFpgaActvDchaActvFltSts;
+-      SftyActvDchaCtrlInactvFltSts = SftyE2eFpgaActvDchaInactvFltSts;
++      SftyActvDchaCtrlActvFltSts   = SftyE2eFpgaActvDchaActvFltSts;
++\t   SftyActvDchaCtrlInactvFltSts = SftyE2eFpgaActvDchaInactvFltSts;
+    }
+    
+ 
+@@ -364,7 +366,7 @@ LOCAL_INLINE void SftyActvDchaCtrl_GetInputData(void)
+ #endif /* SERIES_PRODUCTION */
+ 
+    {
+-\t  SftyActvDchaCtrlHvDcUVal = SftyHvDcUEvlnUdcVal;
++      SftyActvDchaCtrlHvDcUVal = SftyHvDcUEvlnUdcVal;
+    }
+ 
+    
+@@ -375,7 +377,7 @@ LOCAL_INLINE void SftyActvDchaCtrl_GetInputData(void)
+    if (SftyReplcmtActvDchaCtrlCanE2eIpStiEna == TRUE)
+    {
+       SftyActvDchaCtrlBattCntctrSts = SftyReplcmtActvDchaCtrlBattCntctrSt;
+-\t  SftyActvDchaCtrlE2eReq        = SftyReplcmtActvDchaCtrlE2eReq;
++\t   SftyActvDchaCtrlE2eReq        = SftyReplcmtActvDchaCtrlE2eReq;
+    }
+    else
+ \t  
+@@ -383,7 +385,7 @@ LOCAL_INLINE void SftyActvDchaCtrl_GetInputData(void)
+    
+    {
+       SftyActvDchaCtrlBattCntctrSts = SftyE2ePhyDataVcuInvStat1BattContactorSt;  
+-\t  SftyActvDchaCtrlE2eReq        = SftyE2ePhyDataVcuInvCtrl1ActDischReq;
++\t   SftyActvDchaCtrlE2eReq        = SftyE2ePhyDataVcuInvCtrl1ActDischReq;
+    }
+ 
+ 
+@@ -394,17 +396,17 @@ LOCAL_INLINE void SftyActvDchaCtrl_GetInputData(void)
+    if (SftyReplcmtActvDchaCtrlSftyErrDebIpStiEna == TRUE)
+    {
+       SftyActvDchaCtrlFctIdActvDcha\t\t    = SftyReplcmtActvDchaCtrlFctIdActDcha;
+-\t  SftyActvDchaCtrlFctIdCanVcuInvCtrl1   = SftyReplcmtActvDchaCtrlFctIdCanVcuInvStat1;
+-\t  SftyActvDchaCtrlFctIdActvDchaCanFailr = SftyReplcmtActvDchaCtrlFctIdActvDchaCanFailr;
++\t   SftyActvDchaCtrlFctIdCanVcuInvCtrl1   = SftyReplcmtActvDchaCtrlFctIdCanVcuInvStat1;
++\t   SftyActvDchaCtrlFctIdActvDchaCanFailr = SftyReplcmtActvDchaCtrlFctIdActvDchaCanFailr;
+    }
+    else
+ 
+ #endif /* SERIES_PRODUCTION */
+ \t  
+    {
+-\t  SftyActvDchaCtrlFctIdActvDcha\t\t    = SftyErrDebFctInhbnSts.B.FctIdActvDcha;
+-\t  SftyActvDchaCtrlFctIdCanVcuInvCtrl1   = SftyErrDebFctInhbnSts.B.FctIdCanVcuInvCtrl1;
+-\t  SftyActvDchaCtrlFctIdActvDchaCanFailr = SftyErrDebFctInhbnSts.B.FctIdActvDchaCanFailr;
++      SftyActvDchaCtrlFctIdActvDcha\t\t    = SftyErrDebFctInhbnSts.B.FctIdActvDcha;
++\t   SftyActvDchaCtrlFctIdCanVcuInvCtrl1   = SftyErrDebFctInhbnSts.B.FctIdCanVcuInvCtrl1;
++\t   SftyActvDchaCtrlFctIdActvDchaCanFailr = SftyErrDebFctInhbnSts.B.FctIdActvDchaCanFailr;
+    }
+    \t
+    return;
+@@ -430,40 +432,37 @@ LOCAL_INLINE void SftyActvDchaCtrl_StrtupTest(void)
+       {
+          if (SftyActvDchaCtrlAdisReqCmdHasSent == TRUE)
+          {
+-\t\t\tif (SftyActvDchaCtrlInactvFltSts == ADIS_STS_FAULT)
+-\t\t\t{
+-\t\t\t   SftyActvDchaCtrlInactvErrMonrSt = ERR_DEB_MONR_STS_FAILED;
+-\t\t\t}
+-\t\t\telse
+-\t\t\t{
++            if (SftyActvDchaCtrlInactvFltSts == ADIS_STS_FAULT)
++            {
++               SftyActvDchaCtrlInactvErrMonrSt = ERR_DEB_MONR_STS_FAILED;
++            }
++            else
++            {
+                SftyActvDchaCtrlInactvErrMonrSt = ERR_DEB_MONR_STS_PASSED;
+-\t\t\t}
++            }
+ 
+-\t\t\tSftyActvDchaCtrlStrtupTestSts   = ADIS_STRTUP_TEST_FINISHED;
+-\t\t\tSftyActvDchaCtrlActvDchaReqViaR = ACTV_DCHA_NO_REQ;
++            SftyActvDchaCtrlStrtupTestSts   = ADIS_STRTUP_TEST_FINISHED;
++            SftyActvDchaCtrlActvDchaReqViaR = ACTV_DCHA_NO_REQ;
++         }
++         else
++         {
++            SftyActvDchaCtrlActvDchaReqViaR   = ACTV_DCHA_REQ;
++            SftyActvDchaCtrlStrtupTestSts     = ADIS_STRTUP_TEST_RUNNING;
++            SftyActvDchaCtrlAdisReqCmdHasSent = TRUE;
+          }
+-\t\t else
+-\t\t {
+-\t\t    SftyActvDchaCtrlActvDchaReqViaR   = ACTV_DCHA_REQ;
+-\t\t\tSftyActvDchaCtrlStrtupTestSts     = ADIS_STRTUP_TEST_RUNNING;
+-\t\t\tSftyActvDchaCtrlAdisReqCmdHasSent = TRUE;
+-\t\t }
+       }
+-\t  else
+-\t  {
+-\t     /* Do Nothing! */
+-\t  }\t  
++      else
++      {
++         /* Do Nothing! */
++      }
+    }
+    else
+    {
+       /* Do Nothing! */
+    }
+-
+-   
+    return;
+ }
+ 
+-
+ /******************************************************************/
+ /*!
+  * \\fn        void SftyActvDchaCtrl_IntelAdisReq(void)
+@@ -476,62 +475,22 @@ LOCAL_INLINE void SftyActvDchaCtrl_StrtupTest(void)
+ LOCAL_INLINE void SftyActvDchaCtrl_IntelAdisReq(void)
+ {
+    /* ******** Variables declaration *********** */
+-   uint8 sftyActvDchaCtrlActvDchaReqIntel_1;
+-   uint8 sftyActvDchaCtrlActvDchaReqIntel_2;
+-   uint8 sftyActvDchaCtrlActvDchaReqIntel_3;
+    
+    /* ************* Source code **************** */
+ 
+-   /* 1> Checking Condition 1 */
+-   if (SftyActvDchaCtrlFctIdActvDcha == ACTV_DCHA_ACTVE)
+-   {
+-      sftyActvDchaCtrlActvDchaReqIntel_1 = ACTV_DCHA_ACTVE;
+-   }
+-   else
+-   {
+-      sftyActvDchaCtrlActvDchaReqIntel_1 = ACTV_DCHA_DEACTVE;
+-   }
+-
+-   
+-   /* 2> Checking Condition 2 */
+-   if ((SftyActvDchaCtrlFctIdActvDchaCanFailr == ACTV_DCHA_ACTVE)
+-   \t   &&
+-   \t   (SftyActvDchaCtrlFctIdCanVcuInvCtrl1 == ACTV_DCHA_ACTVE))
+-   {
+-      sftyActvDchaCtrlActvDchaReqIntel_2 = ACTV_DCHA_ACTVE;
+-   }
+-   else
+-   {
+-      sftyActvDchaCtrlActvDchaReqIntel_2 = ACTV_DCHA_DEACTVE;
+-   }
+-
+-
+-   /* 3> Checking Condition 3 */
+-   if (((SftyActvDchaCtrlHvDcUVal < SftyActvDchaPrmData.VbatMinThd) || (SftyActvDchaCtrlFctIdActvDchaCanFailr == ACTV_DCHA_ACTVE)) 
+-   \t   && (SftyActvDchaCtrlFctIdCanVcuInvCtrl1 == ACTV_DCHA_ACTVE))
+-   \t{
+-   \t   sftyActvDchaCtrlActvDchaReqIntel_3 = ACTV_DCHA_ACTVE;
+-   \t}
+-\telse
+-\t{
+-\t   sftyActvDchaCtrlActvDchaReqIntel_3 = ACTV_DCHA_DEACTVE;
+-\t}
+-
+-
+-   /* 4> Checking Internal Adis Request */
+-   if ((sftyActvDchaCtrlActvDchaReqIntel_1 == ACTV_DCHA_ACTVE)
+-   \t    ||
+-   \t    (sftyActvDchaCtrlActvDchaReqIntel_2 == ACTV_DCHA_ACTVE)
+-   \t    ||
+-   \t    (sftyActvDchaCtrlActvDchaReqIntel_3 == ACTV_DCHA_ACTVE))
++   /* Checking Condition */
++   if ( (SftyActvDchaCtrlFctIdActvDcha == ACTV_DCHA_ACTVE)            ||
++        (((SftyActvDchaCtrlHvDcUVal < SftyActvDchaPrmData.VbatMinThd) ||
++        (SftyActvDchaCtrlFctIdActvDchaCanFailr == ACTV_DCHA_ACTVE))   &&
++        (SftyActvDchaCtrlFctIdCanVcuInvCtrl1 == ACTV_DCHA_ACTVE))
++      )
+    {
+       SftyActvDchaCtrlActvDchaReqIntel = ACTV_DCHA_ACTVE;
+    }
+    else
+-   {
++\t{
+       SftyActvDchaCtrlActvDchaReqIntel = ACTV_DCHA_DEACTVE;
+-   }
+-
++\t}
+ 
+    return;
+ }
+@@ -590,10 +549,9 @@ LOCAL_INLINE void SftyActvDchaCtrl_DetmnAdisReq(void)
+       SftyActvDchaCtrl_ExtelAdisReq();
+ 
+       /* 3> Active Discharge Request Decision */
+-      if ((SftyActvDchaCtrlHvDcUVal > (SftyActvDchaPrmData.HvDcVoltThd - SftyActvDchaPrmData.HvDcVoltTole))   /* > (60V -1.3V) */
+-   \t      &&
+-   \t      ((SftyActvDchaCtrlActvDchaReqIntel == ACTV_DCHA_ACTVE) || 
+-   \t       (SftyActvDchaCtrlActvDchaReqExtel == ACTV_DCHA_ACTVE)))
++      if (( SftyActvDchaCtrlHvDcUVal > (SftyActvDchaPrmData.HvDcVoltThd - SftyActvDchaPrmData.HvDcVoltTole)) &&  /* > (60V -1.3V) */
++   \t    ((SftyActvDchaCtrlActvDchaReqIntel == ACTV_DCHA_ACTVE) ||
++   \t     (SftyActvDchaCtrlActvDchaReqExtel == ACTV_DCHA_ACTVE)))
+       {
+          SftyActvDchaCtrlActvDchaReq = ACTV_DCHA_ACTVE;
+       }
+@@ -623,19 +581,19 @@ LOCAL_INLINE void SftyActvDchaCtrl_DetmnAdisReq(void)
+ LOCAL_INLINE void SftyActvDchaCtrl_UpdAdisReqCmd(void)
+ {
+    /* ******** Variables declaration *********** */
+-   uint32 sftyActvDchaCtrlAdisByRRtryDurnTim;
++   uint32 adisByRRtryDurnTim;
+    
+    /* ************* Source code **************** */
+ 
+    /* Interval Time Checking between 2 Adjacent Request */
+    if (SftyActvDchaCtrlReqAdisByRCmdUpdEna == SFTY_ACTIV_DCHA_DISABLED)
+    {
+-\t  sftyActvDchaCtrlAdisByRRtryDurnTim = ((uint32)SftyActvDchaPrmData.AdisByRRtryDurnTimThd) * ((uint32)CNT_1S_TO_1MS);
++\t  adisByRRtryDurnTim = ((uint32)SftyActvDchaPrmData.AdisByRRtryDurnTimThd) * ((uint32)CNT_1S_TO_1MS);
+ \t  
+-      if (SftyActvDchaCtrlByRRtryDurnCnt > sftyActvDchaCtrlAdisByRRtryDurnTim)
+-      {
+-         SftyActvDchaCtrlReqAdisByRCmdUpdEna = SFTY_ACTIV_DCHA_ENABLED;
+-      }
++\t  if (SftyActvDchaCtrlByRRtryDurnCnt > adisByRRtryDurnTim)
++\t  {
++\t     SftyActvDchaCtrlReqAdisByRCmdUpdEna = SFTY_ACTIV_DCHA_ENABLED;
++\t  }
+ \t  else
+ \t  {
+          SftyActvDchaCtrlByRRtryDurnCnt++;
+@@ -647,32 +605,31 @@ LOCAL_INLINE void SftyActvDchaCtrl_UpdAdisReqCmd(void)
+    }
+ 
+    /* Update the Request Command */
+-   if ((SftyActvDchaCtrlActvDchaReq == ACTV_DCHA_ACTVE)
+-       &&
+-   \t   (SftyActvDchaCtrlReqAdisByRCmdUpdEna == SFTY_ACTIV_DCHA_ENABLED))
++   if ((SftyActvDchaCtrlActvDchaReq == ACTV_DCHA_ACTVE) &&
++   \t (SftyActvDchaCtrlReqAdisByRCmdUpdEna == SFTY_ACTIV_DCHA_ENABLED))
+    {
+       if (SftyActvDhaCtrlAdisOperSts == ADIS_OPER_STS_FINISHED)
+       {
+          /* Clear it for Dv/Dt delay monitoring */
+-\t     SftyActvDhaCtrlDvDtChkDelayTimAdisByRCnt = 0U;
++         SftyActvDchaCtrlDvDtChkDlyTimAdisByRCnt = 0U;
+ 
+-\t     /* Clear it for Adis via resistor Success monitoring */
+-\t     SftyActvDchaCtrlAdisByRTimeCnt = 0U;
+-\t     SftyActvChaCtrlAdisSuccessful  = ERR_DEB_MONR_STS_INACTIVE;
++         /* Clear it for Adis via resistor Success monitoring */
++         SftyActvDchaCtrlAdisByRTimeCnt = 0U;
++         SftyActvChaCtrlAdisSuccessful  = ERR_DEB_MONR_STS_INACTIVE;
++      }
++      else
++      {
++         /* Keep those variable value */
+       }
+-\t  else
+-\t  {
+-\t     /* Keep those variable value */
+-\t  }
+ 
+       /* Set request Cmd and operation status */
+-\t  /* Don\'t move them to above! */
+-\t  SftyActvDchaCtrlActvDchaReqViaR     = ACTV_DCHA_REQ;
+-\t  SftyActvDhaCtrlAdisOperSts          = ADIS_OPER_STS_RUNNING;
++      /* Don\'t move them to above! */
++      SftyActvDchaCtrlActvDchaReqViaR     = ACTV_DCHA_REQ;
++      SftyActvDhaCtrlAdisOperSts          = ADIS_OPER_STS_RUNNING;
+ 
+-\t  /* Reset them for Interval Time Checking */
+-\t  SftyActvDchaCtrlByRRtryDurnCnt      = 0UL;
+-\t  SftyActvDchaCtrlReqAdisByRCmdUpdEna = SFTY_ACTIV_DCHA_DISABLED;
++      /* Reset them for Interval Time Checking */
++      SftyActvDchaCtrlByRRtryDurnCnt      = 0UL;
++      SftyActvDchaCtrlReqAdisByRCmdUpdEna = SFTY_ACTIV_DCHA_DISABLED;
+    }
+    else
+    {
+@@ -682,6 +639,115 @@ LOCAL_INLINE void SftyActvDchaCtrl_UpdAdisReqCmd(void)
+    return;
+ }
+ 
++/******************************************************************/
++/*!
++ * \\fn        void SftyActvDchaCtrl_ChkCntnsFlr(void)
++ * \\brief     This function checks continuous Failure
++ * \\return    None
++ * \\Parent_DD SftyActvDchaCtrl_MainFunction
++ */
++/******************************************************************/
++LOCAL_INLINE void SftyActvDchaCtrl_ChkCntnsFlr(void)
++{
++   if (SftyActvDchaCtrlEffeChkFailTimeAdisByRInRowCnt >= SftyActvDchaPrmData.EffeChkFailTimeByRInRowThd)
++   {
++      SftyActvDchaCtrlEfcErrMonrStInRow = ERR_DEB_MONR_STS_FAILED;
++   }
++   else
++   {
++      SftyActvDchaCtrlEfcErrMonrStInRow = ERR_DEB_MONR_STS_PASSED;
++   }
++   return;
++}
++
++
++/******************************************************************/
++/*!
++ * \\fn        void SftyActvDchaCtrl_ChktotalFlr(void)
++ * \\brief     This function checks total Failure
++ * \\return    None
++ * \\Parent_DD SftyActvDchaCtrl_MainFunction
++ */
++/******************************************************************/
++LOCAL_INLINE void SftyActvDchaCtrl_ChktotalFlr(void)
++{
++   uint32  adisEffeChkTotalFlrTim ;
++
++   SftyActvDchaCtrlEffeChkTotalFailTimesAdisByRTimCnt++;
++
++   adisEffeChkTotalFlrTim = MLIB_U32F32((SftyActvDchaPrmData.EffeChkTotalFailTimesByRTimThd) * ((float32)CNT_1S_TO_10MS));
++
++   if ((SftyActvDchaCtrlEffeChkTotalFailTimesAdisByRTimCnt < adisEffeChkTotalFlrTim)    &&     /* < 1.5s */
++       (SftyActvDchaCtrlEffeChkFailTimesAdisByRTotCnt >= SftyActvDchaPrmData.EffeChkFailTimeByRTotThd))   /* >= 5 Times */
++   {
++      SftyActvDchaCtrlEfcErrMonrStTotal = ERR_DEB_MONR_STS_FAILED;
++   }
++   else
++   {
++      SftyActvDchaCtrlEfcErrMonrStTotal = ERR_DEB_MONR_STS_PASSED;
++   }
++
++   return;
++}
++
++/******************************************************************/
++/*!
++ * \\fn        void SftyActvDchaCtrl_HndlFailTimeCntr(void)
++ * \\brief     This function handles fail time counter of checking effectivity of active discharge by Resistor
++ * \\return    None
++ * \\Parent_DD SftyActvDchaCtrl_MainFunction
++ */
++/******************************************************************/
++LOCAL_INLINE void SftyActvDchaCtrl_HndlFailTimeCntr(void)
++{
++   if (SftyActvDchaCtrlEffeChkFailTimeAdisByRInRowCnt < SFTY_ACTV_DCHA_CTRL_EFCTV_FAIL_TM_R_CTR_MAX )
++   {
++      SftyActvDchaCtrlEffeChkFailTimeAdisByRInRowCnt++;
++   }
++   else
++   {
++      SftyActvDchaCtrlEffeChkFailTimeAdisByRInRowCnt = SFTY_ACTV_DCHA_CTRL_EFCTV_FAIL_TM_R_CTR_MAX;
++   }
++
++   if (SftyActvDchaCtrlEffeChkFailTimesAdisByRTotCnt < SFTY_ACTV_DCHA_CTRL_EFCTV_FAIL_TM_R_CTR_MAX)
++   {
++      SftyActvDchaCtrlEffeChkFailTimesAdisByRTotCnt++;
++   }
++   else
++   {
++      SftyActvDchaCtrlEffeChkFailTimesAdisByRTotCnt = SFTY_ACTV_DCHA_CTRL_EFCTV_FAIL_TM_R_CTR_MAX;
++   }
++
++   return;
++}
++
++/******************************************************************/
++/*!
++ * \\fn        void SftyActvDchaCtrl_EfcFinalChkAdisByR(void)
++ * \\brief     This function does final Check of the effectivity of active discharge by Resistor
++ * \\return    None
++ * \\Parent_DD SftyActvDchaCtrl_MainFunction
++ */
++/******************************************************************/
++LOCAL_INLINE void SftyActvDchaCtrl_EfcFinalChkAdisByR(void)
++{
++   /* Final Check the Effectivity of Active Discharge by Resistor */
++   if ((SftyActvDchaCtrlEfcErrMonrStInRow == ERR_DEB_MONR_STS_FAILED) ||
++       (SftyActvDchaCtrlEfcErrMonrStTotal == ERR_DEB_MONR_STS_FAILED))
++   {
++      SftyActvDchaCtrlEfcErrMonrStIntel = ERR_DEB_MONR_STS_FAILED;
++   }
++   else if ((SftyActvDchaCtrlEfcErrMonrStInRow == ERR_DEB_MONR_STS_PASSED) &&
++            (SftyActvDchaCtrlEfcErrMonrStTotal == ERR_DEB_MONR_STS_PASSED))
++   {
++      SftyActvDchaCtrlEfcErrMonrStIntel = ERR_DEB_MONR_STS_PASSED;
++   }
++   else
++   {
++      SftyActvDchaCtrlEfcErrMonrStIntel = ERR_DEB_MONR_STS_INACTIVE;
++   }
++   return;
++}
+ 
+ /******************************************************************/
+ /*!
+@@ -695,123 +761,66 @@ LOCAL_INLINE void SftyActvDchaCtrl_UpdAdisReqCmd(void)
+ LOCAL_INLINE void SftyActvDchaCtrl_MonrAdisByREfc(void)
+ {
+    /* ******** Variables declaration *********** */
+-   float32 sftyActvDchaCtrlDeltaHvDcUVal;
+-   uint32 adisEffeChkTotalFailTimesAdisByRTim ;
+-   uint8 adisMonrDvDtEn = SFTY_ACTIV_DCHA_DISABLED;
+-   static ErrDeb_MonrStsType adisEfcErrMonrStInRow = ERR_DEB_MONR_STS_INACTIVE;
+-   static ErrDeb_MonrStsType adisEfcErrMonrStTotal = ERR_DEB_MONR_STS_INACTIVE;
++   float32 adisDeltaHvDcUVal;
++   uint8   adisMonrDvDtEn = SFTY_ACTIV_DCHA_DISABLED;
+    
+    /* ************* Source code **************** */
+ 
+    /* Checking the delay time for monitoring Dv/Dt */
+-   if (SftyActvDhaCtrlDvDtChkDelayTimAdisByRCnt >= SftyActvDchaPrmData.DvDtChkDelayTimAdisByRThd)
++   if (SftyActvDchaCtrlDvDtChkDlyTimAdisByRCnt >= SftyActvDchaPrmData.DvDtChkDelayTimAdisByRThd)
+    {
+       adisMonrDvDtEn = SFTY_ACTIV_DCHA_ENABLED;
+    }
+    else
+    {
+-      SftyActvDhaCtrlDvDtChkDelayTimAdisByRCnt++;
++      SftyActvDchaCtrlDvDtChkDlyTimAdisByRCnt++;
+    }
+ 
+    /* Checking Dv/Dt */
+-   if ((adisMonrDvDtEn == SFTY_ACTIV_DCHA_ENABLED)
+-   \t   &&
+-   \t   (SftyActvDchaCtrlHvDcUVal >= SftyActvDchaPrmData.HvDcVoltThd))
++   if ((adisMonrDvDtEn == SFTY_ACTIV_DCHA_ENABLED) &&
++   \t (SftyActvDchaCtrlHvDcUVal >= SftyActvDchaPrmData.HvDcVoltThd))
+    {
+       if (SftyActvDchaCtrlDeltaTimeResistorCnt >= SftyActvDchaPrmData.DeltaTimAdisByRThd)   /* >= 10ms */
+       {
+          SftyActvDchaCtrlDeltaTimeResistorCnt = 0U;   /* Clear delta time countor */
+ 
+-\t\t /* Calculate Dv */
+-\t\t sftyActvDchaCtrlDeltaHvDcUVal = MLIB_F32AbsF32(SftyActvDchaCtrlHvDcUValPre - SftyActvDchaCtrlHvDcUVal);
+-\t\t SftyActvDchaCtrlHvDcUValPre = SftyActvDchaCtrlHvDcUVal;
++         /* Calculate Dv */
++         adisDeltaHvDcUVal = MLIB_F32AbsF32(SftyActvDchaCtrlHvDcUValPre - SftyActvDchaCtrlHvDcUVal);
++         SftyActvDchaCtrlHvDcUValPre = SftyActvDchaCtrlHvDcUVal;
+ 
+-         if ((SftyActvDchaCtrlHvDcUValPre > SftyActvDchaCtrlHvDcUVal)   /* The Trend has to be down */
+-\t\t \t &&
+-\t\t     (sftyActvDchaCtrlDeltaHvDcUVal >= SftyActvDchaPrmData.AdisByREnaDvThd))
++         if ((SftyActvDchaCtrlHvDcUValPre > SftyActvDchaCtrlHvDcUVal) &&        /* The Trend has to be down */
++             (adisDeltaHvDcUVal >= SftyActvDchaPrmData.AdisByREnaDvThd))
+          {
+             SftyActvDchaCtrlEffeChkFailTimeAdisByRInRowCnt = 0U;
+          }
+-\t     else
+-\t     {
+-            if (SftyActvDchaCtrlEffeChkFailTimeAdisByRInRowCnt < 0xFFU)
+-\t\t    {
+-\t\t       SftyActvDchaCtrlEffeChkFailTimeAdisByRInRowCnt++;
+-\t\t    }
+-\t\t\telse
+-\t\t\t{
+-\t\t\t   SftyActvDchaCtrlEffeChkFailTimeAdisByRInRowCnt = 0xFFU;
+-\t\t\t}
+-
+-\t\t\tif (SftyActvDchaCtrlEffeChkFailTimesAdisByRTotCnt < 0xFFU)
+-\t\t    {
+-\t\t       SftyActvDchaCtrlEffeChkFailTimesAdisByRTotCnt++;
+-\t\t    }
+-\t\t\telse
+-\t\t\t{
+-\t\t\t   SftyActvDchaCtrlEffeChkFailTimesAdisByRTotCnt = 0xFFU;
+-\t\t\t}
+-\t     }
+-
+-\t\t /* Checking Continous Failure */
+-         if (SftyActvDchaCtrlEffeChkFailTimeAdisByRInRowCnt >= SftyActvDchaPrmData.EffeChkFailTimeByRInRowThd)
++         else
+          {
+-            adisEfcErrMonrStInRow = ERR_DEB_MONR_STS_FAILED;
++            SftyActvDchaCtrl_HndlFailTimeCntr();
+          }
+-\t\t else
+-\t\t {
+-\t\t    adisEfcErrMonrStInRow = ERR_DEB_MONR_STS_PASSED;
+-\t\t }
++
++         /* Checking Continous Failure */
++         SftyActvDchaCtrl_ChkCntnsFlr();
+ 
+          /* Checking Total Failure */
+-\t\t SftyActvDchaCtrlEffeChkTotalFailTimesAdisByRTimCnt++;
+-\t\t adisEffeChkTotalFailTimesAdisByRTim = MLIB_U32F32((SftyActvDchaPrmData.EffeChkTotalFailTimesByRTimThd) * ((float32)CNT_1S_TO_10MS));
+-
+-\t\t if ((SftyActvDchaCtrlEffeChkTotalFailTimesAdisByRTimCnt < adisEffeChkTotalFailTimesAdisByRTim)         /* < 1.5s */
+-\t\t \t &&
+-\t\t \t (SftyActvDchaCtrlEffeChkFailTimesAdisByRTotCnt >= SftyActvDchaPrmData.EffeChkFailTimeByRTotThd))   /* >= 5 Times */
+-\t\t {
+-\t\t    adisEfcErrMonrStTotal = ERR_DEB_MONR_STS_FAILED;
+-\t\t }
+-\t\t else
+-\t\t {
+-\t\t    adisEfcErrMonrStTotal = ERR_DEB_MONR_STS_PASSED;
+-\t\t }\t\t 
++         SftyActvDchaCtrl_ChktotalFlr();
++      }
++      else
++      {
++         SftyActvDchaCtrlDeltaTimeResistorCnt++;
+       }
+-\t  else
+-\t  {
+-\t     SftyActvDchaCtrlDeltaTimeResistorCnt++;
+-\t  }
+    }
+    else
+    {
+       SftyActvDchaCtrlDeltaTimeResistorCnt               = 0U;
+       SftyActvDchaCtrlEffeChkFailTimeAdisByRInRowCnt     = 0U;
+       SftyActvDchaCtrlEffeChkFailTimesAdisByRTotCnt      = 0U;
+-\t  SftyActvDchaCtrlEffeChkTotalFailTimesAdisByRTimCnt = 0UL;
+-\t  SftyActvDchaCtrlHvDcUValPre                        = SftyActvDchaCtrlHvDcUVal;
+-
+-\t  adisEfcErrMonrStInRow                              = ERR_DEB_MONR_STS_INACTIVE;
+-\t  adisEfcErrMonrStTotal                              = ERR_DEB_MONR_STS_INACTIVE;
++\t   SftyActvDchaCtrlEffeChkTotalFailTimesAdisByRTimCnt = 0UL;
++\t   SftyActvDchaCtrlHvDcUValPre                        = SftyActvDchaCtrlHvDcUVal;
++\t   SftyActvDchaCtrlEfcErrMonrStInRow                  = ERR_DEB_MONR_STS_INACTIVE;
++\t   SftyActvDchaCtrlEfcErrMonrStTotal                  = ERR_DEB_MONR_STS_INACTIVE;
+    }
+ 
+-   /* Final Check the Effectivity of Active Discharge by Resistor */
+-   if ((adisEfcErrMonrStInRow == ERR_DEB_MONR_STS_FAILED)
+-       ||
+-       (adisEfcErrMonrStTotal == ERR_DEB_MONR_STS_FAILED))
+-   {
+-      SftyActvDchaCtrlEfcErrMonrStIntel = ERR_DEB_MONR_STS_FAILED;
+-   }
+-   else if ((adisEfcErrMonrStInRow == ERR_DEB_MONR_STS_PASSED)
+-            &&
+-            (adisEfcErrMonrStTotal == ERR_DEB_MONR_STS_PASSED))
+-   {
+-      SftyActvDchaCtrlEfcErrMonrStIntel = ERR_DEB_MONR_STS_PASSED;
+-   }
+-   else
+-   {
+-      SftyActvDchaCtrlEfcErrMonrStIntel = ERR_DEB_MONR_STS_INACTIVE;
+-   }
++   SftyActvDchaCtrl_EfcFinalChkAdisByR();
+ 
+    return;
+ }
+@@ -830,15 +839,15 @@ LOCAL_INLINE void SftyActvDchaCtrl_MonrAdisByRSuccess(void)
+ {
+ 
+    /* ******** Variables declaration *********** */
+-   uint32 sftyActvDchaCtrlAdisByRTime;
++   uint32 adisByRTime;
+    
+    /* ************* Source code **************** */
+ 
+    if (SftyActvDchaCtrlHvDcUVal < (SftyActvDchaPrmData.HvDcVoltThd - SftyActvDchaPrmData.HvDcVoltHys))
+    {
+-      sftyActvDchaCtrlAdisByRTime = ((uint32)SftyActvDchaPrmData.AdisByRTimeThd) * ((uint32)CNT_1S_TO_1MS);
++      adisByRTime = ((uint32)SftyActvDchaPrmData.AdisByRTimeThd) * ((uint32)CNT_1S_TO_1MS);
+ \t\t 
+-      if (SftyActvDchaCtrlAdisByRTimeCnt < sftyActvDchaCtrlAdisByRTime)
++      if (SftyActvDchaCtrlAdisByRTimeCnt < adisByRTime)
+       {
+          SftyActvChaCtrlAdisSuccessful = ERR_DEB_MONR_STS_PASSED;
+       }
+@@ -850,13 +859,13 @@ LOCAL_INLINE void SftyActvDchaCtrl_MonrAdisByRSuccess(void)
+    else
+    {
+       /* Update the monitor countor */
+-\t  if (SftyActvDchaCtrlAdisByRTimeCnt < 0xFFFFFFFFU)
++\t  if (SftyActvDchaCtrlAdisByRTimeCnt <  SFTY_ACTV_DCHA_CTRL_ADIS_R_TM_CTR_MAX )
+ \t  {
+ \t     SftyActvDchaCtrlAdisByRTimeCnt++;
+ \t  }
+ \t  else
+ \t  {
+-\t     SftyActvDchaCtrlAdisByRTimeCnt = 0xFFFFFFFFU;
++\t     SftyActvDchaCtrlAdisByRTimeCnt = SFTY_ACTV_DCHA_CTRL_ADIS_R_TM_CTR_MAX;
+ \t  }
+    }
+ 
+@@ -864,7 +873,6 @@ LOCAL_INLINE void SftyActvDchaCtrl_MonrAdisByRSuccess(void)
+    return;
+ }
+ 
+-
+ /******************************************************************/
+ /*!
+  * \\fn        void SftyActvDchaCtrl_MonrAdisByRExit(void)
+@@ -879,11 +887,9 @@ LOCAL_INLINE void SftyActvDchaCtrl_MonrAdisByRExit(void)
+    
+    /* ************* Source code **************** */
+ 
+-   if ((SftyActvDchaCtrlEfcErrMonrStIntel == ERR_DEB_MONR_STS_FAILED)   /* Effectivity */
+-   \t   ||
+-   \t   (SftyActvChaCtrlAdisSuccessful == ERR_DEB_MONR_STS_PASSED)        /* Discharge Successful */
+-       ||
+-       ((SftyActvDchaCtrlActvDchaReqIntel == ACTV_DCHA_DEACTVE) &&       /* No Adis Request */
++   if ((SftyActvDchaCtrlEfcErrMonrStIntel == ERR_DEB_MONR_STS_FAILED) ||  /* Effectivity */
++   \t (SftyActvChaCtrlAdisSuccessful == ERR_DEB_MONR_STS_PASSED)     ||  /* Discharge Successful */
++   \t ((SftyActvDchaCtrlActvDchaReqIntel == ACTV_DCHA_DEACTVE)       &&  /* No Adis Request */
+         (SftyActvDchaCtrlActvDchaReqExtel == ACTV_DCHA_DEACTVE)))
+    {
+       SftyActvDchaCtrlActvDchaReqViaR = ACTV_DCHA_NO_REQ;
+@@ -894,7 +900,6 @@ LOCAL_INLINE void SftyActvDchaCtrl_MonrAdisByRExit(void)
+       /* Do Nothing! */
+    }
+ 
+-
+    return;
+ }
+ 
+@@ -911,38 +916,37 @@ LOCAL_INLINE void SftyActvDchaCtrl_MonrAdisByRExit(void)
+ LOCAL_INLINE void SftyActvDchaCtrl_MonrAdisSts(void)
+ {
+    /* ******** Variables declaration *********** */
+-   float32 sftyActvDchaCtrlAdisFaultThd;
+-   uint32 sftyActvDchaCtrlAdisFaultTimeThd;
++   float32 adisFltThd;
++   uint32  adisFltTmThd;
+    
+    /* ************* Source code **************** */
+-
+    if (SftyActvDhaCtrlAdisOperSts == ADIS_OPER_STS_RUNNING)
+    {
+-      sftyActvDchaCtrlAdisFaultTimeThd = ((uint32)SftyActvDchaPrmData.AdisFaultTimeThd) * ((uint32)CNT_1S_TO_1MS);
+-\t  
+-\t  if (SftyActvDchaCtrlAdisFaultTimeCnt > sftyActvDchaCtrlAdisFaultTimeThd)   /* > 2s */  
++      adisFltTmThd = ((uint32)SftyActvDchaPrmData.AdisFaultTimeThd) * ((uint32)CNT_1S_TO_1MS);
++
++      if (SftyActvDchaCtrlAdisFaultTimeCnt > adisFltTmThd)   /* > 2s */
+       {
+-\t\t sftyActvDchaCtrlAdisFaultThd = SftyActvDchaPrmData.HvDcVoltThd - SftyActvDchaPrmData.HvDcVoltTole;   /* > (60V - 1.3V) */
+-\t\t if (SftyActvDchaCtrlHvDcUVal > sftyActvDchaCtrlAdisFaultThd)
++         adisFltThd = SftyActvDchaPrmData.HvDcVoltThd - SftyActvDchaPrmData.HvDcVoltTole;   /* > (60V - 1.3V) */
++
++         if (SftyActvDchaCtrlHvDcUVal > adisFltThd)
+          {
+             SftyActvDchaCtrlFltErrMonrStIntel = ERR_DEB_MONR_STS_FAILED;
+          }
+-\t     else   /* => (SftyActvDchaCtrlHvDcUVal <= SftyActvDchaCtrlActiveDchaFaultThd) */
+-\t     {
++         else   /* => (SftyActvDchaCtrlHvDcUVal <= SftyActvDchaCtrlActiveDchaFaultThd) */
++         {
+ \t        SftyActvDchaCtrlFltErrMonrStIntel = ERR_DEB_MONR_STS_PASSED;
+-\t     }
++         }
++      }
++      else
++      {
++         SftyActvDchaCtrlAdisFaultTimeCnt++;
+       }
+-\t  else
+-\t  {
+-\t     SftyActvDchaCtrlAdisFaultTimeCnt++;
+-\t  }
+    }
+    else
+    {
+       SftyActvDchaCtrlAdisFaultTimeCnt  = 0UL;
+-\t  SftyActvDchaCtrlFltErrMonrStIntel = ERR_DEB_MONR_STS_INACTIVE;
++      SftyActvDchaCtrlFltErrMonrStIntel = ERR_DEB_MONR_STS_INACTIVE;
+    }
+- 
+ 
+    return;
+ }
+@@ -1006,7 +1010,6 @@ LOCAL_INLINE void SftyActvDchaCtrl_UpdErrMonrSt(void)
+    /* ************* Source code **************** */
+    SftyActvDchaCtrlEfcErrMonrSt    = SftyActvDchaCtrlEfcErrMonrStIntel;
+    SftyActvDchaCtrlFltErrMonrSt    = SftyActvDchaCtrlFltErrMonrStIntel;   
+-
+    
+    if (SftyActvDchaCtrlActvFltSts == ADIS_STS_NO_FAULT)
+    {
+diff --git a/src/fw_cu/Components/Safety/Sfty_Inv/SftyActvDchaCtrl/src/SftyActvDchaCtrl_data.c b/src/fw_cu/Components/Safety/Sfty_Inv/SftyActvDchaCtrl/src/SftyActvDchaCtrl_data.c
+index c6bf15dc0..84c42b3f0 100644
+--- a/src/fw_cu/Components/Safety/Sfty_Inv/SftyActvDchaCtrl/src/SftyActvDchaCtrl_data.c
++++ b/src/fw_cu/Components/Safety/Sfty_Inv/SftyActvDchaCtrl/src/SftyActvDchaCtrl_data.c
+@@ -158,7 +158,7 @@ VAR(uint8, SFTYACTVDCHACTRL_VAR) SftyActvDchaCtrlFctIdActvDcha = ACTV_DCHA_DEACT
+ @@ A2L_TYPE = MEASURE
+ @@ DATA_TYPE = UBYTE [0 ... 1]
+ @@ CONVERSION = TABLE 0 "No Adis Request" 1 "Adis Request"
+-@@ DESCRIPTION = "Local Variable for FID to indicate\xc2\xa0VcuInvCtrl1 CAN frame failure"
++@@ DESCRIPTION = "Local Variable for FID to indicate VcuInvCtrl1 CAN frame failure"
+ @@ GROUP = SftyActvDchaCtrl
+ @@ END
+ */
+@@ -590,7 +590,7 @@ CONST(uint8, SFTYREPLCMT_CALIB) SftyReplcmtActvDchaCtrlFctIdActDcha = ACTV_DCHA_
+ @@ A2L_TYPE = PARAMETER
+ @@ DATA_TYPE = UBYTE [0 ... 1]
+ @@ CONVERSION = TABLE 0 "No Adis Request" 1 "Adis Request"
+-@@ DESCRIPTION = "Replacement value for Local Variable that FID to indicate\xc2\xa0VcuInvCtrl1 CAN frame failure"
++@@ DESCRIPTION = "Replacement value for Local Variable that FID to indicate VcuInvCtrl1 CAN frame failure"
+ @@ GROUP = SftyActvDchaCtrl
+ @@ END
+ */
+diff --git a/src/fw_cu/Components/Safety/Sfty_Inv/SftyDcEvln/src/SftyDcEvln.c b/src/fw_cu/Components/Safety/Sfty_Inv/SftyDcEvln/src/SftyDcEvln.c
+index 6993cd9e1..f3b95fe17 100644
+--- a/src/fw_cu/Components/Safety/Sfty_Inv/SftyDcEvln/src/SftyDcEvln.c
++++ b/src/fw_cu/Components/Safety/Sfty_Inv/SftyDcEvln/src/SftyDcEvln.c
+@@ -74,7 +74,7 @@
+ #define SFTYDCEVLN_EMX_STATUS_EOHVL_OPEN                2U
+ #define SFTYDCEVLN_EMX_STATUS_EOHVL_ERROR               3U
+ 
+-
++#if 0
+ /**************************************************************************/
+ /*!
+  * \\fn      void SftyDcEvln_GetNHvFbSt(void)
+@@ -3174,6 +3174,7 @@ if((SWIT_SftyDcEvln_EN_KEY==SWIT_First_HookEnableKey))
+ /***********************************************************************************/
+ LOCAL_INLINE void SftyDcEvln_SepicOffStrtUpDiag(void)
+ {
++#if 0
+ /*#ifdef SWIT_FC_Active
+ if((SWIT_SftyDcEvln_EN_KEY==SWIT_First_HookEnableKey))
+    SWIT_SftyDcEvln_SepicOffStrtUpDiag_BgnHook ();
+@@ -3269,6 +3270,7 @@ if((SWIT_SftyDcEvln_EN_KEY==SWIT_First_HookEnableKey))
+     }
+ 
+    return;
++#endif
+ }
+ #endif    /*SYSCON_FTR_PSM == 1 USE_IPMCTRL_CONTROL */
+ 
+@@ -3282,6 +3284,8 @@ if((SWIT_SftyDcEvln_EN_KEY==SWIT_First_HookEnableKey))
+ /******************************************************************/
+ LOCAL_INLINE void SftyDcEvln_OCPStrtUpDiag(void)
+ {
++
++#if 0
+ /*#ifdef SWIT_FC_Active
+ if((SWIT_SftyDcEvln_EN_KEY==SWIT_First_HookEnableKey))
+    SWIT_SftyDcEvln_OCPStrtUpDiag_BgnHook ();
+@@ -3369,9 +3373,10 @@ if((SWIT_SftyDcEvln_EN_KEY==SWIT_First_HookEnableKey))
+       SWIT_SftyDcEvln_OCPStrtUpDiag_EndHook();
+ #endif
+    return;
++#endif
+ }
+ 
+-
++#endif
+ 
+ /******************************** AREA-1 *********************************** */
+ /******************************** SLOW   *********************************** */
+diff --git a/src/fw_cu/Components/Safety/Sfty_Inv/SftyHvDcUEvln/include/SftyHvDcUEvln_data.h b/src/fw_cu/Components/Safety/Sfty_Inv/SftyHvDcUEvln/include/SftyHvDcUEvln_data.h
+index a90454480..bc2ff36b9 100644
+--- a/src/fw_cu/Components/Safety/Sfty_Inv/SftyHvDcUEvln/include/SftyHvDcUEvln_data.h
++++ b/src/fw_cu/Components/Safety/Sfty_Inv/SftyHvDcUEvln/include/SftyHvDcUEvln_data.h
+@@ -127,18 +127,6 @@ extern VAR(uint8, SFTYDCEVLN_VAR) SftyHvDcUEvlnDrvBdPwrSplyP16Prsnt;
+ #include "MemMap.h"
+ /* End: SFTYDCEVLN_STOP_SEC_VAR_AREA_1_FAST_INIT_8 (online) */
+ 
+-
+-/* Begin: SFTYDCEVLN_START_SEC_VAR_AREA_1_FAST_INIT_8 (online) */
+-#define SFTYDCEVLN_START_SEC_VAR_AREA_1_FAST_INIT_8
+-#include "MemMap.h"
+-
+-extern VAR(SftyHvDcUEvlnRngErrMonStType, SFTYDCEVLN_VAR) SftyHvDcUEvlnDrvBdRngErrMonrSt;
+-
+-#define SFTYDCEVLN_STOP_SEC_VAR_AREA_1_FAST_INIT_8
+-#include "MemMap.h"
+-/* End: SFTYDCEVLN_STOP_SEC_VAR_AREA_1_FAST_INIT_8 (online) */
+-
+-
+ /* ********************* SEC_VAR_AREA_2_FAST_INIT_8 ********************* */
+ 
+ #if (COMBINED_ERRDEB_ON == 1)
+@@ -259,17 +247,6 @@ extern VAR(boolean, SFTYDCEVLN_VAR) SftyHvDcUEvlnCtrlBdPwrSplyP16Prsnt;
+ /* End: SFTYDCEVLN_STOP_SEC_VAR_AREA_2_FAST_INIT_8 (online) */
+ 
+ 
+-/* Begin: SFTYDCEVLN_START_SEC_VAR_AREA_2_FAST_INIT_8 (online) */
+-#define SFTYDCEVLN_START_SEC_VAR_AREA_2_FAST_INIT_8
+-#include "MemMap.h"
+-
+-extern VAR(SftyHvDcUEvlnRngErrMonStType, SFTYDCEVLN_VAR) SftyHvDcUEvlnCtrlBdRngErrMonrSt;
+-
+-#define SFTYDCEVLN_STOP_SEC_VAR_AREA_2_FAST_INIT_8
+-#include "MemMap.h"
+-/* End: SFTYDCEVLN_STOP_SEC_VAR_AREA_2_FAST_INIT_8 (online) */
+-
+-
+ /* ********************* VAR_AREA_CMN_FAST_INIT_8 ********************* */
+ 
+ /* Begin: SFTYDCEVLN_START_SEC_VAR_AREA_CMN_FAST_INIT_8 (online) */
+diff --git a/src/fw_cu/Components/Safety/Sfty_Inv/SftyHvDcUEvln/src/SftyHvDcUEvln.c b/src/fw_cu/Components/Safety/Sfty_Inv/SftyHvDcUEvln/src/SftyHvDcUEvln.c
+index c0c13435a..86610fdd5 100644
+--- a/src/fw_cu/Components/Safety/Sfty_Inv/SftyHvDcUEvln/src/SftyHvDcUEvln.c
++++ b/src/fw_cu/Components/Safety/Sfty_Inv/SftyHvDcUEvln/src/SftyHvDcUEvln.c
+@@ -148,10 +148,11 @@ LOCAL_INLINE void SftyHvDcUEvln_ClrDrvBdErrMonrSt(void)
+    /* ******** Variables declaration *********** */
+ 
+    /* ************* Source code **************** */
+-
+-   SftyHvDcUEvlnDrvBdRngErrMonrSt.RngHi = ERR_DEB_MONR_STS_INACTIVE;
+-   SftyHvDcUEvlnDrvBdRngErrMonrSt.RngLo = ERR_DEB_MONR_STS_INACTIVE;   
+    
++   SftyHvDcUEvlnDrvBdRngHiErrMonrSt = ERR_DEB_MONR_STS_INACTIVE;
++   SftyHvDcUEvlnDrvBdRngLoErrMonrSt = ERR_DEB_MONR_STS_INACTIVE;
++
++
+    return;
+ }
+ 
+@@ -160,8 +161,7 @@ LOCAL_INLINE void SftyHvDcUEvln_ClrDrvBdErrMonrSt(void)
+ /******************************************************************/
+ /*!
+  * \\fn        void SftyHvDcUEvln_ClrCtrlBdErrMonrSt(void)
+- * \\brief     This function copys the data provided by SftyE2eFpga()
+- *            to local variable. ( Raw value )
++ * \\brief     This function inactived error monitrs
+  * \\Parent_DD SftyHvDcUEvln_MainFunctionArea2
+  */
+ /******************************************************************/
+@@ -174,8 +174,8 @@ LOCAL_INLINE void SftyHvDcUEvln_ClrCtrlBdErrMonrSt(void)
+    /* ******** Variables declaration *********** */
+ 
+    /* ************* Source code **************** */
+-   SftyHvDcUEvlnCtrlBdRngErrMonrSt.RngHi = ERR_DEB_MONR_STS_INACTIVE;
+-   SftyHvDcUEvlnCtrlBdRngErrMonrSt.RngLo = ERR_DEB_MONR_STS_INACTIVE;
++   SftyHvDcUEvlnCtrlBdRngHiErrMonrSt = ERR_DEB_MONR_STS_INACTIVE;
++   SftyHvDcUEvlnCtrlBdRngLoErrMonrSt = ERR_DEB_MONR_STS_INACTIVE;
+    
+    return;
+ }
+@@ -441,399 +441,211 @@ LOCAL_INLINE void SftyHvDcUEvln_GetHvDcUDataForOvRst(void)
+ 
+ /******************************************************************/
+ /*!
+- * \\fn        uint8 SftyHvDcUEvln_ChkRngHiDrvBd(void)
++ * \\fn        void SftyHvDcUEvln_ChkRngHiDrvBd(void)
+  * \\brief     This function checks ranges High for HVDC voltage from Driver Board
+  *            Internal ADC of FPGA, set error status for Range High
+  * \\return    monitor status
+  * \\Parent_DD SftyHvDcUEvln_MainFunctionArea1
+  */
+ /******************************************************************/
+-LOCAL_INLINE uint8 SftyHvDcUEvln_ChkRngHiDrvBd(void)
++LOCAL_INLINE void SftyHvDcUEvln_ChkRngHiDrvBd(void)
+ {
+-   uint8 retVal;
++   /* TODO: Activation Criteria\' in fault matrix needs to be update */
++#if 0
++   if (SftyHvDcUEvlnCtrlBdE2eFpgaRxCrcErrMonrSt == ERR_DEB_MONR_STS_PASSED)
++#endif
+ 
+-   if (SftyHvDcUEvlnDrvBdUdcVal >= SftyHvDcUEvlnDrvBdUdcRngHiThd)
+    {
+-      /* Value is higher than allowed */
+-      retVal = ERR_DEB_MONR_STS_FAILED;
++      if (SftyHvDcUEvlnDrvBdUdcVal >= SftyHvDcUEvlnDrvBdUdcRngHiThd)
++      {
++         /* Value is higher than allowed */
++         SftyHvDcUEvlnDrvBdRngHiErrMonrSt = ERR_DEB_MONR_STS_FAILED;
++      }
++      else
++      {
++         /* No error */
++         SftyHvDcUEvlnDrvBdRngHiErrMonrSt = ERR_DEB_MONR_STS_PASSED;
++      }
+    }
++
++#if 0
+    else
+    {
+-      /* No error */
+-      retVal = ERR_DEB_MONR_STS_PASSED;
++      /* Do nothing*/
+    }
++#endif
+ 
+-   return retVal;
++   return;
+ }
+ 
+ /******************************************************************/
+ /*!
+- * \\fn        uint8 SftyHvDcUEvln_ChkRngLoDrvBd(void)
++ * \\fn        void SftyHvDcUEvln_ChkRngLoDrvBd(void)
+  * \\brief     This function checks ranges Low for HVDC voltage from Driver Board
+  *            Internal ADC of FPGA, set error status for Range Low
+  * \\return    monitor status
+  * \\Parent_DD SftyHvDcUEvln_MainFunctionArea1
+  */
+ /******************************************************************/
+-LOCAL_INLINE uint8 SftyHvDcUEvln_ChkRngLoDrvBd(void)
++LOCAL_INLINE void SftyHvDcUEvln_ChkRngLoDrvBd(void)
+ {
+-   uint8 retVal;
++   /* TODO: Activation Criteria\' in fault matrix needs to be update */
++#if 0
++   if (SftyHvDcUEvlnCtrlBdE2eFpgaRxCrcErrMonrSt == ERR_DEB_MONR_STS_PASSED)
++#endif
+ 
+-   if (SftyHvDcUEvlnDrvBdUdcVal <= SftyHvDcUEvlnDrvBdUdcRngLoThd)
+    {
+-      /* Value is lower than allowed */
+-      retVal = ERR_DEB_MONR_STS_FAILED;
++      if (SftyHvDcUEvlnDrvBdUdcVal <= SftyHvDcUEvlnDrvBdUdcRngLoThd)
++      {
++         /* Value is lower than allowed */
++         SftyHvDcUEvlnDrvBdRngLoErrMonrSt = ERR_DEB_MONR_STS_FAILED;
++      }
++      else
++      {
++         /* No error */
++         SftyHvDcUEvlnDrvBdRngLoErrMonrSt = ERR_DEB_MONR_STS_PASSED;
++      }
+    }
++
++#if 0
+    else
+    {
+-      /* No error */
+-      retVal = ERR_DEB_MONR_STS_PASSED;
++      /* Do nothing*/
+    }
+-
+-   return retVal;
++#endif
++   return;
+ }
++
+ /******************************************************************/
+ /*!
+- * \\fn        SftyHvDcUEvlnRngErrMonStType SftyHvDcUEvln_ChkRngDrvBd(void)
++ * \\fn        void SftyHvDcUEvln_ChkRngDrvBd(void)
+  * \\brief     This function checks ranges for HVDC voltage from Driver Board
+  *            Internal ADC of FPGA, set error status for Range High & Low
+  * \\return    monitor status
+  * \\Parent_DD SftyHvDcUEvln_MainFunctionArea1
+  */
+ /******************************************************************/
+-LOCAL_INLINE SftyHvDcUEvlnRngErrMonStType SftyHvDcUEvln_ChkRngDrvBd(void)
++LOCAL_INLINE void SftyHvDcUEvln_ChkRngDrvBd(void)
+ {
+ #ifdef SWIT_FC_Active
+    if((SWIT_SftyHvDcUEvln_EN_KEY==SWIT_First_HookEnableKey))
+    SWIT_SftyHvDcUEvln_ChkRngDrvBd_BgnHook();
+ #endif
+    /* ******** Variables declaration *********** */
+-   SftyHvDcUEvlnRngErrMonStType retVal;
+    
+    /* ************* Source code **************** */
+ 
+-
+-   /* TODO: Activation Criteria\' in fault matrix needs to be update */
+-#if 0   
+-   if (SftyHvDcUEvlnDrvBdE2eFpgaRxCrcErrMonrSt == ERR_DEB_MONR_STS_PASSED)
+-   \t{
+-      if (SftyHvDcUEvlnDrvBdUdcVal >= SftyHvDcUEvlnDrvBdUdcRngHiThd)
+-      {
+-         /* Value is higher than allowed */
+-         retVal.RngHi = ERR_DEB_MONR_STS_FAILED;
+-      }
+-      else
+-      {
+-         /* No error */
+-         retVal.RngHi = ERR_DEB_MONR_STS_PASSED;
+-      }
+-   }
+-   else
+-   {
+-      retVal.RngHi = ERR_DEB_MONR_STS_INACTIVE;
+-   }
+-#else
+-
+    /* Range High Check */
+-   retVal.RngHi = SftyHvDcUEvln_ChkRngHiDrvBd();
+-
+-#endif
+-
+-   /* TODO: Activation Criteria\' in fault matrix needs to be update */
+-#if 0
+-   if ((SftyHvDcUEvlnDrvBdE2eFpgaRxCrcErrMonrSt  == ERR_DEB_MONR_STS_PASSED)   &&
+-   \t   (SftyHvDcUEvlnDrvBdPwrSplyP16Prsnt        == TRUE))
+-   {   
+-      if (SftyHvDcUEvlnDrvBdUdcVal <= SftyHvDcUEvlnDrvBdUdcRngLoThd)
+-      {
+-         /* Value is lower than allowed */
+-         retVal.RngLo = ERR_DEB_MONR_STS_FAILED;
+-      }
+-      else
+-      {
+-         /* No error */
+-         retVal.RngLo = ERR_DEB_MONR_STS_PASSED;
+-      }
+-   }
+-   else
+-   {
+-      retVal.RngLo = ERR_DEB_MONR_STS_INACTIVE;
+-   }
+-#else
++   SftyHvDcUEvln_ChkRngHiDrvBd();
+ 
+    /* Range Low Check */
+-   retVal.RngLo = SftyHvDcUEvln_ChkRngLoDrvBd();
+-
+-#endif   
++   SftyHvDcUEvln_ChkRngLoDrvBd();
+    
+-   return retVal;
++   return;
+ }
+ 
+ /******************************************************************/
+ /*!
+- * \\fn        uint8 SftyHvDcUEvln_ChkRngHiCtrlBd(void)
++ * \\fn        void SftyHvDcUEvln_ChkRngHiCtrlBd(void)
+  * \\brief     This function checks ranges High for HVDC voltage from Control Board
+  *            External ADC of FPGA, set error status for Range High
+- * \\return    monitor status
+- * \\Parent_DD SftyHvDcUEvln_MainFunctionArea2
+- */
+-/******************************************************************/
+-LOCAL_INLINE uint8 SftyHvDcUEvln_ChkRngHiCtrlBd(void)
+-{
+-   uint8 retVal;
+-
+-   if (SftyHvDcUEvlnCtrlBdUdcVal >= SftyHvDcUEvlnCtrlBdUdcRngHiThd)
+-   {
+-      /* Value is higher than allowed */
+-      retVal = ERR_DEB_MONR_STS_FAILED;
+-   }
+-   else
+-   {
+-      /* No error */
+-      retVal = ERR_DEB_MONR_STS_PASSED;
+-   }
+-
+-   return retVal;
+-}
+-
+-/******************************************************************/
+-/*!
+- * \\fn        uint8 SftyHvDcUEvln_ChkRngHiCtrlBd(void)
+- * \\brief     This function checks ranges Low for HVDC voltage from Control Board
+- *            External ADC of FPGA, set error status for Range Low
+- * \\return    monitor status
+- * \\Parent_DD SftyHvDcUEvln_MainFunctionArea2
+- */
+-/******************************************************************/
+-LOCAL_INLINE uint8 SftyHvDcUEvln_ChkRngLoCtrlBd(void)
+-{
+-   uint8 retVal;
+-
+-   if (SftyHvDcUEvlnCtrlBdUdcVal <= SftyHvDcUEvlnCtrlBdUdcRngLoThd)
+-   {
+-      /* Value is lower than allowed */
+-      retVal = ERR_DEB_MONR_STS_FAILED;
+-   }
+-   else
+-   {
+-      /* No error */
+-      retVal= ERR_DEB_MONR_STS_PASSED;
+-   }
+-
+-   return retVal;
+-}
+-
+-/******************************************************************/
+-/*!
+- * \\fn        SftyHvDcUEvlnRngErrMonStType SftyHvDcUEvln_ChkRngCtrlBd(void)
+- * \\brief     This function checks ranges for HVDC voltage from Control Board
+- *            External ADC of FPGA, set error status for Range High & Low
+- * \\return    monitor status
++ * \\return
+  * \\Parent_DD SftyHvDcUEvln_MainFunctionArea2
+  */
+ /******************************************************************/
+-LOCAL_INLINE SftyHvDcUEvlnRngErrMonStType SftyHvDcUEvln_ChkRngCtrlBd(void)
++LOCAL_INLINE void SftyHvDcUEvln_ChkRngHiCtrlBd(void)
+ {
+-#ifdef SWIT_FC_Active
+-   if((SWIT_SftyHvDcUEvln_EN_KEY==SWIT_First_HookEnableKey))
+-   SWIT_SftyHvDcUEvln_ChkRngCtrlBd_BgnHook();
+-#endif
+-   /* ******** Variables declaration *********** */
+-   SftyHvDcUEvlnRngErrMonStType retVal;
+-   
+-   /* ************* Source code **************** */
+ 
+    /* TODO: Activation Criteria\' in fault matrix needs to be update */
+ #if 0
+    if (SftyHvDcUEvlnCtrlBdE2eFpgaRxCrcErrMonrSt == ERR_DEB_MONR_STS_PASSED)
++#endif
++
+    {
+       if (SftyHvDcUEvlnCtrlBdUdcVal >= SftyHvDcUEvlnCtrlBdUdcRngHiThd)
+       {
+          /* Value is higher than allowed */
+-         retVal.RngHi = ERR_DEB_MONR_STS_FAILED;
++         SftyHvDcUEvlnCtrlBdRngHiErrMonrSt = ERR_DEB_MONR_STS_FAILED;
+       }
+       else
+       {
+          /* No error */
+-         retVal.RngHi = ERR_DEB_MONR_STS_PASSED;
++         SftyHvDcUEvlnCtrlBdRngHiErrMonrSt = ERR_DEB_MONR_STS_PASSED;
+       }
+    }
+-   else
+-   {
+-      retVal.RngHi = ERR_DEB_MONR_STS_INACTIVE;
+-   } 
+-#else
+-
+-   /* Range High Check */
+-   retVal.RngHi = SftyHvDcUEvln_ChkRngHiCtrlBd();
+-
+-
+-#endif
+-
+-   /* TODO: Activation Criteria\' in fault matrix needs to be update */
+ #if 0
+-   if ((SftyHvDcUEvlnCtrlBdE2eFpgaRxCrcErrMonrSt == ERR_DEB_MONR_STS_PASSED)   &&
+-\t   (SftyHvDcUEvlnCtrlBdPwrSplyP16Prsnt       == TRUE))
+-   \t{
+-      if (SftyHvDcUEvlnCtrlBdUdcVal <= SftyHvDcUEvlnCtrlBdUdcRngLoThd)
+-      {
+-         /* Value is lower than allowed */
+-         retVal.RngLo = ERR_DEB_MONR_STS_FAILED;
+-      }
+-      else
+-      {
+-         /* No error */
+-         retVal.RngLo = ERR_DEB_MONR_STS_PASSED;
+-      }
+-   }
+    else
+    {
+-      retVal.RngLo = ERR_DEB_MONR_STS_INACTIVE;
++      /* Do nothing*/
+    }
+-#else
+-
+-   /* Range Low Check */
+-   retVal.RngLo = SftyHvDcUEvln_ChkRngLoCtrlBd();
+-
+-#endif   
+-   
+-   return retVal;
++#endif
++   return;
+ }
+ 
+-
+-
+ /******************************************************************/
+ /*!
+- * \\fn        void SftyHvDcUEvln_UpdDrvBdErrMonrSt(void)
+- * \\brief     This function updates the Driver Board Error Monitor Status
+- *            according to different error handling concept
+-  *\\return    None
+- * \\Parent_DD SftyHvDcUEvln_MainFunctionArea1
++ * \\fn        void SftyHvDcUEvln_ChkRngLoCtrlBd(void)
++ * \\brief     This function checks ranges Low for HVDC voltage from Control Board
++ *            External ADC of FPGA, set error status for Range Low
++ * \\return
++ * \\Parent_DD SftyHvDcUEvln_MainFunctionArea2
+  */
+ /******************************************************************/
+-LOCAL_INLINE void SftyHvDcUEvln_UpdDrvBdErrMonrSt(void)
++LOCAL_INLINE void SftyHvDcUEvln_ChkRngLoCtrlBd(void)
+ {
+-#ifdef SWIT_FC_Active
+-   if((SWIT_SftyHvDcUEvln_EN_KEY==SWIT_First_HookEnableKey))
+-   SWIT_SftyHvDcUEvln_UpdDrvBdErrMonrSt_BgnHook();
++   /* TODO: Activation Criteria\' in fault matrix needs to be update */
++ #if 0
++      if (SftyHvDcUEvlnCtrlBdE2eFpgaRxCrcErrMonrSt == ERR_DEB_MONR_STS_PASSED)
+ #endif
+-   /* ******** Variables declaration *********** */
+-
+-   /* ************* Source code **************** */
+-
+-#if (COMBINED_ERRDEB_ON == 1)
+-
+-   /* ******** Variables declaration *********** */
+-   uint16 u16TempCombinedMonrStsResult1 = 0U;
+-   uint16 u16TempCombinedMonrStsResult2 = 0U;
+-   uint16 u16TempResetDataMask = 0U;
+-   
+-   /* Combined error handling */
+-
+-   /* Clear data for this cycle only and retain other cycles infromation */
+-   /* 0x03 ensures error status for this cycle is made to INVALID before being updated */
+-   u16TempResetDataMask = ~(0x0003 << SftyHvDcUEvlnDrvBdRngErrCyclCntr);
+-
+-   /* Update the Range High error status with new values for this cycle */
+-   u16TempCombinedMonrStsResult1 = SftyHvDcUEvlnDrvBdRngHiErrMonrSt.CombinedMonrStsMulCyc;
+-   u16TempCombinedMonrStsResult2 = ((uint16)SftyHvDcUEvlnDrvBdRngErrMonrSt.RngHi);
+-   SftyHvDcUEvlnDrvBdRngHiErrMonrSt.CombinedMonrStsMulCyc = ((u16TempCombinedMonrStsResult1 & u16TempResetDataMask) | (u16TempCombinedMonrStsResult2 << SftyHvDcUEvlnDrvBdRngErrCyclCntr));
+-
+-
+-   /* Update the Range Low error status with new values for this cycle */
+-   u16TempCombinedMonrStsResult1 = SftyHvDcUEvlnDrvBdRngLoErrMonrSt.CombinedMonrStsMulCyc;
+-   u16TempCombinedMonrStsResult2 = ((uint16)SftyHvDcUEvlnDrvBdRngErrMonrSt.RngLo);
+-   SftyHvDcUEvlnDrvBdRngLoErrMonrSt.CombinedMonrStsMulCyc = ((u16TempCombinedMonrStsResult1 & u16TempResetDataMask) | (u16TempCombinedMonrStsResult2 << SftyHvDcUEvlnDrvBdRngErrCyclCntr));
+ 
++      {
++         if (SftyHvDcUEvlnCtrlBdUdcVal <= SftyHvDcUEvlnCtrlBdUdcRngLoThd)
++         {
++            /* Value is lower than allowed */
++            SftyHvDcUEvlnCtrlBdRngLoErrMonrSt = ERR_DEB_MONR_STS_FAILED;
++         }
++         else
++         {
++            /* No error */
++            SftyHvDcUEvlnCtrlBdRngLoErrMonrSt = ERR_DEB_MONR_STS_PASSED;
++         }
++      }
+ 
+-   /* Update Cycle Countor */
+-   SftyHvDcUEvlnDrvBdRngErrCyclCntr += 2;
+-   
+-   if (SftyHvDcUEvlnDrvBdRngErrCyclCntr >= 10)
+-   {
+-      SftyHvDcUEvlnDrvBdRngErrCyclCntr = 0;
+-   }
+-   else
+-   {
+-      /* Do Nothing */
+-   }\t
+-\t\t 
+-#else
+-   
+-   /* Normal error handling */\t
+-   SftyHvDcUEvlnDrvBdRngHiErrMonrSt = SftyHvDcUEvlnDrvBdRngErrMonrSt.RngHi;
+-   SftyHvDcUEvlnDrvBdRngLoErrMonrSt = SftyHvDcUEvlnDrvBdRngErrMonrSt.RngLo;
+-\t  
++#if 0
++      else
++      {
++         /* Do nothing*/
++      }
+ #endif
+ 
+-
+-   return;
++      return;
+ }
+ 
+-
+-
+ /******************************************************************/
+ /*!
+- * \\fn        void SftyHvDcUEvln_UpdCtrlBdErrMonrSt(void)
+- * \\brief     This function updates the Control Board Error Monitor Status
+- *            according to different error handling concept
+- *\\return     None
++ * \\fn        void SftyHvDcUEvln_ChkRngCtrlBd(void)
++ * \\brief     This function checks ranges for HVDC voltage from Control Board
++ *            External ADC of FPGA, set error status for Range High & Low
++ * \\return    monitor status
+  * \\Parent_DD SftyHvDcUEvln_MainFunctionArea2
+  */
+ /******************************************************************/
+-LOCAL_INLINE void SftyHvDcUEvln_UpdCtrlBdErrMonrSt(void)
++LOCAL_INLINE void SftyHvDcUEvln_ChkRngCtrlBd(void)
+ {
+ #ifdef SWIT_FC_Active
+    if((SWIT_SftyHvDcUEvln_EN_KEY==SWIT_First_HookEnableKey))
+-   SWIT_SftyHvDcUEvln_UpdCtrlBdErrMonrSt_BgnHook();
++   SWIT_SftyHvDcUEvln_ChkRngCtrlBd_BgnHook();
+ #endif
+    /* ******** Variables declaration *********** */
+ 
+-   /* ************* Source code **************** */
+-#if (COMBINED_ERRDEB_ON == 1)
+-   /* ******** Variables declaration *********** */
+-   uint16 u16TempCombinedMonrStsResult1 = 0U;
+-   uint16 u16TempCombinedMonrStsResult2 = 0U;
+-   uint16 u16TempResetDataMask = 0U;
+-   
+-   /* Combined error handling */
+    
+-   /* Clear data for this cycle only and retain other cycles infromation */
+-   /* 0x03 ensures error status for this cycle is made to INVALID before being updated */
+-   u16TempResetDataMask = ~(0x0003 << SftyHvDcUEvlnCtrlBdRngErrCyclCntr);
+-
+-   /* Update the Range High error status with new values for this cycle */
+-   u16TempCombinedMonrStsResult1 = SftyHvDcUEvlnCtrlBdRngHiErrMonrSt.CombinedMonrStsMulCyc;
+-   u16TempCombinedMonrStsResult2 = ((uint16)SftyHvDcUEvlnCtrlBdRngErrMonrSt.RngHi);
+-   SftyHvDcUEvlnCtrlBdRngHiErrMonrSt.CombinedMonrStsMulCyc = ((u16TempCombinedMonrStsResult1 & u16TempResetDataMask) | (u16TempCombinedMonrStsResult2 << SftyHvDcUEvlnCtrlBdRngErrCyclCntr));
+-   
+-
+-   /* Update the Range Low error status with new values for this cycle */
+-   u16TempCombinedMonrStsResult1 = SftyHvDcUEvlnCtrlBdRngLoErrMonrSt.CombinedMonrStsMulCyc;
+-   u16TempCombinedMonrStsResult2 = ((uint16)SftyHvDcUEvlnCtrlBdRngErrMonrSt.RngLo);
+-   SftyHvDcUEvlnCtrlBdRngLoErrMonrSt.CombinedMonrStsMulCyc = ((u16TempCombinedMonrStsResult1 & u16TempResetDataMask) | (u16TempCombinedMonrStsResult2 << SftyHvDcUEvlnCtrlBdRngErrCyclCntr));
+-
++   /* ************* Source code **************** */
+ 
+-   /* Update Cycle Countor */
+-   SftyHvDcUEvlnCtrlBdRngErrCyclCntr += 2;
+-   
+-   if (SftyHvDcUEvlnCtrlBdRngErrCyclCntr >= 10)
+-   {
+-      SftyHvDcUEvlnCtrlBdRngErrCyclCntr = 0;
+-   }
+-   else
+-   {
+-      /* Do Nothing */
+-   }
+-\t\t 
+-#else
+-   
+-   /* Normal error handling */\t
+-   SftyHvDcUEvlnCtrlBdRngHiErrMonrSt = SftyHvDcUEvlnCtrlBdRngErrMonrSt.RngHi;
+-   SftyHvDcUEvlnCtrlBdRngLoErrMonrSt = SftyHvDcUEvlnCtrlBdRngErrMonrSt.RngLo;
+-   
+-#endif
++   /* Range High Check */
++   SftyHvDcUEvln_ChkRngHiCtrlBd();
+ 
++   /* Range Low Check */
++   SftyHvDcUEvln_ChkRngLoCtrlBd();
+    
+    return;
+ }
+@@ -1138,11 +950,8 @@ FUNC(void, SFTY_DC_EVLN_CODE) SftyHvDcUEvln_MainFunctionArea1(void)
+    SftyHvDcUEvlnUdcVal = SftyHvDcUEvlnDrvBdUdcVal;
+ 
+    /* Range Check for HvDcU from Driver Board */
+-   SftyHvDcUEvlnDrvBdRngErrMonrSt = SftyHvDcUEvln_ChkRngDrvBd();
++   SftyHvDcUEvln_ChkRngDrvBd();
+    
+-   /* Update Range Error Status */
+-   SftyHvDcUEvln_UpdDrvBdErrMonrSt();
+-
+    
+ #ifdef SWIT_IT_Active
+    SWIT_SftyHvDcUEvln_MainFunctionArea1_EndHook();
+@@ -1191,11 +1000,7 @@ FUNC(void, SFTY_DC_EVLN_CODE) SftyHvDcUEvln_MainFunctionArea2(void)
+    SftyHvDcUEvln_ScaUdcCtrlBdVal();
+    
+    /* Range Check for HvDcU from Control Board */
+-   SftyHvDcUEvlnCtrlBdRngErrMonrSt = SftyHvDcUEvln_ChkRngCtrlBd();
+-   
+-   /* Update Range Error Status */
+-   SftyHvDcUEvln_UpdCtrlBdErrMonrSt();
+-
++   SftyHvDcUEvln_ChkRngCtrlBd();
+ 
+ #ifdef SWIT_IT_Active
+    SWIT_SftyHvDcUEvln_MainFunctionArea2_EndHook();
+diff --git a/src/fw_cu/Components/Safety/Sfty_Inv/SftyHvDcUEvln/src/SftyHvDcUEvln_data.c b/src/fw_cu/Components/Safety/Sfty_Inv/SftyHvDcUEvln/src/SftyHvDcUEvln_data.c
+index 6d15a6a98..228fd3a7f 100644
+--- a/src/fw_cu/Components/Safety/Sfty_Inv/SftyHvDcUEvln/src/SftyHvDcUEvln_data.c
++++ b/src/fw_cu/Components/Safety/Sfty_Inv/SftyHvDcUEvln/src/SftyHvDcUEvln_data.c
+@@ -31,42 +31,8 @@
+ 
+ /* ********************* SEC_VAR_AREA_1_FAST_INIT_8 ********************* */
+ 
+-
+-/* Begin: SFTYDCEVLN_START_SEC_VAR_AREA_1_FAST_INIT_8 (online) */
+-#define SFTYDCEVLN_START_SEC_VAR_AREA_1_FAST_INIT_8
+-#include "MemMap.h"
+-
+-/*
+-@@ INSTANCE = SftyHvDcUEvlnDrvBdRngErrMonrSt
+-@@ STRUCTURE = SftyHvDcUEvlnRngErrMonStType
+-@@ END
+-*/
+-VAR(SftyHvDcUEvlnRngErrMonStType, SFTYDCEVLN_VAR) SftyHvDcUEvlnDrvBdRngErrMonrSt = {0U, 0U};
+-
+-#define SFTYDCEVLN_STOP_SEC_VAR_AREA_1_FAST_INIT_8
+-#include "MemMap.h"
+-/* End: SFTYDCEVLN_STOP_SEC_VAR_AREA_1_FAST_INIT_8 (online) */
+-
+-
+ /* ********************* SEC_VAR_AREA_2_FAST_INIT_8 ********************* */
+ 
+-
+-/* Begin: SFTYDCEVLN_START_SEC_VAR_AREA_2_FAST_INIT_8 (online) */
+-#define SFTYDCEVLN_START_SEC_VAR_AREA_2_FAST_INIT_8
+-#include "MemMap.h"
+-
+-/*
+-@@ INSTANCE = SftyHvDcUEvlnCtrlBdRngErrMonrSt
+-@@ STRUCTURE = SftyHvDcUEvlnRngErrMonStType
+-@@ END
+-*/
+-VAR(SftyHvDcUEvlnRngErrMonStType, SFTYDCEVLN_VAR) SftyHvDcUEvlnCtrlBdRngErrMonrSt = {0U, 0U};
+-
+-#define SFTYDCEVLN_STOP_SEC_VAR_AREA_2_FAST_INIT_8
+-#include "MemMap.h"
+-/* End: SFTYDCEVLN_STOP_SEC_VAR_AREA_2_FAST_INIT_8 (online) */
+-
+-
+ /* ********************* SEC_VAR_AREA_CMN_FAST_INIT_8 ********************* */
+ 
+ /* Begin: SFTYDCEVLN_START_SEC_VAR_AREA_CMN_FAST_INIT_8 (online) */
+diff --git a/src/fw_cu/Components/Safety/Sfty_Inv/SftyHvInterlock/src/SftyHvInterlock.c b/src/fw_cu/Components/Safety/Sfty_Inv/SftyHvInterlock/src/SftyHvInterlock.c
+index 91300b9c9..750d5aa64 100644
+--- a/src/fw_cu/Components/Safety/Sfty_Inv/SftyHvInterlock/src/SftyHvInterlock.c
++++ b/src/fw_cu/Components/Safety/Sfty_Inv/SftyHvInterlock/src/SftyHvInterlock.c
+@@ -239,7 +239,7 @@ LOCAL_INLINE void SftyHvInterlock_PassiveSigChk(void)
+    SWIT_SftyHvInterlock_PassiveSigChk_BgnHook();
+ #endif
+    /* ******** Variables declaration *********** */
+-   uint8 SftyHvInterlockEvtE2e; /* local variable to store External Interlock Trigger value*/
++   uint8 interlockEvtE2e; /* local variable to store External Interlock Trigger value*/
+ 
+    /* ************* Source code **************** */
+ 
+@@ -248,38 +248,53 @@ LOCAL_INLINE void SftyHvInterlock_PassiveSigChk(void)
+    if (SftyReplcmtHvInterlockStiEna == TRUE)
+    {
+       /* Replacement value for External Interlock Trigger */
+-       SftyHvInterlockEvtE2e = SftyReplcmtE2eInterlockEvt;
++       interlockEvtE2e = SftyReplcmtE2eInterlockEvt;
+    }
+    else
+ #endif /* SERIES_PRODUCTION */
+    {
+       /* Update actual External Interlock Trigger */
+-      SftyHvInterlockEvtE2e = SftyE2ePhyDataVcuInvStat1InterlockEveExt;
++      interlockEvtE2e = SftyE2ePhyDataVcuInvStat1InterlockEveExt;
+    }
+ 
+-   /* Check the External Interlock Trigger status and update the corresponding Errdeb Variable*/
+-   if (SftyHvInterlockEvtE2e == (uint8)SFTYHVINTERLOCK_CAN_NORMAL)
++   switch(interlockEvtE2e)
+    {
+-      /* Monitor status should be Connect. Hence the status is set to passed.*/
+-      SftyHvInterlockPasErrMonrSt = ERR_DEB_MONR_STS_PASSED;
+-   }
+-   else if ((SftyHvInterlockEvtE2e == (uint8)SFTYHVINTERLOCK_CAN_FAULT) || (SftyHvInterlockEvtE2e == (uint8)SFTYHVINTERLOCK_CAN_INVALID))
+-   {
+-      /* Monitor status should be Open. Hence the status is set to failed. */
+-      SftyHvInterlockPasErrMonrSt = ERR_DEB_MONR_STS_FAILED;
+-   }
+-   else if (SftyHvInterlockEvtE2e == (uint8)SFTYHVINTERLOCK_CAN_RESERVED)
+-   {
+-      /* SftyHvInterlockPasErrMonrSt shall keep its last status */
+-      SftyHvInterlockPasErrMonrSt = SftyHvInterlockLstPassiveErrMonrSt;
+-   }
+-   else
+-   {
+-      /* Do Nothing*/
++      case (uint8)SFTYHVINTERLOCK_CAN_NORMAL:
++      {
++         /* Monitor status should be Connect. Hence the status is set to passed.*/
++         SftyHvInterlockPasErrMonrSt = ERR_DEB_MONR_STS_PASSED;
++
++         break;
++      }
++
++      case (uint8)SFTYHVINTERLOCK_CAN_FAULT:
++      case (uint8)SFTYHVINTERLOCK_CAN_INVALID:
++      {
++         /* Monitor status should be Open. Hence the status is set to failed. */
++         SftyHvInterlockPasErrMonrSt = ERR_DEB_MONR_STS_FAILED;
++
++         break;
++      }
++
++      case (uint8)SFTYHVINTERLOCK_CAN_RESERVED:
++      {
++         /* SftyHvInterlockPasErrMonrSt shall keep its last status */
++         SftyHvInterlockPasErrMonrSt = SftyHvInterlockLstPassiveErrMonrSt;
++
++         break;
++      }
++
++      default:
++      {
++         /* Do Nothing*/
++         break;
++      }
++
+    }
+ 
+    /* Update the last error status to current status */
+    SftyHvInterlockLstPassiveErrMonrSt = SftyHvInterlockPasErrMonrSt;
++
+ #ifdef SWIT_IT_Active
+    SftyHvInterlock_PassiveSigChk_EndHook();
+ #endif
+diff --git a/src/fw_cu/build/a2l/Measurements-to-Timeslices-Mapping.csv b/src/fw_cu/build/a2l/Measurements-to-Timeslices-Mapping.csv
+index c73528621..9198c0adf 100644
+--- a/src/fw_cu/build/a2l/Measurements-to-Timeslices-Mapping.csv
++++ b/src/fw_cu/build/a2l/Measurements-to-Timeslices-Mapping.csv
+@@ -5212,7 +5212,7 @@ SftyActvDchaCtrlrIfMeasData.topValSpiPrmTmr,Core_1,Core_1_200us,0.2,,,SSW
+ SftyActvDchaCtrlrIfMeasData.topValSysProtTmr,Core_1,Core_1_200us,0.2,,,SSW
+ SftyActvDchaCtrlStrtupTestSts,Core_1,Core_1_200us,1,,,SSW
+ SftyActvDhaCtrlAdisOperSts,Core_1,Core_1_200us,1,,,SSW
+-SftyActvDhaCtrlDvDtChkDelayTimAdisByRCnt,Core_1,Core_1_200us,1,,,SSW
++SftyActvDchaCtrlDvDtChkDlyTimAdisByRCnt,Core_1,Core_1_200us,1,,,SSW
+ SftyActvDchaCtrlrIfMeasData.actvDchaHvILpFilFac,Core_1,Core_1_200us,0.2,,,SSW
+ SftyActvDchaCtrlrIfMeasData.actvDchaHvILpFilDiTiThd,Core_1,Core_1_200us,0.2,,,SSW
+ SftyActvDchaCtrlrIfMeasData.actvDchaHwCircFlt1DiTiThd,Core_1,Core_1_200us,0.2,,,SSW
+@@ -6826,12 +6826,8 @@ CanTrcvTJA1145_TransceiverStatus,Core_0,C0_10ms_Slow,10,,,BSW
+ CanTrcvTJA1145_WakePinEventStatus,Core_0,C0_10ms_Slow,10,,,BSW
+ CanTrcvTJA1145_WakeUpSourceFlag,Core_0,C0_10ms_Slow,10,,,BSW
+ CanTrcvTJA1145_WakeupSource,Core_0,C0_10ms_Slow,10,,,BSW
+-SftyHvDcUEvlnDrvBdRngErrMonrSt.RngHi,Core_1,Core_1_200us,0.2,,,SSW
+-SftyHvDcUEvlnDrvBdRngErrMonrSt.RngLo,Core_1,Core_1_200us,0.2,,,SSW
+ SftyHvDcUEvlnDrvBdRngHiErrMonrSt,Core_1,Core_1_200us,0.2,,,SSW
+ SftyHvDcUEvlnDrvBdRngLoErrMonrSt,Core_1,Core_1_200us,0.2,,,SSW
+-SftyHvDcUEvlnCtrlBdRngErrMonrSt.RngHi,Core_1,Core_1_200us,0.2,,,SSW
+-SftyHvDcUEvlnCtrlBdRngErrMonrSt.RngLo,Core_1,Core_1_200us,0.2,,,SSW
+ SftyHvDcUEvlnCtrlBdRngHiErrMonrSt,Core_1,Core_1_200us,0.2,,,SSW
+ SftyHvDcUEvlnCtrlBdRngLoErrMonrSt,Core_1,Core_1_200us,0.2,,,SSW
+ Tmm_ComTaskFastDurationViolation,Core_0,C0_1ms_TimeTask,1,,,BSW
+'

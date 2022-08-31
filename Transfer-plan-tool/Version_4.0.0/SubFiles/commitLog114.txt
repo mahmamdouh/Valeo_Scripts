@@ -1,0 +1,954 @@
+b'commit b2db6e89519debeb3025469007ef2d5a49d9139c
+Author: Emerson-Hai ZHAO (JV) <emerson-hai.zhao.jv@valeo.com>
+Date:   Wed Dec 8 11:27:11 2021 +0800
+
+    $100kW-47105$ - [CR] FCT_PrioCtrlSigSw - Implement Unit Construction
+    
+    Change-Id: I9697d02b4a9ae4a28dc2074c6447a585761c57ab
+
+diff --git a/src/fw_cu/Components/Safety/Sfty_Inv/SftyInvActr/include/SftyInvActr_data.h b/src/fw_cu/Components/Safety/Sfty_Inv/SftyInvActr/include/SftyInvActr_data.h
+index f3285c470..ff91ad832 100644
+--- a/src/fw_cu/Components/Safety/Sfty_Inv/SftyInvActr/include/SftyInvActr_data.h
++++ b/src/fw_cu/Components/Safety/Sfty_Inv/SftyInvActr/include/SftyInvActr_data.h
+@@ -42,104 +42,67 @@
+ 
+ 
+ /*================== [macros] ===============================================*/
+-#define LS_ASC_REQ             (0U)
+-#define HS_ACS_REQ             (1U)
+-#define SPO_REQ                (2U)
+-#define COORD_LS_ASC_SPO_REQ   (3U)
+-#define COORD_HS_ASC_SPO_REQ   (4U)
+-#define NO_SAFE_STATE_REQ      (5U)
+ 
++/* Deinition For Safe State Request From SSW Module */
++#define LS_ASC_REQ_SSW             (0U)
++#define HS_ASC_REQ_SSW             (1U)
++#define SPO_REQ_SSW                (2U)
++#define COORD_LS_ASC_SPO_REQ_SSW   (3U)
++#define COORD_HS_ASC_SPO_REQ_SSW   (4U)
++#define NO_SAFE_STATE_REQ_SSW      (5U)
+ 
+ 
++/* Deinition For Safe State Request From DRCO Module */
++#define NO_SAFE_STATE_REQ_DRCO     (0U)
++#define SPO_REQ_DRCO               (1U)
++#define ACS_REQ_DRCO               (2U)
+ 
++/* Deinition For Internal Safe State Request */
++#define NO_SAFE_STATE_REQ_INTEL    (0U)
++#define SPO_REQ_INTEL              (1U)
++#define ACS_REQ_INTEL              (2U)
++#define COORD_ASC_SPO_REQ_INTEL    (3U)
+ 
+-/*================== [type definitions] =====================================*/
+ 
++/* Deinition For the Command of Safe State */
++#define CMD_ASC                    (0U)
++#define CMD_SPO                    (1U)
++#define CMD_ASC_NO_FAULT           (2U)
++#define CMD_SPO_NO_FAULT           (3U)
+ 
+ 
+-/*================== [declaration of public data] ===========================*/
++/* Deinition For Safe State Required Command to FPGA, Required Mode / SftyInvActrStateReqMod */
++#define PWM_OFF_FPGA               (0U)
++#define PWM_DIRECT_FPGA            (1U)
++#define PWM_INIT_FPGA              (2U)
+ 
+-/* ================================================================== */
++/* Deinition For Safe State Required Command to FPGA, Not Emergency SW / SftyInvActrStateReqEmgySw */
++#define EMERGENCY_STOP             (0U)
++#define NO_FAULT                   (1U)
+ 
+-#ifndef SW_INTERFACE
++/* Deinition For Safe State Required Command to FPGA, SC speed ready / SftyInvActrStateReqSCSpdReady */
++#define OPEN_CIRCUIT               (0U)
++#define ASC_Hs_Ls                  (1U)
+ 
+-   /* Begin: SFTYACTVDCHACTRL_START_SEC_VAR_AREA_CMN_FAST_INIT_32 (online struct) */
+-#define SFTYACTVDCHACTRL_START_SEC_VAR_AREA_CMN_FAST_INIT_32
+-#include "MemMap.h"
+ 
+-extern VAR(SftyActvDchaCtrl_CmdType, SFTYACTVDCHACTRL_VAR) SftyActvDchaCtrlCmd;
+-   #define SFTYACTVDCHACTRL_STOP_SEC_VAR_AREA_CMN_FAST_INIT_32
+-#include "MemMap.h"
+-/* End: SFTYACTVDCHACTRL_STOP_SEC_VAR_AREA_CMN_FAST_INIT_32 (online struct) */
+ 
+ 
+-   /* Begin: SFTYDCEVLN_START_SEC_VAR_AREA_1_FAST_INIT_8 (online) */
+-#define SFTYDCEVLN_START_SEC_VAR_AREA_1_FAST_INIT_8
+-#include "MemMap.h"
+ 
+-extern VAR(uint8, SFTYDCEVLN_VAR) SftyDcEvlnKl30RngUvHwpErrMonrSt;
+-   #define SFTYDCEVLN_STOP_SEC_VAR_AREA_1_FAST_INIT_8
+-#include "MemMap.h"
+-/* End: SFTYDCEVLN_STOP_SEC_VAR_AREA_1_FAST_INIT_8 (online) */
+ 
+-/* Begin: SFTYMODMGR_START_SEC_VAR_AREA_CMN_FAST_NO_INIT_8 (online) */
+-#define SFTYMODMGR_START_SEC_VAR_AREA_CMN_FAST_NO_INIT_8
+-#include "MemMap.h"
+-
+-extern VAR(uint8, SFTYMODMGR_VAR) SftyModMgrKl30InvStReq;
+-   #define SFTYMODMGR_STOP_SEC_VAR_AREA_CMN_FAST_NO_INIT_8
+-#include "MemMap.h"
+-/* End: SFTYMODMGR_STOP_SEC_VAR_AREA_CMN_FAST_NO_INIT_8 (online) */
+-
+-/* Begin: SFTYTQESTIMRPWRMDL_START_SEC_VAR_AREA_1_FAST_INIT_32 (online) */
+-#define SFTYTQESTIMRPWRMDL_START_SEC_VAR_AREA_1_FAST_INIT_32
+-#include "MemMap.h"
++/*================== [type definitions] =====================================*/
+ 
+-extern VAR(Sfty_ModActType, SFTYTQESTIMRPWRMDL_VAR) SftyTqEstimrPwrMdlIgbtModAct;
+-   #define SFTYTQESTIMRPWRMDL_STOP_SEC_VAR_AREA_1_FAST_INIT_32
+-#include "MemMap.h"
+-/* End: SFTYTQESTIMRPWRMDL_STOP_SEC_VAR_AREA_1_FAST_INIT_32 (online) */
+ 
+-#endif
+ 
++/*================== [declaration of public data] ===========================*/
+ 
+ /* ================================================================== */
+ 
+-/* Begin: SFTYINVACTR_START_SEC_VAR_AREA_CMN_FAST_NO_INIT_8 (online) */
+-#define SFTYINVACTR_START_SEC_VAR_AREA_CMN_FAST_NO_INIT_8
+-#include "MemMap.h"
++#ifndef SW_INTERFACE
+ 
+-extern VAR(uint8, SFTYINVACTR_VAR) SftyInvActrKl30InvSt;
+-#define SFTYINVACTR_STOP_SEC_VAR_AREA_CMN_FAST_NO_INIT_8
+-#include "MemMap.h"
+-/* End: SFTYINVACTR_STOP_SEC_VAR_AREA_CMN_FAST_NO_INIT_8 (online) */
+ 
+-/* Begin: SFTYINVACTR_START_SEC_VAR_QM_FAST_INIT_32 (online) */
+-#define SFTYINVACTR_START_SEC_VAR_QM_FAST_INIT_32
+-#include "MemMap.h"
+ 
+-extern VAR(uint32, SFTYINVACTR_VAR) SftyInvActrSoftAscTmr;
+-#define SFTYINVACTR_STOP_SEC_VAR_QM_FAST_INIT_32
+-#include "MemMap.h"
+-/* End: SFTYINVACTR_STOP_SEC_VAR_QM_FAST_INIT_32 (online) */
+-
+-/* Begin: SFTYINVACTR_START_SEC_VAR_QM_FAST_INIT_8 (online) */
+-#define SFTYINVACTR_START_SEC_VAR_QM_FAST_INIT_8
+-#include "MemMap.h"
+-
+-extern VAR(uint8, SFTYINVACTR_VAR) SftyInvActrSoftAscTmrActv;
+-#define SFTYINVACTR_STOP_SEC_VAR_QM_FAST_INIT_8
+-#include "MemMap.h"
+-/* End: SFTYINVACTR_STOP_SEC_VAR_QM_FAST_INIT_8 (online) */
+-
+-/* Begin: SFTYINVACTR_START_SEC_VAR_QM_FAST_INIT_8 (online) */
+-#define SFTYINVACTR_START_SEC_VAR_QM_FAST_INIT_8
+-#include "MemMap.h"
++#endif
+ 
+-extern VAR(uint8, SFTYINVACTR_VAR) SftyInvActrSoftAscTmrElpd;
+-#define SFTYINVACTR_STOP_SEC_VAR_QM_FAST_INIT_8
+-#include "MemMap.h"
+-/* End: SFTYINVACTR_STOP_SEC_VAR_QM_FAST_INIT_8 (online) */
+ 
+ /* Begin: SFTYINVACTR_START_SEC_VAR_QM_FAST_INIT_32 (online) */
+ #define SFTYINVACTR_START_SEC_VAR_QM_FAST_INIT_32
+@@ -150,21 +113,11 @@ extern VAR(SftyInvActr_SafStTyp, SFTYINVACTR_VAR) SftyInvActrSts;
+ #include "MemMap.h"
+ /* End: SFTYINVACTR_STOP_SEC_VAR_QM_FAST_INIT_32 (online) */
+ 
+-/* Begin: SFTYINVACTR_START_SEC_CALIB_32 (calib) */
+-#define SFTYINVACTR_START_SEC_CALIB_32
+-#include "MemMap.h"
+-
+-extern CONST(uint32, SFTYINVACTR_CALIB) SftyInvActrSoftAscTmrThd;
+-#define SFTYINVACTR_STOP_SEC_CALIB_32
+-#include "MemMap.h"
+-/* End: SFTYINVACTR_STOP_SEC_CALIB_32 (calib) */
+ 
+ /* ================================================================== */
+ 
+ 
+ 
+-
+-
+ /* ******************** Start Of P2_100kW ******************** */
+ 
+ 
+@@ -187,6 +140,8 @@ extern VAR(boolean, SFTYINVACTR_VAR) SftyInvActrFctldCoordLsAscSpoSfty;
+ 
+ extern VAR(uint8, SFTYINVACTR_VAR) SftyInvActrSafeStReqDrv;
+ 
++extern VAR(uint8, SFTYINVACTR_VAR) SftyInvActrEmmMode;
++
+ 
+ #define SFTYINVACTR_STOP_SEC_VAR_QM_FAST_INIT_8
+ #include "MemMap.h"
+@@ -198,14 +153,13 @@ extern VAR(uint8, SFTYINVACTR_VAR) SftyInvActrSafeStReqDrv;
+ #define SFTYINVACTR_START_SEC_VAR_QM_FAST_INIT_32
+ #include "MemMap.h"
+ 
+-
+ extern VAR(float32, SFTYINVACTR_VAR) SftyInvActrMotorSpdFild;
+ 
+-
+ #define SFTYINVACTR_STOP_SEC_VAR_QM_FAST_INIT_32
+ #include "MemMap.h"
+ /* End: SFTYINVACTR_STOP_SEC_VAR_QM_FAST_INIT_32 (online) */
+ 
++
+ /* ================================================================== */
+ 
+ 
+@@ -335,7 +289,14 @@ extern CONST(uint8, SFTYREPLCMT_CALIB) SftyReplcmtInvActrSafeStReqDrvStiEna;
+ extern CONST(uint8, SFTYREPLCMT_CALIB) SftyReplcmtInvActrSafeStReqDrv;
+ 
+ 
+-/* 3> Error Monitor Status about IGBT */
++/* 3> Current Emm Mode from Manage State module */
++
++extern CONST(uint8, SFTYREPLCMT_CALIB) SftyReplcmtInvActrEmmModeStiEna;
++
++extern CONST(uint8, SFTYREPLCMT_CALIB) SftyReplcmtInvActrEmmMode;
++
++
++/* 4> Error Monitor Status about IGBT */
+ 
+ extern CONST(uint8, SFTYREPLCMT_CALIB) SftyReplcmtInvActrIgbtMonrStStiEna;
+ 
+@@ -350,7 +311,7 @@ extern CONST(uint8, SFTYREPLCMT_CALIB) SftyReplcmtInvActrMidPointPhaVErrMonrSt;
+ extern CONST(uint8, SFTYREPLCMT_CALIB) SftyReplcmtInvActrMidPointPhaWErrMonrSt;
+ 
+ 
+-/* 4> Read Safe state status that from is FPGA */
++/* 5> Read Safe state status that from is FPGA */
+ 
+ extern CONST(uint8, SFTYREPLCMT_CALIB) SftyReplcmtInvActrCurrSafeStStiEna;
+ 
+@@ -359,7 +320,7 @@ extern CONST(boolean, SFTYINVACTR_VAR) SftyReplcmtInvActrEmgySwFltSts;
+ extern CONST(boolean, SFTYINVACTR_VAR) SftyReplcmtInvActrSCSpdReadyFltSts;
+ 
+ 
+-/* 5> Read Filtered Moror Speed */
++/* 6> Read Filtered Moror Speed */
+ 
+ extern CONST(uint8, SFTYREPLCMT_CALIB) SftyReplcmtInvActrMotorSpdStiEna;
+ 
+diff --git a/src/fw_cu/Components/Safety/Sfty_Inv/SftyInvActr/src/SftyInvActr.c b/src/fw_cu/Components/Safety/Sfty_Inv/SftyInvActr/src/SftyInvActr.c
+index ba6e38021..a1660eb0d 100644
+--- a/src/fw_cu/Components/Safety/Sfty_Inv/SftyInvActr/src/SftyInvActr.c
++++ b/src/fw_cu/Components/Safety/Sfty_Inv/SftyInvActr/src/SftyInvActr.c
+@@ -41,6 +41,8 @@
+ #include "C2cComSftyData.h"
+ #include "C2cComDrvCtrlData.h"
+ #include "C2cComDrvCtrl.h"
++#include "emm_common.h"
++#include "C2cComBswData.h"
+ #include "AddGlobalDefines.h"
+ #include "SftySysInit.h"
+ #include "dsadc.h"
+@@ -142,7 +144,25 @@ LOCAL_INLINE void SftyInvActr_GetInputData(void)
+       SftyInvActrSafeStReqDrv = DrvCtrlC2cData.SafeStReq;
+    }
+ 
+-   /* 3> Read Filtered Moror Speed */
++
++   /* 3> Read Current Emm Mode from Manage State module */
++   
++#ifndef SERIES_PRODUCTION
++   
++   if (SftyReplcmtInvActrEmmModeStiEna == TRUE)
++   {
++      SftyInvActrEmmMode = SftyReplcmtInvActrEmmMode;
++   }
++   else
++   
++#endif /* SERIES_PRODUCTION */
++   
++   {
++      SftyInvActrEmmMode = BswC2cData.EmmMode;
++   }
++   
++
++   /* 4> Read Filtered Moror Speed */
+    
+ #ifndef SERIES_PRODUCTION
+ 
+@@ -154,11 +174,12 @@ LOCAL_INLINE void SftyInvActr_GetInputData(void)
+ \t   
+ #endif /* SERIES_PRODUCTION */
+ 
+-   {      
+-      SftyInvActrMotorSpdFild = DrvCtrlC2cData.SpdMeclRpmFild1;   /* SftyRslvrCalcnMeclSpdFild */ 
++   {
++      SftyInvActrMotorSpdFild = DrvCtrlC2cData.SpdMeclRpmFild1;   /* SftyRslvrCalcnMeclSpdFild */
+    }
++   
+ 
+-   /* 4> Error Monitor Status about IGBT */
++   /* 5> Error Monitor Status about IGBT */
+    
+ #ifndef SERIES_PRODUCTION
+ 
+@@ -174,7 +195,7 @@ LOCAL_INLINE void SftyInvActr_GetInputData(void)
+    
+ #endif /* SERIES_PRODUCTION */
+ 
+-   {  \t
++   {
+ \t  SftyInvActrHSGateDrvrErrMonrSt   = IgbtErrMonitorStMap[SftyE2eFpgaHsGateDrvrFltSts & (0x01U)];
+       SftyInvActrLSGateDrvrErrMonrSt   = IgbtErrMonitorStMap[SftyE2eFpgaLoGateDrvrFltSts & (0x01U)];   
+       SftyInvActrMidPointPhaUErrMonrSt = IgbtErrMonitorStMap[SftyE2eFpgaMidPointPhaFltSts[SYSDEF_PHA_U] & (0x01U)];   
+@@ -183,7 +204,7 @@ LOCAL_INLINE void SftyInvActr_GetInputData(void)
+    }
+ 
+ 
+-   /* 5> Read Safe state status that from is FPGA */
++   /* 6> Read Safe state status that from is FPGA */
+    
+ #ifndef SERIES_PRODUCTION
+ 
+@@ -229,11 +250,11 @@ LOCAL_INLINE uint8 SftyInvActr_GetSafeStReqSfty(void)
+       /* LS_ASC has high priority */
+ \t  if (SftyInvActrFctldLsAscSfty == TRUE)
+ \t  {
+-\t     SafeStReqSfty = LS_ASC_REQ;
++\t     SafeStReqSfty = LS_ASC_REQ_SSW;
+ \t  }
+ \t  else
+ \t  {
+-\t     SafeStReqSfty = HS_ACS_REQ;
++\t     SafeStReqSfty = HS_ASC_REQ_SSW;
+ \t  }
+    }
+    else if ((SftyInvActrFctldCoordLsAscSpoSfty == TRUE)   ||
+@@ -241,20 +262,20 @@ LOCAL_INLINE uint8 SftyInvActr_GetSafeStReqSfty(void)
+    {
+ \t  if (SftyInvActrFctldCoordLsAscSpoSfty == TRUE)
+ \t  {
+-\t     SafeStReqSfty = COORD_LS_ASC_SPO_REQ;
++\t     SafeStReqSfty = COORD_LS_ASC_SPO_REQ_SSW;
+ \t  }
+ \t  else
+ \t  {
+-\t     SafeStReqSfty = COORD_HS_ASC_SPO_REQ;
+-\t  }\t  
++\t     SafeStReqSfty = COORD_HS_ASC_SPO_REQ_SSW;
++\t  }
+    }
+    else if (SftyInvActrFctldSpoSfty == TRUE)
+    {
+-      SafeStReqSfty = SPO_REQ;
++      SafeStReqSfty = SPO_REQ_SSW;
+    }
+    else
+    {
+-      SafeStReqSfty = NO_SAFE_STATE_REQ;
++      SafeStReqSfty = NO_SAFE_STATE_REQ_SSW;
+    }
+ 
+    
+@@ -275,7 +296,7 @@ LOCAL_INLINE uint8 SftyInvActr_GetSafeStReqSfty(void)
+ /******************************************************************/
+ LOCAL_INLINE void SftyInvActr_DetmnSafeStReq(void)
+ {
+-   /* ******** Variables declaration *********** */
++   /* ******** Variables declaration *********** */      
+    uint8 SafeStReqSSW;\t /* Safe state request from SSW module */
+    
+    /* ************* Source code **************** */
+@@ -284,46 +305,25 @@ LOCAL_INLINE void SftyInvActr_DetmnSafeStReq(void)
+    SafeStReqSSW = SftyInvActr_GetSafeStReqSfty();
+    
+    /* Determining the final safe state request */
+-   if ((SafeStReqSSW == HS_ACS_REQ)             ||
+-   \t   (SafeStReqSSW == LS_ASC_REQ)             ||
+-   \t   (SftyInvActrSafeStReqDrv == HS_ACS_REQ)  ||
+-   \t   (SftyInvActrSafeStReqDrv == LS_ASC_REQ))
+-   {
+-      /* SSW core request is high priority */
+-      /* => HS_ACS_REQ Or LS_ASC_REQ  */
+-\t  if (SafeStReqSSW <= HS_ACS_REQ)
+-\t  {
+-\t     SftyInvActrSafeStReqIntel = SafeStReqSSW;
+-\t  }
+-\t  else
+-\t  {
+-\t     SftyInvActrSafeStReqIntel = SftyInvActrSafeStReqDrv;
+-\t  }
++   if ((SafeStReqSSW == HS_ASC_REQ_SSW)             ||
++   \t   (SafeStReqSSW == LS_ASC_REQ_SSW)             ||
++   \t   (SftyInvActrSafeStReqDrv == ACS_REQ_DRCO))
++   {
++      SftyInvActrSafeStReqIntel = ACS_REQ_INTEL;
+    }   
+-   else if ((SafeStReqSSW == COORD_HS_ASC_SPO_REQ)             ||
+-   \t        (SafeStReqSSW == COORD_LS_ASC_SPO_REQ)             ||
+-   \t        (SftyInvActrSafeStReqDrv == COORD_HS_ASC_SPO_REQ)  ||
+-   \t        (SftyInvActrSafeStReqDrv == COORD_LS_ASC_SPO_REQ))
+-   {
+-      /* SSW core request is high priority*/    
+-\t  if ((SafeStReqSSW == COORD_HS_ASC_SPO_REQ) ||
+-\t  \t  (SafeStReqSSW == COORD_LS_ASC_SPO_REQ))
+-\t  {
+-\t     SftyInvActrSafeStReqIntel = SafeStReqSSW;
+-\t  }
+-\t  else
+-\t  {
+-\t     SftyInvActrSafeStReqIntel = SftyInvActrSafeStReqDrv;
+-\t  }
++   else if ((SafeStReqSSW == COORD_HS_ASC_SPO_REQ_SSW) ||
++   \t        (SafeStReqSSW == COORD_LS_ASC_SPO_REQ_SSW))
++   {
++      SftyInvActrSafeStReqIntel = COORD_ASC_SPO_REQ_INTEL;
+    }
+-   else if ((SafeStReqSSW == SPO_REQ)  ||
+-            (SftyInvActrSafeStReqDrv == SPO_REQ))
++   else if ((SafeStReqSSW == SPO_REQ_SSW) ||
++            (SftyInvActrSafeStReqDrv == SPO_REQ_DRCO))
+    {
+-       SftyInvActrSafeStReqIntel = SPO_REQ;
++       SftyInvActrSafeStReqIntel = SPO_REQ_INTEL;
+    }
+    else   /* => NO_SAFE_STATE_REQ */
+    {
+-\t   SftyInvActrSafeStReqIntel = NO_SAFE_STATE_REQ;
++\t   SftyInvActrSafeStReqIntel = NO_SAFE_STATE_REQ_INTEL;
+    }
+ 
+ 
+@@ -332,6 +332,101 @@ LOCAL_INLINE void SftyInvActr_DetmnSafeStReq(void)
+ 
+ 
+ 
++/******************************************************************/
++/*!
++ * \\fn        void SftyInvActr_SendCmd(uint8 inp_SafeStateCmd)
++ * \\brief     This function sends safe state commands
++ * \\param     [in] inp_SafeStateCmd: 8-bit-uint8 input data, Safe State Required Command
++ * \\return    None
++ * \\Parent_DD SftyInvActr_MainFunctionAreaCmn
++ */
++/******************************************************************/
++LOCAL_INLINE void SftyInvActr_SendCmd(uint8 SafeStReqCmd)
++{
++   /* ******** Variables declaration *********** */
++   
++   /* ************* Source code **************** */
++
++   switch (SafeStReqCmd)
++   {
++      case CMD_ASC:
++      {
++         /* ASC Commends */
++\t     SftyInvActrStateReqMod        = PWM_DIRECT_FPGA;
++         SftyInvActrStateReqEmgySw     = EMERGENCY_STOP;
++\t     SftyInvActrStateReqSCSpdReady = ASC_Hs_Ls;
++\t\t 
++         break;
++      }
++\t  case CMD_SPO:
++      {
++         /* SPO Commends */
++\t     SftyInvActrStateReqMod        = PWM_INIT_FPGA;
++\t\t SftyInvActrStateReqEmgySw     = EMERGENCY_STOP;
++\t     SftyInvActrStateReqSCSpdReady = ASC_Hs_Ls;         
++\t\t 
++         break;
++      }
++\t  case CMD_ASC_NO_FAULT:
++\t  {
++         /* ASC without fault */
++         SftyInvActrStateReqEmgySw     = NO_FAULT;
++\t     SftyInvActrStateReqSCSpdReady = ASC_Hs_Ls;
++
++\t\t /* Update Required Mode for FPGA */
++\t\t if ((SftyInvActrEmmMode == ((uint8)EMM_INIT_MODE))
++\t          ||
++\t\t     (SftyInvActrEmmMode == ((uint8)EMM_SLEEP_MODE)))
++\t\t {
++\t\t    SftyInvActrStateReqMod = PWM_INIT_FPGA;
++\t\t }
++\t\t else if (SftyInvActrEmmMode == ((uint8)EMM_TRQCTRL_MODE))
++\t\t {
++\t\t    SftyInvActrStateReqMod = PWM_DIRECT_FPGA;
++\t\t }
++\t\t else
++\t\t {
++\t\t    /* Keep Previous Status */
++\t\t }\t\t 
++\t     
++\t     break;
++\t  }
++\t  case CMD_SPO_NO_FAULT:
++\t  {
++\t     /* SPO without fault */
++\t\t SftyInvActrStateReqEmgySw     = NO_FAULT;
++\t     SftyInvActrStateReqSCSpdReady = OPEN_CIRCUIT;
++\t\t 
++\t\t /* Update Required Mode for FPGA */
++\t\t if ((SftyInvActrEmmMode == ((uint8)EMM_INIT_MODE))
++\t          ||
++\t\t     (SftyInvActrEmmMode == ((uint8)EMM_SLEEP_MODE)))
++\t\t {
++\t\t    SftyInvActrStateReqMod = PWM_INIT_FPGA;
++\t\t }
++\t\t else if (SftyInvActrEmmMode == ((uint8)EMM_TRQCTRL_MODE))
++\t\t {
++\t\t    SftyInvActrStateReqMod = PWM_DIRECT_FPGA;
++\t\t }
++\t\t else
++\t\t {
++\t\t    /* Keep Previous Status */
++\t\t }
++\t\t 
++\t     break;
++\t  }
++\t  default:
++\t  {
++         /* Do nothing! */
++\t     break;
++\t  }   
++   }   
++
++   return;
++}
++
++
++
+ /******************************************************************/
+ /*!
+  * \\fn        void SftyInvActr_UpdSafeStCmd(void)
+@@ -344,77 +439,62 @@ LOCAL_INLINE void SftyInvActr_DetmnSafeStReq(void)
+ LOCAL_INLINE void SftyInvActr_UpdSafeStCmd(void)
+ {
+    /* ******** Variables declaration *********** */
+-   uint8 SftyC2cSafeStReq[6] = {SAFE_ST_LS_ASC, SAFE_ST_HS_ASC, SAFE_ST_SPO, SAFE_ST_LS_ASC, SAFE_ST_HS_ASC, SAFE_ST_NO_REQ};
+ \t  
+    /* ************* Source code **************** */
+ 
+    /* Update Safe State required commands to FPGA */
+-   if ((SftyInvActrSafeStReqIntel == HS_ACS_REQ)   ||
+-   \t   (SftyInvActrSafeStReqIntel == LS_ASC_REQ))
++   if (SftyInvActrSafeStReqIntel == ACS_REQ_INTEL)
+    {
+-      /* ASC Commends */
+-      SftyInvActrStateReqMod       = 1U;
+-\t  SftyInvActrStateReqEmgySw     = 0U;
+-\t  SftyInvActrStateReqSCSpdReady = 1U;
+-      
+-      /* Update Safe State Request to SftyC2cData */
+-      SftyC2cData.SafeStReq = SftyC2cSafeStReq[SftyInvActrSafeStReqIntel];
+-   }
+-   else if (SftyInvActrSafeStReqIntel == SPO_REQ)
+-   {
+-      /* SPO Commends */
+-      SftyInvActrStateReqMod       = 2U;
+-\t  SftyInvActrStateReqEmgySw     = 0U;
+-\t  SftyInvActrStateReqSCSpdReady = 0U;
+-
++      /* Send ASC Command */
++\t  SftyInvActr_SendCmd(CMD_ASC);
++\t  
+ \t  /* Update Safe State Request to SftyC2cData */
+-\t  SftyC2cData.SafeStReq = SftyC2cSafeStReq[SPO_REQ];
+-   }
+-   else if ((SftyInvActrSafeStReqIntel == COORD_HS_ASC_SPO_REQ)   ||
+-   \t        (SftyInvActrSafeStReqIntel == COORD_LS_ASC_SPO_REQ))
++\t  SftyC2cData.InvSafeStReq = STS_INV_SAFE_ST_ASC;
++   }   
++   else if (SftyInvActrSafeStReqIntel == COORD_ASC_SPO_REQ_INTEL)
+    {
+       if (MLIB_F32AbsF32(SftyInvActrMotorSpdFild) >= SftyInvActrSpdReadyHithd)
+       {
+-         /* ASC Commends */
+-\t     SftyInvActrStateReqMod       = 1U;
+-         SftyInvActrStateReqEmgySw     = 0U;
+-\t     SftyInvActrStateReqSCSpdReady = 1U;
++         /* Send ASC Command */
++\t\t SftyInvActr_SendCmd(CMD_ASC);
+ 
+ \t\t /* Update Safe State Request to SftyC2cData */
+-\t\t SftyC2cData.SafeStReq = SftyC2cSafeStReq[SftyInvActrSafeStReqIntel];
++\t\t SftyC2cData.InvSafeStReq = STS_INV_SAFE_ST_ASC;
+       }
+ \t  else
+       {
+-         /* SPO Commends */
+-\t     SftyInvActrStateReqMod       = 2U;
+-\t\t SftyInvActrStateReqEmgySw     = 0U;
+-\t     SftyInvActrStateReqSCSpdReady = 0U;
+-
++         /* Send SPO Command */
++         SftyInvActr_SendCmd(CMD_SPO);
++\t\t 
+ \t\t /* Update Safe State Request to SftyC2cData */
+-         SftyC2cData.SafeStReq = SftyC2cSafeStReq[SPO_REQ];
++\t\t SftyC2cData.InvSafeStReq = STS_INV_SAFE_ST_SPO;
++\t\t 
+       }
+    }
++   else if (SftyInvActrSafeStReqIntel == SPO_REQ_INTEL)
++   {
++      /* Send SPO Command */
++      SftyInvActr_SendCmd(CMD_SPO);
++
++\t  /* Update Safe State Request to SftyC2cData */
++\t  SftyC2cData.InvSafeStReq = STS_INV_SAFE_ST_SPO;
++   }
+    else   /* => NO_SAFE_STATE_REQ */
+    {
+       if (MLIB_F32AbsF32(SftyInvActrMotorSpdFild) >= SftyInvActrSpdReadyHithd)
+       {
+-         /* ASC without fault */
+-\t     SftyInvActrStateReqMod       = 1U;
+-         SftyInvActrStateReqEmgySw     = 1U;
+-\t     SftyInvActrStateReqSCSpdReady = 1U;\t\t 
++\t\t /* Send ASC_No_Fault Command */
++\t\t SftyInvActr_SendCmd(CMD_ASC_NO_FAULT);
+       }
+ \t  else
+       {
+-         /* SPO without fault */
+-\t     SftyInvActrStateReqMod       = 1U;
+-\t\t SftyInvActrStateReqEmgySw     = 1U;
+-\t     SftyInvActrStateReqSCSpdReady = 0U;\t\t 
+-      }
++\t\t /* Send SPO_No_Fault Command */
++\t\t SftyInvActr_SendCmd(CMD_SPO_NO_FAULT);
++      }\t  
+ 
+ \t  /* Update Safe State Request to SftyC2cData */
+-      SftyC2cData.SafeStReq = SftyC2cSafeStReq[NO_SAFE_STATE_REQ];   /* No safe state request */   
+-   }   \t    
+-
++\t  SftyC2cData.InvSafeStReq = STS_INV_SAFE_ST_INACTIVE;   /* No safe state request */
++   }
+ 
+    return;
+ }
+@@ -491,7 +571,7 @@ FUNC(void, SFTY_INV_ACTR_CODE) SftyInvActr_InitAreaCmn(void)
+    /* ************* Source code **************** */
+    
+    /* Initialize internal variables */
+-   SftyInvActrSafeStReqIntel = NO_SAFE_STATE_REQ;
++   SftyInvActrSafeStReqIntel = NO_SAFE_STATE_REQ_INTEL;
+    
+ \t  
+    /* Input Variables, get them from other module */
+@@ -500,15 +580,16 @@ FUNC(void, SFTY_INV_ACTR_CODE) SftyInvActr_InitAreaCmn(void)
+    SftyInvActrFctldSpoSfty           = FALSE;
+    SftyInvActrFctldCoordHsAscSpoSfty = FALSE;
+    SftyInvActrFctldCoordLsAscSpoSfty = FALSE;
+-   SftyInvActrSafeStReqDrv           = NO_SAFE_STATE_REQ;
++   SftyInvActrSafeStReqDrv           = NO_SAFE_STATE_REQ_DRCO;
++   SftyInvActrEmmMode                = (uint8)EMM_INIT_MODE;
+    SftyInvActrMotorSpdFild           = 0.0f;
+-   SftyInvActrEmgySwFltSts           = 1U;              /* No Fault */ 
+-   SftyInvActrSCSpdReadyFltSts       = 1U;              /* ASC_Hs_Ls */
++   SftyInvActrEmgySwFltSts           = NO_FAULT;                   /* No Fault */ 
++   SftyInvActrSCSpdReadyFltSts       = ASC_Hs_Ls;                  /* ASC_Hs_Ls */
+    
+    /* Output Variables */
+-   SftyInvActrStateReqEmgySw         = 1U;               /* No Fault */ 
+-   SftyInvActrStateReqSCSpdReady     = 1U;               /* ASC_Hs_Ls */
+-   SftyC2cData.SafeStReq             = SAFE_ST_NO_REQ;   /* No safe state request */
++   SftyInvActrStateReqEmgySw         = NO_FAULT;                   /* No Fault */ 
++   SftyInvActrStateReqSCSpdReady     = ASC_Hs_Ls;                  /* ASC_Hs_Ls */
++   SftyC2cData.InvSafeStReq          = STS_INV_SAFE_ST_INACTIVE;   /* No safe state request */
+ 
+    SftyInvActrSafeStCompErrMonrSt    = ERR_DEB_MONR_STS_INACTIVE;
+    SftyInvActrHSGateDrvrErrMonrSt    = ERR_DEB_MONR_STS_INACTIVE;
+@@ -524,7 +605,7 @@ FUNC(void, SFTY_INV_ACTR_CODE) SftyInvActr_InitAreaCmn(void)
+    SftyInvActrSetMidPointPhaWReinitSt = TRUE;
+ 
+    /* It is not set by other module now, so initialize it here */
+-   DrvCtrlC2cData.SafeStReq = NO_SAFE_STATE_REQ;
++   DrvCtrlC2cData.SafeStReq = NO_SAFE_STATE_REQ_DRCO;
+ 
+ 
+    return;
+@@ -549,7 +630,7 @@ if((SWIT_SftyInvActr_EN_KEY==SWIT_First_HookEnableKey))
+ \t  
+    /* ************* Source Code **************** */
+ 
+-   /* Clear Error Status */   
++   /* Clear Error Status */
+    SftyInvActr_ClrErrMonrSt();
+ 
+    /* Copy the data provided by other modules */
+@@ -562,7 +643,7 @@ if((SWIT_SftyInvActr_EN_KEY==SWIT_First_HookEnableKey))
+    SftyInvActr_UpdSafeStCmd();
+ 
+    /* Monitoring safe sate execution by comparing safe state signals */
+-   SftyInvActr_MonrSafeStExct();  
++   SftyInvActr_MonrSafeStExct();
+ 
+ 
+ #ifdef SWIT_IT_Active
+@@ -588,7 +669,7 @@ if((SWIT_SftyInvActr_EN_KEY==SWIT_First_HookEnableKey))
+  * \\return  None
+  */
+ /******************************************************************/
+-FUNC(void, SFTY_INV_ACTR_CODE) SftyInvActr_ReinitMonrData(void)/* PRQA S 1503 # SftyInvActr_ReinitMonrData() is called by ErrDeb_cfg.c. */
++FUNC(void, SFTY_INV_ACTR_CODE) SftyInvActr_ReinitMonrData(void)   /* PRQA S 1503 # SftyInvActr_ReinitMonrData() will be called by ErrDeb_cfg.c */
+ {
+    /* ******** Variables declaration *********** */
+    
+diff --git a/src/fw_cu/Components/Safety/Sfty_Inv/SftyInvActr/src/SftyInvActr_data.c b/src/fw_cu/Components/Safety/Sfty_Inv/SftyInvActr/src/SftyInvActr_data.c
+index 8dcab29f0..e4baeae84 100644
+--- a/src/fw_cu/Components/Safety/Sfty_Inv/SftyInvActr/src/SftyInvActr_data.c
++++ b/src/fw_cu/Components/Safety/Sfty_Inv/SftyInvActr/src/SftyInvActr_data.c
+@@ -15,6 +15,8 @@
+ #include "Std_Types.h"
+ #include "SftyInvActr_data.h"
+ #include "AddEnumTypes.h"
++#include "emm_common.h"
++
+ 
+ 
+ #ifndef ADDS_DEF_FILE
+@@ -24,63 +26,27 @@
+ 
+ /*==================================== [Defination for Variable] ====================================*/
+ 
+-
+ /* Begin: SFTYINVACTR_START_SEC_VAR_AREA_CMN_FAST_NO_INIT_8 (online) */
+ #define SFTYINVACTR_START_SEC_VAR_AREA_CMN_FAST_NO_INIT_8
+ #include "MemMap.h"
+ 
+ VAR(uint8, SFTYINVACTR_VAR) SftyInvActrKl30InvSt;
++
+ #define SFTYINVACTR_STOP_SEC_VAR_AREA_CMN_FAST_NO_INIT_8
+ #include "MemMap.h"
+ /* End: SFTYINVACTR_STOP_SEC_VAR_AREA_CMN_FAST_NO_INIT_8 (online) */
+ 
+-/* Begin: SFTYINVACTR_START_SEC_VAR_QM_FAST_INIT_32 (online) */
+-#define SFTYINVACTR_START_SEC_VAR_QM_FAST_INIT_32
+-#include "MemMap.h"
+-
+-VAR(uint32, SFTYINVACTR_VAR) SftyInvActrSoftAscTmr = 0UL;
+-#define SFTYINVACTR_STOP_SEC_VAR_QM_FAST_INIT_32
+-#include "MemMap.h"
+-/* End: SFTYINVACTR_STOP_SEC_VAR_QM_FAST_INIT_32 (online) */
+-
+-/* Begin: SFTYINVACTR_START_SEC_VAR_QM_FAST_INIT_8 (online) */
+-#define SFTYINVACTR_START_SEC_VAR_QM_FAST_INIT_8
+-#include "MemMap.h"
+-
+-VAR(uint8, SFTYINVACTR_VAR) SftyInvActrSoftAscTmrActv = 0U;
+-#define SFTYINVACTR_STOP_SEC_VAR_QM_FAST_INIT_8
+-#include "MemMap.h"
+-/* End: SFTYINVACTR_STOP_SEC_VAR_QM_FAST_INIT_8 (online) */
+-
+-/* Begin: SFTYINVACTR_START_SEC_VAR_QM_FAST_INIT_8 (online) */
+-#define SFTYINVACTR_START_SEC_VAR_QM_FAST_INIT_8
+-#include "MemMap.h"
+-
+-VAR(uint8, SFTYINVACTR_VAR) SftyInvActrSoftAscTmrElpd = 0U;
+-#define SFTYINVACTR_STOP_SEC_VAR_QM_FAST_INIT_8
+-#include "MemMap.h"
+-/* End: SFTYINVACTR_STOP_SEC_VAR_QM_FAST_INIT_8 (online) */
+ 
+ /* Begin: SFTYINVACTR_START_SEC_VAR_QM_FAST_INIT_32 (online) */
+ #define SFTYINVACTR_START_SEC_VAR_QM_FAST_INIT_32
+ #include "MemMap.h"
+ 
+ VAR(SftyInvActr_SafStTyp, SFTYINVACTR_VAR) SftyInvActrSts = SFTY_INV_ACTR_IDLE_ST;
++
+ #define SFTYINVACTR_STOP_SEC_VAR_QM_FAST_INIT_32
+ #include "MemMap.h"
+ /* End: SFTYINVACTR_STOP_SEC_VAR_QM_FAST_INIT_32 (online) */
+ 
+-/* Begin: SFTYINVACTR_START_SEC_CALIB_32 (calib) */
+-#define SFTYINVACTR_START_SEC_CALIB_32
+-#include "MemMap.h"
+-
+-CONST(uint32, SFTYINVACTR_CALIB) SftyInvActrSoftAscTmrThd = 200000UL;
+-#define SFTYINVACTR_STOP_SEC_CALIB_32
+-#include "MemMap.h"
+-/* End: SFTYINVACTR_STOP_SEC_CALIB_32 (calib) */
+-
+-
+-
+ 
+ /* ******************** Start Of P2_100kW ******************** */
+ 
+@@ -154,13 +120,34 @@ VAR(boolean, SFTYINVACTR_VAR) SftyInvActrFctldCoordLsAscSpoSfty = FALSE;
+ /*
+ @@ SYMBOL = SftyInvActrSafeStReqDrv
+ @@ A2L_TYPE = MEASURE
+-@@ DATA_TYPE = UBYTE [0 ... 5]
+-@@ CONVERSION = TABLE 0 "LS_ASC request" 1 "HS_ASC request" 2 "SPO request" 3 "LS_ASC_SPO request" 4 "HS_ASC_SPO request" 5 "No Safe State request"
++@@ DATA_TYPE = UBYTE [0 ... 2]
++@@ CONVERSION = TABLE 0 "No Safe State request" 1 "SPO request" 2 "ASC request"
+ @@ DESCRIPTION = "Safe state request from DrvCtrl module"
+ @@ GROUP = SftyInvActr
+ @@ END
+ */
+-VAR(uint8, SFTYINVACTR_VAR) SftyInvActrSafeStReqDrv = 5U;
++VAR(uint8, SFTYINVACTR_VAR) SftyInvActrSafeStReqDrv = 0U;
++
++#define SFTYINVACTR_STOP_SEC_VAR_QM_FAST_INIT_8
++#include "MemMap.h"
++/* End: SFTYINVACTR_STOP_SEC_VAR_QM_FAST_INIT_8 (online) */
++
++
++/* Begin: SFTYINVACTR_START_SEC_VAR_QM_FAST_INIT_8 (online) */
++#define SFTYINVACTR_START_SEC_VAR_QM_FAST_INIT_8
++#include "MemMap.h"
++
++
++/*
++@@ SYMBOL = SftyInvActrEmmMode
++@@ A2L_TYPE = MEASURE
++@@ DATA_TYPE = UBYTE [0 ... 9]
++@@ CONVERSION = TABLE 0 "EMM_CALIB_MODE" 1 "EMM_FAILURE_MODE" 2 "EMM_FREEWHEEL_MODE" 3 "EMM_INIT_MODE" 4 "EMM_NACHLAUF_MODE" 5 "EMM_PREPARESLEEP_MODE" 6 "EMM_SLEEP_MODE" 7 "EMM_STANDBY_MODE" 8 "EMM_TRQCTRL_MODE" 9 "EMM_VLTCTRL_MODE"
++@@ DESCRIPTION = "Current Emm Mode from Manage State module"
++@@ GROUP = SftyInvActr
++@@ END
++*/
++VAR(uint8, SFTYINVACTR_VAR) SftyInvActrEmmMode = (uint8)EMM_INIT_MODE;
+ 
+ #define SFTYINVACTR_STOP_SEC_VAR_QM_FAST_INIT_8
+ #include "MemMap.h"
+@@ -175,13 +162,13 @@ VAR(uint8, SFTYINVACTR_VAR) SftyInvActrSafeStReqDrv = 5U;
+ /*
+ @@ SYMBOL = SftyInvActrSafeStReqIntel
+ @@ A2L_TYPE = MEASURE
+-@@ DATA_TYPE = UBYTE [0 ... 5]
+-@@ CONVERSION = TABLE 0 "LS_ASC request" 1 "HS_ASC request" 2 "SPO request" 3 "LS_ASC_SPO request" 4 "HS_ASC_SPO request" 5 "No Safe State request"
++@@ DATA_TYPE = UBYTE [0 ... 3]
++@@ CONVERSION = TABLE 0 "No Safe State request" 1 "SPO request" 2 "ASC request" 3 "Coordinated ASC_SPO request"
+ @@ DESCRIPTION = "Internal safe state ID after judging"
+ @@ GROUP = SftyInvActr
+ @@ END
+ */
+-VAR(uint8, SFTYINVACTR_VAR) SftyInvActrSafeStReqIntel = 5U;
++VAR(uint8, SFTYINVACTR_VAR) SftyInvActrSafeStReqIntel = 0U;
+ 
+ 
+ /*
+@@ -193,7 +180,7 @@ VAR(uint8, SFTYINVACTR_VAR) SftyInvActrSafeStReqIntel = 5U;
+ @@ GROUP = SftyInvActr
+ @@ END
+ */
+-VAR(uint8, SFTYINVACTR_VAR) SftyInvActrStateReqMod = 1U;
++VAR(uint8, SFTYINVACTR_VAR) SftyInvActrStateReqMod = PWM_OFF_FPGA;
+ 
+ 
+ /*
+@@ -244,6 +231,7 @@ VAR(float32, SFTYINVACTR_VAR) SftyInvActrMotorSpdFild = 0.0f;
+ #include "MemMap.h"
+ /* End: SFTYINVACTR_STOP_SEC_VAR_QM_FAST_INIT_32 (online) */
+ 
++
+ /* ================================================================== */
+ 
+ 
+@@ -572,16 +560,42 @@ CONST(uint8, SFTYREPLCMT_CALIB) SftyReplcmtInvActrSafeStReqDrvStiEna = FALSE;
+ /*
+ @@ SYMBOL = SftyReplcmtInvActrSafeStReqDrv
+ @@ A2L_TYPE = PARAMETER
+-@@ DATA_TYPE = UBYTE [0 ... 5]
+-@@ CONVERSION = TABLE 0 "LS_ASC request" 1 "HS_ASC request" 2 "SPO request" 3 "LS_ASC_SPO request" 4 "HS_ASC_SPO request" 5 "No Safe State request"
++@@ DATA_TYPE = UBYTE [0 ... 2]
++@@ CONVERSION = TABLE 0 "No Safe State request" 1 "SPO request" 2 "ASC request"
+ @@ DESCRIPTION = "Replacement value of Safe State Request from DRCO"
+ @@ GROUP = SftyInvActr
+ @@ END
+ */
+-CONST(uint8, SFTYREPLCMT_CALIB) SftyReplcmtInvActrSafeStReqDrv = NO_SAFE_STATE_REQ;
++CONST(uint8, SFTYREPLCMT_CALIB) SftyReplcmtInvActrSafeStReqDrv = NO_SAFE_STATE_REQ_DRCO;
+ 
+ 
+-/* 3> Error Monitor Status about IGBT */
++/* 3> Current Emm Mode from Manage State module */
++
++/*
++@@ SYMBOL = SftyReplcmtInvActrEmmModeStiEna
++@@ A2L_TYPE = PARAMETER
++@@ DATA_TYPE = UBYTE [0 ... 1]
++@@ CONVERSION = TABLE 0 "Disable" 1 "Enable"
++@@ DESCRIPTION = "Enable stimulation of Current Emm Mode from Manage State module"
++@@ GROUP = SftyInvActr
++@@ END
++*/
++CONST(uint8, SFTYREPLCMT_CALIB) SftyReplcmtInvActrEmmModeStiEna = FALSE;
++
++
++/*
++@@ SYMBOL = SftyReplcmtInvActrEmmMode
++@@ A2L_TYPE = PARAMETER
++@@ DATA_TYPE = UBYTE [0 ... 9]
++@@ CONVERSION = TABLE 0 "EMM_CALIB_MODE" 1 "EMM_FAILURE_MODE" 2 "EMM_FREEWHEEL_MODE" 3 "EMM_INIT_MODE" 4 "EMM_NACHLAUF_MODE" 5 "EMM_PREPARESLEEP_MODE" 6 "EMM_SLEEP_MODE" 7 "EMM_STANDBY_MODE" 8 "EMM_TRQCTRL_MODE" 9 "EMM_VLTCTRL_MODE"
++@@ DESCRIPTION = "Replacement value for Current Emm Mode from Manage State module"
++@@ GROUP = SftyInvActr
++@@ END
++*/
++CONST(uint8, SFTYREPLCMT_CALIB) SftyReplcmtInvActrEmmMode = (uint8)EMM_INIT_MODE;
++
++
++/* 4> Error Monitor Status about IGBT */
+ 
+ /*
+ @@ SYMBOL = SftyReplcmtInvActrIgbtMonrStStiEna
+@@ -655,7 +669,7 @@ CONST(uint8, SFTYREPLCMT_CALIB) SftyReplcmtInvActrMidPointPhaVErrMonrSt = FALSE;
+ CONST(uint8, SFTYREPLCMT_CALIB) SftyReplcmtInvActrMidPointPhaWErrMonrSt = FALSE;
+ 
+ 
+-/* 4> Read Safe state status that from is FPGA */
++/* 5> Read Safe state status that from is FPGA */
+ 
+ /*
+ @@ SYMBOL = SftyReplcmtInvActrCurrSafeStStiEna
+@@ -673,7 +687,7 @@ CONST(uint8, SFTYREPLCMT_CALIB) SftyReplcmtInvActrCurrSafeStStiEna = FALSE;
+ @@ SYMBOL = SftyReplcmtInvActrEmgySwFltSts
+ @@ A2L_TYPE = PARAMETER
+ @@ DATA_TYPE = UBYTE [0 ... 1]
+-@@ CONVERSION = TABLE 0 "No SPO request" 1 "SPO request"
++@@ CONVERSION = TABLE 0 "Emergency Stop" 1 "No Fault"
+ @@ DESCRIPTION = "Replacement value for current safe state status from FPGA that is for Not Emergency"
+ @@ GROUP = SftyInvActr
+ @@ END
+@@ -685,7 +699,7 @@ CONST(boolean, SFTYINVACTR_VAR) SftyReplcmtInvActrEmgySwFltSts = FALSE;
+ @@ SYMBOL = SftyReplcmtInvActrSCSpdReadyFltSts
+ @@ A2L_TYPE = PARAMETER
+ @@ DATA_TYPE = UBYTE [0 ... 1]
+-@@ CONVERSION = TABLE 0 "No SPO request" 1 "SPO request"
++@@ CONVERSION = TABLE 0 "Open Circuit" 1 "ASC_Hs_Ls"
+ @@ DESCRIPTION = "Replacement value for current safe state status from FPGA that is for SC speed"
+ @@ GROUP = SftyInvActr
+ @@ END
+@@ -693,7 +707,7 @@ CONST(boolean, SFTYINVACTR_VAR) SftyReplcmtInvActrEmgySwFltSts = FALSE;
+ CONST(boolean, SFTYINVACTR_VAR) SftyReplcmtInvActrSCSpdReadyFltSts = FALSE;
+ 
+ 
+-/* 5> Read Filtered Moror Speed */
++/* 6> Read Filtered Moror Speed */
+ 
+ /*
+ @@ SYMBOL = SftyReplcmtInvActrMotorSpdStiEna
+diff --git a/src/fw_cu/build/Parfiles/P2_100kW/Testbench/VW310E_76_49_A274_0028_VEH_200901.par b/src/fw_cu/build/Parfiles/P2_100kW/Testbench/VW310E_76_49_A274_0028_VEH_200901.par
+index bc8cbd540..6e2411296 100644
+--- a/src/fw_cu/build/Parfiles/P2_100kW/Testbench/VW310E_76_49_A274_0028_VEH_200901.par
++++ b/src/fw_cu/build/Parfiles/P2_100kW/Testbench/VW310E_76_49_A274_0028_VEH_200901.par
+@@ -9391,7 +9391,7 @@ SftyDmaVadcRslvrTiStampOffs [UINT(32)]  320 ;  320
+ ;SftyEccMonEovFlashMaxErrCorrnThd [UINT(8)]  3 ;  3
+ ;SftyEccMonEovRamMaxErrCorrnThd [UINT(8)]  5 ;  5
+ SftyFlshVldtCrcCalcLen [UINT(32)]  512 ;  512
+-SftyInvActrSoftAscTmrThd [UINT(32)]  40000 ;  40000
++;SftyInvActrSoftAscTmrThd [UINT(32)]  40000 ;  40000
+ ;SftyLibApp_Enable [UINT(8)]  0 ; FALSE
+ ;SftyLibApp_FltInjecInRunTime [UINT(8)]  0 ; FALSE
+ SftyModMgrModSwtTmrThd [UINT(32)]  40000 ;  40000
+diff --git a/src/fw_cu/build/a2l/Measurements-to-Timeslices-Mapping.csv b/src/fw_cu/build/a2l/Measurements-to-Timeslices-Mapping.csv
+index 57960572f..c5fde3f6f 100644
+--- a/src/fw_cu/build/a2l/Measurements-to-Timeslices-Mapping.csv
++++ b/src/fw_cu/build/a2l/Measurements-to-Timeslices-Mapping.csv
+@@ -8145,6 +8145,7 @@ BswFpgaIfIpduTx.Data.TxA.Id.Mx1.Signal.StateReq.Field.SCSpeedReady,Core_2,C2_10m
+ BswFpgaIfIpduTx.Data.TxA.Id.Mx1.Signal.StateReq.Field.SwitchType,Core_2,C2_10ms,10,,,DRCO
+ BswFpgaIfIpduTx.Data.TxS.Data16,Core_2,C2_10ms,10,,,DRCO
+ SftyInvActrEmgySwFltSts,Core_1,Core_1_200us,0.2,,,SSW
++SftyInvActrEmmMode,Core_1,Core_1_200us,0.2,,,SSW
+ SftyInvActrSCSpdReadyFltSts,Core_1,Core_1_200us,0.2,,,SSW
+ SftyInvActrFctldHsAscSfty,Core_1,Core_1_200us,0.2,,,SSW
+ SftyInvActrFctldLsAscSfty,Core_1,Core_1_200us,0.2,,,SSW
+'

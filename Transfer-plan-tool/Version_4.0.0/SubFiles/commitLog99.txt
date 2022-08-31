@@ -1,0 +1,3211 @@
+b'commit 4de0b35f227d68cfeef5b07ae06854ef5df5f227
+Author: Santosh Pallanti <santos.pallanti.jv.ext@valeo.com>
+Date:   Tue Dec 21 23:38:35 2021 +0530
+
+    $100kW-48745$ - FCT_CtrlParkPos - Implement SW Unit SftyParkLockEvln
+    
+    Change-Id: I012a2084cbb1a3aa77c127afe30afede5215f8a2
+
+diff --git a/src/fw_cu/Components/Cmn/Com/C2cCom/include/C2cComBswData.h b/src/fw_cu/Components/Cmn/Com/C2cCom/include/C2cComBswData.h
+index 22d4309b9..3f69252a7 100644
+--- a/src/fw_cu/Components/Cmn/Com/C2cCom/include/C2cComBswData.h
++++ b/src/fw_cu/Components/Cmn/Com/C2cCom/include/C2cComBswData.h
+@@ -654,6 +654,28 @@ typedef struct BswC2cDataType_
+    */
+    uint8 MotTempIni;
+ 
++   /*
++   @@ ELEMENT = DisEngmentValue
++   @@ STRUCTURE = BswC2cDataType
++   @@ A2L_TYPE = MEASURE
++   @@ DATA_TYPE = FLOAT
++   @@ DESCRIPTION = "Park lock Actuator Disengage Position Angle"
++   @@ GROUP = C2cCom
++   @@ END
++   */
++   float32 DisEngmentValue;
++
++   /*
++   @@ ELEMENT = EngmentValue
++   @@ STRUCTURE = BswC2cDataType
++   @@ A2L_TYPE = MEASURE
++   @@ DATA_TYPE = FLOAT
++   @@ DESCRIPTION = "Park lock Actuator Engage Position Angle"
++   @@ GROUP = C2cCom
++   @@ END
++   */
++   float32 EngmentValue;
++
+ } BswC2cDataType;
+ 
+ /*================== [declaration of public data] ===========================*/
+diff --git a/src/fw_cu/Components/Cmn/Shared/MemMap/include/SftyNextGen_MemMap.h b/src/fw_cu/Components/Cmn/Shared/MemMap/include/SftyNextGen_MemMap.h
+index 77650f958..ea7248cb8 100644
+--- a/src/fw_cu/Components/Cmn/Shared/MemMap/include/SftyNextGen_MemMap.h
++++ b/src/fw_cu/Components/Cmn/Shared/MemMap/include/SftyNextGen_MemMap.h
+@@ -2176,6 +2176,16 @@
+ 
+ 
+ /*SftyCrc********************************************************************/
++#elif (defined SFTYCRC_START_SEC_CONST_6)
++   #undef SFTYCRC_START_SEC_CONST_6
++   #define SFTY_ASIL_C_START_SEC_CONST
++   #include "BasicNextGen_MemMap.h"
++
++#elif (defined SFTYCRC_STOP_SEC_CONST_6)
++   #undef SFTYCRC_STOP_SEC_CONST_6
++   #define SFTY_ASIL_C_STOP_SEC_CONST
++   #include "BasicNextGen_MemMap.h"
++
+ #elif (defined SFTYCRC_START_SEC_CONST_8)
+    #undef SFTYCRC_START_SEC_CONST_8
+    #define SFTY_ASIL_C_START_SEC_CONST
+@@ -5594,6 +5604,137 @@
+    #define SFTY_ASIL_A_STOP_SEC_VAR_FAST_NOINIT
+    #include "BasicNextGen_MemMap.h"
+ 
++/************************************************* SftyParkLockEvln ************************************************************/
++#elif (defined SFTYPARKLOCKEVLN_START_SEC_VAR_AREA_2_FAST_INIT_8)
++   #undef SFTYPARKLOCKEVLN_START_SEC_VAR_AREA_2_FAST_INIT_8
++   #define SFTY_ASIL_B_START_SEC_VAR_FAST_INIT
++   #include "BasicNextGen_MemMap.h"
++
++#elif (defined SFTYPARKLOCKEVLN_STOP_SEC_VAR_AREA_2_FAST_INIT_8)
++   #undef SFTYPARKLOCKEVLN_STOP_SEC_VAR_AREA_2_FAST_INIT_8
++   #define SFTY_ASIL_B_STOP_SEC_VAR_FAST_INIT
++   #include "BasicNextGen_MemMap.h"
++
++#elif (defined SFTYPARKLOCKEVLN_START_SEC_VAR_AREA_2_FAST_INIT_16)
++   #undef SFTYPARKLOCKEVLN_START_SEC_VAR_AREA_2_FAST_INIT_16
++   #define SFTY_ASIL_B_START_SEC_VAR_FAST_INIT
++   #include "BasicNextGen_MemMap.h"
++
++#elif (defined SFTYPARKLOCKEVLN_STOP_SEC_VAR_AREA_2_FAST_INIT_16)
++   #undef SFTYPARKLOCKEVLN_STOP_SEC_VAR_AREA_2_FAST_INIT_16
++   #define SFTY_ASIL_B_STOP_SEC_VAR_FAST_INIT
++   #include "BasicNextGen_MemMap.h"
++
++#elif (defined SFTYPARKLOCKEVLN_START_SEC_VAR_AREA_2_FAST_INIT_32)
++   #undef SFTYPARKLOCKEVLN_START_SEC_VAR_AREA_2_FAST_INIT_32
++   #define SFTY_ASIL_B_START_SEC_VAR_FAST_INIT
++   #include "BasicNextGen_MemMap.h"
++
++#elif (defined SFTYPARKLOCKEVLN_STOP_SEC_VAR_AREA_2_FAST_INIT_32)
++   #undef SFTYPARKLOCKEVLN_STOP_SEC_VAR_AREA_2_FAST_INIT_32
++   #define SFTY_ASIL_B_STOP_SEC_VAR_FAST_INIT
++   #include "BasicNextGen_MemMap.h"
++
++#elif (defined SFTYPARKLOCKEVLN_AREA_2_START_SEC_CONST_16)
++   #undef SFTYPARKLOCKEVLN_AREA_2_START_SEC_CONST_16
++   #define SFTY_ASIL_B_START_SEC_CONST
++   #include "BasicNextGen_MemMap.h"
++
++#elif (defined SFTYPARKLOCKEVLN_AREA_2_STOP_SEC_CONST_16)
++   #undef SFTYPARKLOCKEVLN_AREA_2_STOP_SEC_CONST_16
++   #define SFTY_ASIL_B_STOP_SEC_CONST
++   #include "BasicNextGen_MemMap.h"
++
++#elif (defined SFTYPARKLOCKEVLN_AREA_2_START_SEC_CODE_SLOW)
++   #undef SFTYPARKLOCKEVLN_AREA_2_START_SEC_CODE_SLOW
++   #define SFTY_ASIL_B_START_SEC_CODE_SLOW
++   #include "BasicNextGen_MemMap.h"
++
++#elif (defined SFTYPARKLOCKEVLN_AREA_2_STOP_SEC_CODE_SLOW)
++   #undef SFTYPARKLOCKEVLN_AREA_2_STOP_SEC_CODE_SLOW
++   #define SFTY_ASIL_B_STOP_SEC_CODE_SLOW
++   #include "BasicNextGen_MemMap.h"
++
++#elif (defined SFTYPARKLOCKEVLN_AREA_2_START_SEC_CODE_FAST)
++   #undef SFTYPARKLOCKEVLN_AREA_2_START_SEC_CODE_FAST
++   #define SFTY_ASIL_B_START_SEC_CODE_FAST
++   #include "BasicNextGen_MemMap.h"
++
++#elif (defined SFTYPARKLOCKEVLN_AREA_2_STOP_SEC_CODE_FAST)
++   #undef SFTYPARKLOCKEVLN_AREA_2_STOP_SEC_CODE_FAST
++   #define SFTY_ASIL_B_STOP_SEC_CODE_FAST
++   #include "BasicNextGen_MemMap.h"
++
++#elif (defined SFTYPARKLOCKEVLN_ASIL_2_START_SEC_VAR_FAST_CLEARED)
++   #undef SFTYPARKLOCKEVLN_ASIL_2_START_SEC_VAR_FAST_CLEARED
++   #define SFTY_ASIL_B_START_SEC_VAR_FAST_CLEARED
++   #include "BasicNextGen_MemMap.h"
++
++#elif (defined SFTYPARKLOCKEVLN_ASIL_2_STOP_SEC_VAR_FAST_CLEARED)
++   #undef SFTYPARKLOCKEVLN_ASIL_2_STOP_SEC_VAR_FAST_CLEARED
++   #define SFTY_ASIL_B_STOP_SEC_VAR_FAST_CLEARED
++   #include "BasicNextGen_MemMap.h"
++
++#elif (defined SFTYPARKLOCKEVLN_AREA_0_START_SEC_CODE_FAST)
++   #undef SFTYPARKLOCKEVLN_AREA_0_START_SEC_CODE_FAST
++   #define SFTY_QM_START_SEC_CODE_FAST
++   #include "BasicNextGen_MemMap.h"
++
++#elif (defined SFTYPARKLOCKEVLN_AREA_0_STOP_SEC_CODE_FAST)
++   #undef SFTYPARKLOCKEVLN_AREA_0_STOP_SEC_CODE_FAST
++   #define SFTY_QM_STOP_SEC_CODE_FAST
++   #include "BasicNextGen_MemMap.h"
++
++#elif (defined SFTYPARKLOCKEVLN_ASIL_0_START_SEC_VAR_FAST_CLEARED)
++   #undef SFTYPARKLOCKEVLN_ASIL_0_START_SEC_VAR_FAST_CLEARED
++   #define SFTY_QM_START_SEC_VAR_FAST_CLEARED
++   #include "BasicNextGen_MemMap.h"
++
++#elif (defined SFTYPARKLOCKEVLN_ASIL_0_STOP_SEC_VAR_FAST_CLEARED)
++   #undef SFTYPARKLOCKEVLN_ASIL_0_STOP_SEC_VAR_FAST_CLEARED
++   #define SFTY_QM_STOP_SEC_VAR_FAST_CLEARED
++   #include "BasicNextGen_MemMap.h"
++
++#elif (defined SFTYPARKLOCKEVLN_AREA_0_START_SEC_VAR_FAST_INIT_32)
++   #undef SFTYPARKLOCKEVLN_AREA_0_START_SEC_VAR_FAST_INIT_32
++   #define SFTY_QM_START_SEC_VAR_FAST_INIT
++   #include "BasicNextGen_MemMap.h"
++
++#elif (defined SFTYPARKLOCKEVLN_AREA_0_STOP_SEC_VAR_FAST_INIT_32)
++   #undef SFTYPARKLOCKEVLN_AREA_0_STOP_SEC_VAR_FAST_INIT_32
++   #define SFTY_QM_STOP_SEC_VAR_FAST_INIT
++   #include "BasicNextGen_MemMap.h"
++
++#elif (defined SFTYPARKLOCKEVLN_START_SEC_CALIB_32)
++   #undef SFTYPARKLOCKEVLN_START_SEC_CALIB_32
++   #define SAFETY_START_SEC_CALIB
++   #include "BasicNextGen_MemMap.h"
++
++#elif (defined SFTYPARKLOCKEVLN_STOP_SEC_CALIB_32)
++   #undef SFTYPARKLOCKEVLN_STOP_SEC_CALIB_32
++   #define SAFETY_STOP_SEC_CALIB
++   #include "BasicNextGen_MemMap.h"
++
++#elif (defined SFTYPARKLOCKEVLN_START_SEC_CALIB_16)
++   #undef SFTYPARKLOCKEVLN_START_SEC_CALIB_16
++   #define SAFETY_START_SEC_CALIB
++   #include "BasicNextGen_MemMap.h"
++
++#elif (defined SFTYPARKLOCKEVLN_STOP_SEC_CALIB_16)
++   #undef SFTYPARKLOCKEVLN_STOP_SEC_CALIB_16
++   #define SAFETY_STOP_SEC_CALIB
++   #include "BasicNextGen_MemMap.h"
++
++#elif (defined SFTYPARKLOCKEVLN_START_SEC_CALIB_8)
++   #undef SFTYPARKLOCKEVLN_START_SEC_CALIB_8
++   #define SAFETY_START_SEC_CALIB
++   #include "BasicNextGen_MemMap.h"
++
++#elif (defined SFTYPARKLOCKEVLN_STOP_SEC_CALIB_8)
++   #undef SFTYPARKLOCKEVLN_STOP_SEC_CALIB_8
++   #define SAFETY_STOP_SEC_CALIB
++   #include "BasicNextGen_MemMap.h"
++
+ /*****************************************************************************************************************************/
+ #else
+    #define NO_SFTY_MEM_SELECTOR
+diff --git a/src/fw_cu/Components/Cmn/Shared/SysDef/include/AddEnumTypes.h b/src/fw_cu/Components/Cmn/Shared/SysDef/include/AddEnumTypes.h
+index 142915aa5..f492d14e3 100644
+--- a/src/fw_cu/Components/Cmn/Shared/SysDef/include/AddEnumTypes.h
++++ b/src/fw_cu/Components/Cmn/Shared/SysDef/include/AddEnumTypes.h
+@@ -46,6 +46,7 @@ typedef enum  {SYSPRM_EM_PHA_SET_ACTVN_NONE = 0, SYSPRM_EM_PHA_SET_ACTVN_A = 1,
+ typedef enum  {BSW_ERR_DEB_MONR_NOT_TESTD_ST = 0, BSW_ERR_DEB_MONR_NO_ERR_ST = 1, BSW_ERR_DEB_MONR_ERR_ST = 2} BswErrDeb_ErrMonrStType;
+ typedef enum  {INV_STANDBY = 0, INV_TRQCTRL = 1, INV_INT_SPDCTRL = 2, INV_VTGCTRL = 3, INV_EX_SPDCTRL = 4, INV_FAILURE = 5, INV_CALIBRATION = 6, INV_SPCLBRK = 7, INV_FREEWHL = 8, INV_INIT = 15}Sfty_InvModType;
+ typedef enum  {NVM_UPDT_INACTIVE = 0, NVM_UPDT_PENDING = 1, NVM_UPDT_SUCCESS = 2, NVM_UPDT_FAILED = 3} RslvrOffsNvmUpdtStsType;
++typedef enum  {SFTYPARKLOCK_POSN_SIGNAL_NOT_AVAILABLE = 0, SFTYPARKLOCK_POSN_ENGAGED = 1, SFTYPARKLOCK_POSN_UNDETERMINED = 2, SFTYPARKLOCK_POSN_DISENGAGED = 3} SftyParkLockEvln_AbsPosnType;
+ 
+ 
+ #endif
+diff --git a/src/fw_cu/Components/Cmn/Shared/SysDef/include/AddStructTypes.h b/src/fw_cu/Components/Cmn/Shared/SysDef/include/AddStructTypes.h
+index 6dd2bf835..e55af97e0 100644
+--- a/src/fw_cu/Components/Cmn/Shared/SysDef/include/AddStructTypes.h
++++ b/src/fw_cu/Components/Cmn/Shared/SysDef/include/AddStructTypes.h
+@@ -115,8 +115,25 @@ typedef struct SftyE2eRxReplcmtCfgType_
+ } SftyE2eRxReplcmtCfgType;
+ typedef struct SftyOffsetGainType_
+ {
+-\t\t_param float32 Offset;
+-\t\t_param float32 Gain;
++   /*
++   @@ ELEMENT = Offset
++   @@ STRUCTURE = SftyOffsetGainType
++   @@ A2L_TYPE = MEASURE
++   @@ DATA_TYPE = FLOAT
++   @@ GROUP = AddStructTypes
++   @@ END
++   */
++   _param float32 Offset;
++
++   /*
++   @@ ELEMENT = Gain
++   @@ STRUCTURE = SftyOffsetGainType
++   @@ A2L_TYPE = MEASURE
++   @@ DATA_TYPE = FLOAT
++   @@ GROUP = AddStructTypes
++   @@ END
++   */
++\t_param float32 Gain;
+ } SftyOffsetGainType;
+ typedef struct SftyQSpi_CfgType_
+ {
+diff --git a/src/fw_cu/Components/Safety/Sfty_Cmn/SftyCrc/include/SftyCrc.h b/src/fw_cu/Components/Safety/Sfty_Cmn/SftyCrc/include/SftyCrc.h
+index 0dca450b9..8e925e71b 100644
+--- a/src/fw_cu/Components/Safety/Sfty_Cmn/SftyCrc/include/SftyCrc.h
++++ b/src/fw_cu/Components/Safety/Sfty_Cmn/SftyCrc/include/SftyCrc.h
+@@ -165,6 +165,7 @@ typedef struct SftyCrc_FceCrcRegType_ /* PRQA S 0635  */
+ #define SFTYCRC_START_SEC_CODE_AREA_CMN_SLOW
+ #include "MemMap.h"
+ EXTERNAL_ FUNC (uint8, SFTYCRC) SftyCrc_CalcCRC4(const uint8 Crc_Data[], uint32  Crc_Length, uint8  Crc_StartValue8,  boolean Crc_IsFirstCall);
++EXTERNAL_ FUNC(uint8, SFTYCRC)  SftyCrc_CalcCRC6(const uint8 Crc_Data[], uint32  Crc_Length, uint8  Crc_StartValue6,  boolean Crc_IsFirstCall);
+ EXTERNAL_ FUNC(uint8, SFTYCRC)  SftyCrc_CalcCRC8(const  uint8 Crc_Data[], uint32 Crc_Length, uint8  Crc_StartValue8,  boolean Crc_IsFirstCall);
+ EXTERNAL_ FUNC(uint16, SFTYCRC) SftyCrc_CalcCRC16(const uint8 Crc_Data[], uint32 Crc_Length, uint16 Crc_StartValue16, boolean Crc_IsFirstCall);
+ EXTERNAL_ FUNC(uint32, SFTYCRC) SftyCrc_CalcCRC32(const uint8 Crc_Data[], uint32 Crc_Length, uint32 Crc_StartValue32, boolean Crc_IsFirstCall);
+diff --git a/src/fw_cu/Components/Safety/Sfty_Cmn/SftyCrc/include/SftyCrc_data.h b/src/fw_cu/Components/Safety/Sfty_Cmn/SftyCrc/include/SftyCrc_data.h
+index 9815fd0cc..ede400f1b 100644
+--- a/src/fw_cu/Components/Safety/Sfty_Cmn/SftyCrc/include/SftyCrc_data.h
++++ b/src/fw_cu/Components/Safety/Sfty_Cmn/SftyCrc/include/SftyCrc_data.h
+@@ -34,6 +34,14 @@
+ #define CRC_INITIAL_VALUE4              (0x5U)
+ /* CRC4 XOR value*/
+ #define CRC_XOR_VALUE4                  (0xFU)
++
++/*! Maximum size of SftyCrc_Table6 table */
++#define CRC_INITIAL_VALUE6              (0x15U)
++/*! Initial value of crc6 */
++#define CRC_6_TBL_SIZE                  (64U)
++/*! CRC XOR value */
++#define CRC_XOR_VALUE6                  (0x00U)
++
+ /*! Maximum size of SftyCrc_Table8 table*/
+ #define CRC_8_TBL_SIZE                  (256U)
+ /*! Initial value of crc8 */
+@@ -62,10 +70,21 @@
+ /*================== [local data] ===========================================*/
+ #define SFTYCRC_START_SEC_CONST_8
+ #include "MemMap.h"
++
+ EXTERNAL_ CONST(uint8, SFTYCRC_CONST) SftyCrc_Tbl4[CRC_4_TBL_SIZE];
++
+ #define SFTYCRC_STOP_SEC_CONST_8
+ #include "MemMap.h"
+ 
++#define SFTYCRC_START_SEC_CONST_6
++#include "MemMap.h"
++
++/*! Table of pre-computed values for CRC6. Used Polynomial is 0x59 according SAE J2716 */
++EXTERNAL_ CONST(uint8, SFTYCRC_CONST) SftyCrc_Tbl6[CRC_6_TBL_SIZE];
++
++#define SFTYCRC_STOP_SEC_CONST_6
++#include "MemMap.h"
++
+ #define SFTYCRC_START_SEC_CONST_8
+ #include "MemMap.h"
+ 
+@@ -80,7 +99,6 @@ EXTERNAL_ CONST(uint8, SFTYCRC_CONST) SftyCrc_Tbl8[CRC_8_TBL_SIZE];
+ 
+ /*! Table of pre-computed values for CRC8 */
+ EXTERNAL_ CONST(uint16, SFTYCRC_CONST) SftyCrc_Tbl16[CRC_16_TBL_SIZE];
+-
+ #define SFTYCRC_STOP_SEC_CONST_16
+ #include "MemMap.h"
+ 
+diff --git a/src/fw_cu/Components/Safety/Sfty_Cmn/SftyCrc/src/SftyCrc.c b/src/fw_cu/Components/Safety/Sfty_Cmn/SftyCrc/src/SftyCrc.c
+index 6a3e3395e..effb77ae7 100644
+--- a/src/fw_cu/Components/Safety/Sfty_Cmn/SftyCrc/src/SftyCrc.c
++++ b/src/fw_cu/Components/Safety/Sfty_Cmn/SftyCrc/src/SftyCrc.c
+@@ -253,6 +253,53 @@ FUNC (uint8, SFTYCRC) SftyCrc_CalcCRC4
+ 
+    return Crc_RetValue4;
+ }
++
++/**************************************************************************************************************/
++/*!
++ *\\fn         uint8 SftyCrc_CalcCRC6 (const uint8 Crc_Data[], uint32 Crc_Length, uint8 Crc_StartValue8, boolean Crc_IsFirstCall)
++ *\\brief      This function performs the calculation of a 6-bit CRC according SAE J2716
++ *            using polynomial is 0x59 and initial seed value is 0x15
++ *\\param   [in]   Crc_Data - start address of data block
++ *\\param   [in]   Crc_Length  - Length of data block in bytes
++ *\\param   [in]   Crc_StartValue6 - Start value to continue CRC block calculation
++ *\\param   [in]   Crc_IsFirstCall - TRUE, start a new CRC block calculation
++ *\\param                            FALSE, continue the previous CRC block calculation
++ *\\return      uint8 - 8 bit result of CRC calculation.
++ */
++/**************************************************************************************************************/
++FUNC (uint8, SFTYCRC) SftyCrc_CalcCRC6
++(
++  const uint8 Crc_Data[],
++  uint32  Crc_Length,
++  uint8   Crc_StartValue6,
++  boolean Crc_IsFirstCall
++)
++{
++   uint8   idx;
++   uint8   Crc_RetValue6;
++
++   if(TRUE == Crc_IsFirstCall)
++   {
++      Crc_RetValue6 = CRC_INITIAL_VALUE6; /* First time initialize CRC value with 0x15 seed value */
++   }
++   else
++   {
++      /* Undo final XOR operation */
++      Crc_RetValue6 = Crc_StartValue6 ^ CRC_XOR_VALUE6;
++   }
++
++   /* Process all data (byte wise) */
++   for(idx = 0U; idx < Crc_Length; idx++)
++   {
++      /* get current CRC value = remainder */
++      Crc_RetValue6 = (uint8)(Crc_Data[idx]) ^ (uint8)(SftyCrc_Tbl6[Crc_RetValue6]);
++   }
++
++   Crc_RetValue6 = (uint8)(SftyCrc_Tbl6[Crc_RetValue6]) ^ CRC_XOR_VALUE6;   /* Do Final XOR crc value */
++
++   return Crc_RetValue6;
++}
++
+ /**************************************************************************************************************/
+ /*!
+  *\\fn         uint8 SftyCrc_CalcCRC8 (const uint8 Crc_Data[], uint32 Crc_Length, uint8 Crc_StartValue8, boolean Crc_IsFirstCall)
+diff --git a/src/fw_cu/Components/Safety/Sfty_Cmn/SftyCrc/src/SftyCrc_data.c b/src/fw_cu/Components/Safety/Sfty_Cmn/SftyCrc/src/SftyCrc_data.c
+index 1fcdb7603..6b35d8187 100644
+--- a/src/fw_cu/Components/Safety/Sfty_Cmn/SftyCrc/src/SftyCrc_data.c
++++ b/src/fw_cu/Components/Safety/Sfty_Cmn/SftyCrc/src/SftyCrc_data.c
+@@ -65,6 +65,21 @@ CONST(uint8, SFTYCRC_CONST) SftyCrc_Tbl8[CRC_8_TBL_SIZE] =
+ #define SFTYCRC_STOP_SEC_CONST_8
+ #include "MemMap.h"
+ 
++#define SFTYCRC_START_SEC_CONST_6
++#include "MemMap.h"
++
++/*! Table of pre-computed values for CRC6. Used Polynomial is 0x59 and initial seed value is 0x15 according SAE J2716 */
++CONST(uint8, SFTYCRC_CONST) SftyCrc_Tbl6[CRC_6_TBL_SIZE] =
++{
++  0x00U, 0x19U, 0x32U, 0x2BU, 0x3DU, 0x24U, 0x0FU, 0x16U, 0x23U, 0x3AU, 0x11U, 0x08U, 0x1EU, 0x07U, 0x2CU, 0x35U,
++  0x1FU, 0x06U, 0x2DU, 0x34U, 0x22U, 0x3BU, 0x10U, 0x09U, 0x3CU, 0x25U, 0x0EU, 0x17U, 0x01U, 0x18U, 0x33U, 0x2AU,
++  0x3EU, 0x27U, 0x0CU, 0x15U, 0x03U, 0x1AU, 0x31U, 0x28U, 0x1DU, 0x04U, 0x2FU, 0x36U, 0x20U, 0x39U, 0x12U, 0x0BU,
++  0x21U, 0x38U, 0x13U, 0x0AU, 0x1CU, 0x05U, 0x2EU, 0x37U, 0x02U, 0x1BU, 0x30U, 0x29U, 0x3FU, 0x26U, 0x0DU, 0x14U
++};
++
++#define SFTYCRC_STOP_SEC_CONST_6
++#include "MemMap.h"
++
+ #define SFTYCRC_START_SEC_CONST_16
+ #include "MemMap.h"
+ 
+diff --git a/src/fw_cu/Components/Safety/Sfty_Cmn/SftyParkLockEvln/a2l/.gitkeep b/src/fw_cu/Components/Safety/Sfty_Cmn/SftyParkLockEvln/a2l/.gitkeep
+new file mode 100644
+index 000000000..e69de29bb
+diff --git a/src/fw_cu/Components/Safety/Sfty_Cmn/SftyParkLockEvln/doc/.gitkeep b/src/fw_cu/Components/Safety/Sfty_Cmn/SftyParkLockEvln/doc/.gitkeep
+new file mode 100644
+index 000000000..e69de29bb
+diff --git a/src/fw_cu/Components/Safety/Sfty_Cmn/SftyParkLockEvln/include/SftyParkLockEvln.h b/src/fw_cu/Components/Safety/Sfty_Cmn/SftyParkLockEvln/include/SftyParkLockEvln.h
+new file mode 100644
+index 000000000..35f6694c4
+--- /dev/null
++++ b/src/fw_cu/Components/Safety/Sfty_Cmn/SftyParkLockEvln/include/SftyParkLockEvln.h
+@@ -0,0 +1,67 @@
++/* ********************************************************************** */
++/* Sourcefile:    SftyParkLockEvln.h                                      */
++/*                                                                        */
++/* Project:       100kw                                                   */
++/* TriCore                                                                */
++/*                                                                        */
++/* Department: Valeo Siemens eAutomotive                                  */
++/* I DT EC R&D                                                            */
++/* ********************************************************************** */
++/* Copyright (C) Valeo Siemens eAutomotive Germany GmbH 2021              */
++/* All Rights Reserved. Confidential                                      */
++/* ********************************************************************** */
++
++#ifndef SFTYPARKLOCKEVLN_H_
++#define SFTYPARKLOCKEVLN_H_
++/*!
++* \\addtogroup SftyParkLockEvln_module
++* @{
++*/
++
++/*================== [includes] =============================================*/
++
++/*================== [macros] ===============================================*/
++
++/*================== [type definitions] =====================================*/
++
++/*================== [declaration of public data] ===========================*/
++
++/*================== [declaration of global functions] ======================*/
++
++/* ****************************** AREA 2 - SLOW ********************************* */
++#define SFTYPARKLOCKEVLN_AREA_2_START_SEC_CODE_SLOW
++#include "MemMap.h"
++
++extern FUNC(void, SFTYPARKLOCKEVLN_CODE) SftyParkLockEvln_SlowFunctionArea2(void);
++extern FUNC(void, SFTYPARKLOCKEVLN_CODE) SftyParkLockEvln_Init(void);
++
++#define SFTYPARKLOCKEVLN_AREA_2_STOP_SEC_CODE_SLOW
++#include "MemMap.h"
++
++/* ****************************** AREA 2 - FAST ********************************* */
++#define SFTYPARKLOCKEVLN_AREA_2_START_SEC_CODE_FAST
++#include "MemMap.h"
++
++extern FUNC(void, SFTYPARKLOCKEVLN_CODE) SftyParkLockEvln_MainFunctionArea2(void);
++
++#define SFTYPARKLOCKEVLN_AREA_2_STOP_SEC_CODE_FAST
++#include "MemMap.h"
++
++/* ****************************** AREA 0 - FAST ********************************* */
++#define SFTYPARKLOCKEVLN_AREA_0_START_SEC_CODE_FAST
++#include "MemMap.h"
++
++extern FUNC(void, SFTYPARKLOCKEVLN_CODE) SftyParkLockEvln_MainFastArea0(void);
++
++#define SFTYPARKLOCKEVLN_AREA_0_STOP_SEC_CODE_FAST
++#include "MemMap.h"
++
++/*================== [closure] ==============================================*/
++
++#endif /* SFTYPARKLOCKEVLN_H_ */
++
++/* ********************************************************************** */
++/* Copyright (C) Valeo Siemens eAutomotive Germany GmbH 2021              */
++/* All Rights Reserved. Confidential                                      */
++/* ********************************************************************** */
++/*==================[end of file]=========================================*/
+diff --git a/src/fw_cu/Components/Safety/Sfty_Cmn/SftyParkLockEvln/include/SftyParkLockEvln_data.h b/src/fw_cu/Components/Safety/Sfty_Cmn/SftyParkLockEvln/include/SftyParkLockEvln_data.h
+new file mode 100644
+index 000000000..9fb533cf1
+--- /dev/null
++++ b/src/fw_cu/Components/Safety/Sfty_Cmn/SftyParkLockEvln/include/SftyParkLockEvln_data.h
+@@ -0,0 +1,115 @@
++/* ***************************************************************** */
++/* Sourcefile: SftyParkLockEvln_data.h                               */
++/* ADD Container: SftyParkLockEvln                                   */
++/* ADD Container Version: 1.0.0                                      */
++/* ***************************************************************** */
++/* Copyright (C) Valeo Siemens eAutomotive Germany GmbH 2021         */
++/* All Rights Reserved. Confidential                                 */
++/* ***************************************************************** */
++
++/*!
++ * \\addtogroup    SftyParkLockEvln_data
++ * @{
++*/
++#ifndef\tSFTYPARKLOCKEVLN_DATA_H
++#define\tSFTYPARKLOCKEVLN_DATA_H
++
++#include\t"AddStructTypes.h"
++#include\t"AddEnumTypes.h"
++
++/************************* MEASURABLE PARAMETERS - BEGIN *****************************/
++
++/* Begin: SFTYPARKLOCKEVLN_START_SEC_VAR_AREA_2_FAST_INIT_8 (online) */
++#define SFTYPARKLOCKEVLN_START_SEC_VAR_AREA_2_FAST_INIT_8
++#include "MemMap.h"
++
++extern VAR(uint8, SFTYPARKLOCKEVLN_VAR) SftyParkLockEvlnSnrDataElecLoErrMonrSt;
++
++extern VAR(uint8, SFTYPARKLOCKEVLN_VAR) SftyParkLockEvlnSnrDataElecHiErrMonrSt;
++
++extern VAR(uint8, SFTYPARKLOCKEVLN_VAR) SftyParkLockEvlnPrkgPosSnsrErrMonrSt;
++
++#define SFTYPARKLOCKEVLN_STOP_SEC_VAR_AREA_2_FAST_INIT_8
++#include "MemMap.h"
++/* End: SFTYPARKLOCKEVLN_STOP_SEC_VAR_AREA_2_FAST_INIT_8 (online) */
++
++/* Begin: SFTYPARKLOCKEVLN_START_SEC_VAR_AREA_2_FAST_INIT_32 (online) */
++#define SFTYPARKLOCKEVLN_START_SEC_VAR_AREA_2_FAST_INIT_32
++#include "MemMap.h"
++
++extern VAR(float32, SFTYPARKLOCKEVLN_VAR) SftyParkLockEvlnActrAg;
++
++extern VAR(float32, SFTYPARKLOCKEVLN_VAR) SftyParkLockEvlnActrAgSpd;
++
++extern VAR(SftyParkLockEvln_AbsPosnType, SFTYPARKLOCKEVLN_VAR) SftyParkLockEvlnActrAbsPosn;
++
++extern VAR(float32, SFTYPARKLOCKEVLN_VAR) SftyParkLockEvlnPrimActrPosChUMeas;
++
++extern VAR(float32, SFTYPARKLOCKEVLN_VAR) SftyParkLockEvlnPrimActrNegChUMeas;
++
++#define SFTYPARKLOCKEVLN_STOP_SEC_VAR_AREA_2_FAST_INIT_32
++#include "MemMap.h"
++/* End: SFTYPARKLOCKEVLN_STOP_SEC_VAR_AREA_2_FAST_INIT_32 (online) */
++
++/* Begin: SFTYPARKLOCKEVLN_AREA_0_START_SEC_VAR_FAST_INIT_32 (online) */
++#define SFTYPARKLOCKEVLN_AREA_0_START_SEC_VAR_FAST_INIT_32
++#include "MemMap.h"
++
++extern VAR(float32, SFTYPARKLOCKEVLN_VAR) SftyParkLockEvlnPrimActrIMeas;
++
++#define SFTYPARKLOCKEVLN_AREA_0_STOP_SEC_VAR_FAST_INIT_32
++#include "MemMap.h"
++/* End: SFTYPARKLOCKEVLN_AREA_0_STOP_SEC_VAR_FAST_INIT_32 (online) */
++
++/************************* MEASURABLE PARAMETERS - END *****************************/
++
++/************************* CALIBRATION PARAMETERS - BEGIN *****************************/
++
++/* Begin: SFTYPARKLOCKEVLN_START_SEC_CALIB_32 (calib) */
++#define SFTYPARKLOCKEVLN_START_SEC_CALIB_32
++#include "MemMap.h"
++
++extern CONST(SftyOffsetGainType, SFTYACTVDCHACTRL_CALIB) SftyParkLockEvlnPrimActrIScaCfg;
++
++extern CONST(SftyOffsetGainType, SFTYACTVDCHACTRL_CALIB) SftyParkLockEvlnPrimActrPosChUScaCfg;
++
++extern CONST(SftyOffsetGainType, SFTYACTVDCHACTRL_CALIB) SftyParkLockEvlnPrimActrNegChUScaCfg;
++
++extern CONST(uint32, SFTYPARKLOCKEVLN_VAR) SftyParkLockEvlnMainFastArea2ExecCycTiInUs;
++
++extern CONST(float32, SFTYPARKLOCKEVLN_VAR) SftyParkLockEvlnActrGearRatio;
++
++extern CONST(float32, SFTYPARKLOCKEVLN_VAR) SftyParkLockEvlnDeltaPrkgAgIni;
++
++extern CONST(float32, SFTYPARKLOCKEVLN_VAR) SftyParkLockEvlnDeltaPrkgAgNomMax;
++
++extern CONST(float32, SFTYPARKLOCKEVLN_VAR) SftyParkLockEvlnDeltaNoPrkgAgIni;
++
++extern CONST(float32, SFTYPARKLOCKEVLN_VAR) SftyParkLockEvlnDeltaNoPrkgAgNomMin;
++
++#define SFTYPARKLOCKEVLN_STOP_SEC_CALIB_32
++#include "MemMap.h"
++/* End: SFTYPARKLOCKEVLN_STOP_SEC_CALIB_32 (calib) */
++
++
++/* Begin: SFTYPARKLOCKEVLN_START_SEC_CALIB_16 (calib) */
++#define SFTYPARKLOCKEVLN_START_SEC_CALIB_16
++#include "MemMap.h"
++
++extern CONST(uint16, SFTYACTVDCHACTRL_CALIB) SftyParkLockEvlnPosnAcqnMinRawVal;
++
++extern CONST(uint16, SFTYACTVDCHACTRL_CALIB) SftyParkLockEvlnPosnAcqnMaxRawVal;
++
++#define SFTYPARKLOCKEVLN_STOP_SEC_CALIB_16
++#include "MemMap.h"
++/* End: SFTYPARKLOCKEVLN_STOP_SEC_CALIB_16 (calib) */
++
++/************************* CALIBRATION PARAMETERS - END *****************************/
++
++/*================== [closure] ==============================================*/
++#endif
++/* ***************************************************************** */
++/* Copyright (C) Valeo Siemens eAutomotive Germany GmbH 2021         */
++/* All Rights Reserved. Confidential                                 */
++/* ***************************************************************** */
++/*==================[end of file]====================================*/
+diff --git a/src/fw_cu/Components/Safety/Sfty_Cmn/SftyParkLockEvln/lib/.gitkeep b/src/fw_cu/Components/Safety/Sfty_Cmn/SftyParkLockEvln/lib/.gitkeep
+new file mode 100644
+index 000000000..e69de29bb
+diff --git a/src/fw_cu/Components/Safety/Sfty_Cmn/SftyParkLockEvln/make/makefile.mak b/src/fw_cu/Components/Safety/Sfty_Cmn/SftyParkLockEvln/make/makefile.mak
+new file mode 100644
+index 000000000..073a2f274
+--- /dev/null
++++ b/src/fw_cu/Components/Safety/Sfty_Cmn/SftyParkLockEvln/make/makefile.mak
+@@ -0,0 +1,28 @@
++# \\\\file\
+#
++# \\brief AUTOSAR <ComponentName>
++#
++# This file contains the implementation of AUTOSAR
++# module <ComponentName>.
++#
++# \\author <AuthorInformation> Siemens AG, 91056 Erlangen, Germany
++#
++# Copyright 2015 - 2015 Siemens AG
++# All rights exclusively reserved for Siemens AG,
++# unless expressly agreed to otherwise.#
++################################################################## DEFINITIONS#
++#################################################################
++
++
++SftyParkLockEvln_BASE := $(dir $(abspath $(lastword $(dir $(abspath $(lastword $(MAKEFILE_LIST)))))))
++SftyParkLockEvln_PATH_OUT := $(SftyParamVldt_BASE)generated
++SftyParkLockEvln_PATH_USE := $(SftyParamVldt_BASE)
++CC_FILES_TO_BUILD += $(wildcard $(SftyParkLockEvln_BASE)src/*.c)
++CPP_FILES_TO_BUILD += $(wildcard $(SftyParkLockEvln_BASE)src/*.cpp)
++ASM_FILES_TO_BUILD += $(wildcard $(SftyParkLockEvln_BASE)src/*.s)
++
++SftyParkLockEvln_ARCHIVED_LIB := $(wildcard $(SftyParkLockEvln_BASE)lib/*.a)
++SftyParkLockEvln_GENERATED_LIB := $(SftyParkLockEvln_BASE)generated/lib/SftyParamVldt.a
++SftyParkLockEvln_ARCHIVED_A2L := $(wildcard $(SftyParkLockEvln_BASE)a2l/*.a2l)
++SftyParkLockEvln_GENERATED_A2L := $(SftyParkLockEvln_BASE)generated/a2l/SftyParamVldt.a2l
++A2L_SLAVE_SftyParkLockEvln = $(SftyParkLockEvln_GENERATED_A2L)
++CC_INCLUDE_PATH += $(SftyParkLockEvln_BASE)include
+\\ No newline at end of file
+diff --git a/src/fw_cu/Components/Safety/Sfty_Cmn/SftyParkLockEvln/src/SftyParkLockEvln.c b/src/fw_cu/Components/Safety/Sfty_Cmn/SftyParkLockEvln/src/SftyParkLockEvln.c
+new file mode 100644
+index 000000000..e460bc924
+--- /dev/null
++++ b/src/fw_cu/Components/Safety/Sfty_Cmn/SftyParkLockEvln/src/SftyParkLockEvln.c
+@@ -0,0 +1,1477 @@
++/* ********************************************************************** */
++/* Sourcefile:    SftyParkLockEvln.c                                      */
++/*                                                                        */
++/* Project:       100kw                                                   */
++/* TriCore                                                                */
++/*                                                                        */
++/* Department: Valeo Siemens eAutomotive                                  */
++/* I DT EC R&D                                                            */
++/* ********************************************************************** */
++/* Copyright (C) Valeo Siemens eAutomotive Germany GmbH 2021              */
++/* All Rights Reserved. Confidential                                      */
++/* ********************************************************************** */
++
++
++/*!
++* \\defgroup SftyParkLockEvln_module SftyParkLockEvln Park lock software component for signal processing and evaluation
++* \\ingroup SftyParkLockEvln
++* @{
++*/
++
++/*================== [includes] =============================================*/
++#include "SftyDma_data.h"
++#include "SftyDma.h"
++#include "SftyParkLockEvln_data.h"
++#include "SftyParkLockPosnAcqn_data.h"
++#include "SftyParkLockEvln.h"
++#include "SftyReplcmt_data.h"
++#include "SftyUtils.h"
++#include "SftyErrDeb.h" /* PRQA S 0380 # header file necessary; inclusion of macros unavoidable */
++#include "SftyCrc.h"
++/* Core 2 core communication */
++#include "C2cComBswData.h"
++
++/*================== [defines] ==============================================*/
++
++/* \\brief: 180 degrees */
++#define SFTYPARKLOCKEVLN_180_DEGREE                               180.0f
++/* \\brief: Conversion factor for micro seconds to second */
++#define SFTYPARKLOCKEVLN_1_US                                     0.000001f
++/* \\brief: Message ID from SENT serial message is fault diagnostic code */
++#define SFTYPARKLOCKEVLN_MSG_ID_TYPE_DIAGNOSTIC_STATUS_CODE       0x01U
++/* \\brief: Number of position sensor ASIL error faults to be detected */
++#define SFTYPARKLOCKEVLN_POSNSNR_TOTAL_NO_OF_FAULTS               0x0BU
++/* \\brief: Park lock position sensor no faults */
++#define SFTYPARKLOCKEVLN_POSNSNR_NO_FAULTS                        0x00U
++/* \\brief: CRC buffer for calculating 6-bit CRC */
++#define SFTYPARKLOCKEVLN_CRC_CALCN_BUF_SIZE                       0x04U
++/* \\brief: Seed value for calculating 6-bit CRC as per SAE J2716 */
++#define SFTYPARKLOCKEVLN_6BIT_CRC_INIT_SEED_VALUE                 0x15U
++/* \\brief: Start index of serial data in 24-bit CRC frame */
++#define SFTYPARKLOCKEVLN_STRT_IDX_SERIAL_DATA                     0x16U
++/* \\brief: Start index of lower nibble message Id in 24-bit CRC frame */
++#define SFTYPARKLOCKEVLN_STRT_IDX_MSG_ID_LOWER_NIBBLE             0x15U
++/* \\brief: Start index of higher nibble message Id in 24-bit CRC frame */
++#define SFTYPARKLOCKEVLN_STRT_IDX_MSG_ID_HIGHER_NIBBLE            0x0BU
++/* \\brief: Start index of configuration data in 24-bit CRC frame */
++#define SFTYPARKLOCKEVLN_STRT_IDX_CONFG_DATA                      0x03U
++/* \\brief: Data mask to get lower nibble of 8-bit message id */
++#define SFTYPARKLOCKEVLN_MSG_ID_LOWER_NIBBLE_DATA_MASK            0x0FU
++/* \\brief: Data mask to get lower nibble of 8-bit message id */
++#define SFTYPARKLOCKEVLN_MSG_ID_HIGHER_NIBBLE_DATA_MASK           0xF0U
++
++/*================== [type definitions] =====================================*/
++
++/* \\brief Structure definition of park lock position sensor data */
++typedef struct SftyParkLockEvlnSerlDataType_
++{
++   /*
++   @@ ELEMENT = serlData
++   @@ STRUCTURE = SftyParkLockEvlnSerlDataType
++   @@ A2L_TYPE = MEASURE
++   @@ DATA_TYPE = UWORD
++   @@ DESCRIPTION = "12-bit serial data of slow channel serial frame"
++   @@ GROUP = SftyParkLockEvln
++   @@ END
++   */
++   uint16 serlData;
++
++   /*
++   @@ ELEMENT = msgId
++   @@ STRUCTURE = SftyParkLockEvlnSerlDataType
++   @@ A2L_TYPE = MEASURE
++   @@ DATA_TYPE = UBYTE
++   @@ DESCRIPTION = "8-bit message id data of slow channel serial frame"
++   @@ GROUP = SftyParkLockEvln
++   @@ END
++   */
++   uint8 msgId;
++
++   /*
++   @@ ELEMENT = serlCrc
++   @@ STRUCTURE = SftyParkLockEvlnSerlDataType
++   @@ A2L_TYPE = MEASURE
++   @@ DATA_TYPE = UBYTE
++   @@ DESCRIPTION = "6-Bit serial CRC data of slow channel serial frame"
++   @@ GROUP = SftyParkLockEvln
++   @@ END
++   */
++   uint8 serlCrc;
++
++   /*
++   @@ ELEMENT = cfgBit
++   @@ STRUCTURE = SftyParkLockEvlnSerlDataType
++   @@ A2L_TYPE = MEASURE
++   @@ DATA_TYPE = UBYTE
++   @@ DESCRIPTION = "1-bit configuration data of slow channel serial frame"
++   @@ GROUP = SftyParkLockEvln
++   @@ END
++   */
++   boolean cfgBit;
++}SftyParkLockEvlnSerlDataType;
++
++/* \\brief Structure definition of 6 bit CRC frame */
++typedef struct SftyParkLockEvln6BitCrcFrameType_
++{
++   /*
++   @@ ELEMENT = data0
++   @@ STRUCTURE = SftyParkLockEvln6BitCrcFrameType
++   @@ A2L_TYPE = MEASURE
++   @@ DATA_TYPE = UBYTE
++   @@ DESCRIPTION = "Bits [5:0] data0"
++   @@ GROUP = SftyParkLockEvln
++   @@ END
++   */
++   unsigned int data0   : 6;
++
++   /*
++   @@ ELEMENT = data1
++   @@ STRUCTURE = SftyParkLockEvln6BitCrcFrameType
++   @@ A2L_TYPE = MEASURE
++   @@ DATA_TYPE = UBYTE
++   @@ DESCRIPTION = "Bits [11:6] data1"
++   @@ GROUP = SftyParkLockEvln
++   @@ END
++   */
++   unsigned int data1   : 6;
++
++   /*
++   @@ ELEMENT = data2
++   @@ STRUCTURE = SftyParkLockEvln6BitCrcFrameType
++   @@ A2L_TYPE = MEASURE
++   @@ DATA_TYPE = UBYTE
++   @@ DESCRIPTION = "Bits [17:12] data2"
++   @@ GROUP = SftyParkLockEvln
++   @@ END
++   */
++   unsigned int data2   : 6;
++
++   /*
++   @@ ELEMENT = data3
++   @@ STRUCTURE = SftyParkLockEvln6BitCrcFrameType
++   @@ A2L_TYPE = MEASURE
++   @@ DATA_TYPE = UBYTE
++   @@ DESCRIPTION = "Bits [23:18] data3"
++   @@ GROUP = SftyParkLockEvln
++   @@ END
++   */
++   unsigned int data3   : 6;
++
++   /*
++   @@ ELEMENT = reserved_8
++   @@ STRUCTURE = SftyParkLockEvln6BitCrcFrameType
++   @@ A2L_TYPE = MEASURE
++   @@ DATA_TYPE = UBYTE
++   @@ DESCRIPTION = "Bits [31:24] reserved_8"
++   @@ GROUP = SftyParkLockEvln
++   @@ END
++   */
++   unsigned int reserved_8 :  8;
++}SftyParkLockEvln6BitCrcFrameType;
++
++/* \\brief Structure definition of 24 bit CRC frame */
++typedef union SftyParkLockEvln24BitCrcFrameType_
++{/* PRQA S 0750 # union is needed to get access of 6-bit data in 24-bit CRC frame */
++   /*
++   @@ SUB_STRUCTURE = byte
++   @@ STRUCTURE = SftyParkLockEvln24BitCrcFrameType
++   @@ DATA_TYPE = STRUCTURE SftyParkLockEvln6BitCrcFrameType
++   @@ END
++   */
++   SftyParkLockEvln6BitCrcFrameType  byte;
++
++   /*
++   @@ ELEMENT = word
++   @@ STRUCTURE = SftyParkLockEvln24BitCrcFrameType
++   @@ A2L_TYPE = MEASURE
++   @@ DATA_TYPE = ULONG
++   @@ DESCRIPTION = "Access to complete 24-bit CRC frame"
++   @@ GROUP = SftyParkLockEvln
++   @@ END
++   */
++   uint32 word;
++}SftyParkLockEvln24BitCrcFrameType;
++
++/*================== [local data] ===========================================*/
++
++/* Begin: SFTYPARKLOCKEVLN_ASIL_0_START_SEC_VAR_FAST_CLEARED (online) */
++#define SFTYPARKLOCKEVLN_ASIL_0_START_SEC_VAR_FAST_CLEARED
++#include "MemMap.h"
++
++/*
++@@ SYMBOL = SftyParkLockEvlnPrimActrICurRawVal
++@@ A2L_TYPE = MEASURE
++@@ DATA_TYPE = UWORD
++@@ DESCRIPTION = "Current RAW value of primary actuator I measurement; unit \'Raw\'"
++@@ GROUP = SftyParkLockEvln
++@@ END
++*/
++STATIC VAR(uint16, SFTYPARKLOCKEVLN_VAR) SftyParkLockEvlnPrimActrICurRawVal;
++
++/*
++@@ SYMBOL = SftyParkLockEvlnPrimActrICurTiStamp
++@@ A2L_TYPE = MEASURE
++@@ DATA_TYPE = ULONG
++@@ DESCRIPTION = "Current time stamp of primary actuator I measurement; unit \'Ticks\'"
++@@ GROUP = SftyParkLockEvln
++@@ END
++*/
++STATIC VAR(uint32, SFTYPARKLOCKEVLN_VAR) SftyParkLockEvlnPrimActrICurTiStamp;
++
++/*
++@@ SYMBOL = SftyParkLockEvlnPrimActrILstTiStamp
++@@ A2L_TYPE = MEASURE
++@@ DATA_TYPE = ULONG
++@@ DESCRIPTION = "Last time stamp of primary actuator I measurement; unit \'Ticks\'"
++@@ GROUP = SftyParkLockEvln
++@@ END
++*/
++STATIC VAR(uint32, SFTYPARKLOCKEVLN_VAR) SftyParkLockEvlnPrimActrILstTiStamp;
++
++#define SFTYPARKLOCKEVLN_ASIL_0_STOP_SEC_VAR_FAST_CLEARED
++#include "MemMap.h"
++/* End: SFTYPARKLOCKEVLN_ASIL_0_STOP_SEC_VAR_FAST_CLEARED (online) */
++
++/* Begin: SFTYPARKLOCKEVLN_ASIL_2_START_SEC_VAR_FAST_CLEARED (online) */
++#define SFTYPARKLOCKEVLN_ASIL_2_START_SEC_VAR_FAST_CLEARED
++#include "MemMap.h"
++
++/*
++@@ SYMBOL = SftyParkLockEvlnIntCalcCrcVal
++@@ A2L_TYPE = MEASURE
++@@ DATA_TYPE = UBYTE
++@@ DESCRIPTION = "Internal calculated CRC value for SENT serial data; unit \'-\'"
++@@ GROUP = SftyParkLockEvln
++@@ END
++*/
++/*! \\cvar Buffer for 6-Bit CRC calculation; unit \'-\' */
++STATIC VAR(uint8, SFTYPARKLOCKEVLN_VAR) SftyParkLockEvlnIntCalcCrcVal;
++
++/*
++@@ SYMBOL = SftyParkLockEvlnCrcCalcBuff
++@@ A2L_TYPE = MEASURE
++@@ DATA_TYPE = UBYTE
++@@ DIMENSION = 4
++@@ DESCRIPTION = "Buffer for 6-Bit CRC calculation; unit \'-\'"
++@@ GROUP = SftyParkLockEvln
++@@ END
++*/
++/*! \\cvar Buffer for 6-Bit CRC calculation; unit \'-\' */
++STATIC VAR(uint8, SFTYPARKLOCKEVLN_VAR) SftyParkLockEvlnCrcCalcBuff[SFTYPARKLOCKEVLN_CRC_CALCN_BUF_SIZE];
++
++/*
++@@ SYMBOL = SftyParkLockEvlnPrimActrPosChUCurRawVal
++@@ A2L_TYPE = MEASURE
++@@ DATA_TYPE = UWORD
++@@ DESCRIPTION = "Current RAW value of primary actuator positive channel U measurement; unit \'-\'"
++@@ GROUP = SftyParkLockEvln
++@@ END
++*/
++STATIC VAR(uint16, SFTYPARKLOCKEVLN_VAR) SftyParkLockEvlnPrimActrPosChUCurRawVal;
++
++/*
++@@ SYMBOL = SftyParkLockEvlnPrimActrNegChUCurRawVal
++@@ A2L_TYPE = MEASURE
++@@ DATA_TYPE = UWORD
++@@ DESCRIPTION = "Current RAW value of primary actuator negative channel U measurement; unit \'-\'"
++@@ GROUP = SftyParkLockEvln
++@@ END
++*/
++STATIC VAR(uint16, SFTYPARKLOCKEVLN_VAR) SftyParkLockEvlnPrimActrNegChUCurRawVal;
++
++/*
++@@ SYMBOL = SftyParkLockEvlnPrimActrPosChUCurTiStamp
++@@ A2L_TYPE = MEASURE
++@@ DATA_TYPE = ULONG
++@@ DESCRIPTION = "Current time stamp of primary actuator positive channel U measurement; unit \'Ticks\'"
++@@ GROUP = SftyParkLockEvln
++@@ END
++*/
++STATIC VAR(uint32, SFTYPARKLOCKEVLN_VAR) SftyParkLockEvlnPrimActrPosChUCurTiStamp;
++
++/*
++@@ SYMBOL = SftyParkLockEvlnPrimActrPosChULstTiStamp
++@@ A2L_TYPE = MEASURE
++@@ DATA_TYPE = ULONG
++@@ DESCRIPTION = "Last time stamp of primary actuator positive channel U measurement; unit \'Ticks\'"
++@@ GROUP = SftyParkLockEvln
++@@ END
++*/
++STATIC VAR(uint32, SFTYPARKLOCKEVLN_VAR) SftyParkLockEvlnPrimActrPosChULstTiStamp;
++
++/*
++@@ SYMBOL = SftyParkLockEvlnPrimActrNegChUCurTiStamp
++@@ A2L_TYPE = MEASURE
++@@ DATA_TYPE = ULONG
++@@ DESCRIPTION = "Primary actuator negative channel U current time stamp; unit \'Ticks\'"
++@@ GROUP = SftyParkLockEvln
++@@ END
++*/
++STATIC VAR(uint32, SFTYPARKLOCKEVLN_VAR) SftyParkLockEvlnPrimActrNegChUCurTiStamp;
++
++/*
++@@ SYMBOL = SftyParkLockEvlnPrimActrNegChULstTiStamp
++@@ A2L_TYPE = MEASURE
++@@ DATA_TYPE = ULONG
++@@ DESCRIPTION = "Primary actuator negative channel U last time stamp; unit \'Ticks\'"
++@@ GROUP = SftyParkLockEvln
++@@ END
++*/
++STATIC VAR(uint32, SFTYPARKLOCKEVLN_VAR) SftyParkLockEvlnPrimActrNegChULstTiStamp;
++
++/*
++@@ SYMBOL = SftyParkLockEvlnSerlDataCurTiStamp
++@@ A2L_TYPE = MEASURE
++@@ DATA_TYPE = ULONG
++@@ DESCRIPTION = "Position sensor slow channel serial data current time stamp from DMA; unit \'Ticks\'"
++@@ GROUP = SftyParkLockEvln
++@@ END
++*/
++STATIC VAR(uint32, SFTYPARKLOCKEVLN_VAR) SftyParkLockEvlnSerlDataCurTiStamp;
++
++/*
++@@ SYMBOL = SftyParkLockEvlnSerlDataLstTiStamp
++@@ A2L_TYPE = MEASURE
++@@ DATA_TYPE = ULONG
++@@ DESCRIPTION = "Position sensor slow channel serial data last time stamp from DMA; unit \'Ticks\'"
++@@ GROUP = SftyParkLockEvln
++@@ END
++*/
++STATIC VAR(uint32, SFTYPARKLOCKEVLN_VAR) SftyParkLockEvlnSerlDataLstTiStamp;
++
++/*
++@@ SYMBOL = SftyParkLockEvlnActrAgPrev
++@@ A2L_TYPE = MEASURE
++@@ DATA_TYPE = FLOAT
++@@ DESCRIPTION = "Last primary actuator angle; unit \'degree\'"
++@@ GROUP = SftyParkLockEvln
++@@ END
++*/
++STATIC VAR(float32, SFTYPARKLOCKEVLN_VAR) SftyParkLockEvlnActrAgPrev;
++
++/*
++@@ INSTANCE = SftyParkLockEvlnSerlData
++@@ STRUCTURE = SftyParkLockEvlnSerlDataType
++@@ END
++*/
++/*! \\cvar Park lock position sensor serial data; unit \'-\'\' */
++STATIC VAR(SftyParkLockEvlnSerlDataType, SFTYPARKLOCKEVLN_VAR)   SftyParkLockEvlnSerlData;
++
++/*
++@@ INSTANCE = SftyParkLockEvln24BitCrcFrame
++@@ STRUCTURE = SftyParkLockEvln24BitCrcFrameType
++@@ END
++*/
++/*! \\cvar Rearranged 24-bit CRC frame used for 6-bit CRC calculation; unit \'-\' */
++STATIC VAR(SftyParkLockEvln24BitCrcFrameType, SFTYPARKLOCKEVLN_VAR) SftyParkLockEvln24BitCrcFrame; /* PRQA S 0759 # union is needed to get access of 6-bit data in 24-bit CRC frame */
++
++#define SFTYPARKLOCKEVLN_ASIL_2_STOP_SEC_VAR_FAST_CLEARED
++#include "MemMap.h"
++/* End: SFTYPARKLOCKEVLN_ASIL_2_STOP_SEC_VAR_FAST_CLEARED (online) */
++
++/* Begin: SFTYPARKLOCKEVLN_AREA_2_START_SEC_CONST_16 (online) */
++#define SFTYPARKLOCKEVLN_AREA_2_START_SEC_CONST_16
++#include "MemMap.h"
++
++/*
++@@ SYMBOL = SftyParkLockEvlnPosSnrDiagFaultCodeLst
++@@ A2L_TYPE = MEASURE
++@@ DATA_TYPE = UWORD
++@@ DIMENSION = 11
++@@ DESCRIPTION = "Array containing all the position sensor fault codes to be detected; unit \'-\'"
++@@ GROUP = SftyParkLockEvln
++@@ END
++*/
++/*! \\cvar Array containing all the position sensor fault codes to be detected; unit \'-\' */
++STATIC CONST(uint16, SFTYPARKLOCKEVLN_VAR) SftyParkLockEvlnPosSnrDiagFaultCodeLst[SFTYPARKLOCKEVLN_POSNSNR_TOTAL_NO_OF_FAULTS] =
++{
++  0x801U /* ASIL Error Code SM01 : magnetic field conversion check fault                         */
++ ,0x802U /* ASIL Error Code SM02 : inverted angle calculation check fault                        */
++ ,0x804U /* ASIL Error Code SM03 : data division check fault                                     */
++ ,0x808U /* ASIL Error Code SM04 : data conversion check fault                                   */
++ ,0x810U /* ASIL Error Code SM05 : adjusted angle calculation check fault                        */
++ ,0x820U /* ASIL Error Code SM06 and SM07 : control signal check and BIST completion check fault */
++ ,0x840U /* ASIL Error Code SM08 : built-in self-test (BIST) encoding check fault                */
++ ,0x880U /* ASIL Error Code SM09 : SD-ADC range check fault                                      */
++ ,0x900U /* ASIL Error Code SM10 : data adder check fault                                        */
++ ,0xA00U /* ASIL Error Code SM11 : CORDIC range check fault                                      */
++ ,0xC00U /* ASIL Error Code SM12 : angular range check fault                                     */
++};
++
++#define SFTYPARKLOCKEVLN_AREA_2_STOP_SEC_CONST_16
++#include "MemMap.h"
++/* End: SFTYPARKLOCKEVLN_AREA_2_STOP_SEC_CONST_16 (online) */
++
++/*================== [prototype of local functions] =========================*/
++
++/*================== [definition of inline functions] =======================*/
++
++/*****************************************************************************/
++/*!
++ * \\fn        : void SftyParkLockEvln_GetPrimActrIFromDma(void)
++ * \\brief     : This function gets value of Primary actuator current from DMA,
++ *              measured by VADC
++ * \\Parent_DD : SftyParkLockEvln_MainFastArea0
++ * \\return    : None
++ */
++/*****************************************************************************/
++LOCAL_INLINE void SftyParkLockEvln_GetPrimActrIFromDma(void)
++{
++   /* ******** Variables declaration *********** */
++
++   /* ************* Source code **************** */
++
++   /* Get last primary actor current time stamp and I value*/
++   SftyDma_UpdateParkLockPrimActrIAndTiStamp();
++
++   /* If primary actuator current measurement raw value is disable*/
++#ifndef SERIES_PRODUCTION
++   if(SftyReplcmtParkLockEvlnPrimActrIMeasRawValStiEna == TRUE)
++   {
++      /* Update primary actuator I measurement by Replacement value*/
++      SftyParkLockEvlnPrimActrICurRawVal = SftyReplcmtParkLockEvlnPrimActrIMeasRawReplcmtVal;
++   }
++   else
++#endif /* SERIES_PRODUCTION */
++   {
++      /* Update primary actuator I measurement by VADC */
++      SftyParkLockEvlnPrimActrICurRawVal = SftyDmaParkLockPrimActrIRawVal;
++   }
++
++   /* If primary actuator current measurement time stamp is disable*/
++#ifndef SERIES_PRODUCTION
++   if(SftyReplcmtParkLockEvlnPrimActrIMeasTiStampStiEna == TRUE)
++   {
++      /* Update primary actuator I measurement by Replacement value*/
++      SftyParkLockEvlnPrimActrICurTiStamp = SftyReplcmtParkLockEvlnPrimActrIMeasTiStampReplcmtVal;
++   }
++   else
++#endif /* SERIES_PRODUCTION */
++   {
++      /*Update primary actuator I measurement by VADC time stamp*/
++      SftyParkLockEvlnPrimActrICurTiStamp = SftyDmaParkLockPrimActrITiStamp;
++   }
++
++   return;
++}
++
++/*****************************************************************************/
++/*!
++ * \\fn        : void SftyParkLockEvln_EvlPrimActrI(void)
++ * \\brief     : This function evaluates current of primary actuator
++ * \\Parent_DD : SftyParkLockEvln_MainFastArea0
++ * \\return    : None
++ */
++/*****************************************************************************/
++LOCAL_INLINE void SftyParkLockEvln_EvlPrimActrI(void)
++{
++   /* ******** Variables declaration *********** */
++   uint8 primActrITiStampErr;
++
++   /* ************* Source code **************** */
++
++   /* Get value of Primary actuator current from DMA*/
++   SftyParkLockEvln_GetPrimActrIFromDma();
++
++   /* Check time stamp error*/
++   primActrITiStampErr = SftyUtils_ChkTiStamp(&SftyParkLockEvlnPrimActrILstTiStamp, &SftyParkLockEvlnPrimActrICurTiStamp);
++
++   /* If time stamp check was OK*/
++   if(primActrITiStampErr == ERR_DEB_MONR_STS_PASSED)
++   {
++      /* Get Primary actuator current measurement*/
++      SftyParkLockEvlnPrimActrIMeas = SftyUtils_ScaVal(SftyParkLockEvlnPrimActrICurRawVal, SftyParkLockEvlnPrimActrIScaCfg);
++   }
++   else
++   {
++      /* Do Nothing */
++   }
++
++   return;
++}
++
++/**********************************************************************************/
++/*!
++ * \\fn        : void SftyParkLockEvln_PosnSnrRngErrChk(void)
++ * \\brief     : This function performs range check on the digital park lock angle
++ *              from the KMZ80 sensor
++ * \\Parent_DD : SftyParkLockEvln_MainFunctionArea2
++ * \\return    : None
++ */
++/**********************************************************************************/
++LOCAL_INLINE void SftyParkLockEvln_PosnSnrRngErrChk(void)
++{
++   /* ******** Variables declaration *********** */
++
++   /* ************* Source code **************** */
++
++   /* KMZ sensor uses A.1 format, so maximum valid digital angle value is 4094
++    * and minimum valid digital angle value is 1 */
++   if(SftyParkLockPosnAcqnRawVal < SftyParkLockEvlnPosnAcqnMinRawVal)
++   {
++      /* Set digital park lock angle range low error monitor status to failed */
++      SftyParkLockEvlnSnrDataElecLoErrMonrSt = ERR_DEB_MONR_STS_FAILED;
++      /* Set digital park lock angle range high error monitor status to passed */
++      SftyParkLockEvlnSnrDataElecHiErrMonrSt = ERR_DEB_MONR_STS_PASSED;
++   }
++   else if (SftyParkLockPosnAcqnRawVal > SftyParkLockEvlnPosnAcqnMaxRawVal)
++   {
++      /* Set digital park lock angle range low error monitor status to passed */
++      SftyParkLockEvlnSnrDataElecLoErrMonrSt = ERR_DEB_MONR_STS_PASSED;
++      /* Set digital park lock angle range high error monitor status to failed */
++      SftyParkLockEvlnSnrDataElecHiErrMonrSt = ERR_DEB_MONR_STS_FAILED;
++   }
++   else
++   {
++      /* Set digital park lock angle is within valid range */
++      SftyParkLockEvlnSnrDataElecLoErrMonrSt = ERR_DEB_MONR_STS_PASSED;
++      SftyParkLockEvlnSnrDataElecHiErrMonrSt = ERR_DEB_MONR_STS_PASSED;
++   }
++
++   return;
++}
++
++/*************************************************************************/
++/*!
++ * \\fn        : void SftyParkLockEvln_GetActrAg(void)
++ * \\brief     : This function calculates park lock primary actuator angle
++ * \\Parent_DD : SftyParkLockEvln_MainFunctionArea2
++ * \\return    : Return primary actuator angle
++ */
++/*************************************************************************/
++LOCAL_INLINE float32 SftyParkLockEvln_GetActrAg(void)
++{
++   /* ******** Variables declaration *********** */
++   float32 primActrAng;
++
++   /* ************* Source code **************** */
++
++   /* Convert digital park lock angle from the KMZ80 sensor to physical value in degrees.
++    * This conversion formula is for SENT protocol A.1 format considering D0-D2 nibble data */
++   primActrAng = (float32)((float32)SftyParkLockPosnAcqnRawVal * (float32)(SFTYPARKLOCKEVLN_180_DEGREE / (float32)SftyParkLockEvlnPosnAcqnMaxRawVal));
++
++   return primActrAng;
++}
++
++/*****************************************************************************/
++/*!
++ * \\fn        : float32 SftyParkLockEvln_GetActrAgSpd(void)
++ * \\brief     : This function calculates primary actuator position speed [rad/s]
++ * \\Parent_DD : SftyParkLockEvln_MainFunctionArea2
++ * \\return    : Return primary actuator position speed in rad/s
++ */
++/*****************************************************************************/
++LOCAL_INLINE float32 SftyParkLockEvln_GetActrAgSpd(void)
++{
++   /* ******** Variables declaration *********** */
++   float32 actrAgSpd = 0.0f;
++
++   /* ************* Source code **************** */
++
++   /*avoid devision by zero in case of wrong initialization*/
++   if((SftyParkLockEvlnMainFastArea2ExecCycTiInUs == 0u))
++   {
++      /*do nothing and return initialized actrAgSpd = 0.0f*/
++   }
++   else
++   {
++      /*Get the calculated actuator angle speed in degree/second */
++      actrAgSpd = (SftyParkLockEvlnActrAg - SftyParkLockEvlnActrAgPrev) /
++                  (((float32)SftyParkLockEvlnMainFastArea2ExecCycTiInUs) * SFTYPARKLOCKEVLN_1_US);
++   }
++
++   /* Update previous actuator angle with current actuator angle */
++   SftyParkLockEvlnActrAgPrev = SftyParkLockEvlnActrAg;
++
++   /* Convert actuator angle speed to radians/second */
++   actrAgSpd = (float32)((actrAgSpd*SYSCON_PI)/SFTYPARKLOCKEVLN_180_DEGREE);
++
++   /* Convert actuator angle speed to actual speed by multiplying by gear ratio */
++   actrAgSpd = (float32)(actrAgSpd * SftyParkLockEvlnActrGearRatio);
++
++   /*Return the actual actuator angle speed in radians/second */
++   return actrAgSpd;
++}
++
++/************************************************************************************************/
++/*!
++ * \\fn         : void SftyParkLockEvln_GetAbsPosn(void)
++ * \\brief      : This function calculates absolute position of the sensor
++ * \\Parent_DD  : SftyParkLockEvln_MainFunctionArea2
++ * \\return     : Return status of primary actuator absolute position
++ * \\retAbsPosn : SFTYPARKLOCK_POSN_ENGAGED - Return primary actuator is in engaged position
++ * \\retAbsPosn : SFTYPARKLOCK_POSN_DISENGAGED - Return primary actuator is in disengaged position
++ * \\retAbsPosn : SFTYPARKLOCK_POSN_UNDETERMINED - Return primary actuator is in unknown position
++ */
++/************************************************************************************************/
++LOCAL_INLINE SftyParkLockEvln_AbsPosnType SftyParkLockEvln_GetAbsPosn(void)
++{
++   /* ******** Variables declaration *********** */
++   SftyParkLockEvln_AbsPosnType retAbsPosn;
++
++   /* ************* Source code **************** */
++
++   /* Check if park lock angle value is engaged */
++   if(SftyParkLockEvlnActrAg <= (BswC2cData.EngmentValue + SftyParkLockEvlnDeltaPrkgAgIni + SftyParkLockEvlnDeltaPrkgAgNomMax))
++   {
++      /* Park lock actuator status is engaged */
++      retAbsPosn = SFTYPARKLOCK_POSN_ENGAGED;
++   }
++   /* Check if park lock angle value is disengaged */
++   else if (SftyParkLockEvlnActrAg >= (BswC2cData.DisEngmentValue + SftyParkLockEvlnDeltaNoPrkgAgIni + SftyParkLockEvlnDeltaNoPrkgAgNomMin))
++   {
++      /* Park lock actuator status is disengaged */
++      retAbsPosn = SFTYPARKLOCK_POSN_DISENGAGED;
++   }
++   else
++   {
++      /* Park lock actuator status is undetermined */
++      retAbsPosn = SFTYPARKLOCK_POSN_UNDETERMINED;
++   }
++
++   return retAbsPosn;
++}
++
++/*****************************************************************************/
++/*!
++ * \\fn        : void SftyParkLockEvln_EvlPrimActrPosn(void)
++ * \\brief     : This function evaluates primary actuator position
++ * \\Parent_DD : SftyParkLockEvln_MainFunctionArea2
++ * \\return    : None
++ */
++/*****************************************************************************/
++LOCAL_INLINE void SftyParkLockEvln_EvlPrimActrPosn(void)
++{
++   /* ******** Variables declaration *********** */
++
++   /* ************* Source code **************** */
++   /* Check if power supply to park lock position sensor is enabled */
++   /******************* For TEMPORARY PURPOSE ONLY ************************/
++   /* Note: Replacement variable \'SftyReplcmtParkLockActrPosSnsrSts\' shall be replaced
++    *       with SftyParkLockActrPosSnsrSts during SftyParkLockActr module integration */
++   if(SftyReplcmtParkLockActrPosSnsrSts == TRUE)
++   {
++      /* Perform range check on the digital park lock angle from the KMZ80 sensor */
++      SftyParkLockEvln_PosnSnrRngErrChk();
++
++      /* If position sensor digital park lock angle range check passed */
++      if((SftyParkLockEvlnSnrDataElecLoErrMonrSt == ERR_DEB_MONR_STS_PASSED) &&
++         (SftyParkLockEvlnSnrDataElecHiErrMonrSt == ERR_DEB_MONR_STS_PASSED))
++      {
++         /* Get park lock primary actuator angle */
++         SftyParkLockEvlnActrAg = SftyParkLockEvln_GetActrAg();
++
++         /* Get park lock primary actuator motor speed */
++         SftyParkLockEvlnActrAgSpd = SftyParkLockEvln_GetActrAgSpd();
++
++         /* Get the absolute position of the sensor */
++         SftyParkLockEvlnActrAbsPosn = SftyParkLockEvln_GetAbsPosn();
++      }
++      else
++      {
++         /* Do Nothing */
++      }
++   }
++   else
++   {
++      /* Do Nothing */
++   }
++
++   return;
++}
++
++/*****************************************************************************/
++/*!
++ * \\fn        : void SftyParkLockEvln_GetPrimActrPosChUFromDma(void)
++ * \\brief     : This function gets value of P-channel primary actuator voltage
++ *              and time stamp values from DMA, measured by VADC
++ * \\Parent_DD : SftyParkLockEvln_MainFunctionArea2
++ * \\return    : None
++ */
++/*****************************************************************************/
++LOCAL_INLINE void SftyParkLockEvln_GetPrimActrPosChUFromDma(void)
++{
++   /* ******** Variables declaration *********** */
++
++   /* ************* Source code **************** */
++
++   /* Get last primary actor positive channel voltage */
++   SftyDma_UpdateParkLockPrimActrPosChUAndTiStamp();
++
++   /* If primary actuator positive channel voltage measurement raw value disable*/
++#ifndef SERIES_PRODUCTION
++   if(SftyReplcmtParkLockEvlnPrimActrPosChUMeasRawValStiEna == TRUE)
++   {
++      /* voltage measured by Replacement value for voltage measurement raw value*/
++      SftyParkLockEvlnPrimActrPosChUCurRawVal = SftyReplcmtParkLockEvlnPrimActrPosChUMeasRawReplcmtVal;
++   }
++   else
++#endif /* SERIES_PRODUCTION */
++   {
++      /* Update Current RAW value by voltage measured by VADC */
++      SftyParkLockEvlnPrimActrPosChUCurRawVal = SftyDmaParkLockPrimActrPosChURawVal;
++   }
++
++   /* If time stamp replacement stimulation is disable */
++#ifndef SERIES_PRODUCTION
++   if(SftyReplcmtParkLockEvlnPrimActrPosChUMeasTiStampStiEna == TRUE)
++   {
++      /* Update Current Time stamp by Replacement value time stamp */
++      SftyParkLockEvlnPrimActrPosChUCurTiStamp = SftyReplcmtParkLockEvlnPrimActrPosChUMeasTiStampReplcmtVal;
++   }
++   else
++#endif /* SERIES_PRODUCTION */
++   {
++      /* Update Current Time stamp by VADC time stamp*/
++      SftyParkLockEvlnPrimActrPosChUCurTiStamp = SftyDmaParkLockPrimActrPosChUTiStamp;
++   }
++
++   return;
++}
++
++/***************************************************************************/
++/*!
++ * \\fn        : void SftyParkLockEvln_EvlPrimActrPosChU(void)
++ * \\brief     : This function evaluates P-channel primary actuator voltage
++ * \\Parent_DD : SftyParkLockEvln_MainFunctionArea2
++ * \\return    : None
++ */
++/***************************************************************************/
++LOCAL_INLINE void SftyParkLockEvln_EvlPrimActrPosChU(void)
++{
++   /* ******** Variables declaration *********** */
++   uint8 primActrPosChUTiStampErr;
++
++   /* ************* Source code **************** */
++
++   /* Gets value of Primary actuator voltage from DMA*/
++   SftyParkLockEvln_GetPrimActrPosChUFromDma();
++
++   /* Checks that the time stamp is renewed for a park lock voltage measurement*/
++   primActrPosChUTiStampErr = (uint8)SftyUtils_ChkTiStamp(&SftyParkLockEvlnPrimActrPosChULstTiStamp, &SftyParkLockEvlnPrimActrPosChUCurTiStamp);
++
++   /* Check if time stamp check was OK*/
++   if(primActrPosChUTiStampErr == ERR_DEB_MONR_STS_PASSED)
++   {
++      /* Convert P-channel primary actuator voltage measurement from raw to physical value */
++      SftyParkLockEvlnPrimActrPosChUMeas = SftyUtils_ScaVal(SftyParkLockEvlnPrimActrPosChUCurRawVal, SftyParkLockEvlnPrimActrPosChUScaCfg);
++   }
++   else
++   {
++      /* Do Nothing */
++   }
++   return;
++}
++
++/*****************************************************************************/
++/*!
++ * \\fn        : void SftyParkLockEvln_GetPrimActrNegChUFromDma(void)
++ * \\brief     : This function gets value of N-channel primary actuator voltage
++ *              and time stamp values from DMA, measured by VADC
++ * \\Parent_DD : SftyParkLockEvln_MainFunctionArea2
++ * \\return    : None
++ */
++/*****************************************************************************/
++LOCAL_INLINE void SftyParkLockEvln_GetPrimActrNegChUFromDma(void)
++{
++   /* ******** Variables declaration *********** */
++
++   /* ************* Source code **************** */
++
++   /* Get last primary actor negative channel voltage time stamp*/
++   SftyDma_UpdateParkLockPrimActrNegChUAndTiStamp();
++
++   /* If primary actuator negative channel voltage measurement raw value disable*/
++#ifndef SERIES_PRODUCTION
++   if(SftyReplcmtParkLockEvlnPrimActrNegChUMeasRawValStiEna == TRUE)
++   {
++      /* Update Current RAW value by Replacement voltage  negative  measured raw value*/
++      SftyParkLockEvlnPrimActrNegChUCurRawVal = SftyReplcmtParkLockEvlnPrimActrNegChUMeasRawReplcmtVal;
++   }
++   else
++#endif /* SERIES_PRODUCTION */
++   {
++      /* Update Current RAW value by voltage measured by VADC*/
++      SftyParkLockEvlnPrimActrNegChUCurRawVal = SftyDmaParkLockPrimActrNegChURawVal;
++   }
++
++   /* If primary actuator negative channel voltage measurement time stamp disable*/
++#ifndef SERIES_PRODUCTION
++   if(SftyReplcmtParkLockEvlnPrimActrNegChUMeasTiStampStiEna == TRUE)
++   {
++      /*Update Primary Actuator Negative Channel U Current Time stamp by Replacement value for time stamp*/
++      SftyParkLockEvlnPrimActrNegChUCurTiStamp = SftyReplcmtParkLockEvlnPrimActrNegChUMeasTiStampReplcmtVal;
++   }
++   else
++#endif /* SERIES_PRODUCTION */
++   {
++      /*Update Primary Actuator Negative Channel U Current Time stamp by VADC time stamp*/
++      SftyParkLockEvlnPrimActrNegChUCurTiStamp = SftyDmaParkLockPrimActrNegChUTiStamp;
++   }
++
++   return;
++}
++
++/***************************************************************************/
++/*!
++ * \\fn        : void SftyParkLockEvln_EvlPrimActrNegChU(void)
++ * \\brief     : This function evaluates N-channel primary actuator voltage
++ * \\Parent_DD : SftyParkLockEvln_MainFunctionArea2
++ * \\return    : None
++ */
++/***************************************************************************/
++LOCAL_INLINE void SftyParkLockEvln_EvlPrimActrNegChU(void)
++{
++   /* ******** Variables declaration *********** */
++   uint8 primActrNegChUTiStampErr;
++
++   /* ************* Source code **************** */
++
++   /* Gets value of Primary actuator voltage from DMA*/
++   SftyParkLockEvln_GetPrimActrNegChUFromDma();
++
++   /* Checks that the time stamp is renewed for a park lock voltage measurement */
++   primActrNegChUTiStampErr = (uint8)SftyUtils_ChkTiStamp(&SftyParkLockEvlnPrimActrNegChULstTiStamp, &SftyParkLockEvlnPrimActrNegChUCurTiStamp);
++
++   /* Check if time stamp check was OK */
++   if(primActrNegChUTiStampErr == ERR_DEB_MONR_STS_PASSED)
++   {
++      /* Convert N-channel primary actuator voltage measurement from raw to physical value */
++      SftyParkLockEvlnPrimActrNegChUMeas = SftyUtils_ScaVal(SftyParkLockEvlnPrimActrNegChUCurRawVal, SftyParkLockEvlnPrimActrNegChUScaCfg);
++   }
++   else
++   {
++      /* Do Nothing */
++   }
++
++   return;
++}
++
++/*****************************************************************************/
++/*!
++ * \\fn        : void SftyParkLockEvln_EvlPrimActrU(void)
++ * \\brief     : This function evaluates P and N channel voltage of primary actuator
++ * \\Parent_DD : SftyParkLockEvln_MainFunctionArea2
++ * \\return    : None
++ */
++/*****************************************************************************/
++LOCAL_INLINE void SftyParkLockEvln_EvlPrimActrU(void)
++{
++   /* ******** Variables declaration *********** */
++
++   /* ************* Source code **************** */
++
++   /* Evaluate voltage of primary actuator positive channel */
++   SftyParkLockEvln_EvlPrimActrPosChU();
++
++   /* Evaluate voltage of primary actuator negative channel */
++   SftyParkLockEvln_EvlPrimActrNegChU();
++
++   return;
++}
++
++/*****************************************************************************/
++/*!
++ * \\fn        : uint16 SftyParkLockEvln_Get12BitSerlDataFrmSDSReg(uint32 data)
++ * \\brief     : This function extracts 12-bit serial data from 32-bit SDS
++ *              register sent via DMA
++ * \\param     : [in]  data - 32-bit SENT serial data received from DMA
++ * \\Parent_DD : SftyParkLockEvln_SlowFunctionArea2
++ * \\return    : Return 12-bit serial data of slow channel serial frame
++ */
++/*****************************************************************************/
++LOCAL_INLINE uint16 SftyParkLockEvln_Get12BitSerlDataFrmSDSReg(uint32 data)
++{
++   /* ******** Variables declaration *********** */
++
++   /* ************* Source code **************** */
++
++   /* Extract 12 bit serial data from 32-bit SDS (Serial Data and Status) register */
++   return (uint16)(data & 0x0FFFUL);
++}
++
++/*****************************************************************************/
++/*!
++ * \\fn        : uint8 SftyParkLockEvln_Get8BitMsgIdFrmSDSReg(uint32 data)
++ * \\brief     : This function extracts 12-bit serial data from 32-bit SDS
++ *              register sent via DMA
++ * \\param     : [in]  data - 32-bit SENT serial data received from DMA
++ * \\Parent_DD : SftyParkLockEvln_SlowFunctionArea2
++ * \\return    : Return 8-bit message id of slow channel serial frame
++ */
++/*****************************************************************************/
++LOCAL_INLINE uint8 SftyParkLockEvln_Get8BitMsgIdFrmSDSReg(uint32 data)
++{
++   /* ******** Variables declaration *********** */
++
++   /* ************* Source code **************** */
++
++   /* Extract 8 bit message Id from 32-bit SDS (Serial Data and Status) register */
++   return (uint8)((data & 0x00FF0000UL) >> 16U);
++}
++
++/*****************************************************************************/
++/*!
++ * \\fn        : uint8 SftyParkLockEvln_Get6BitSerlCrcFrmSDSReg(uint32 data)
++ * \\brief     : This function extracts 12-bit serial data from 32-bit SDS
++ *              register sent via DMA
++ * \\param     : [in]  data - 32-bit SENT serial data received from DMA
++ * \\Parent_DD : SftyParkLockEvln_SlowFunctionArea2
++ * \\return    : Return 6-bit serial CRC of slow channel serial frame
++ */
++/*****************************************************************************/
++LOCAL_INLINE uint8 SftyParkLockEvln_Get6BitSerlCrcFrmSDSReg(uint32 data)
++{
++   /* ******** Variables declaration *********** */
++
++   /* ************* Source code **************** */
++
++   /* Extract 6 bit serial CRC from 32-bit SDS (Serial Data and Status) register */
++   return (uint8)((data & 0x3F000000UL) >> 24U);
++}
++
++/*****************************************************************************/
++/*!
++ * \\fn        : boolean SftyParkLockEvln_Get1BitCfgDataFrmSDSReg(uint32 data)
++ * \\brief     : This function extracts 1-bit configuration data from 32-bit
++ *              SDS register sent via DMA
++ * \\param     : [in]  data - 32-bit SENT serial data received from DMA
++ * \\Parent_DD : SftyParkLockEvln_SlowFunctionArea2
++ * \\return    : Return 1-bit configuration data of slow channel serial frame
++ */
++/*****************************************************************************/
++LOCAL_INLINE boolean SftyParkLockEvln_Get1BitCfgDataFrmSDSReg(uint32 data)
++{
++   /* ******** Variables declaration *********** */
++
++   /* ************* Source code **************** */
++
++   /* Extract 1 bit configuration data from 32-bit SDS (Serial Data and Status) register */
++   return (boolean)((data & 0x80000000UL) >> 31U);
++}
++
++/*****************************************************************************/
++/*!
++ * \\fn          void SftyParkLockEvln_GetPosnSnrSerlDataFromDma(void)
++ * \\brief     : This function gets park lock position SENT serial message data
++ *              from DMA
++ * \\Parent_DD : SftyParkLockEvln_SlowFunctionArea2
++ * \\return    : None
++ */
++/*****************************************************************************/
++LOCAL_INLINE void SftyParkLockEvln_GetPosnSnrSerlDataFromDma(void)
++{
++   /* ******** Variables declaration *********** */
++
++   /* ************* Source code **************** */
++
++   /* Enhanced Serial Message Data from KMZ30 Sensor is being received in A.1 format
++    * Serial Data and Status Register (SDSR) data is copied directly via DMA to SftyDmaParkLockEvlnSENTStsInfoRx.data
++    * SDSR Register Details:
++    * SDSR[0:15]  - Serial Message Data
++    * SDSR[16:23] - Message ID
++    * SDSR[24:29] - Serial CRC
++    * SDSR[31]    - Configuration Bit
++    * Note: Configuration Bit is always SET to 0 which indicates:
++    * 12-bit Serial Message Data and 8-bit Message ID
++    * */
++
++#ifndef SERIES_PRODUCTION
++   /* Check if SENT serial data stimuli is disabled */
++   if(SftyReplcmtParkLockEvlnSENTStsInfoRxDataStiEna == TRUE)
++   {
++      /* Use replacement value for extracting the data */
++      /* Extract 12-bit serial message ID data from 32-bit value */
++      SftyParkLockEvlnSerlData.serlData  = SftyParkLockEvln_Get12BitSerlDataFrmSDSReg(SftyReplcmtParkLockEvlnSENTStsInfoRxDataReplcmtVal);
++      /* Extract 8-bit message ID from 32-bit value */
++      SftyParkLockEvlnSerlData.msgId     = SftyParkLockEvln_Get8BitMsgIdFrmSDSReg(SftyReplcmtParkLockEvlnSENTStsInfoRxDataReplcmtVal);
++      /* Extract 6-bit serial CRC from 32-bit value */
++      SftyParkLockEvlnSerlData.serlCrc   = SftyParkLockEvln_Get6BitSerlCrcFrmSDSReg(SftyReplcmtParkLockEvlnSENTStsInfoRxDataReplcmtVal);
++      /* Extract 1-bit configuration bit from 32-bit value */
++      SftyParkLockEvlnSerlData.cfgBit    = SftyParkLockEvln_Get1BitCfgDataFrmSDSReg(SftyReplcmtParkLockEvlnSENTStsInfoRxDataReplcmtVal);
++   }
++   else
++#endif /* SERIES_PRODUCTION */
++   {
++      /* Use SENT data from DMA for extracting the data */
++      /* Extract 12-bit serial message ID data from 32-bit value */
++      SftyParkLockEvlnSerlData.serlData  = SftyParkLockEvln_Get12BitSerlDataFrmSDSReg(SftyDmaParkLockEvlnSENTStsInfoRx.data);
++      /* Extract 8-bit message ID from 32-bit value */
++      SftyParkLockEvlnSerlData.msgId     = SftyParkLockEvln_Get8BitMsgIdFrmSDSReg(SftyDmaParkLockEvlnSENTStsInfoRx.data);
++      /* Extract 6-bit serial CRC from 32-bit value */
++      SftyParkLockEvlnSerlData.serlCrc   = SftyParkLockEvln_Get6BitSerlCrcFrmSDSReg(SftyDmaParkLockEvlnSENTStsInfoRx.data);
++      /* Extract 1-bit configuration bit from 32-bit value */
++      SftyParkLockEvlnSerlData.cfgBit    = SftyParkLockEvln_Get1BitCfgDataFrmSDSReg(SftyDmaParkLockEvlnSENTStsInfoRx.data);
++   }
++
++#ifndef SERIES_PRODUCTION
++   /* Check if SENT serial data time stamp stimuli is disabled */
++   if(SftyReplcmtParkLockEvlnSENTStsInfoRxDataTiStampStiEna == TRUE)
++   {
++      /* Copy Serial Data replacement time stamp value */
++      SftyParkLockEvlnSerlDataCurTiStamp = SftyReplcmtParkLockEvlnSENTStsInfoRxDataTiStampReplcmtVal;
++   }
++   else
++#endif /* SERIES_PRODUCTION */
++   {
++      /* Copy Serial Data DMA time stamp value */
++      SftyParkLockEvlnSerlDataCurTiStamp = SftyDmaParkLockEvlnSENTStsInfoRx.tiStamp;
++   }
++
++   return;
++}
++
++/************************************************************************************/
++/*!
++ * \\fn        : void SftyParkLockEvln_FitDataInto24BitMsgFrame(uint16 data, uint8 startIdx)
++ * \\brief     : This function shall update \'data\' inside 24-bit frame
++ * \\param     : [in]  data - data which needs to be fit into 24-bit message frame
++ * \\param     : [in]  startIdx - start index of 24-bit message frame where data needs to be fit
++ * \\Parent_DD : SftyParkLockEvln_SlowFunctionArea2
++ * \\return    : None
++ */
++/************************************************************************************/
++LOCAL_INLINE void SftyParkLockEvln_FitDataInto24BitMsgFrame(uint16 data, uint8 startIdx)
++{
++   /* ******** Variables declaration *********** */
++   uint16 tempData;
++   uint8 strtIndx;
++
++   /* ************* Source code **************** */
++
++   tempData = data;
++   strtIndx = startIdx;
++
++   do
++   {
++      /* Check if LSB is set */
++      if((tempData & 0x01U) == 0x01U)
++      {
++         /* Set bit at position \'shiftIndx\' */
++         SftyParkLockEvln24BitCrcFrame.word = SftyParkLockEvln24BitCrcFrame.word | (uint32)(1UL << strtIndx);
++      }
++      else
++      {
++         /* Do Nothing*/
++      }
++
++      /* Decrement start index by 2 */
++      strtIndx = strtIndx - 0x2U;
++      /* Shift data left bit by 1 */
++      tempData = tempData >> 1U;
++
++   }while(tempData != 0x0U);
++
++   return;
++}
++
++/************************************************************************************/
++/*!
++ * \\fn        : void SftyParkLockEvln_Form24BitCrcFrame(void)
++ * \\brief     : This function shall fit serial message data, serial message id and
++ *              configuration bit into 24-bit CRC frame as per SAE J2716 format
++ * \\Parent_DD : SftyParkLockEvln_SlowFunctionArea2
++ * \\return    : None
++ */
++/************************************************************************************/
++LOCAL_INLINE void SftyParkLockEvln_Form24BitCrcFrame(void)
++{
++   /* ******** Variables declaration *********** */
++   uint16 u16Data;
++   uint8 u8Data;
++
++   /* ************* Source code **************** */
++
++   /* Fit 12-bit serial message data into 24-bit message frame */
++   u16Data = SftyParkLockEvlnSerlData.serlData;
++   SftyParkLockEvln_FitDataInto24BitMsgFrame(u16Data, SFTYPARKLOCKEVLN_STRT_IDX_SERIAL_DATA);
++
++   /* Fit lower nibble of 8-bit serial message Id into 24-bit message frame */
++   u8Data = SftyParkLockEvlnSerlData.msgId & SFTYPARKLOCKEVLN_MSG_ID_LOWER_NIBBLE_DATA_MASK;
++   SftyParkLockEvln_FitDataInto24BitMsgFrame((uint16)u8Data, SFTYPARKLOCKEVLN_STRT_IDX_MSG_ID_LOWER_NIBBLE);
++
++   /* Fit higher nibble of 8-bit serial message Id into 24-bit message frame */
++   u8Data = (SftyParkLockEvlnSerlData.msgId & SFTYPARKLOCKEVLN_MSG_ID_HIGHER_NIBBLE_DATA_MASK) >> 4U;
++   SftyParkLockEvln_FitDataInto24BitMsgFrame((uint16)u8Data, SFTYPARKLOCKEVLN_STRT_IDX_MSG_ID_HIGHER_NIBBLE);
++
++   /* Fit configuration bit into 24-bit message frame */
++   u8Data = SftyParkLockEvlnSerlData.cfgBit;
++   SftyParkLockEvln_FitDataInto24BitMsgFrame((uint16)u8Data, SFTYPARKLOCKEVLN_STRT_IDX_CONFG_DATA);
++
++   return;
++}
++
++/*****************************************************************************/
++/*!
++ * \\fn        : void SftyParkLockEvln_EvlPosnSnrSerlData(void)
++ * \\brief     : This function evaluate park lock position sensor\'s slow channel
++ *              SENT serial message data
++ * \\Parent_DD : SftyParkLockEvln_SlowFunctionArea2
++ * \\return    : Status of serial data validation
++ * \\retErrVal : ERR_DEB_MONR_STS_PASSED - Return serial data validation check as passed
++ * \\retErrVal : ERR_DEB_MONR_STS_FAILED - Return serial data validation check as failed
++ */
++/*****************************************************************************/
++LOCAL_INLINE uint8 SftyParkLockEvln_EvlPosnSnrSerlData(void)
++{
++   /* ******** Variables declaration *********** */
++   uint8 posnSnrSerlDataTiStampErr;
++   uint8 retErrVal;
++
++   /* ************* Source code **************** */
++
++   /* Get park lock position SENT serial data from DMA */
++   SftyParkLockEvln_GetPosnSnrSerlDataFromDma();
++
++   /* Checks that the time stamp is renewed for a park lock sensor serial data */
++   posnSnrSerlDataTiStampErr = SftyUtils_ChkTiStamp(&SftyParkLockEvlnSerlDataLstTiStamp, &SftyParkLockEvlnSerlDataCurTiStamp);
++
++   /* Check if time stamp is valid */
++   if(posnSnrSerlDataTiStampErr == ERR_DEB_MONR_STS_PASSED)
++   {
++      /* Validate serial CRC data received from DMA */
++
++      /* As per SAE INTERNATIONAL J2716 APR2016, 24-bit message data shall be used for 6-bit CRC generation
++       * and order of the message bits shall be as below :
++       -------------------------------------------------------------------------------------------------------------------------
++       * D11 |0x0 |D10 |CON |D09 |ID7 |D08 |ID6 |D07 |ID5 |D06 |ID4 |D05 |0x0 |D04 |ID3 |D03 |ID2 |D02 |ID1 |D01 |ID0 |D00 |0x0
++       * m00  m01  m02  m03  m04  m05  m06  m07  m08  m09  m10  m11  m12  m13  m14  m15  m16  m17  m18  b19  b20  b21  b22  b23
++       -------------------------------------------------------------------------------------------------------------------------
++       * 0x0 |0x0 |0x0 |0x0 |0x0 |0x0
++       * m24  m25  b26  b27  b28  b29
++       -------------------------------
++       *
++       * where D00:D12 = 12-bit Serial Message Data
++       *       ID0:ID7 = 8-bit Serial Message Id
++       *       CON     = 1-bit Configuration Bit
++       *       m00     = LSB bit position of 24-bit message data
++       *       m29     = MSB bit position of 24-bit message data
++       */
++
++      /* Form 24-bit message frame using serial message data, serial message id and configuration bit
++       * as per above SAE J2716 format to be used for 6-bit CRC calculation */
++      SftyParkLockEvln_Form24BitCrcFrame();
++
++      /* Update CRC buffer with 6 bit data group */
++      SftyParkLockEvlnCrcCalcBuff[0] = (uint8)SftyParkLockEvln24BitCrcFrame.byte.data0;
++      SftyParkLockEvlnCrcCalcBuff[1] = (uint8)SftyParkLockEvln24BitCrcFrame.byte.data1;
++      SftyParkLockEvlnCrcCalcBuff[2] = (uint8)SftyParkLockEvln24BitCrcFrame.byte.data2;
++      SftyParkLockEvlnCrcCalcBuff[3] = (uint8)SftyParkLockEvln24BitCrcFrame.byte.data3;
++
++      /* Calculate 6-Bit CRC value */
++      SftyParkLockEvlnIntCalcCrcVal = SftyCrc_CalcCRC6((const uint8 *)SftyParkLockEvlnCrcCalcBuff, SFTYPARKLOCKEVLN_CRC_CALCN_BUF_SIZE,
++                                                       SFTYPARKLOCKEVLN_6BIT_CRC_INIT_SEED_VALUE, TRUE);
++
++      /* Check if calculated CRC is equal to CRC received from DMA via SENT */
++      if(SftyParkLockEvlnIntCalcCrcVal == SftyParkLockEvlnSerlData.serlCrc)
++      {
++         /* CRC check passed */
++         retErrVal = ERR_DEB_MONR_STS_PASSED;
++      }
++      else
++      {
++         /* CRC check failed */
++         retErrVal = ERR_DEB_MONR_STS_FAILED;
++      }
++   }
++   else
++   {
++      /* Time stamp check failed */
++      retErrVal = ERR_DEB_MONR_STS_FAILED;
++   }
++
++   return retErrVal;
++}
++
++/***********************************************************************/
++/*!
++ * \\fn        : void SftyParkLockEvln_ChkPosnSnrFaults(void)
++ * \\brief     : This function shall check for position sensor faults
++ * \\Parent_DD : SftyParkLockEvln_SlowFunctionArea2
++ * \\return    : None
++ */
++/***********************************************************************/
++LOCAL_INLINE void SftyParkLockEvln_ChkPosnSnrFaults(void)
++{
++   /* ******** Variables declaration *********** */
++   uint8 idx;
++
++   /* ************* Source code **************** */
++
++   /* Check if Serial Message Id is equal to Diagnostic Status Code */
++   if(SftyParkLockEvlnSerlData.msgId == SFTYPARKLOCKEVLN_MSG_ID_TYPE_DIAGNOSTIC_STATUS_CODE)
++   {
++      if(SftyParkLockEvlnSerlData.serlData != SFTYPARKLOCKEVLN_POSNSNR_NO_FAULTS)
++      {
++         /* Set position sensor fault to PASSED unless,
++          * fault is equal to any faults from diagnostic fault code list */
++         SftyParkLockEvlnPrkgPosSnsrErrMonrSt = ERR_DEB_MONR_STS_PASSED;
++
++         /* Check if any faults from Diagnostic Fault Code list occurred */
++         for(idx=0U; (idx < SFTYPARKLOCKEVLN_POSNSNR_TOTAL_NO_OF_FAULTS) && (SftyParkLockEvlnPrkgPosSnsrErrMonrSt != ERR_DEB_MONR_STS_FAILED); idx++)
++         {
++            if(SftyParkLockEvlnSerlData.serlData == SftyParkLockEvlnPosSnrDiagFaultCodeLst[idx])
++            {
++               /* Position sensor fault detected. */
++               SftyParkLockEvlnPrkgPosSnsrErrMonrSt = ERR_DEB_MONR_STS_FAILED;
++            }
++            else
++            {
++               /* Continue to check for faults */
++            }
++         }
++      }
++      else
++      {
++         /* No faults detected in park lock position sensor */
++         SftyParkLockEvlnPrkgPosSnsrErrMonrSt = ERR_DEB_MONR_STS_PASSED;
++      }
++   }
++   else
++   {
++      /* Do nothing. Serial message data received is not a diagnostic message */
++   }
++
++   return;
++}
++
++/*****************************************************************************/
++/*!
++ * \\fn        : void SftyParkLockEvln_InitMainFastArea0(void)
++ * \\brief     : This function shall initialize all variables used in main fast
++ *              area 0 cyclic function
++ * \\Parent_DD : SftyParkLockEvln_MainFastArea0
++ * \\return    : None
++ */
++/*****************************************************************************/
++LOCAL_INLINE void SftyParkLockEvln_InitMainFastArea0(void)
++{
++   /* ******** Variables declaration *********** */
++
++   /* ************* Source code **************** */
++
++   /* Initialize the variables used in main fast area 0 cyclic function */
++   SftyParkLockEvlnPrimActrICurRawVal = 0x0U;
++   SftyParkLockEvlnPrimActrICurTiStamp = 0x0UL;
++   SftyParkLockEvlnPrimActrIMeas = 0.0f;
++
++   return;
++}
++
++/*****************************************************************************/
++/*!
++ * \\fn        : void SftyParkLockEvln_InitMainFunctionArea2(void)
++ * \\brief     : This function shall initialize all variables used in main function
++ *              fast area 2 cyclic function
++ * \\Parent_DD : SftyParkLockEvln_MainFunctionArea2
++ * \\return    : None
++ */
++/*****************************************************************************/
++LOCAL_INLINE void SftyParkLockEvln_InitMainFunctionArea2(void)
++{
++   /* ******** Variables declaration *********** */
++
++   /* ************* Source code **************** */
++
++   /* Initialize all variables used in main function fast area 2 cyclic function */
++   SftyParkLockEvlnSnrDataElecLoErrMonrSt = ERR_DEB_MONR_STS_INACTIVE;
++   SftyParkLockEvlnSnrDataElecHiErrMonrSt = ERR_DEB_MONR_STS_INACTIVE;
++   SftyParkLockEvlnActrAg = 0.0f;
++   SftyParkLockEvlnActrAgSpd = 0.0f;
++   SftyParkLockEvlnActrAbsPosn = SFTYPARKLOCK_POSN_SIGNAL_NOT_AVAILABLE;
++   SftyParkLockEvlnPrimActrPosChUCurRawVal = 0x0U;
++   SftyParkLockEvlnPrimActrPosChUCurTiStamp = 0x0U;
++   SftyParkLockEvlnPrimActrPosChUMeas = 0.0f;
++   SftyParkLockEvlnPrimActrNegChUCurRawVal = 0x0U;
++   SftyParkLockEvlnPrimActrNegChUCurTiStamp = 0x0U;
++   SftyParkLockEvlnPrimActrNegChUMeas = 0.0f;
++
++   return;
++}
++
++/*****************************************************************************/
++/*!
++ * \\fn        : void SftyParkLockEvln_InitSlowFunctionArea2(void)
++ * \\brief     : This function shall initialize all variables used in main function
++ *              slow area 2 cyclic function
++ * \\Parent_DD : SftyParkLockEvln_SlowFunctionArea2
++ * \\return    : None
++ */
++/*****************************************************************************/
++LOCAL_INLINE void SftyParkLockEvln_InitSlowFunctionArea2(void)
++{
++   /* ******** Variables declaration *********** */
++
++   /* ************* Source code **************** */
++
++   /* Initialize all variables used in main function slow area 2 cyclic function */
++   SftyParkLockEvlnSerlData.serlCrc = 0x0U;
++   SftyParkLockEvlnSerlData.msgId = 0x0U;
++   SftyParkLockEvlnSerlData.cfgBit = 0x0U;
++   SftyParkLockEvlnSerlData.serlData = 0x0U;
++   SftyParkLockEvlnSerlDataCurTiStamp = 0x0UL;
++   SftyParkLockEvln24BitCrcFrame.word = 0x0U;
++   SftyParkLockEvlnIntCalcCrcVal = 0x0U;
++   SftyParkLockEvlnPrkgPosSnsrErrMonrSt = ERR_DEB_MONR_STS_INACTIVE;
++
++   return;
++}
++
++/*================== [definition of public functions] =======================*/
++
++#define SFTYPARKLOCKEVLN_AREA_2_START_SEC_CODE_SLOW
++#include "MemMap.h"
++
++/*****************************************************************************/
++/*!
++ * \\fn     : void SftyParkLockEvln_Init(void)
++ * \\brief  : This function initializes all variables in Area 2
++ * \\return : None
++ */
++/*****************************************************************************/
++FUNC(void, SFTYPARKLOCKEVLN_CODE) SftyParkLockEvln_Init(void)
++{
++   /* ******** Variables declaration *********** */
++
++   /* ************* Source code **************** */
++
++   /* Initialize all variables used in main function slow area 2 */
++   SftyParkLockEvlnSnrDataElecLoErrMonrSt = ERR_DEB_MONR_STS_INACTIVE;
++   SftyParkLockEvlnSnrDataElecHiErrMonrSt = ERR_DEB_MONR_STS_INACTIVE;
++   SftyParkLockEvlnPrkgPosSnsrErrMonrSt = ERR_DEB_MONR_STS_INACTIVE;
++   SftyParkLockEvlnActrAbsPosn = SFTYPARKLOCK_POSN_SIGNAL_NOT_AVAILABLE;
++   SftyParkLockEvlnActrAg = 0.0f;
++   SftyParkLockEvlnActrAgSpd = 0.0f;
++   SftyParkLockEvlnPrimActrPosChUMeas = 0.0f;
++   SftyParkLockEvlnPrimActrNegChUMeas = 0.0f;
++
++   return;
++}
++
++/*****************************************************************************/
++/*!
++ * \\fn     : void SftyParkLockEvln_SlowFunctionArea2(void)
++ * \\brief  : This function evaluates slow channel serial message data and detects
++ *           if there are any fault is park lock position sensor
++ * \\return : None
++ */
++/*****************************************************************************/
++FUNC(void, SFTYPARKLOCKEVLN_CODE) SftyParkLockEvln_SlowFunctionArea2(void)
++{
++   /* ******** Variables declaration *********** */
++   uint8 retSerlDataEvlnResult;
++
++   /* ************* Source code **************** */
++
++   /* Initialize all variables used in main function slow area 2 cyclic function */
++   SftyParkLockEvln_InitSlowFunctionArea2();
++
++   /* Check if power supply to park lock position sensor is enabled */
++   /******************* For TEMPORARY PURPOSE ONLY ************************/
++   /* Note: Replacement variable \'SftyReplcmtParkLockActrPosSnsrSts\' shall be replaced
++    *       with SftyParkLockActrPosSnsrSts during SftyParkLockActr module integration */
++   if(SftyReplcmtParkLockActrPosSnsrSts == TRUE)
++   {
++      /* Evaluate park lock position sensor\'s slow channel SENT serial message data */
++      retSerlDataEvlnResult = SftyParkLockEvln_EvlPosnSnrSerlData();
++
++      if(retSerlDataEvlnResult == ERR_DEB_MONR_STS_PASSED)
++      {
++         /* Slow channel serial data is valid. Now check for position sensor faults */
++         SftyParkLockEvln_ChkPosnSnrFaults();
++      }
++      else
++      {
++         /* Slow channel serial data in invalid */
++      }
++   }
++   else
++   {
++      /* Do Nothing */
++   }
++
++   return;
++}
++
++#define SFTYPARKLOCKEVLN_AREA_2_STOP_SEC_CODE_SLOW
++#include "MemMap.h"
++
++
++#define SFTYPARKLOCKEVLN_AREA_2_START_SEC_CODE_FAST
++#include "MemMap.h"
++
++/*****************************************************************************/
++/*!
++ * \\fn     : void SftyParkLockEvln_MainFunctionArea2(void)
++ * \\brief  : This function calculates the absolute position of primary actuator and
++ *           also evaluates P and N channel primary actuator voltages
++ * \\return : None
++ */
++/*****************************************************************************/
++FUNC(void, SFTYPARKLOCKEVLN_CODE) SftyParkLockEvln_MainFunctionArea2(void)
++{
++   /* ******** Variables declaration *********** */
++
++   /* ************* Source code **************** */
++
++   /* Initialize all variables used in main function fast area 2 cyclic function */
++   SftyParkLockEvln_InitMainFunctionArea2();
++
++   /* Evaluate primary actuator position */
++   SftyParkLockEvln_EvlPrimActrPosn();
++
++   /* Evaluate primary actuator voltage */
++   SftyParkLockEvln_EvlPrimActrU();
++
++   return;
++}
++
++#define SFTYPARKLOCKEVLN_AREA_2_STOP_SEC_CODE_FAST
++#include "MemMap.h"
++
++
++#define SFTYPARKLOCKEVLN_AREA_0_START_SEC_CODE_FAST
++#include "MemMap.h"
++
++/***********************************************************************/
++/*!
++ * \\fn     : void SftyParkLockEvln_MainFastArea0(void)
++ * \\brief  : This function evaluates primary actuator current values
++ * \\return : None
++ */
++/***********************************************************************/
++FUNC(void, SFTYPARKLOCKEVLN_CODE) SftyParkLockEvln_MainFastArea0(void)
++{
++   /* ******** Variables declaration *********** */
++
++   /* ************* Source code **************** */
++
++   /* Initialize all variables used in main fast area 0 cyclic function */
++   SftyParkLockEvln_InitMainFastArea0();
++
++   /* Check if power supply to park lock position sensor is enabled */
++   /******************* For TEMPORARY PURPOSE ONLY ************************/
++   /* Note: Replacement variable \'SftyReplcmtParkLockActrPosSnsrSts\' shall be replaced
++    *       with SftyParkLockActrPosSnsrSts during SftyParkLockActr module integration */
++   if(SftyReplcmtParkLockActrPosSnsrSts == TRUE)
++   {
++      /* Evaluate primary actuator current measurement */
++      SftyParkLockEvln_EvlPrimActrI();
++   }
++   else
++   {
++      /* Do Nothing */
++   }
++
++   return;
++}
++
++#define SFTYPARKLOCKEVLN_AREA_0_STOP_SEC_CODE_FAST
++#include "MemMap.h"
++
++/*================== [closure] ==============================================*/
++/* ********************************************************************** */
++/* Copyright (C) Valeo Siemens eAutomotive Germany GmbH 2021              */
++/* All Rights Reserved. Confidential                                      */
++/* ********************************************************************** */
++/*==================[end of file]============================================*/
+diff --git a/src/fw_cu/Components/Safety/Sfty_Cmn/SftyParkLockEvln/src/SftyParkLockEvln_data.c b/src/fw_cu/Components/Safety/Sfty_Cmn/SftyParkLockEvln/src/SftyParkLockEvln_data.c
+new file mode 100644
+index 000000000..3d15b1b02
+--- /dev/null
++++ b/src/fw_cu/Components/Safety/Sfty_Cmn/SftyParkLockEvln/src/SftyParkLockEvln_data.c
+@@ -0,0 +1,271 @@
++/* ***************************************************************** */
++/* Sourcefile: SftyParkLockEvln_data.c                               */
++/* ADD Container: SftyParkLockEvln                                   */
++/* ADD Container Version: 1.0.0                                      */
++/* ***************************************************************** */
++/* Copyright (C) Valeo Siemens eAutomotive Germany GmbH 2021         */
++/* All Rights Reserved. Confidential                                 */
++/* ***************************************************************** */
++
++/*!
++ * \\defgroup      SftyParkLockEvln_data   SftyParkLockEvln_data -  SftyParkLockEvln\'s calibration data
++ * \\ingroup       SftyParkLockEvln
++ * @{
++*/
++
++#include\t"SftyParkLockEvln_data.h"
++
++/************************* MEASURABLE PARAMETERS - BEGIN *****************************/
++
++/* Begin: SFTYPARKLOCKEVLN_START_SEC_VAR_AREA_2_FAST_INIT_8 (online) */
++#define SFTYPARKLOCKEVLN_START_SEC_VAR_AREA_2_FAST_INIT_8
++#include "MemMap.h"
++
++/*
++@@ SYMBOL = SftyParkLockEvlnSnrDataElecLoErrMonrSt
++@@ A2L_TYPE = MEASURE
++@@ DATA_TYPE = UBYTE [0 ... 2]
++@@ CONVERSION = TABLE 0 "INACTIVE" 1 "PASSED" 2 "FAILED"
++@@ DESCRIPTION = "Park lock position sensor raw data validity electric low status; unit \'-\'"
++@@ GROUP = SftyParkLockEvln
++@@ END
++*/
++VAR(uint8, SFTYPARKLOCKEVLN_VAR) SftyParkLockEvlnSnrDataElecLoErrMonrSt = 0U;
++
++/*
++@@ SYMBOL = SftyParkLockEvlnSnrDataElecHiErrMonrSt
++@@ A2L_TYPE = MEASURE
++@@ DATA_TYPE = UBYTE [0 ... 2]
++@@ CONVERSION = TABLE 0 "INACTIVE" 1 "PASSED" 2 "FAILED"
++@@ DESCRIPTION = "Park lock position sensor raw data validity electric high status; unit \'-\'"
++@@ GROUP = SftyParkLockEvln
++@@ END
++*/
++VAR(uint8, SFTYPARKLOCKEVLN_VAR) SftyParkLockEvlnSnrDataElecHiErrMonrSt = 0U;
++
++/*
++@@ SYMBOL = SftyParkLockEvlnPrkgPosSnsrErrMonrSt
++@@ A2L_TYPE = MEASURE
++@@ DATA_TYPE = UBYTE [0 ... 2]
++@@ CONVERSION = TABLE 0 "INACTIVE" 1 "PASSED" 2 "FAILED"
++@@ DESCRIPTION = "Park lock position sensor fault status; unit \'-\'"
++@@ GROUP = SftyParkLockEvln
++@@ END
++*/
++VAR(uint8, SFTYPARKLOCKEVLN_VAR) SftyParkLockEvlnPrkgPosSnsrErrMonrSt = 0U;
++
++/*
++@@ SYMBOL = SftyParkLockEvlnActrAbsPosn
++@@ A2L_TYPE = MEASURE
++@@ DATA_TYPE = UBYTE [0 ... 3]
++@@ CONVERSION = TABLE 0 "SFTYPARKLOCK_POSN_SIGNAL_NOT_AVAILABLE" 1 "SFTYPARKLOCK_POSN_ENGAGED" 2 "SFTYPARKLOCK_POSN_UNDETERMINED" 3 "SFTYPARKLOCK_POSN_DISENGAGED"
++@@ DESCRIPTION = "Absolute position of park lock actuator; unit \'-\'"
++@@ GROUP = SftyParkLockEvln
++@@ END
++*/
++VAR(SftyParkLockEvln_AbsPosnType, SFTYPARKLOCKEVLN_VAR) SftyParkLockEvlnActrAbsPosn = SFTYPARKLOCK_POSN_SIGNAL_NOT_AVAILABLE;
++
++#define SFTYPARKLOCKEVLN_STOP_SEC_VAR_AREA_2_FAST_INIT_8
++#include "MemMap.h"
++/* End: SFTYPARKLOCKEVLN_STOP_SEC_VAR_AREA_2_FAST_INIT_8 (online) */
++
++/* Begin: SFTYPARKLOCKEVLN_START_SEC_VAR_AREA_2_FAST_INIT_32 (online) */
++#define SFTYPARKLOCKEVLN_START_SEC_VAR_AREA_2_FAST_INIT_32
++#include "MemMap.h"
++
++/*
++@@ SYMBOL = SftyParkLockEvlnActrAg
++@@ A2L_TYPE = MEASURE
++@@ DATA_TYPE = FLOAT
++@@ DESCRIPTION = "Current primary actuator angle; unit \'degree\'"
++@@ GROUP = SftyParkLockEvln
++@@ END
++*/
++VAR(float32, SFTYPARKLOCKEVLN_VAR) SftyParkLockEvlnActrAg = 0.f;
++
++/*
++@@ SYMBOL = SftyParkLockEvlnActrAgSpd
++@@ A2L_TYPE = MEASURE
++@@ DATA_TYPE = FLOAT
++@@ DESCRIPTION = "Park lock primary actuator motor speed; unit \'rad/sec\'"
++@@ GROUP = SftyParkLockEvln
++@@ END
++*/
++VAR(float32, SFTYPARKLOCKEVLN_VAR) SftyParkLockEvlnActrAgSpd = 0.f;
++
++/*
++@@ SYMBOL = SftyParkLockEvlnPrimActrPosChUMeas
++@@ A2L_TYPE = MEASURE
++@@ DATA_TYPE = FLOAT
++@@ DESCRIPTION = "Primary actuator voltage measurement of positive channel; unit \'V\'"
++@@ GROUP = SftyParkLockEvln
++@@ END
++*/
++VAR(float32, SFTYPARKLOCKEVLN_VAR) SftyParkLockEvlnPrimActrPosChUMeas = 0.f;
++
++/*
++@@ SYMBOL = SftyParkLockEvlnPrimActrNegChUMeas
++@@ A2L_TYPE = MEASURE
++@@ DATA_TYPE = FLOAT
++@@ DESCRIPTION = "Primary actuator voltage measurement of negative channel; unit \'V\'"
++@@ GROUP = SftyParkLockEvln
++@@ END
++*/
++VAR(float32, SFTYPARKLOCKEVLN_VAR) SftyParkLockEvlnPrimActrNegChUMeas = 0.f;
++
++#define SFTYPARKLOCKEVLN_STOP_SEC_VAR_AREA_2_FAST_INIT_32
++#include "MemMap.h"
++/* End: SFTYPARKLOCKEVLN_STOP_SEC_VAR_AREA_2_FAST_INIT_32 (online) */
++
++/* Begin: SFTYPARKLOCKEVLN_AREA_0_START_SEC_VAR_FAST_INIT_32 (online) */
++#define SFTYPARKLOCKEVLN_AREA_0_START_SEC_VAR_FAST_INIT_32
++#include "MemMap.h"
++
++/*
++@@ SYMBOL = SftyParkLockEvlnPrimActrIMeas
++@@ A2L_TYPE = MEASURE
++@@ DATA_TYPE = FLOAT
++@@ DESCRIPTION = "Primary actuator current measurement; unit \'A\'"
++@@ GROUP = SftyParkLockEvln
++@@ END
++*/
++VAR(float32, SFTYPARKLOCKEVLN_VAR) SftyParkLockEvlnPrimActrIMeas = 0.f;
++
++#define SFTYPARKLOCKEVLN_AREA_0_STOP_SEC_VAR_FAST_INIT_32
++#include "MemMap.h"
++/* End: SFTYPARKLOCKEVLN_AREA_0_STOP_SEC_VAR_FAST_INIT_32 (online) */
++
++
++/************************* MEASURABLE PARAMETERS - END *****************************/
++
++
++/************************* CALIBRATION PARAMETERS - BEGIN *****************************/
++
++/* Begin: SFTYPARKLOCKEVLN_START_SEC_CALIB_32 (calib) */
++#define SFTYPARKLOCKEVLN_START_SEC_CALIB_32
++#include "MemMap.h"
++/*
++@@ INSTANCE = SftyParkLockEvlnPrimActrIScaCfg
++@@ STRUCTURE = SftyOffsetGainType
++@@ END
++*/
++/*! \\cvar Offset and gain value to get physical value of primary actuator current; unit \'-\' */
++CONST(SftyOffsetGainType, SFTYPARKLOCKEVLN_VAR) SftyParkLockEvlnPrimActrIScaCfg =
++   {-2048.f,0.0122100124f};
++
++/*
++@@ INSTANCE = SftyParkLockEvlnPrimActrPosChUScaCfg
++@@ STRUCTURE = SftyOffsetGainType
++@@ END
++*/
++/*! \\cvar Offset and gain value to get physical value of primary actuator P channel voltage; unit \'-\' */
++CONST(SftyOffsetGainType, SFTYPARKLOCKEVLN_VAR) SftyParkLockEvlnPrimActrPosChUScaCfg =
++   {0.f,0.0012210012f};
++
++/*
++@@ INSTANCE = SftyParkLockEvlnPrimActrNegChUScaCfg
++@@ STRUCTURE = SftyOffsetGainType
++@@ END
++*/
++/*! \\cvar Offset and gain value to get physical value of primary actuator N channel voltage; unit \'-\' */
++CONST(SftyOffsetGainType, SFTYPARKLOCKEVLN_VAR) SftyParkLockEvlnPrimActrNegChUScaCfg =
++   {0.f,0.0012210012f};
++
++/*
++@@ SYMBOL = SftyParkLockEvlnMainFastArea2ExecCycTiInUs
++@@ A2L_TYPE = PARAMETER
++@@ DATA_TYPE = ULONG
++@@ DESCRIPTION = "Execution cycle time of park lock evaluation main fast area 2 function; unit \'us\'"
++@@ GROUP = SftyParkLockEvln
++@@ END
++*/
++CONST(uint32, SFTYPARKLOCKEVLN_VAR) SftyParkLockEvlnMainFastArea2ExecCycTiInUs = 1000UL;
++
++/*
++@@ SYMBOL = SftyParkLockEvlnActrGearRatio
++@@ A2L_TYPE = PARAMETER
++@@ DATA_TYPE = FLOAT
++@@ DESCRIPTION = "Park lock primary actuator gear ratio to get actual speed; unit \'-\'"
++@@ GROUP = SftyParkLockEvln
++@@ END
++*/
++CONST(float32, SFTYPARKLOCKEVLN_VAR) SftyParkLockEvlnActrGearRatio = 177.0f;
++
++/*
++@@ SYMBOL = SftyParkLockEvlnDeltaPrkgAgIni
++@@ A2L_TYPE = PARAMETER
++@@ DATA_TYPE = FLOAT
++@@ DESCRIPTION = "Delta engaging angle between initial position (target position of park lock control) and nominal angle to set engagement status; unit \'degree\'"
++@@ GROUP = SftyParkLockEvln
++@@ END
++*/
++CONST(float32, SFTYPARKLOCKEVLN_VAR) SftyParkLockEvlnDeltaPrkgAgIni = 2.0f;
++
++/*
++@@ SYMBOL = SftyParkLockEvlnDeltaPrkgAgNomMax
++@@ A2L_TYPE = PARAMETER
++@@ DATA_TYPE = FLOAT
++@@ DESCRIPTION = "Delta engaging angle between nominal position (to set engagement status) and max angle (to set engagement status); unit \'degree\'"
++@@ GROUP = SftyParkLockEvln
++@@ END
++*/
++CONST(float32, SFTYPARKLOCKEVLN_VAR) SftyParkLockEvlnDeltaPrkgAgNomMax = 3.0f;
++
++/*
++@@ SYMBOL = SftyParkLockEvlnDeltaNoPrkgAgIni
++@@ A2L_TYPE = PARAMETER
++@@ DATA_TYPE = FLOAT
++@@ DESCRIPTION = "Delta disengaging angle between initial position(target position of park lock control) and nominal angle to set disengagement status; unit \'degree\'"
++@@ GROUP = SftyParkLockEvln
++@@ END
++*/
++CONST(float32, SFTYPARKLOCKEVLN_VAR) SftyParkLockEvlnDeltaNoPrkgAgIni = 2.0f;
++
++/*
++@@ SYMBOL = SftyParkLockEvlnDeltaNoPrkgAgNomMin
++@@ A2L_TYPE = PARAMETER
++@@ DATA_TYPE = FLOAT
++@@ DESCRIPTION = "Delta disengaging angle between nominal position( to set disengagement status) and min angle( to set disengagement status); unit \'degree\'"
++@@ GROUP = SftyParkLockEvln
++@@ END
++*/
++CONST(float32, SFTYPARKLOCKEVLN_VAR) SftyParkLockEvlnDeltaNoPrkgAgNomMin = 3.0f;
++
++#define SFTYPARKLOCKEVLN_STOP_SEC_CALIB_32
++#include "MemMap.h"
++/* End: SFTYPARKLOCKEVLN_STOP_SEC_CALIB_32 (calib) */
++
++/* Begin: SFTYPARKLOCKEVLN_START_SEC_CALIB_16 (calib) */
++#define SFTYPARKLOCKEVLN_START_SEC_CALIB_16
++#include "MemMap.h"
++/*
++@@ SYMBOL = SftyParkLockEvlnPosnAcqnMinRawVal
++@@ A2L_TYPE = PARAMETER
++@@ DATA_TYPE = UWORD
++@@ DESCRIPTION = "Minimum raw value of park lock position sensor angle ; unit \'-\'"
++@@ GROUP = SftyParkLockEvln
++@@ END
++*/
++CONST(uint16, SFTYPARKLOCKEVLN_VAR) SftyParkLockEvlnPosnAcqnMinRawVal = 1U;
++
++/*
++@@ SYMBOL = SftyParkLockEvlnPosnAcqnMaxRawVal
++@@ A2L_TYPE = PARAMETER
++@@ DATA_TYPE = UWORD
++@@ DESCRIPTION = "Maximum raw value of park lock position sensor angle ; unit \'-\'"
++@@ GROUP = SftyParkLockEvln
++@@ END
++*/
++CONST(uint16, SFTYPARKLOCKEVLN_VAR) SftyParkLockEvlnPosnAcqnMaxRawVal = 4094U;
++
++#define SFTYPARKLOCKEVLN_STOP_SEC_CALIB_16
++#include "MemMap.h"
++/* End: SFTYPARKLOCKEVLN_STOP_SEC_CALIB_16 (calib) */
++
++/************************* CALIBRATION PARAMETERS - END *****************************/
++
++/* ***************************************************************** */
++/* Copyright (C) Valeo Siemens eAutomotive Germany GmbH 2021         */
++/* All Rights Reserved. Confidential                                 */
++/* ***************************************************************** */
++/*==================[end of file]====================================*/
+diff --git a/src/fw_cu/Components/Safety/Sfty_Cmn/SftySdl/src/SftySdl_cfg.c b/src/fw_cu/Components/Safety/Sfty_Cmn/SftySdl/src/SftySdl_cfg.c
+index dc4436f50..26d5d661b 100644
+--- a/src/fw_cu/Components/Safety/Sfty_Cmn/SftySdl/src/SftySdl_cfg.c
++++ b/src/fw_cu/Components/Safety/Sfty_Cmn/SftySdl/src/SftySdl_cfg.c
+@@ -41,6 +41,7 @@
+ #include "SftyCrc.h"
+ #include "SftySysInit_data.h"
+ #include "SftyParkLockPosnAcqn.h"
++#include "SftyParkLockEvln.h"
+ 
+ /* Safety Inverter Modules */
+ #include "SftyAcEvln.h"
+@@ -454,28 +455,37 @@ STATIC FUNC(void, SFTYSDL) SftySdl_FinishInit(void)
+ @@ INSTANCE = SftySdlTickCntNormRun._35_ SftySdlRunTiNormRun_SftyHvInterlock_MainFunction
+ @@ STRUCTURE = SftySdl_TickCntType
+ @@ END
+-@@ INSTANCE = SftySdlTickCntNormRun._36_ SftySdlRunTiNormRun_SftySdl_MPUChkArea1Slow
++@@ INSTANCE = SftySdlTickCntNormRun._36_ SftySdlRunTiNormRun_SftyParkLockEvln_MainFastArea0
+ @@ STRUCTURE = SftySdl_TickCntType
+ @@ END
+-@@ INSTANCE = SftySdlTickCntNormRun._37_ SftySdlRunTiNormRun_SftySdl_MPUChkArea2Slow
++@@ INSTANCE = SftySdlTickCntNormRun._37_ SftySdlRunTiNormRun_SftyParkLockEvln_MainFunctionArea2
+ @@ STRUCTURE = SftySdl_TickCntType
+ @@ END
+-@@ INSTANCE = SftySdlTickCntNormRun._38_ SftySdlRunTiNormRun_SftySdl_MPUChkAreaCmnSlow
++@@ INSTANCE = SftySdlTickCntNormRun._38_ SftySdlRunTiNormRun_SftyParkLockEvln_SlowFunctionArea2
+ @@ STRUCTURE = SftySdl_TickCntType
+ @@ END
+-@@ INSTANCE = SftySdlTickCntNormRun._39_ SftySdlRunTiNormRun_SftySdl_MPUChkArea0
++@@ INSTANCE = SftySdlTickCntNormRun._39_ SftySdlRunTiNormRun_SftySdl_MPUChkArea1Slow
+ @@ STRUCTURE = SftySdl_TickCntType
+ @@ END
+-@@ INSTANCE = SftySdlTickCntNormRun._40_ SftySdlRunTiNormRun_SftySdl_MPUChkArea1
++@@ INSTANCE = SftySdlTickCntNormRun._40_ SftySdlRunTiNormRun_SftySdl_MPUChkArea2Slow
+ @@ STRUCTURE = SftySdl_TickCntType
+ @@ END
+-@@ INSTANCE = SftySdlTickCntNormRun._41_ SftySdlRunTiNormRun_SftySdl_MPUChkArea2
++@@ INSTANCE = SftySdlTickCntNormRun._41_ SftySdlRunTiNormRun_SftySdl_MPUChkAreaCmnSlow
+ @@ STRUCTURE = SftySdl_TickCntType
+ @@ END
+-@@ INSTANCE = SftySdlTickCntNormRun._42_ SftySdlRunTiNormRun_SftySdl_MPUChkAreaCmn
++@@ INSTANCE = SftySdlTickCntNormRun._42_ SftySdlRunTiNormRun_SftySdl_MPUChkArea0
+ @@ STRUCTURE = SftySdl_TickCntType
+ @@ END
+-@@ INSTANCE = SftySdlTickCntNormRun._43_ SftySdlRunTiNormRun_SftySysInit_DebugModChk
++@@ INSTANCE = SftySdlTickCntNormRun._43_ SftySdlRunTiNormRun_SftySdl_MPUChkArea1
++@@ STRUCTURE = SftySdl_TickCntType
++@@ END
++@@ INSTANCE = SftySdlTickCntNormRun._44_ SftySdlRunTiNormRun_SftySdl_MPUChkArea2
++@@ STRUCTURE = SftySdl_TickCntType
++@@ END
++@@ INSTANCE = SftySdlTickCntNormRun._45_ SftySdlRunTiNormRun_SftySdl_MPUChkAreaCmn
++@@ STRUCTURE = SftySdl_TickCntType
++@@ END
++@@ INSTANCE = SftySdlTickCntNormRun._46_ SftySdlRunTiNormRun_SftySysInit_DebugModChk
+ @@ STRUCTURE = SftySdl_TickCntType
+ @@ END
+ */
+@@ -532,12 +542,15 @@ CONST(SftySdl_TaskTblType, SFTYSDL) SftySdlNormRunTaskTbl[]=
+    ,{ SFTYSDL_AREA_1,   &SftyDcEvln_MainFunctionArea1Slow,       100u,           0u}
+    ,{ SFTYSDL_AREA_2,   &SftyDcEvln_MainFunctionArea2Slow,       100u,           0u}
+    ,{ SFTYSDL_AREA_CMN, &SftyErrDeb_MainFunctionAreaCmnSlow,     100u,           6u}
+-   ,{ SFTYSDL_AREA_0,   &SftyTempEvln_MainFunction,                 20u,            8u}
+-//   ,{ SFTYSDL_AREA_0,   &SftyLibApp_Run,                        5000u,           4u}
+-   ,{ SFTYSDL_AREA_2,\t&SftyParkLockPosnAcqn_MainFunctionArea2,  10u,            0u}
++   ,{ SFTYSDL_AREA_0,   &SftyTempEvln_MainFunction,               20u,           8u}
++//   ,{ SFTYSDL_AREA_0,   &SftyLibApp_Run,                        5000u,         4u}
++   ,{ SFTYSDL_AREA_2,\t&SftyParkLockPosnAcqn_MainFunctionArea2,  10u,           0u}
+    ,{ SFTYSDL_AREA_CMN, &SftyShutoffPahTst_Main,                  10u,           0u}
+    ,{ SFTYSDL_AREA_1,   &SftyCrashSigMon_MainFunction,            10u,           0u}
+    ,{ SFTYSDL_AREA_2,   &SftyHvInterlock_MainFunction,            10u,           0u}
++   ,{ SFTYSDL_AREA_0,   &SftyParkLockEvln_MainFastArea0,           2u,           0u}
++   ,{ SFTYSDL_AREA_2,   &SftyParkLockEvln_MainFunctionArea2,      10u,           0u}
++   ,{ SFTYSDL_AREA_2,   &SftyParkLockEvln_SlowFunctionArea2,     100u,           0u}
+ #ifndef SERIES_PRODUCTION
+     /* function for testing MPU */
+    ,{ SFTYSDL_AREA_1,   &SftySdl_MPUChkArea1Slow,                100u,           0u}
+@@ -612,6 +625,7 @@ CONST(SftySdl_InitTblType, SFTYSDL) SftySdlInitNormRunTbl[] =
+ \t\t\t\t\t\t\t\t\t\t\t\t\t\t/* is enabled */
+     ,{ SFTYSDL_AREA_1,   &SftyCrashSigMon_Init}
+     ,{ SFTYSDL_AREA_2,   &SftyHvInterlock_Init}
++\t,{ SFTYSDL_AREA_2,   &SftyParkLockEvln_Init}
+ };
+ 
+ #define SFTYSDL_STOP_SEC_CONST_32
+diff --git a/src/fw_cu/Components/Safety/Sfty_Cmn/SftyUtils/include/SftyUtils.h b/src/fw_cu/Components/Safety/Sfty_Cmn/SftyUtils/include/SftyUtils.h
+index 7e226586a..5c59ba59d 100644
+--- a/src/fw_cu/Components/Safety/Sfty_Cmn/SftyUtils/include/SftyUtils.h
++++ b/src/fw_cu/Components/Safety/Sfty_Cmn/SftyUtils/include/SftyUtils.h
+@@ -34,6 +34,7 @@
+ #include <math.h>
+ #include "Mathlib.h"
+ #include "ErrDeb_cmn.h"
++#include "AddStructTypes.h"
+ /*================== [macros] ===============================================*/
+ /**
+  * \\brief master device tags used to setup access privileges for CPU peripherals
+@@ -399,6 +400,27 @@ LOCAL_INLINE float32 SftyUtils_FindAmp(float32 inp, float32 angle, float32 filCo
+    return amplitude;
+ }
+ 
++/******************************************************************/
++/*!
++* \\fn float32 SftyUtils_ScaVal(const uint16 rawVal, const SftyOffsetGainType offsetGainCfg)
++* \\brief This function scales the raw value of a generic measurement to a physical value using provided gain and offset
++* \\param [in] uint16 rawVal raw value
++* \\param [in] SftyOffsetGainType offsetGainCfg gain offset configuration for scaling
++* \\return Scaled value. <br>
++*/
++/******************************************************************/
++LOCAL_INLINE float32 SftyUtils_ScaVal(const uint16 rawVal, const SftyOffsetGainType offsetGainCfg)
++{
++/* ******** Variables declaration *********** */
++float32 retVal = (float32) MLIB_F32U32((uint32) rawVal);
++
++/* ************* Source code **************** */
++retVal += offsetGainCfg.Offset;
++retVal *= offsetGainCfg.Gain;
++
++return retVal;
++}
++
+ /**********************************************************************************************************************************************/
+ /*!
+  * \\fn         void SftyUtils_InitFindAmpStructVars(SftyUtilsFindAmpType *findAmp)
+diff --git a/src/fw_cu/Components/Safety/Sfty_Cmn/Sfty_Common/include/SftyReplcmt_data.h b/src/fw_cu/Components/Safety/Sfty_Cmn/Sfty_Common/include/SftyReplcmt_data.h
+index 738380f62..7afb38a1d 100644
+--- a/src/fw_cu/Components/Safety/Sfty_Cmn/Sfty_Common/include/SftyReplcmt_data.h
++++ b/src/fw_cu/Components/Safety/Sfty_Cmn/Sfty_Common/include/SftyReplcmt_data.h
+@@ -2779,61 +2779,53 @@ extern CONST(boolean, SFTYDCEVLN_CALIB) SftyReplcmtE2eFpgaOverVoltVBatFltSts;
+ /* End: SFTYREPLCMT_STOP_SEC_CALIB_8 (calib) */
+ 
+ 
+-/* Begin: SFTYREPLCMT_START_SEC_CALIB_8 (online) */
++/* Begin: SFTYREPLCMT_START_SEC_CALIB_8 (calib) */
+ #define SFTYREPLCMT_START_SEC_CALIB_8
+ #include "MemMap.h"
+ 
+ extern CONST(uint8, SFTYPARKLOCKPOSNACQN_VAR)SftyReplcmParkLockPosnAcqnEnaFlg;
+-
+ #define SFTYREPLCMT_STOP_SEC_CALIB_8
+ #include "MemMap.h"
+-/* Stop: SFTYREPLCMT_STOP_SEC_CALIB_8 (online) */
++/* Stop: SFTYREPLCMT_STOP_SEC_CALIB_8 (calib) */
+ 
+-/* Begin: SFTYREPLCMT_START_SEC_CALIB_8 (online) */
++/* Begin: SFTYREPLCMT_START_SEC_CALIB_8 (calib) */
+ #define SFTYREPLCMT_START_SEC_CALIB_8
+ #include "MemMap.h"
+ 
+-
+ extern CONST(uint8, SFTYPARKLOCKPOSNACQN_VAR)SftyReplcmParkLockActrPosSnsrSts;
+-
+ #define SFTYREPLCMT_STOP_SEC_CALIB_8
+ #include "MemMap.h"
+-/* Stop: SFTYREPLCMT_STOP_SEC_CALIB_8 (online) */
++/* Stop: SFTYREPLCMT_STOP_SEC_CALIB_8 (calib) */
+ 
+-/* Begin: SFTYREPLCMT_START_SEC_CALIB_32 (online) */
++/* Begin: SFTYREPLCMT_START_SEC_CALIB_32 (calib) */
+ #define SFTYREPLCMT_START_SEC_CALIB_32
+ #include "MemMap.h"
+ 
+-
+ extern CONST(uint32, SFTYPARKLOCKPOSNACQN_VAR)SftyReplcmParkLockPosnAcqnSENTSnrDataRxCrcVal;
+-
+ #define SFTYREPLCMT_STOP_SEC_CALIB_32
+ #include "MemMap.h"
+-/* Stop: SFTYREPLCMT_STOP_SEC_CALIB_32 (online) */
++/* Stop: SFTYREPLCMT_STOP_SEC_CALIB_32 (calib) */
+ 
+-/* Begin: SFTYREPLCMT_START_SEC_CALIB_32 (online) */
++/* Begin: SFTYREPLCMT_START_SEC_CALIB_32 (calib) */
+ #define SFTYREPLCMT_START_SEC_CALIB_32
+ #include "MemMap.h"
+ 
+-
+ extern CONST(uint32, SFTYPARKLOCKPOSNACQN_VAR)SftyReplcmParkLockPosnAcqnSENTSnrDataRxSnsrDataVal;
+ 
+ #define SFTYREPLCMT_STOP_SEC_CALIB_32
+ #include "MemMap.h"
+-/* Stop: SFTYREPLCMT_STOP_SEC_CALIB_32 (online) */
++/* Stop: SFTYREPLCMT_STOP_SEC_CALIB_32 (calib) */
+ 
+-/* Begin: SFTYREPLCMT_START_SEC_CALIB_32 (online) */
++/* Begin: SFTYREPLCMT_START_SEC_CALIB_32 (calib) */
+ #define SFTYREPLCMT_START_SEC_CALIB_32
+ #include "MemMap.h"
+ 
+-
+ extern CONST(uint32, SFTYPARKLOCKPOSNACQN_VAR)SftyReplcmParkLockPosnAcqnSENTSnrDataRxTiStampDmaVal;
+-
+ #define SFTYREPLCMT_STOP_SEC_CALIB_32
+ #include "MemMap.h"
+-/* Stop: SFTYREPLCMT_STOP_SEC_CALIB_32 (online) */
++/* Stop: SFTYREPLCMT_STOP_SEC_CALIB_32 (calib) */
+ 
+-/* Begin: SFTYREPLCMT_START_SEC_CALIB_32 (online) */
++/* Begin: SFTYREPLCMT_START_SEC_CALIB_32 (calib) */
+ #define SFTYREPLCMT_START_SEC_CALIB_32
+ #include "MemMap.h"
+ 
+@@ -2841,16 +2833,169 @@ extern CONST(uint32, SFTYPARKLOCKPOSNACQN_VAR)SftyReplcmParkLockPosnAcqnSENTSnrD
+ 
+ #define SFTYREPLCMT_STOP_SEC_CALIB_32
+ #include "MemMap.h"
+-/* Stop: SFTYREPLCMT_STOP_SEC_CALIB_32 (online) */
++/* Stop: SFTYREPLCMT_STOP_SEC_CALIB_32 (calib) */
+ 
+-/* Begin: SFTYREPLCMT_START_SEC_CALIB_32 (online) */
++/* Begin: SFTYREPLCMT_START_SEC_CALIB_32 (calib) */
+ #define SFTYREPLCMT_START_SEC_CALIB_32
+ #include "MemMap.h"
+ 
+ 
+ extern CONST(uint32, SFTYPARKLOCKPOSNACQN_VAR)SftyReplcmParkLockPosnAcqnSENTSnrDataRxIntStatVal;
++#define SFTYREPLCMT_STOP_SEC_CALIB_32
++#include "MemMap.h"
++/* Stop: SFTYREPLCMT_STOP_SEC_CALIB_32 (calib) */
++
++/* Begin: SFTYREPLCMT_START_SEC_CALIB_8 (calib) */
++#define SFTYREPLCMT_START_SEC_CALIB_8
++#include "MemMap.h"
++
++extern CONST(boolean, SFTYREPLCMT_CALIB) SftyReplcmtParkLockEvlnPrimActrIMeasRawValStiEna;
++#define SFTYREPLCMT_STOP_SEC_CALIB_8
++#include "MemMap.h"
++/* End: SFTYREPLCMT_STOP_SEC_CALIB_8 (calib) */
++
++/* Begin: SFTYREPLCMT_START_SEC_CALIB_8 (calib) */
++#define SFTYREPLCMT_START_SEC_CALIB_8
++#include "MemMap.h"
++
++extern CONST(boolean, SFTYREPLCMT_CALIB) SftyReplcmtParkLockEvlnPrimActrIMeasTiStampStiEna;
++#define SFTYREPLCMT_STOP_SEC_CALIB_8
++#include "MemMap.h"
++/* End: SFTYREPLCMT_STOP_SEC_CALIB_8 (calib) */
++
++/* Begin: SFTYREPLCMT_START_SEC_CALIB_16 (calib) */
++#define SFTYREPLCMT_START_SEC_CALIB_16
++#include "MemMap.h"
++
++extern CONST(uint16, SFTYREPLCMT_CALIB) SftyReplcmtParkLockEvlnPrimActrIMeasRawReplcmtVal;
++#define SFTYREPLCMT_STOP_SEC_CALIB_16
++#include "MemMap.h"
++/* End: SFTYREPLCMT_STOP_SEC_CALIB_16 (calib) */
++
++/* Begin: SFTYREPLCMT_START_SEC_CALIB_32 (calib) */
++#define SFTYREPLCMT_START_SEC_CALIB_32
++#include "MemMap.h"
+ 
++extern CONST(uint32, SFTYREPLCMT_CALIB) SftyReplcmtParkLockEvlnPrimActrIMeasTiStampReplcmtVal;
+ #define SFTYREPLCMT_STOP_SEC_CALIB_32
+ #include "MemMap.h"
+-/* Stop: SFTYREPLCMT_STOP_SEC_CALIB_32 (online) */
++/* End: SFTYREPLCMT_STOP_SEC_CALIB_32 (calib) */
++
++/* Begin: SFTYREPLCMT_START_SEC_CALIB_8 (calib) */
++#define SFTYREPLCMT_START_SEC_CALIB_8
++#include "MemMap.h"
++
++extern CONST(boolean, SFTYREPLCMT_CALIB) SftyReplcmtParkLockEvlnPrimActrPosChUMeasRawValStiEna;
++#define SFTYREPLCMT_STOP_SEC_CALIB_8
++#include "MemMap.h"
++/* End: SFTYREPLCMT_STOP_SEC_CALIB_8 (calib) */
++
++/* Begin: SFTYREPLCMT_START_SEC_CALIB_8 (calib) */
++#define SFTYREPLCMT_START_SEC_CALIB_8
++#include "MemMap.h"
++
++extern CONST(boolean, SFTYREPLCMT_CALIB) SftyReplcmtParkLockEvlnPrimActrPosChUMeasTiStampStiEna;
++#define SFTYREPLCMT_STOP_SEC_CALIB_8
++#include "MemMap.h"
++/* End: SFTYREPLCMT_STOP_SEC_CALIB_8 (calib) */
++
++/* Begin: SFTYREPLCMT_START_SEC_CALIB_16 (calib) */
++#define SFTYREPLCMT_START_SEC_CALIB_16
++#include "MemMap.h"
++
++extern CONST(uint16, SFTYREPLCMT_CALIB) SftyReplcmtParkLockEvlnPrimActrPosChUMeasRawReplcmtVal;
++#define SFTYREPLCMT_STOP_SEC_CALIB_16
++#include "MemMap.h"
++/* End: SFTYREPLCMT_STOP_SEC_CALIB_16 (calib) */
++
++/* Begin: SFTYREPLCMT_START_SEC_CALIB_32 (calib) */
++#define SFTYREPLCMT_START_SEC_CALIB_32
++#include "MemMap.h"
++
++extern CONST(uint32, SFTYREPLCMT_CALIB) SftyReplcmtParkLockEvlnPrimActrPosChUMeasTiStampReplcmtVal;
++#define SFTYREPLCMT_STOP_SEC_CALIB_32
++#include "MemMap.h"
++/* End: SFTYREPLCMT_STOP_SEC_CALIB_32 (calib) */
++
++/* Begin: SFTYREPLCMT_START_SEC_CALIB_8 (calib) */
++#define SFTYREPLCMT_START_SEC_CALIB_8
++#include "MemMap.h"
++
++extern CONST(boolean, SFTYREPLCMT_CALIB) SftyReplcmtParkLockEvlnPrimActrNegChUMeasRawValStiEna;
++#define SFTYREPLCMT_STOP_SEC_CALIB_8
++#include "MemMap.h"
++/* End: SFTYREPLCMT_STOP_SEC_CALIB_8 (calib) */
++
++/* Begin: SFTYREPLCMT_START_SEC_CALIB_8 (calib) */
++#define SFTYREPLCMT_START_SEC_CALIB_8
++#include "MemMap.h"
++
++extern CONST(boolean, SFTYREPLCMT_CALIB) SftyReplcmtParkLockEvlnPrimActrNegChUMeasTiStampStiEna;
++#define SFTYREPLCMT_STOP_SEC_CALIB_8
++#include "MemMap.h"
++/* End: SFTYREPLCMT_STOP_SEC_CALIB_8 (calib) */
++
++/* Begin: SFTYREPLCMT_START_SEC_CALIB_16 (calib) */
++#define SFTYREPLCMT_START_SEC_CALIB_16
++#include "MemMap.h"
++
++extern CONST(uint16, SFTYREPLCMT_CALIB) SftyReplcmtParkLockEvlnPrimActrNegChUMeasRawReplcmtVal;
++#define SFTYREPLCMT_STOP_SEC_CALIB_16
++#include "MemMap.h"
++/* End: SFTYREPLCMT_STOP_SEC_CALIB_16 (calib) */
++
++/* Begin: SFTYREPLCMT_START_SEC_CALIB_32 (calib) */
++#define SFTYREPLCMT_START_SEC_CALIB_32
++#include "MemMap.h"
++
++extern CONST(uint32, SFTYREPLCMT_CALIB) SftyReplcmtParkLockEvlnPrimActrNegChUMeasTiStampReplcmtVal;
++#define SFTYREPLCMT_STOP_SEC_CALIB_32
++#include "MemMap.h"
++/* End: SFTYREPLCMT_STOP_SEC_CALIB_32 (calib) */
++
++/* Begin: SFTYREPLCMT_START_SEC_CALIB_8 (calib) */
++#define SFTYREPLCMT_START_SEC_CALIB_8
++#include "MemMap.h"
++
++extern CONST(boolean, SFTYREPLCMT_CALIB) SftyReplcmtParkLockEvlnSENTStsInfoRxDataStiEna;
++#define SFTYREPLCMT_STOP_SEC_CALIB_8
++#include "MemMap.h"
++/* End: SFTYREPLCMT_STOP_SEC_CALIB_8 (calib) */
++
++/* Begin: SFTYREPLCMT_START_SEC_CALIB_32 (calib) */
++#define SFTYREPLCMT_START_SEC_CALIB_32
++#include "MemMap.h"
++
++extern CONST(uint32, SFTYREPLCMT_CALIB) SftyReplcmtParkLockEvlnSENTStsInfoRxDataReplcmtVal;
++#define SFTYREPLCMT_STOP_SEC_CALIB_32
++#include "MemMap.h"
++/* End: SFTYREPLCMT_STOP_SEC_CALIB_32 (calib) */
++
++/* Begin: SFTYREPLCMT_START_SEC_CALIB_8 (calib) */
++#define SFTYREPLCMT_START_SEC_CALIB_8
++#include "MemMap.h"
++
++extern CONST(boolean, SFTYREPLCMT_CALIB) SftyReplcmtParkLockEvlnSENTStsInfoRxDataTiStampStiEna;
++#define SFTYREPLCMT_STOP_SEC_CALIB_8
++#include "MemMap.h"
++/* End: SFTYREPLCMT_STOP_SEC_CALIB_8 (calib) */
++
++/* Begin: SFTYREPLCMT_START_SEC_CALIB_32 (calib) */
++#define SFTYREPLCMT_START_SEC_CALIB_32
++#include "MemMap.h"
++
++extern CONST(uint32, SFTYREPLCMT_CALIB) SftyReplcmtParkLockEvlnSENTStsInfoRxDataTiStampReplcmtVal;
++#define SFTYREPLCMT_STOP_SEC_CALIB_32
++#include "MemMap.h"
++/* End: SFTYREPLCMT_STOP_SEC_CALIB_32 (calib) */
++
++/* Begin: SFTYREPLCMT_START_SEC_CALIB_8 (calib) */
++#define SFTYREPLCMT_START_SEC_CALIB_8
++#include "MemMap.h"
++
++extern CONST(uint8, SFTYREPLCMT_CALIB) SftyReplcmtParkLockActrPosSnsrSts;
++#define SFTYREPLCMT_STOP_SEC_CALIB_8
++#include "MemMap.h"
++/* End: SFTYREPLCMT_STOP_SEC_CALIB_8 (calib) */
++
+ #endif
+diff --git a/src/fw_cu/Components/Safety/Sfty_Cmn/Sfty_Common/src/SftyReplcmt_data.c b/src/fw_cu/Components/Safety/Sfty_Cmn/Sfty_Common/src/SftyReplcmt_data.c
+index 2cae4241d..52bdf0dae 100644
+--- a/src/fw_cu/Components/Safety/Sfty_Cmn/Sfty_Common/src/SftyReplcmt_data.c
++++ b/src/fw_cu/Components/Safety/Sfty_Cmn/Sfty_Common/src/SftyReplcmt_data.c
+@@ -2983,7 +2983,8 @@ CONST(boolean, SFTYDCEVLN_CALIB) SftyReplcmtE2eFpgaOverVoltVBatFltSts = FALSE;
+ #define SFTYREPLCMT_STOP_SEC_CALIB_8
+ #include "MemMap.h"
+ /* End: SFTYREPLCMT_STOP_SEC_CALIB_8 (calib) */
+-/* Begin: SFTYREPLCMT_START_SEC_CALIB_8 (online) */
++
++/* Begin: SFTYREPLCMT_START_SEC_CALIB_8 (calib) */
+ #define SFTYREPLCMT_START_SEC_CALIB_8
+ #include "MemMap.h"
+ /*
+@@ -2998,9 +2999,9 @@ CONST(uint8, SFTYPARKLOCKPOSNACQN_VAR)SftyReplcmParkLockPosnAcqnEnaFlg = 0U;
+ 
+ #define SFTYREPLCMT_STOP_SEC_CALIB_8
+ #include "MemMap.h"
+-/* Stop: SFTYREPLCMT_STOP_SEC_CALIB_8 (online) */
++/* Stop: SFTYREPLCMT_STOP_SEC_CALIB_8 (calib) */
+ 
+-/* Begin: SFTYREPLCMT_START_SEC_CALIB_8 (online) */
++/* Begin: SFTYREPLCMT_START_SEC_CALIB_8 (calib) */
+ #define SFTYREPLCMT_START_SEC_CALIB_8
+ #include "MemMap.h"
+ /*
+@@ -3015,9 +3016,9 @@ CONST(uint8, SFTYPARKLOCKPOSNACQN_VAR)SftyReplcmParkLockActrPosSnsrSts = 0U;
+ 
+ #define SFTYREPLCMT_STOP_SEC_CALIB_8
+ #include "MemMap.h"
+-/* Stop: SFTYREPLCMT_STOP_SEC_CALIB_8 (online) */
++/* Stop: SFTYREPLCMT_STOP_SEC_CALIB_8 (calib) */
+ 
+-/* Begin: SFTYREPLCMT_START_SEC_CALIB_32 (online) */
++/* Begin: SFTYREPLCMT_START_SEC_CALIB_32 (calib) */
+ #define SFTYREPLCMT_START_SEC_CALIB_32
+ #include "MemMap.h"
+ 
+@@ -3033,9 +3034,9 @@ CONST(uint32, SFTYPARKLOCKPOSNACQN_VAR)SftyReplcmParkLockPosnAcqnSENTSnrDataRxCr
+ 
+ #define SFTYREPLCMT_STOP_SEC_CALIB_32
+ #include "MemMap.h"
+-/* Stop: SFTYREPLCMT_STOP_SEC_CALIB_32 (online) */
++/* Stop: SFTYREPLCMT_STOP_SEC_CALIB_32 (calib) */
+ 
+-/* Begin: SFTYREPLCMT_START_SEC_CALIB_32 (online) */
++/* Begin: SFTYREPLCMT_START_SEC_CALIB_32 (calib) */
+ #define SFTYREPLCMT_START_SEC_CALIB_32
+ #include "MemMap.h"
+ 
+@@ -3051,9 +3052,9 @@ CONST(uint32, SFTYPARKLOCKPOSNACQN_VAR)SftyReplcmParkLockPosnAcqnSENTSnrDataRxSn
+ 
+ #define SFTYREPLCMT_STOP_SEC_CALIB_32
+ #include "MemMap.h"
+-/* Stop: SFTYREPLCMT_STOP_SEC_CALIB_32 (online) */
++/* Stop: SFTYREPLCMT_STOP_SEC_CALIB_32 (calib) */
+ 
+-/* Begin: SFTYREPLCMT_START_SEC_CALIB_32 (online) */
++/* Begin: SFTYREPLCMT_START_SEC_CALIB_32 (calib) */
+ #define SFTYREPLCMT_START_SEC_CALIB_32
+ #include "MemMap.h"
+ 
+@@ -3069,9 +3070,9 @@ CONST(uint32, SFTYPARKLOCKPOSNACQN_VAR)SftyReplcmParkLockPosnAcqnSENTSnrDataRxTi
+ 
+ #define SFTYREPLCMT_STOP_SEC_CALIB_32
+ #include "MemMap.h"
+-/* Stop: SFTYREPLCMT_STOP_SEC_CALIB_32 (online) */
++/* Stop: SFTYREPLCMT_STOP_SEC_CALIB_32 (calib) */
+ 
+-/* Begin: SFTYREPLCMT_START_SEC_CALIB_32 (online) */
++/* Begin: SFTYREPLCMT_START_SEC_CALIB_32 (calib) */
+ #define SFTYREPLCMT_START_SEC_CALIB_32
+ #include "MemMap.h"
+ 
+@@ -3087,9 +3088,9 @@ CONST(uint32, SFTYPARKLOCKPOSNACQN_VAR)SftyReplcmParkLockPosnAcqnSENTSnrDataRxTi
+ 
+ #define SFTYREPLCMT_STOP_SEC_CALIB_32
+ #include "MemMap.h"
+-/* Stop: SFTYREPLCMT_STOP_SEC_CALIB_32 (online) */
++/* Stop: SFTYREPLCMT_STOP_SEC_CALIB_32 (calib) */
+ 
+-/* Begin: SFTYREPLCMT_START_SEC_CALIB_32 (online) */
++/* Begin: SFTYREPLCMT_START_SEC_CALIB_32 (calib) */
+ #define SFTYREPLCMT_START_SEC_CALIB_32
+ #include "MemMap.h"
+ 
+@@ -3105,5 +3106,276 @@ CONST(uint32, SFTYPARKLOCKPOSNACQN_VAR)SftyReplcmParkLockPosnAcqnSENTSnrDataRxIn
+ 
+ #define SFTYREPLCMT_STOP_SEC_CALIB_32
+ #include "MemMap.h"
+-/* Stop: SFTYREPLCMT_STOP_SEC_CALIB_32 (online) */
++/* Stop: SFTYREPLCMT_STOP_SEC_CALIB_32 (calib) */
++
++/* Begin: SFTYREPLCMT_START_SEC_CALIB_8 (calib) */
++#define SFTYREPLCMT_START_SEC_CALIB_8
++#include "MemMap.h"
++/*
++@@ SYMBOL = SftyReplcmtParkLockEvlnPrimActrIMeasRawValStiEna
++@@ A2L_TYPE = PARAMETER
++@@ DATA_TYPE = UBYTE
++@@ DESCRIPTION = "Enable raw value replacement for primary actuator current measurement raw value; unit \'-\'"
++@@ GROUP = SftyParkLockEvln
++@@ END
++*/
++CONST(uint8, SFTYREPLCMT_CALIB) SftyReplcmtParkLockEvlnPrimActrIMeasRawValStiEna = 0U;
++#define SFTYREPLCMT_STOP_SEC_CALIB_8
++#include "MemMap.h"
++/* End: SFTYREPLCMT_STOP_SEC_CALIB_8 (calib) */
++
++/* Begin: SFTYREPLCMT_START_SEC_CALIB_8 (calib) */
++#define SFTYREPLCMT_START_SEC_CALIB_8
++#include "MemMap.h"
++/*
++@@ SYMBOL = SftyReplcmtParkLockEvlnPrimActrIMeasTiStampStiEna
++@@ A2L_TYPE = PARAMETER
++@@ DATA_TYPE = UBYTE
++@@ DESCRIPTION = "Enable time stamp replacement stimulation for primary actuator current measurement; unit \'-\'"
++@@ GROUP = SftyParkLockEvln
++@@ END
++*/
++CONST(uint8, SFTYREPLCMT_CALIB) SftyReplcmtParkLockEvlnPrimActrIMeasTiStampStiEna = 0U;
++#define SFTYREPLCMT_STOP_SEC_CALIB_8
++#include "MemMap.h"
++/* End: SFTYREPLCMT_STOP_SEC_CALIB_8 (calib) */
++
++/* Begin: SFTYREPLCMT_START_SEC_CALIB_16 (calib) */
++#define SFTYREPLCMT_START_SEC_CALIB_16
++#include "MemMap.h"
++/*
++@@ SYMBOL = SftyReplcmtParkLockEvlnPrimActrIMeasRawReplcmtVal
++@@ A2L_TYPE = PARAMETER
++@@ DATA_TYPE = UWORD
++@@ DESCRIPTION = "Replacement value for primary actuator current measurement raw value; unit \'Raw\'"
++@@ GROUP = SftyParkLockEvln
++@@ END
++*/
++CONST(uint16, SFTYREPLCMT_CALIB) SftyReplcmtParkLockEvlnPrimActrIMeasRawReplcmtVal = 0U;
++#define SFTYREPLCMT_STOP_SEC_CALIB_16
++#include "MemMap.h"
++/* End: SFTYREPLCMT_STOP_SEC_CALIB_16 (calib) */
++
++/* Begin: SFTYREPLCMT_START_SEC_CALIB_32 (calib) */
++#define SFTYREPLCMT_START_SEC_CALIB_32
++#include "MemMap.h"
++/*
++@@ SYMBOL = SftyReplcmtParkLockEvlnPrimActrIMeasTiStampReplcmtVal
++@@ A2L_TYPE = PARAMETER
++@@ DATA_TYPE = ULONG
++@@ DESCRIPTION = "Replacement value for primary actuator current measurement timestamp value; unit \'Ticks\'"
++@@ GROUP = SftyParkLockEvln
++@@ END
++*/
++CONST(uint32, SFTYREPLCMT_CALIB) SftyReplcmtParkLockEvlnPrimActrIMeasTiStampReplcmtVal = 0UL;
++#define SFTYREPLCMT_STOP_SEC_CALIB_32
++#include "MemMap.h"
++/* End: SFTYREPLCMT_STOP_SEC_CALIB_32 (calib) */
++
++/* Begin: SFTYREPLCMT_START_SEC_CALIB_8 (calib) */
++#define SFTYREPLCMT_START_SEC_CALIB_8
++#include "MemMap.h"
++/*
++@@ SYMBOL = SftyReplcmtParkLockEvlnPrimActrPosChUMeasRawValStiEna
++@@ A2L_TYPE = PARAMETER
++@@ DATA_TYPE = UBYTE
++@@ DESCRIPTION = "Enable raw value replacement for primary actuator positive channel voltage measurement raw value; unit \'-\'"
++@@ GROUP = SftyParkLockEvln
++@@ END
++*/
++CONST(uint8, SFTYREPLCMT_CALIB) SftyReplcmtParkLockEvlnPrimActrPosChUMeasRawValStiEna = 0U;
++#define SFTYREPLCMT_STOP_SEC_CALIB_8
++#include "MemMap.h"
++/* End: SFTYREPLCMT_STOP_SEC_CALIB_8 (calib) */
++
++/* Begin: SFTYREPLCMT_START_SEC_CALIB_8 (calib) */
++#define SFTYREPLCMT_START_SEC_CALIB_8
++#include "MemMap.h"
++/*
++@@ SYMBOL = SftyReplcmtParkLockEvlnPrimActrPosChUMeasTiStampStiEna
++@@ A2L_TYPE = PARAMETER
++@@ DATA_TYPE = UBYTE
++@@ DESCRIPTION = "Enable time stamp replacement stimulation for primary actuator positive channel voltage measurement; unit \'-\'"
++@@ GROUP = SftyParkLockEvln
++@@ END
++*/
++CONST(uint8, SFTYREPLCMT_CALIB) SftyReplcmtParkLockEvlnPrimActrPosChUMeasTiStampStiEna = 0U;
++#define SFTYREPLCMT_STOP_SEC_CALIB_8
++#include "MemMap.h"
++/* End: SFTYREPLCMT_STOP_SEC_CALIB_8 (calib) */
++
++/* Begin: SFTYREPLCMT_START_SEC_CALIB_16 (calib) */
++#define SFTYREPLCMT_START_SEC_CALIB_16
++#include "MemMap.h"
++/*
++@@ SYMBOL = SftyReplcmtParkLockEvlnPrimActrPosChUMeasRawReplcmtVal
++@@ A2L_TYPE = PARAMETER
++@@ DATA_TYPE = UWORD
++@@ DESCRIPTION = "Replacement value for primary actuator positive channel voltage measurement raw value; unit \'Raw\'"
++@@ GROUP = SftyParkLockEvln
++@@ END
++*/
++CONST(uint16, SFTYREPLCMT_CALIB) SftyReplcmtParkLockEvlnPrimActrPosChUMeasRawReplcmtVal = 0U;
++#define SFTYREPLCMT_STOP_SEC_CALIB_16
++#include "MemMap.h"
++/* End: SFTYREPLCMT_STOP_SEC_CALIB_16 (calib) */
++
++/* Begin: SFTYREPLCMT_START_SEC_CALIB_32 (calib) */
++#define SFTYREPLCMT_START_SEC_CALIB_32
++#include "MemMap.h"
++/*
++@@ SYMBOL = SftyReplcmtParkLockEvlnPrimActrPosChUMeasTiStampReplcmtVal
++@@ A2L_TYPE = PARAMETER
++@@ DATA_TYPE = ULONG
++@@ DESCRIPTION = "Replacement value for primary actuator positive channel voltage measurement timestamp value; unit \'Ticks\'"
++@@ GROUP = SftyParkLockEvln
++@@ END
++*/
++CONST(uint32, SFTYREPLCMT_CALIB) SftyReplcmtParkLockEvlnPrimActrPosChUMeasTiStampReplcmtVal = 0UL;
++#define SFTYREPLCMT_STOP_SEC_CALIB_32
++#include "MemMap.h"
++/* End: SFTYREPLCMT_STOP_SEC_CALIB_32 (calib) */
+ 
++/* Begin: SFTYREPLCMT_START_SEC_CALIB_8 (calib) */
++#define SFTYREPLCMT_START_SEC_CALIB_8
++#include "MemMap.h"
++/*
++@@ SYMBOL = SftyReplcmtParkLockEvlnPrimActrNegChUMeasRawValStiEna
++@@ A2L_TYPE = PARAMETER
++@@ DATA_TYPE = UBYTE
++@@ DESCRIPTION = "Enable raw value replacement for primary actuator negative channel voltage measurement raw value; unit \'-\'"
++@@ GROUP = SftyParkLockEvln
++@@ END
++*/
++CONST(uint8, SFTYREPLCMT_CALIB) SftyReplcmtParkLockEvlnPrimActrNegChUMeasRawValStiEna = 0U;
++#define SFTYREPLCMT_STOP_SEC_CALIB_8
++#include "MemMap.h"
++/* End: SFTYREPLCMT_STOP_SEC_CALIB_8 (calib) */
++
++/* Begin: SFTYREPLCMT_START_SEC_CALIB_8 (calib) */
++#define SFTYREPLCMT_START_SEC_CALIB_8
++#include "MemMap.h"
++/*
++@@ SYMBOL = SftyReplcmtParkLockEvlnPrimActrNegChUMeasTiStampStiEna
++@@ A2L_TYPE = PARAMETER
++@@ DATA_TYPE = UBYTE
++@@ DESCRIPTION = "Enable time stamp replacement stimulation for primary actuator negative channel voltage measurement; unit \'-\'"
++@@ GROUP = SftyParkLockEvln
++@@ END
++*/
++CONST(uint8, SFTYREPLCMT_CALIB) SftyReplcmtParkLockEvlnPrimActrNegChUMeasTiStampStiEna = 0U;
++#define SFTYREPLCMT_STOP_SEC_CALIB_8
++#include "MemMap.h"
++/* End: SFTYREPLCMT_STOP_SEC_CALIB_8 (calib) */
++
++/* Begin: SFTYREPLCMT_START_SEC_CALIB_16 (calib) */
++#define SFTYREPLCMT_START_SEC_CALIB_16
++#include "MemMap.h"
++/*
++@@ SYMBOL = SftyReplcmtParkLockEvlnPrimActrNegChUMeasRawReplcmtVal
++@@ A2L_TYPE = PARAMETER
++@@ DATA_TYPE = UWORD
++@@ DESCRIPTION = "Replacement value for primary actuator negative channel voltage measurement raw value; unit \'Raw\'"
++@@ GROUP = SftyParkLockEvln
++@@ END
++*/
++CONST(uint16, SFTYREPLCMT_CALIB) SftyReplcmtParkLockEvlnPrimActrNegChUMeasRawReplcmtVal = 0U;
++#define SFTYREPLCMT_STOP_SEC_CALIB_16
++#include "MemMap.h"
++/* End: SFTYREPLCMT_STOP_SEC_CALIB_16 (calib) */
++
++/* Begin: SFTYREPLCMT_START_SEC_CALIB_32 (calib) */
++#define SFTYREPLCMT_START_SEC_CALIB_32
++#include "MemMap.h"
++/*
++@@ SYMBOL = SftyReplcmtParkLockEvlnPrimActrNegChUMeasTiStampReplcmtVal
++@@ A2L_TYPE = PARAMETER
++@@ DATA_TYPE = ULONG
++@@ DESCRIPTION = "Replacement value for primary actuator negative channel voltage measurement timestamp value; unit \'Ticks\'"
++@@ GROUP = SftyParkLockEvln
++@@ END
++*/
++CONST(uint32, SFTYREPLCMT_CALIB) SftyReplcmtParkLockEvlnPrimActrNegChUMeasTiStampReplcmtVal = 0UL;
++#define SFTYREPLCMT_STOP_SEC_CALIB_32
++#include "MemMap.h"
++/* End: SFTYREPLCMT_STOP_SEC_CALIB_32 (calib) */
++
++/* Begin: SFTYREPLCMT_START_SEC_CALIB_8 (calib) */
++#define SFTYREPLCMT_START_SEC_CALIB_8
++#include "MemMap.h"
++/*
++@@ SYMBOL = SftyReplcmtParkLockEvlnSENTStsInfoRxDataStiEna
++@@ A2L_TYPE = PARAMETER
++@@ DATA_TYPE = UBYTE
++@@ DESCRIPTION = "Enable replacement stimulation for SENT slow channel serial data; unit \'-\'"
++@@ GROUP = SftyParkLockEvln
++@@ END
++*/
++CONST(uint8, SFTYREPLCMT_CALIB) SftyReplcmtParkLockEvlnSENTStsInfoRxDataStiEna = 0U;
++#define SFTYREPLCMT_STOP_SEC_CALIB_8
++#include "MemMap.h"
++/* End: SFTYREPLCMT_STOP_SEC_CALIB_8 (calib) */
++
++/* Begin: SFTYREPLCMT_START_SEC_CALIB_32 (calib) */
++#define SFTYREPLCMT_START_SEC_CALIB_32
++#include "MemMap.h"
++/*
++@@ SYMBOL = SftyReplcmtParkLockEvlnSENTStsInfoRxDataReplcmtVal
++@@ A2L_TYPE = PARAMETER
++@@ DATA_TYPE = ULONG
++@@ DESCRIPTION = "Replacement value for SENT slow channel serial data; unit \'-\'"
++@@ GROUP = SftyParkLockEvln
++@@ END
++*/
++CONST(uint32, SFTYREPLCMT_CALIB) SftyReplcmtParkLockEvlnSENTStsInfoRxDataReplcmtVal = 0UL;
++#define SFTYREPLCMT_STOP_SEC_CALIB_32
++#include "MemMap.h"
++/* End: SFTYREPLCMT_STOP_SEC_CALIB_32 (calib) */
++
++/* Begin: SFTYREPLCMT_START_SEC_CALIB_8 (calib) */
++#define SFTYREPLCMT_START_SEC_CALIB_8
++#include "MemMap.h"
++/*
++@@ SYMBOL = SftyReplcmtParkLockEvlnSENTStsInfoRxDataTiStampStiEna
++@@ A2L_TYPE = PARAMETER
++@@ DATA_TYPE = UBYTE
++@@ DESCRIPTION = "Enable replacement stimulation for SENT slow channel serial data time stamp; unit \'-\'"
++@@ GROUP = SftyParkLockEvln
++@@ END
++*/
++CONST(uint8, SFTYREPLCMT_CALIB) SftyReplcmtParkLockEvlnSENTStsInfoRxDataTiStampStiEna = 0U;
++#define SFTYREPLCMT_STOP_SEC_CALIB_8
++#include "MemMap.h"
++/* End: SFTYREPLCMT_STOP_SEC_CALIB_8 (calib) */
++
++/* Begin: SFTYREPLCMT_START_SEC_CALIB_32 (calib) */
++#define SFTYREPLCMT_START_SEC_CALIB_32
++#include "MemMap.h"
++/*
++@@ SYMBOL = SftyReplcmtParkLockEvlnSENTStsInfoRxDataTiStampReplcmtVal
++@@ A2L_TYPE = PARAMETER
++@@ DATA_TYPE = ULONG
++@@ DESCRIPTION = "Time stamp replacement value for SENT slow channel serial data; unit \'-\'"
++@@ GROUP = SftyParkLockEvln
++@@ END
++*/
++CONST(uint32, SFTYREPLCMT_CALIB) SftyReplcmtParkLockEvlnSENTStsInfoRxDataTiStampReplcmtVal = 0UL;
++#define SFTYREPLCMT_STOP_SEC_CALIB_32
++#include "MemMap.h"
++/* End: SFTYREPLCMT_STOP_SEC_CALIB_32 (calib) */
++
++/* Begin: SFTYREPLCMT_START_SEC_CALIB_8 (calib) */
++#define SFTYREPLCMT_START_SEC_CALIB_8
++#include "MemMap.h"
++/*
++@@ SYMBOL = SftyReplcmtParkLockActrPosSnsrSts
++@@ A2L_TYPE = PARAMETER
++@@ DATA_TYPE = UBYTE
++@@ DESCRIPTION = "Replacement value for park lock position sensor status; unit \'-\'"
++@@ GROUP = SftyParkLockEvln
++@@ END
++*/
++CONST(uint8, SFTYREPLCMT_CALIB) SftyReplcmtParkLockActrPosSnsrSts = 0U;
++#define SFTYREPLCMT_STOP_SEC_CALIB_8
++#include "MemMap.h"
++/* End: SFTYREPLCMT_STOP_SEC_CALIB_8 (calib) */
+diff --git a/src/fw_cu/build/a2l/Measurements-to-Timeslices-Mapping.csv b/src/fw_cu/build/a2l/Measurements-to-Timeslices-Mapping.csv
+index 57e529d02..5a05f1947 100644
+--- a/src/fw_cu/build/a2l/Measurements-to-Timeslices-Mapping.csv
++++ b/src/fw_cu/build/a2l/Measurements-to-Timeslices-Mapping.csv
+@@ -4,6 +4,7 @@ BswC2cData.AlvCntr,Core_0,C0_1ms_TimeTask,1,,,BSW
+ BswC2cData.CanBatteryMode,Core_0,C0_1ms_TimeTask,1,,,BSW
+ BswC2cData.CanTrcvInitSts,Core_0,C0_1ms_TimeTask,1,,,BSW
+ BswC2cData.EmmMode,Core_0,C0_1ms_TimeTask,1,,,BSW
++BswC2cData.EngmentValue,Core_0,C0_1ms_TimeTask,1,,,BSW
+ BswC2cData.ActvDchaReq,Core_0,C0_1ms_TimeTask,1,,,BSW
+ BswC2cData.CrashSt,Core_0,C0_1ms_TimeTask,1,,,BSW
+ BswC2cData.InterlockEveExt,Core_0,C0_1ms_TimeTask,1,,,BSW
+@@ -67,6 +68,7 @@ BswC2cData.TqMgrTqDrtgMin,Core_0,C0_1ms_TimeTask,1,,,BSW
+ BswC2cData.TqReq,Core_0,C0_1ms_TimeTask,1,,,BSW
+ BswC2cData.TqSpSel,Core_0,C0_1ms_TimeTask,1,,,BSW
+ BswC2cData.DbgModSts,Core_0,C0_1ms_TimeTask,1,,,BSW
++BswC2cData.DisEngmentValue,Core_0,C0_1ms_TimeTask,1,,,BSW
+ BswC2cData.UDcReq,Core_0,C0_1ms_TimeTask,1,,,BSW
+ BswC2cData.VehPrkgTi,Core_0,C0_1ms_TimeTask,1,,,BSW
+ BswC2cData.HvDcPwrLimTqGenNoLosses,Core_0,C0_1ms_TimeTask,1,,,BSW
+@@ -6509,6 +6511,15 @@ SftySdlRunTiNormRun_SftyErrDeb_MainFunctionAreaCmn.TickStart,Core_1,Core_1_200us
+ SftySdlRunTiNormRun_SftyModMgr_MainFunction.CycTi,Core_1,Core_1_200us,0.2,,,SSW
+ SftySdlRunTiNormRun_SftyModMgr_MainFunction.RunTi,Core_1,Core_1_200us,0.2,,,SSW
+ SftySdlRunTiNormRun_SftyModMgr_MainFunction.TickStart,Core_1,Core_1_200us,0.2,,,SSW
++SftySdlRunTiNormRun_SftyParkLockEvln_MainFastArea0.CycTi,Core_1,Core_1_200us,0.2,,,SSW
++SftySdlRunTiNormRun_SftyParkLockEvln_MainFastArea0.RunTi,Core_1,Core_1_200us,0.2,,,SSW
++SftySdlRunTiNormRun_SftyParkLockEvln_MainFastArea0.TickStart,Core_1,Core_1_200us,0.2,,,SSW
++SftySdlRunTiNormRun_SftyParkLockEvln_MainFunctionArea2.CycTi,Core_1,Core_1_200us,0.2,,,SSW
++SftySdlRunTiNormRun_SftyParkLockEvln_MainFunctionArea2.RunTi,Core_1,Core_1_200us,0.2,,,SSW
++SftySdlRunTiNormRun_SftyParkLockEvln_MainFunctionArea2.TickStart,Core_1,Core_1_200us,0.2,,,SSW
++SftySdlRunTiNormRun_SftyParkLockEvln_SlowFunctionArea2.CycTi,Core_1,Core_1_200us,0.2,,,SSW
++SftySdlRunTiNormRun_SftyParkLockEvln_SlowFunctionArea2.RunTi,Core_1,Core_1_200us,0.2,,,SSW
++SftySdlRunTiNormRun_SftyParkLockEvln_SlowFunctionArea2.TickStart,Core_1,Core_1_200us,0.2,,,SSW
+ SftySdlRunTiNormRun_SftyE2eTx_Main.CycTi,Core_1,Core_1_200us,0.2,,,SSW
+ SftySdlRunTiNormRun_SftyE2eTx_Main.RunTi,Core_1,Core_1_200us,0.2,,,SSW
+ SftySdlRunTiNormRun_SftyE2eTx_Main.TickStart,Core_1,Core_1_200us,0.2,,,SSW
+@@ -8107,6 +8118,46 @@ SftyInvActrSafeStReqIntel,Core_1,Core_1_200us,0.2,,,SSW
+ SftyInvActrStateReqEmgySw,Core_1,Core_1_200us,0.2,,,SSW
+ SftyInvActrStateReqMod,Core_1,Core_1_200us,0.2,,,SSW
+ SftyInvActrStateReqSCSpdReady,Core_1,Core_1_200us,0.2,,,SSW
++SftyParkLockEvln24BitCrcFrame.byte.data0,Core_1,Core_1_200us,0.2,,,SSW
++SftyParkLockEvln24BitCrcFrame.byte.data1,Core_1,Core_1_200us,0.2,,,SSW
++SftyParkLockEvln24BitCrcFrame.byte.data2,Core_1,Core_1_200us,0.2,,,SSW
++SftyParkLockEvln24BitCrcFrame.byte.data3,Core_1,Core_1_200us,0.2,,,SSW
++SftyParkLockEvln24BitCrcFrame.byte.reserved_8,Core_1,Core_1_200us,0.2,,,SSW
++SftyParkLockEvln24BitCrcFrame.word,Core_1,Core_1_200us,0.2,,,SSW
++SftyParkLockEvlnActrAbsPosn,Core_1,Core_1_200us,0.2,,,SSW
++SftyParkLockEvlnActrAg,Core_1,Core_1_200us,0.2,,,SSW
++SftyParkLockEvlnActrAgPrev,Core_1,Core_1_200us,0.2,,,SSW
++SftyParkLockEvlnActrAgSpd,Core_1,Core_1_200us,0.2,,,SSW
++SftyParkLockEvlnCrcCalcBuff,Core_1,Core_1_200us,0.2,,,SSW
++SftyParkLockEvlnIntCalcCrcVal,Core_1,Core_1_200us,0.2,,,SSW
++SftyParkLockEvlnPosSnrDiagFaultCodeLst,Core_1,Core_1_200us,0.2,,,SSW
++SftyParkLockEvlnPrimActrICurRawVal,Core_1,Core_1_200us,0.2,,,SSW
++SftyParkLockEvlnPrimActrICurTiStamp,Core_1,Core_1_200us,0.2,,,SSW
++SftyParkLockEvlnPrimActrILstTiStamp,Core_1,Core_1_200us,0.2,,,SSW
++SftyParkLockEvlnPrimActrIMeas,Core_1,Core_1_200us,0.2,,,SSW
++SftyParkLockEvlnPrimActrIScaCfg.Gain,Core_1,Core_1_200us,0.2,,,SSW
++SftyParkLockEvlnPrimActrIScaCfg.Offset,Core_1,Core_1_200us,0.2,,,SSW
++SftyParkLockEvlnPrimActrNegChUCurRawVal,Core_1,Core_1_200us,0.2,,,SSW
++SftyParkLockEvlnPrimActrNegChUCurTiStamp,Core_1,Core_1_200us,0.2,,,SSW
++SftyParkLockEvlnPrimActrNegChULstTiStamp,Core_1,Core_1_200us,0.2,,,SSW
++SftyParkLockEvlnPrimActrNegChUMeas,Core_1,Core_1_200us,0.2,,,SSW
++SftyParkLockEvlnPrimActrNegChUScaCfg.Gain,Core_1,Core_1_200us,0.2,,,SSW
++SftyParkLockEvlnPrimActrNegChUScaCfg.Offset,Core_1,Core_1_200us,0.2,,,SSW
++SftyParkLockEvlnPrimActrPosChUCurRawVal,Core_1,Core_1_200us,0.2,,,SSW
++SftyParkLockEvlnPrimActrPosChUCurTiStamp,Core_1,Core_1_200us,0.2,,,SSW
++SftyParkLockEvlnPrimActrPosChULstTiStamp,Core_1,Core_1_200us,0.2,,,SSW
++SftyParkLockEvlnPrimActrPosChUMeas,Core_1,Core_1_200us,0.2,,,SSW
++SftyParkLockEvlnPrimActrPosChUScaCfg.Gain,Core_1,Core_1_200us,0.2,,,SSW
++SftyParkLockEvlnPrimActrPosChUScaCfg.Offset,Core_1,Core_1_200us,0.2,,,SSW
++SftyParkLockEvlnPrkgPosSnsrErrMonrSt,Core_1,Core_1_200us,0.2,,,SSW
++SftyParkLockEvlnSerlData.cfgBit,Core_1,Core_1_200us,0.2,,,SSW
++SftyParkLockEvlnSerlData.msgId,Core_1,Core_1_200us,0.2,,,SSW
++SftyParkLockEvlnSerlData.serlCrc,Core_1,Core_1_200us,0.2,,,SSW
++SftyParkLockEvlnSerlData.serlData,Core_1,Core_1_200us,0.2,,,SSW
++SftyParkLockEvlnSerlDataCurTiStamp,Core_1,Core_1_200us,0.2,,,SSW
++SftyParkLockEvlnSerlDataLstTiStamp,Core_1,Core_1_200us,0.2,,,SSW
++SftyParkLockEvlnSnrDataElecHiErrMonrSt,Core_1,Core_1_200us,0.2,,,SSW
++SftyParkLockEvlnSnrDataElecLoErrMonrSt,Core_1,Core_1_200us,0.2,,,SSW
+ SftyParkLockPosnAcqnCrcVal,Core_1,Core_1_200us,0.2,,,SSW
+ SftyParkLockPosnAcqnCurrDmaTiStamp,Core_1,Core_1_200us,0.2,,,SSW
+ SftyParkLockPosnAcqnCurrRtsTiStamp,Core_1,Core_1_200us,0.2,,,SSW
+'

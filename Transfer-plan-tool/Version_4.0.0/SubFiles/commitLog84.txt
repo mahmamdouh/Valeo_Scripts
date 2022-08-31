@@ -1,0 +1,1017 @@
+b'commit 5c36237c6264054374530791739edb45690615e5
+Author: Santosh Pallanti <santos.pallanti.jv.ext@valeo.com>
+Date:   Fri Jan 7 21:28:41 2022 +0530
+
+    $100kW-48745$ - FCT_CtrlParkPos - Implement SW Unit SftyParkLockEvln
+    
+    Change-Id: Ie7354b2c7305676b03542d3fc1f4d2b8c40eb5c1
+
+diff --git a/src/fw_cu/Components/Cmn/Shared/MemMap/include/SftyNextGen_MemMap.h b/src/fw_cu/Components/Cmn/Shared/MemMap/include/SftyNextGen_MemMap.h
+index 29ddcc489..474626575 100644
+--- a/src/fw_cu/Components/Cmn/Shared/MemMap/include/SftyNextGen_MemMap.h
++++ b/src/fw_cu/Components/Cmn/Shared/MemMap/include/SftyNextGen_MemMap.h
+@@ -2176,16 +2176,6 @@
+ 
+ 
+ /*SftyCrc********************************************************************/
+-#elif (defined SFTYCRC_START_SEC_CONST_6)
+-   #undef SFTYCRC_START_SEC_CONST_6
+-   #define SFTY_ASIL_C_START_SEC_CONST
+-   #include "BasicNextGen_MemMap.h"
+-
+-#elif (defined SFTYCRC_STOP_SEC_CONST_6)
+-   #undef SFTYCRC_STOP_SEC_CONST_6
+-   #define SFTY_ASIL_C_STOP_SEC_CONST
+-   #include "BasicNextGen_MemMap.h"
+-
+ #elif (defined SFTYCRC_START_SEC_CONST_8)
+    #undef SFTYCRC_START_SEC_CONST_8
+    #define SFTY_ASIL_C_START_SEC_CONST
+diff --git a/src/fw_cu/Components/Safety/Sfty_Cmn/SftyCrc/include/SftyCrc.h b/src/fw_cu/Components/Safety/Sfty_Cmn/SftyCrc/include/SftyCrc.h
+index 8e925e71b..b8b48aea1 100644
+--- a/src/fw_cu/Components/Safety/Sfty_Cmn/SftyCrc/include/SftyCrc.h
++++ b/src/fw_cu/Components/Safety/Sfty_Cmn/SftyCrc/include/SftyCrc.h
+@@ -1,16 +1,13 @@
+ /* ********************************************************************** */
+-/* Sourcefile: SftyCrc.h                                                  */
++/* Sourcefile:    SftyCrc.h                                               */
+ /*                                                                        */
+-/* Project: VW_MEB project                                                       */
+-/* TriCore                                                                  */
++/* Project:       100kw                                                   */
++/* TriCore                                                                */
+ /*                                                                        */
+-/* Department:    Valeo Siemens eAutomotive GmbH                          */
+-/*                R&D INV ASW SSW                                         */
+-/*                                                                        */
+-/* First author: Thiagraj Perinatraj                                      */
+-/* Other authors:                                                         */
++/* Department: Valeo Siemens eAutomotive                                  */
++/* I DT EC R&D                                                            */
+ /* ********************************************************************** */
+-/* Copyright (C) Valeo Siemens eAutomotive Germany GmbH 2019              */
++/* Copyright (C) Valeo Siemens eAutomotive Germany GmbH 2021              */
+ /* All Rights Reserved. Confidential                                      */
+ /* ********************************************************************** */
+ 
+@@ -21,12 +18,6 @@
+ * @{
+ */
+ 
+-#ifdef MASTER_SFTYCRC_
+-# define EXTERNAL_
+-#else
+-# define EXTERNAL_ extern
+-#endif
+-
+ /*================== [type definitions] =====================================*/
+ 
+ typedef unsigned int bittype;
+@@ -34,9 +25,7 @@ typedef unsigned int bittype;
+ /*!
+  * \\brief FCE CLC register
+  */
+-/*! \\misra MISRA-C:2004 Rule 6.4 Warning No C0635:4
+- * "bittype does not exist on AUTOSAR use of unsigned long instead" */
+-typedef struct SftyCrc_FieFceClcRegType_ /* PRQA S 0635  */
++typedef struct SftyCrc_FieFceClcRegType_
+ {
+     bittype  DISR       : 1;  /*!< Module Disable Request Bit */
+     bittype  DISS       : 1;  /*!< Module Disable Status Bit */
+@@ -47,8 +36,7 @@ typedef struct SftyCrc_FieFceClcRegType_ /* PRQA S 0635  */
+  *  \\brief FCE CLC register layout
+  */
+ typedef volatile union SftyCrc_FceClcRegType_
+-/*! \\misra MISRA-C:2004 Rule 18.4 Warning No C0750:4 "union is used for register access" */
+-{ /* PRQA S 0750 */
++{
+    SftyCrc_FieFceClcRegType  Fie; /*!< bitfield definition */
+    bittype RegVal;                 /*!< register value */
+ }SftyCrc_FceClcRegType;
+@@ -57,9 +45,7 @@ typedef volatile union SftyCrc_FceClcRegType_
+ /*!
+  * \\brief FCE Input register 0
+  */
+-/*! \\misra MISRA-C:2004 Rule 6.4 Warning No C0635:4
+- * "bittype does not exist on AUTOSAR use of unsigned long instead" */
+-typedef struct SftyCrc_FceInpRegType_ /* PRQA S 0635  */
++typedef struct SftyCrc_FceInpRegType_
+ {
+     bittype  IR       : 32;  /*!< Input Register */
+ }SftyCrc_FceInpRegType;
+@@ -67,9 +53,7 @@ typedef struct SftyCrc_FceInpRegType_ /* PRQA S 0635  */
+ /*!
+  * \\brief FCE Result register 0
+  */
+-/*! \\misra MISRA-C:2004 Rule 6.4 Warning No C0635:4
+- * "bittype does not exist on AUTOSAR use of unsigned long instead" */
+-typedef struct SftyCrc_FceResRegType_ /* PRQA S 0635  */
++typedef struct SftyCrc_FceResRegType_
+ {
+     bittype  RES      : 32;  /*!< Result Register */
+ }SftyCrc_FceResRegType;
+@@ -77,9 +61,7 @@ typedef struct SftyCrc_FceResRegType_ /* PRQA S 0635  */
+ /*!
+  * \\brief FCE CFG0 register
+  */
+-/*! \\misra MISRA-C:2004 Rule 6.4 Warning No C0635:4
+- * "bittype does not exist on AUTOSAR use of unsigned long instead" */
+-typedef struct SftyCrc_FieFceCfgRegType_ /* PRQA S 0635  */
++typedef struct SftyCrc_FieFceCfgRegType_
+ {
+     bittype  CMI       : 1;  /*!< CRC Mismatch Interrupt */
+     bittype  CEI       : 1;  /*!< Configuration Error Interrupt */
+@@ -98,8 +80,7 @@ typedef struct SftyCrc_FieFceCfgRegType_ /* PRQA S 0635  */
+  *  \\brief FCE CFG0 register  layout
+  */
+ typedef volatile union SftyCrc_FceCfgRegType_
+-/*! \\misra MISRA-C:2004 Rule 18.4 Warning No C0750:4 "union is used for register access" */
+-{ /* PRQA S 0750 */
++{
+    SftyCrc_FieFceCfgRegType  Fie; /*!< bitfield definition */
+    uint32 RegVal;                 /*!< register value */
+ }SftyCrc_FceCfgRegType;
+@@ -107,9 +88,7 @@ typedef volatile union SftyCrc_FceCfgRegType_
+ /*!
+  * \\brief FCE STS0 register
+  */
+-/*! \\misra MISRA-C:2004 Rule 6.4 Warning No C0635:4
+- * "bittype does not exist on AUTOSAR use of unsigned long instead" */
+-typedef struct SftyCrc_FieFceStsRegType_ /* PRQA S 0635  */
++typedef struct SftyCrc_FieFceStsRegType_
+ {
+     bittype  CMF       : 1;  /*!< CRC Mismatch Flag */
+     bittype  CEF       : 1;  /*!< Configuration Error Flag */
+@@ -122,8 +101,7 @@ typedef struct SftyCrc_FieFceStsRegType_ /* PRQA S 0635  */
+  *  \\brief FCE STS0 register  layout
+  */
+ typedef volatile union SftyCrc_FceStsRegType_
+-/*! \\misra MISRA-C:2004 Rule 18.4 Warning No C0750:4 "union is used for register access" */
+-{ /* PRQA S 0750 */
++{
+    SftyCrc_FieFceStsRegType  Fie; /*!< bitfield definition */
+    uint32 RegVal;                 /*!< register value */
+ }SftyCrc_FceStsRegType;
+@@ -131,9 +109,7 @@ typedef volatile union SftyCrc_FceStsRegType_
+ /*!
+  * \\brief FCE LEN0 register
+  */
+-/*! \\misra MISRA-C:2004 Rule 6.4 Warning No C0635:4
+- * "bittype does not exist on AUTOSAR use of unsigned long instead" */
+-typedef struct SftyCrc_FieFceLenRegType_ /* PRQA S 0635  */
++typedef struct SftyCrc_FieFceLenRegType_
+ {
+     bittype  LENGTH    : 16;  /*!< Message Length Register */
+     bittype  reserved  : 16;  /*!< reserved */
+@@ -143,8 +119,7 @@ typedef struct SftyCrc_FieFceLenRegType_ /* PRQA S 0635  */
+  *  \\brief FCE LEN0 register  layout
+  */
+ typedef volatile union SftyCrc_FceLenRegType_
+-/*! \\misra MISRA-C:2004 Rule 18.4 Warning No C0750:4 "union is used for register access" */
+-{ /* PRQA S 0750 */
++{
+    SftyCrc_FieFceLenRegType  Fie; /*!< bitfield definition */
+    uint32 RegVal;                 /*!< register value */
+ }SftyCrc_FceLenRegType;
+@@ -152,9 +127,7 @@ typedef volatile union SftyCrc_FceLenRegType_
+ /*!
+  * \\brief FCE CRC register 0
+  */
+-/*! \\misra MISRA-C:2004 Rule 6.4 Warning No C0635:4
+- * "bittype does not exist on AUTOSAR use of unsigned long instead" */
+-typedef struct SftyCrc_FceCrcRegType_ /* PRQA S 0635  */
++typedef struct SftyCrc_FceCrcRegType_
+ {
+     bittype CRC      : 32;  /*!< CRC Input */
+ }SftyCrc_FceCrcRegType;
+@@ -164,11 +137,11 @@ typedef struct SftyCrc_FceCrcRegType_ /* PRQA S 0635  */
+ 
+ #define SFTYCRC_START_SEC_CODE_AREA_CMN_SLOW
+ #include "MemMap.h"
+-EXTERNAL_ FUNC (uint8, SFTYCRC) SftyCrc_CalcCRC4(const uint8 Crc_Data[], uint32  Crc_Length, uint8  Crc_StartValue8,  boolean Crc_IsFirstCall);
+-EXTERNAL_ FUNC(uint8, SFTYCRC)  SftyCrc_CalcCRC6(const uint8 Crc_Data[], uint32  Crc_Length, uint8  Crc_StartValue6,  boolean Crc_IsFirstCall);
+-EXTERNAL_ FUNC(uint8, SFTYCRC)  SftyCrc_CalcCRC8(const  uint8 Crc_Data[], uint32 Crc_Length, uint8  Crc_StartValue8,  boolean Crc_IsFirstCall);
+-EXTERNAL_ FUNC(uint16, SFTYCRC) SftyCrc_CalcCRC16(const uint8 Crc_Data[], uint32 Crc_Length, uint16 Crc_StartValue16, boolean Crc_IsFirstCall);
+-EXTERNAL_ FUNC(uint32, SFTYCRC) SftyCrc_CalcCRC32(const uint8 Crc_Data[], uint32 Crc_Length, uint32 Crc_StartValue32, boolean Crc_IsFirstCall);
++extern FUNC (uint8, SFTYCRC) SftyCrc_CalcCRC4(const uint8 Crc_Data[], uint32  Crc_Length, uint8  Crc_StartValue4,  boolean Crc_IsFirstCall);
++extern FUNC(uint8, SFTYCRC)  SftyCrc_CalcCRC6(const uint8 Crc_Data[], uint32  Crc_Length, uint8  Crc_StartValue6,  boolean Crc_IsFirstCall);
++extern FUNC(uint8, SFTYCRC)  SftyCrc_CalcCRC8(const  uint8 Crc_Data[], uint32 Crc_Length, uint8  Crc_StartValue8,  boolean Crc_IsFirstCall);
++extern FUNC(uint16, SFTYCRC) SftyCrc_CalcCRC16(const uint8 Crc_Data[], uint32 Crc_Length, uint16 Crc_StartValue16, boolean Crc_IsFirstCall);
++extern FUNC(uint32, SFTYCRC) SftyCrc_CalcCRC32(const uint8 Crc_Data[], uint32 Crc_Length, uint32 Crc_StartValue32, boolean Crc_IsFirstCall);
+ 
+ #define SFTYCRC_STOP_SEC_CODE_AREA_CMN_SLOW
+ #include "MemMap.h"
+@@ -176,19 +149,16 @@ EXTERNAL_ FUNC(uint32, SFTYCRC) SftyCrc_CalcCRC32(const uint8 Crc_Data[], uint32
+ #define SFTYCRC_START_SEC_CODE_AREA_0_SLOW
+ #include "MemMap.h"
+ 
+-EXTERNAL_ FUNC(void, SFTYCRC) SftyCrc_InitArea0(void);
++extern FUNC(void, SFTYCRC) SftyCrc_InitArea0(void);
+ 
+ #define SFTYCRC_STOP_SEC_CODE_AREA_0_SLOW
+ #include "MemMap.h"
+ 
+ 
+ /*================== [closure] ==============================================*/
+-/*! \\misra Warning No C2004:19.6 "Undefine EXTERNAL_ according to Coding Guideline." */
+-#undef EXTERNAL_ /* PRQA S 0841 */
+-/*! @} doxygen end of group definition */
+ #endif
+ /* ********************************************************************** */
+-/* Copyright (C) Siemens AG 2015 */
+-/* All Rights Reserved. Confidential */
++/* Copyright (C) Valeo Siemens eAutomotive Germany GmbH 2021              */
++/* All Rights Reserved. Confidential                                      */
+ /* ********************************************************************** */
+ /*==================[end of file]============================================*/
+diff --git a/src/fw_cu/Components/Safety/Sfty_Cmn/SftyCrc/include/SftyCrc_data.h b/src/fw_cu/Components/Safety/Sfty_Cmn/SftyCrc/include/SftyCrc_data.h
+index ede400f1b..9dbd4ed01 100644
+--- a/src/fw_cu/Components/Safety/Sfty_Cmn/SftyCrc/include/SftyCrc_data.h
++++ b/src/fw_cu/Components/Safety/Sfty_Cmn/SftyCrc/include/SftyCrc_data.h
+@@ -1,18 +1,16 @@
+ /* ********************************************************************** */
+-/* Sourcefile: SftyCrc_data.h                                             */
++/* Sourcefile:    SftyCrc_data.h                                          */
+ /*                                                                        */
+-/* Project: VW_MEB project                                                       */
+-/* TriCore                                                                  */
++/* Project:       100kw                                                   */
++/* TriCore                                                                */
+ /*                                                                        */
+-/* Department:    Valeo Siemens eAutomotive GmbH                          */
+-/*                R&D INV ASW SSW                                         */
+-/*                                                                        */
+-/* First author: Thiagraj Perinatraj                                      */
+-/* Other authors:                                                         */
++/* Department: Valeo Siemens eAutomotive                                  */
++/* I DT EC R&D                                                            */
+ /* ********************************************************************** */
+-/* Copyright (C) Valeo Siemens eAutomotive Germany GmbH 2019              */
++/* Copyright (C) Valeo Siemens eAutomotive Germany GmbH 2021              */
+ /* All Rights Reserved. Confidential                                      */
+ /* ********************************************************************** */
++
+ #ifndef SftyCrc_data_H
+ #define SftyCrc_data_H
+ /*!
+@@ -20,11 +18,6 @@
+ * @{
+ */
+ 
+-#ifdef MASTER_SFTYCRC_DATA_
+-#define EXTERNAL_
+-#else
+-#define EXTERNAL_ extern
+-#endif
+ /*================== [includes] =============================================*/
+ 
+ /*================== [macros] ===============================================*/
+@@ -71,25 +64,14 @@
+ #define SFTYCRC_START_SEC_CONST_8
+ #include "MemMap.h"
+ 
+-EXTERNAL_ CONST(uint8, SFTYCRC_CONST) SftyCrc_Tbl4[CRC_4_TBL_SIZE];
+-
+-#define SFTYCRC_STOP_SEC_CONST_8
+-#include "MemMap.h"
+-
+-#define SFTYCRC_START_SEC_CONST_6
+-#include "MemMap.h"
++/*! Table of pre-computed values for CRC4. Used Polynomial is 0x1D according SAE J2716 */
++extern CONST(uint8, SFTYCRC_CONST) SftyCrc_Tbl4[CRC_4_TBL_SIZE];
+ 
+ /*! Table of pre-computed values for CRC6. Used Polynomial is 0x59 according SAE J2716 */
+-EXTERNAL_ CONST(uint8, SFTYCRC_CONST) SftyCrc_Tbl6[CRC_6_TBL_SIZE];
+-
+-#define SFTYCRC_STOP_SEC_CONST_6
+-#include "MemMap.h"
+-
+-#define SFTYCRC_START_SEC_CONST_8
+-#include "MemMap.h"
++extern CONST(uint8, SFTYCRC_CONST) SftyCrc_Tbl6[CRC_6_TBL_SIZE];
+ 
+ /*! Table of pre-computed values for CRC8 */
+-EXTERNAL_ CONST(uint8, SFTYCRC_CONST) SftyCrc_Tbl8[CRC_8_TBL_SIZE];
++extern CONST(uint8, SFTYCRC_CONST) SftyCrc_Tbl8[CRC_8_TBL_SIZE];
+ 
+ #define SFTYCRC_STOP_SEC_CONST_8
+ #include "MemMap.h"
+@@ -98,7 +80,8 @@ EXTERNAL_ CONST(uint8, SFTYCRC_CONST) SftyCrc_Tbl8[CRC_8_TBL_SIZE];
+ #include "MemMap.h"
+ 
+ /*! Table of pre-computed values for CRC8 */
+-EXTERNAL_ CONST(uint16, SFTYCRC_CONST) SftyCrc_Tbl16[CRC_16_TBL_SIZE];
++extern CONST(uint16, SFTYCRC_CONST) SftyCrc_Tbl16[CRC_16_TBL_SIZE];
++
+ #define SFTYCRC_STOP_SEC_CONST_16
+ #include "MemMap.h"
+ 
+@@ -106,18 +89,15 @@ EXTERNAL_ CONST(uint16, SFTYCRC_CONST) SftyCrc_Tbl16[CRC_16_TBL_SIZE];
+ #include "MemMap.h"
+ 
+ /*! Table of pre-computed values for CRC8 */
+-EXTERNAL_ CONST(uint32, SFTYCRC_CONST) SftyCrc_Tbl32[CRC_32_TBL_SIZE];
++extern CONST(uint32, SFTYCRC_CONST) SftyCrc_Tbl32[CRC_32_TBL_SIZE];
+ 
+ #define SFTYCRC_STOP_SEC_CONST_32
+ #include "MemMap.h"
+ 
+ /*================== [closure] ==============================================*/
+-/*! \\misra Warning No C2004:19.6 "Undefine EXTERNAL_ according to Coding Guideline." */
+-#undef EXTERNAL_ /* PRQA S 0841 */
+-/*! @} doxygen end of group definition */
+-#endif /* SftyDcDcMon_cfg_H */
++#endif /* SftyCrc_data.h */
+ /* ********************************************************************** */
+-/* Copyright (C) Siemens AG 2013 */
+-/* All Rights Reserved. Confidential */
++/* Copyright (C) Valeo Siemens eAutomotive Germany GmbH 2021              */
++/* All Rights Reserved. Confidential                                      */
+ /* ********************************************************************** */
+ /*==================[end of file]============================================*/
+diff --git a/src/fw_cu/Components/Safety/Sfty_Cmn/SftyCrc/src/SftyCrc.c b/src/fw_cu/Components/Safety/Sfty_Cmn/SftyCrc/src/SftyCrc.c
+index e31382249..e68470bea 100644
+--- a/src/fw_cu/Components/Safety/Sfty_Cmn/SftyCrc/src/SftyCrc.c
++++ b/src/fw_cu/Components/Safety/Sfty_Cmn/SftyCrc/src/SftyCrc.c
+@@ -1,22 +1,21 @@
+ /* ********************************************************************** */
+-/* Sourcefile: SftyCrc.c                                                  */
++/* Sourcefile:    SftyCrc.c                                               */
+ /*                                                                        */
+-/* Project: VW_MEB project                                          */
++/* Project:       100kw                                                   */
+ /* TriCore                                                                */
+ /*                                                                        */
+ /* Department: Valeo Siemens eAutomotive                                  */
+-/*             VS R&D INV ASW SSW                                         */
+-/*                                                                        */
+-/* First author: Thiagraj Perinatraj                                      */
+-/* Other authors: -                                                       */
++/* I DT EC R&D                                                            */
+ /* ********************************************************************** */
+-/* Copyright (C) Valeo Siemens eAutomotive Germany GmbH 2019              */
++/* Copyright (C) Valeo Siemens eAutomotive Germany GmbH 2021              */
+ /* All Rights Reserved. Confidential                                      */
+ /* ********************************************************************** */
+ 
+ /*!
+-* \\defgroup SftyCrc SftyCrc - 8, 16 and 32 bit CRC calculation
++* \\defgroup SftyCrc SftyCrc - 4, 6, 8, 16 and 32 bit CRC calculation
+ *                             This module calculates
++*                                - 4 bit CRC according to SAE J2716 (x^4 + x^3 + x^2 + 1)
++*                                - 6 bit CRC according to SAE J2716 (x^6 + x^4 + x^3 + 1)
+ *                                - 8 bit CRC according to CRC-8-AUTOSAR (x^8 + x^5 + x^3 + x^2 + x + 1)
+ *                                - 16 bit CRC according to CRC-16-CCITT (x^16 + x^12 + x^5 + 1)
+ *                                - 32 bit CRC according to CRC-32 IEEE802.3
+@@ -35,8 +34,6 @@
+ * @{
+ */
+ 
+-#define MASTER_SFTYCRC_
+-
+ /*================== [includes] =============================================*/
+ #include "Std_Types.h"
+ #include "Sfty_Types.h"
+@@ -68,25 +65,25 @@
+ /* --------------------------------------- Register definitions start -----------------------------------------------*/
+ 
+ /*! \\brief FCE CLC Register */
+-#define SFTYCRC_FCE_CLC         (*(SftyCrc_FceClcRegType *)0xF0000000ul)
++#define SFTYCRC_FCE_CLC         (*(SftyCrc_FceClcRegType *)0xF0000000UL)
+ 
+ /*! \\brief FCE Input Register 0 */
+-#define SFTYCRC_FCE_IR0         (*(SftyCrc_FceInpRegType *)0xF0000100ul)
++#define SFTYCRC_FCE_IR0         (*(SftyCrc_FceInpRegType *)0xF0000100UL)
+ 
+ /*! \\brief FCE Result Register 0 */
+-#define SFTYCRC_FCE_RES0        (*(SftyCrc_FceResRegType *)0xF0000104ul)
++#define SFTYCRC_FCE_RES0        (*(SftyCrc_FceResRegType *)0xF0000104UL)
+ 
+ /*! \\brief FCE Configuration Register 0 */
+-#define SFTYCRC_FCE_CFG0        (*(SftyCrc_FceCfgRegType *)0xF0000108ul)
++#define SFTYCRC_FCE_CFG0        (*(SftyCrc_FceCfgRegType *)0xF0000108UL)
+ 
+ /*! \\brief FCE Status Register 0 */
+-#define SFTYCRC_FCE_STS0        (*(SftyCrc_FceStsRegType *)0xF000010Cul)
++#define SFTYCRC_FCE_STS0        (*(SftyCrc_FceStsRegType *)0xF000010CUL)
+ 
+ /*! \\brief FCE Length Register 0 */
+-#define SFTYCRC_FCE_LEN0        (*(SftyCrc_FceLenRegType *)0xF0000110ul)
++#define SFTYCRC_FCE_LEN0        (*(SftyCrc_FceLenRegType *)0xF0000110UL)
+ 
+ /*! \\brief FCE CRC Register 0 */
+-#define SFTYCRC_FCE_CRC0        (*(SftyCrc_FceCrcRegType *)0xF0000118ul)
++#define SFTYCRC_FCE_CRC0        (*(SftyCrc_FceCrcRegType *)0xF0000118UL)
+ 
+ /*================== [type definitions] ================================================*/
+ 
+@@ -114,9 +111,12 @@ LOCAL_INLINE void SftyCrc_FceOn(void)
+    SWIT_SftyCrc_FceOn_BgnHook ();
+ #endif
+    /* Enable FCE clock control register.*/
++   /* PRQA S 0759 1 # union is used for register access */
+    SftyCrc_FceClcRegType SFTY_CRC_FCEON_CL;
+    SFTY_CRC_FCEON_CL.RegVal = SFTYCRC_FCE_CLC.RegVal;
+    SFTY_CRC_FCEON_CL.Fie.DISR = SFTYCRC_RESET_BIT;
++   /* PRQA S 0315 2 # implicit conversion unavoidable as function input parameter
++      and passing parameter are of different pointer types */
+    Mcal_WriteCpuEndInitProtReg(&SFTYCRC_FCE_CLC.RegVal,(uint32)SFTY_CRC_FCEON_CL.RegVal);
+    return;
+ }
+@@ -135,7 +135,9 @@ LOCAL_INLINE void SftyCrc_FceCfg(void)
+    SWIT_SftyCrc_FceCfg_BgnHook ();
+ #endif
+    /* Enable FCE clock control register.*/
+-   Mcal_WriteCpuEndInitProtReg(&(SFTYCRC_FCE_CFG0.RegVal),(uint32)SFTYCRC0_CRC_CFG);
++   /* PRQA S 0315 2 # implicit conversion unavoidable as function input parameter
++      and passing parameter are of different pointer types */
++   Mcal_WriteCpuEndInitProtReg(&(SFTYCRC_FCE_CFG0.RegVal),(uint32)SFTYCRC0_CRC_CFG); 
+    return;
+ }
+ 
+@@ -166,8 +168,8 @@ LOCAL_INLINE void SftyCrc_SetCrc32Init(uint32 init_val)
+ #ifdef SWIT_FC_Active
+    SWIT_SftyCrc_SetCrc32Init_BgnHook ();
+ #endif
+-   /*! \\misra Warning No C2004:11.3 "Cast between a pointer to object and an integral type. Behaviour is correct */
+-   SFTYCRC_FCE_CRC0.CRC = init_val;    /* PRQA S 0306 */
++
++   SFTYCRC_FCE_CRC0.CRC = init_val;
+    return;
+ }
+ 
+@@ -183,8 +185,8 @@ LOCAL_INLINE void SftyCrc_CRC32Add(uint32 data)
+ #ifdef SWIT_FC_Active
+    SWIT_SftyCrc_CRC32Add_BgnHook ();
+ #endif
+-   /*! \\misra Warning No C2004:11.3 "Cast between a pointer to object and an integral type. Behaviour is correct */
+-   SFTYCRC_FCE_IR0.IR = data;          /* PRQA S 0306 */
++
++   SFTYCRC_FCE_IR0.IR = data;
+    return;
+ }
+ 
+@@ -199,8 +201,8 @@ LOCAL_INLINE uint32 SftyCrc_GetCrc32Result(void)
+ #ifdef SWIT_FC_Active
+    SWIT_SftyCrc_GetCrc32Result_BgnHook ();
+ #endif
+-   /*! \\misra Warning No C2004:11.3 "Cast between a pointer to object and an integral type. Behaviour is correct */
+-   return SFTYCRC_FCE_RES0.RES;        /* PRQA S 0306 */
++
++   return SFTYCRC_FCE_RES0.RES;
+ }
+ 
+ /*================== [global function definitions] ===========================*/
+@@ -211,7 +213,7 @@ LOCAL_INLINE uint32 SftyCrc_GetCrc32Result(void)
+ 
+ /**************************************************************************************************************/
+ /*!
+- *\\fn         uint8 SftyCrc_CalcCRC4 (const uint8 Crc_Data[], uint32 Crc_Length\xa3\xacuint8   Crc_StartValue4,  boolean Crc_IsFirstCall)
++ *\\fn         uint8 SftyCrc_CalcCRC4 (const uint8 Crc_Data[], uint32 Crc_Length uint8   Crc_StartValue4,  boolean Crc_IsFirstCall)
+  *\\brief      This function performs the calculation of a 4-bit CRC Polynom 0x1D
+  *\\param   [in]   Crc_Data - start address of data block
+  *\\param   [in]   Crc_Length  - Length of data block in bytes
+@@ -229,7 +231,7 @@ FUNC (uint8, SFTYCRC) SftyCrc_CalcCRC4
+   boolean Crc_IsFirstCall
+ )
+ {
+-   uint8\ttempData = 0U;
++   uint8\ttempData;
+    uint8\tidx;
+    uint8\tCrc_RetValue4;
+    
+@@ -288,7 +290,7 @@ FUNC (uint8, SFTYCRC) SftyCrc_CalcCRC6
+    else
+    {
+       /* Undo final XOR operation */
+-      Crc_RetValue6 = Crc_StartValue6 ^ CRC_XOR_VALUE6;
++      Crc_RetValue6 = Crc_StartValue6;
+    }
+ 
+    /* Process all data (byte wise) */
+@@ -298,7 +300,8 @@ FUNC (uint8, SFTYCRC) SftyCrc_CalcCRC6
+       Crc_RetValue6 = (uint8)(Crc_Data[idx]) ^ (uint8)(SftyCrc_Tbl6[Crc_RetValue6]);
+    }
+ 
+-   Crc_RetValue6 = (uint8)(SftyCrc_Tbl6[Crc_RetValue6]) ^ CRC_XOR_VALUE6;   /* Do Final XOR crc value */
++   /* Get final checksum value */
++   Crc_RetValue6 = SftyCrc_Tbl6[Crc_RetValue6];
+ 
+    return Crc_RetValue6;
+ }
+@@ -315,6 +318,7 @@ FUNC (uint8, SFTYCRC) SftyCrc_CalcCRC6
+  *\\return      uint8 - 8 bit result of CRC calculation.
+  */
+ /**************************************************************************************************************/
++/* PRQA S 1503 1 # This function will be used by other SW Components based on the configuration parameters set */
+ FUNC (uint8, SFTYCRC) SftyCrc_CalcCRC8
+ (
+   const uint8 Crc_Data[],
+@@ -326,7 +330,7 @@ FUNC (uint8, SFTYCRC) SftyCrc_CalcCRC8
+ #ifdef SWIT_FC_Active
+    SWIT_SftyCrc_CalcCRC8_BgnHook ();
+ #endif
+-   uint8   tempData = 0U;
++   uint8   tempData;
+    uint8   idx;
+    uint8   Crc_RetValue8;
+ 
+@@ -379,7 +383,7 @@ FUNC (uint16, SFTYCRC) SftyCrc_CalcCRC16
+    SWIT_SftyCrc_CalcCRC16_BgnHook ();
+ #endif
+    /* ******** Variables declaration *********** */
+-   uint32 cntr = 0U;
++   uint32 idx;
+    uint16 Crc_RetValue16;
+ 
+    /* ************* Source code **************** */
+@@ -394,16 +398,13 @@ FUNC (uint16, SFTYCRC) SftyCrc_CalcCRC16
+    }
+ 
+    /* Process all data (byte wise) */
+-   while(Crc_Length != 0U)
++   for(idx = 0U; idx < Crc_Length; idx++)
+    {
+       /* Process one byte of data */
+       Crc_RetValue16
+-\t    = SftyCrc_Tbl16[((uint8)(Crc_RetValue16 >> 8U)) ^ Crc_Data[cntr]]
+-\t\t^ ((uint16)(Crc_RetValue16 << 8U));
+-
+-      ++cntr;
+-      --Crc_Length;
+-   } /* while (Crc_Length != 0U) */
++       = SftyCrc_Tbl16[((uint8)(Crc_RetValue16 >> 8U)) ^ Crc_Data[idx]]
++      ^ ((uint16)(Crc_RetValue16 << 8U));
++   }
+ 
+    return Crc_RetValue16;
+ }
+@@ -463,7 +464,7 @@ FUNC (uint32, SFTYCRC) SftyCrc_CalcCRC32
+    /* Calculate block length supported by FCE (32bit access) */
+    Crc_LengthLoc = Crc_Length & 0xFFFFFFFCUL;
+ 
+-   if(Crc_LengthLoc != 0ul)
++   if(Crc_LengthLoc != 0UL)
+    {
+       /*! - First status register is reset, init value is set and provided data is written 32bit wise to CRC unit.
+        *  If all data has been written, final CRC result value will be return.
+@@ -490,7 +491,7 @@ FUNC (uint32, SFTYCRC) SftyCrc_CalcCRC32
+    }
+    else
+    {
+-      i = 0ul;
++      i = 0UL;
+    }
+ 
+    /* process left (0-3) data bytes */
+@@ -559,11 +560,10 @@ FUNC(void, SFTYCRC) SftyCrc_InitArea0(void)
+ 
+ 
+ /*================== [closure] ===========================================*/
+-/*! \\misra Warning No C2004:19.6 "Using \'#undef\' for master c-file"       */
+-#undef MASTER_SFTYCRC_ /* PRQA S 0841 */
++
+ /*! @} doxygen end of group definition                                    */
+ /* ********************************************************************** */
+-/* Copyright (C) Valeo Siemens eAutomotive Germany GmbH 2019              */
++/* Copyright (C) Valeo Siemens eAutomotive Germany GmbH 2021              */
+ /* All Rights Reserved. Confidential                                      */
+ /* ********************************************************************** */
+ /*==================[end of file]=========================================*/
+diff --git a/src/fw_cu/Components/Safety/Sfty_Cmn/SftyCrc/src/SftyCrc_data.c b/src/fw_cu/Components/Safety/Sfty_Cmn/SftyCrc/src/SftyCrc_data.c
+index 8ed1ab6d2..ef57fb944 100644
+--- a/src/fw_cu/Components/Safety/Sfty_Cmn/SftyCrc/src/SftyCrc_data.c
++++ b/src/fw_cu/Components/Safety/Sfty_Cmn/SftyCrc/src/SftyCrc_data.c
+@@ -1,21 +1,20 @@
+ /* ********************************************************************** */
+-/* Sourcefile: SftyCrc_data.c                                             */
++/* Sourcefile:    SftyCrc_data.c                                          */
+ /*                                                                        */
+-/* Project: VW_MEB project                                                       */
+-/* TriCore                                                                  */
++/* Project:       100kw                                                   */
++/* TriCore                                                                */
+ /*                                                                        */
+-/* Department:    Valeo Siemens eAutomotive GmbH                          */
+-/*                R&D INV ASW SSW                                         */
+-/*                                                                        */
+-/* First author: Appasab Gidaganti                                        */
+-/* Other authors: Thiagraj Perinatraj                                     */
++/* Department: Valeo Siemens eAutomotive                                  */
++/* I DT EC R&D                                                            */
+ /* ********************************************************************** */
+-/* Copyright (C) Valeo Siemens eAutomotive Germany GmbH 2019              */
++/* Copyright (C) Valeo Siemens eAutomotive Germany GmbH 2021              */
+ /* All Rights Reserved. Confidential                                      */
+ /* ********************************************************************** */
+ /*!
+ * \\defgroup SftyCrc_data Data of SftyCrc_data module
+ * \\brief\t\t Lookup table for CRC calculation
++*                                - 4 bit CRC according to SAE J2716 (x^4 + x^3 + x^2 + 1)
++*                                - 6 bit CRC according to SAE J2716 (x^6 + x^4 + x^3 + 1)
+ *                                - 8 bit CRC according to CRC-8-AUTOSAR (x^8 + x^5 + x^3 + x^2 + x + 1)
+ *                                - 16 bit CRC according to CRC-16-CCITT (x^16 + x^12 + x^5 + 1)
+ *                                - 32 bit CRC according to CRC-32 IEEE802.3
+@@ -39,8 +38,18 @@
+ #define SFTYCRC_START_SEC_CONST_8
+ #include "MemMap.h"
+ 
+-/*! Table of pre-computed values for CRC4. Used Polynomial is 0x1D according VW Lastenheft */
++/*! Table of pre-computed values for CRC4. Used Polynomial is 0x1D according to SAE J2716 */
+ CONST(uint8, SFTYCRC_CONST) SftyCrc_Tbl4[CRC_4_TBL_SIZE] = {0U, 13U, 7U, 10U, 14U, 3U, 9U, 4U, 1U, 12U, 6U, 11U, 15U, 2U, 8U, 5U};
++
++/*! Table of pre-computed values for CRC6. Used Polynomial is 0x59 and initial seed value is 0x15 according to SAE J2716 */
++CONST(uint8, SFTYCRC_CONST) SftyCrc_Tbl6[CRC_6_TBL_SIZE] =
++{
++  0x00U, 0x19U, 0x32U, 0x2BU, 0x3DU, 0x24U, 0x0FU, 0x16U, 0x23U, 0x3AU, 0x11U, 0x08U, 0x1EU, 0x07U, 0x2CU, 0x35U,
++  0x1FU, 0x06U, 0x2DU, 0x34U, 0x22U, 0x3BU, 0x10U, 0x09U, 0x3CU, 0x25U, 0x0EU, 0x17U, 0x01U, 0x18U, 0x33U, 0x2AU,
++  0x3EU, 0x27U, 0x0CU, 0x15U, 0x03U, 0x1AU, 0x31U, 0x28U, 0x1DU, 0x04U, 0x2FU, 0x36U, 0x20U, 0x39U, 0x12U, 0x0BU,
++  0x21U, 0x38U, 0x13U, 0x0AU, 0x1CU, 0x05U, 0x2EU, 0x37U, 0x02U, 0x1BU, 0x30U, 0x29U, 0x3FU, 0x26U, 0x0DU, 0x14U
++};
++
+ /*! Table of pre-computed values for CRC8. Used Polynomial is 0x2F according VW Lastenheft */
+ CONST(uint8, SFTYCRC_CONST) SftyCrc_Tbl8[CRC_8_TBL_SIZE] =
+ {
+@@ -65,21 +74,6 @@ CONST(uint8, SFTYCRC_CONST) SftyCrc_Tbl8[CRC_8_TBL_SIZE] =
+ #define SFTYCRC_STOP_SEC_CONST_8
+ #include "MemMap.h"
+ 
+-#define SFTYCRC_START_SEC_CONST_6
+-#include "MemMap.h"
+-
+-/*! Table of pre-computed values for CRC6. Used Polynomial is 0x59 and initial seed value is 0x15 according SAE J2716 */
+-CONST(uint8, SFTYCRC_CONST) SftyCrc_Tbl6[CRC_6_TBL_SIZE] =
+-{
+-  0x00U, 0x19U, 0x32U, 0x2BU, 0x3DU, 0x24U, 0x0FU, 0x16U, 0x23U, 0x3AU, 0x11U, 0x08U, 0x1EU, 0x07U, 0x2CU, 0x35U,
+-  0x1FU, 0x06U, 0x2DU, 0x34U, 0x22U, 0x3BU, 0x10U, 0x09U, 0x3CU, 0x25U, 0x0EU, 0x17U, 0x01U, 0x18U, 0x33U, 0x2AU,
+-  0x3EU, 0x27U, 0x0CU, 0x15U, 0x03U, 0x1AU, 0x31U, 0x28U, 0x1DU, 0x04U, 0x2FU, 0x36U, 0x20U, 0x39U, 0x12U, 0x0BU,
+-  0x21U, 0x38U, 0x13U, 0x0AU, 0x1CU, 0x05U, 0x2EU, 0x37U, 0x02U, 0x1BU, 0x30U, 0x29U, 0x3FU, 0x26U, 0x0DU, 0x14U
+-};
+-
+-#define SFTYCRC_STOP_SEC_CONST_6
+-#include "MemMap.h"
+-
+ #define SFTYCRC_START_SEC_CONST_16
+ #include "MemMap.h"
+ 
+@@ -119,12 +113,8 @@ CONST(uint32, SFTYCRC_CONST) SftyCrc_Tbl32[CRC_32_TBL_SIZE] =
+ #define SFTYCRC_STOP_SEC_CONST_32
+ #include "MemMap.h"
+ 
+-/*================== [closure] ==============================================*/
+-/*! \\misra Warning No C2004:19.6 "Using \'#undef\' for master c-file" */
+-#undef MASTER_SFTYCRC_DATA_ /* PRQA S 0841 */
+-/*! @} doxygen end of group definition */
+ /* ********************************************************************** */
+-/* Copyright (C) Siemens AG 2015                                          */
++/* Copyright (C) Valeo Siemens eAutomotive Germany GmbH 2021              */
+ /* All Rights Reserved. Confidential                                      */
+ /* ********************************************************************** */
+ /*==================[end of file]============================================*/
+diff --git a/src/fw_cu/Components/Safety/Sfty_Cmn/SftyParkLockEvln/include/SftyParkLockEvln_data.h b/src/fw_cu/Components/Safety/Sfty_Cmn/SftyParkLockEvln/include/SftyParkLockEvln_data.h
+index 9fb533cf1..aff25cb0d 100644
+--- a/src/fw_cu/Components/Safety/Sfty_Cmn/SftyParkLockEvln/include/SftyParkLockEvln_data.h
++++ b/src/fw_cu/Components/Safety/Sfty_Cmn/SftyParkLockEvln/include/SftyParkLockEvln_data.h
+@@ -69,23 +69,23 @@ extern VAR(float32, SFTYPARKLOCKEVLN_VAR) SftyParkLockEvlnPrimActrIMeas;
+ #define SFTYPARKLOCKEVLN_START_SEC_CALIB_32
+ #include "MemMap.h"
+ 
+-extern CONST(SftyOffsetGainType, SFTYACTVDCHACTRL_CALIB) SftyParkLockEvlnPrimActrIScaCfg;
++extern CONST(SftyOffsetGainType, SFTYPARKLOCKEVLN_CALIB) SftyParkLockEvlnPrimActrIScaCfg;
+ 
+-extern CONST(SftyOffsetGainType, SFTYACTVDCHACTRL_CALIB) SftyParkLockEvlnPrimActrPosChUScaCfg;
++extern CONST(SftyOffsetGainType, SFTYPARKLOCKEVLN_CALIB) SftyParkLockEvlnPrimActrPosChUScaCfg;
+ 
+-extern CONST(SftyOffsetGainType, SFTYACTVDCHACTRL_CALIB) SftyParkLockEvlnPrimActrNegChUScaCfg;
++extern CONST(SftyOffsetGainType, SFTYPARKLOCKEVLN_CALIB) SftyParkLockEvlnPrimActrNegChUScaCfg;
+ 
+-extern CONST(uint32, SFTYPARKLOCKEVLN_VAR) SftyParkLockEvlnMainFastArea2ExecCycTiInUs;
++extern CONST(uint32, SFTYPARKLOCKEVLN_CALIB) SftyParkLockEvlnMainFastArea2ExecCycTiInUs;
+ 
+-extern CONST(float32, SFTYPARKLOCKEVLN_VAR) SftyParkLockEvlnActrGearRatio;
++extern CONST(float32, SFTYPARKLOCKEVLN_CALIB) SftyParkLockEvlnActrGearRatio;
+ 
+-extern CONST(float32, SFTYPARKLOCKEVLN_VAR) SftyParkLockEvlnDeltaPrkgAgIni;
++extern CONST(float32, SFTYPARKLOCKEVLN_CALIB) SftyParkLockEvlnDeltaPrkgAgIni;
+ 
+-extern CONST(float32, SFTYPARKLOCKEVLN_VAR) SftyParkLockEvlnDeltaPrkgAgNomMax;
++extern CONST(float32, SFTYPARKLOCKEVLN_CALIB) SftyParkLockEvlnDeltaPrkgAgNomMax;
+ 
+-extern CONST(float32, SFTYPARKLOCKEVLN_VAR) SftyParkLockEvlnDeltaNoPrkgAgIni;
++extern CONST(float32, SFTYPARKLOCKEVLN_CALIB) SftyParkLockEvlnDeltaNoPrkgAgIni;
+ 
+-extern CONST(float32, SFTYPARKLOCKEVLN_VAR) SftyParkLockEvlnDeltaNoPrkgAgNomMin;
++extern CONST(float32, SFTYPARKLOCKEVLN_CALIB) SftyParkLockEvlnDeltaNoPrkgAgNomMin;
+ 
+ #define SFTYPARKLOCKEVLN_STOP_SEC_CALIB_32
+ #include "MemMap.h"
+@@ -96,9 +96,9 @@ extern CONST(float32, SFTYPARKLOCKEVLN_VAR) SftyParkLockEvlnDeltaNoPrkgAgNomMin;
+ #define SFTYPARKLOCKEVLN_START_SEC_CALIB_16
+ #include "MemMap.h"
+ 
+-extern CONST(uint16, SFTYACTVDCHACTRL_CALIB) SftyParkLockEvlnPosnAcqnMinRawVal;
++extern CONST(uint16, SFTYPARKLOCKEVLN_CALIB) SftyParkLockEvlnPosnAcqnMinRawVal;
+ 
+-extern CONST(uint16, SFTYACTVDCHACTRL_CALIB) SftyParkLockEvlnPosnAcqnMaxRawVal;
++extern CONST(uint16, SFTYPARKLOCKEVLN_CALIB) SftyParkLockEvlnPosnAcqnMaxRawVal;
+ 
+ #define SFTYPARKLOCKEVLN_STOP_SEC_CALIB_16
+ #include "MemMap.h"
+diff --git a/src/fw_cu/Components/Safety/Sfty_Cmn/SftyParkLockEvln/src/SftyParkLockEvln.c b/src/fw_cu/Components/Safety/Sfty_Cmn/SftyParkLockEvln/src/SftyParkLockEvln.c
+index e460bc924..355f1452b 100644
+--- a/src/fw_cu/Components/Safety/Sfty_Cmn/SftyParkLockEvln/src/SftyParkLockEvln.c
++++ b/src/fw_cu/Components/Safety/Sfty_Cmn/SftyParkLockEvln/src/SftyParkLockEvln.c
+@@ -23,6 +23,7 @@
+ #include "SftyDma.h"
+ #include "SftyParkLockEvln_data.h"
+ #include "SftyParkLockPosnAcqn_data.h"
++#include "SftyParkLockActr_data.h"
+ #include "SftyParkLockEvln.h"
+ #include "SftyReplcmt_data.h"
+ #include "SftyUtils.h"
+@@ -645,11 +646,9 @@ LOCAL_INLINE void SftyParkLockEvln_EvlPrimActrPosn(void)
+    /* ******** Variables declaration *********** */
+ 
+    /* ************* Source code **************** */
++
+    /* Check if power supply to park lock position sensor is enabled */
+-   /******************* For TEMPORARY PURPOSE ONLY ************************/
+-   /* Note: Replacement variable \'SftyReplcmtParkLockActrPosSnsrSts\' shall be replaced
+-    *       with SftyParkLockActrPosSnsrSts during SftyParkLockActr module integration */
+-   if(SftyReplcmtParkLockActrPosSnsrSts == TRUE)
++   if(SftyParkLockActrPosSnsrSts == TRUE)
+    {
+       /* Perform range check on the digital park lock angle from the KMZ80 sensor */
+       SftyParkLockEvln_PosnSnrRngErrChk();
+@@ -950,6 +949,61 @@ LOCAL_INLINE boolean SftyParkLockEvln_Get1BitCfgDataFrmSDSReg(uint32 data)
+    return (boolean)((data & 0x80000000UL) >> 31U);
+ }
+ 
++/*****************************************************************************/
++/*!
++ * \\fn          void SftyParkLockEvln_ExtrPosnSnrSerlDataFromReplcmt(void)
++ * \\brief     : This function extracts park lock position SENT serial message data
++ *              from replacement value
++ * \\Parent_DD : SftyParkLockEvln_SlowFunctionArea2
++ * \\return    : None
++ */
++/*****************************************************************************/
++LOCAL_INLINE void SftyParkLockEvln_ExtrPosnSnrSerlDataFromReplcmt(void)
++{
++   /* ******** Variables declaration *********** */
++
++   /* ************* Source code **************** */
++
++   /* Extract 12-bit serial message ID data from 32-bit value */
++   SftyParkLockEvlnSerlData.serlData  = SftyParkLockEvln_Get12BitSerlDataFrmSDSReg(SftyReplcmtParkLockEvlnSENTStsInfoRxDataReplcmtVal);
++   /* Extract 8-bit message ID from 32-bit value */
++   SftyParkLockEvlnSerlData.msgId     = SftyParkLockEvln_Get8BitMsgIdFrmSDSReg(SftyReplcmtParkLockEvlnSENTStsInfoRxDataReplcmtVal);
++   /* Extract 6-bit serial CRC from 32-bit value */
++   SftyParkLockEvlnSerlData.serlCrc   = SftyParkLockEvln_Get6BitSerlCrcFrmSDSReg(SftyReplcmtParkLockEvlnSENTStsInfoRxDataReplcmtVal);
++   /* Extract 1-bit configuration bit from 32-bit value */
++   SftyParkLockEvlnSerlData.cfgBit    = SftyParkLockEvln_Get1BitCfgDataFrmSDSReg(SftyReplcmtParkLockEvlnSENTStsInfoRxDataReplcmtVal);
++
++   return;
++}
++
++/*****************************************************************************/
++/*!
++ * \\fn          void SftyParkLockEvln_ExtrPosnSnrSerlDataFromDma(void)
++ * \\brief     : This function extracts park lock position SENT serial message data
++ *              from DMA value
++ * \\Parent_DD : SftyParkLockEvln_SlowFunctionArea2
++ * \\return    : None
++ */
++/*****************************************************************************/
++LOCAL_INLINE void SftyParkLockEvln_ExtrPosnSnrSerlDataFromDma(void)
++{
++   /* ******** Variables declaration *********** */
++
++   /* ************* Source code **************** */
++
++   /* Use SENT data from DMA for extracting the data */
++   /* Extract 12-bit serial message ID data from 32-bit value */
++   SftyParkLockEvlnSerlData.serlData  = SftyParkLockEvln_Get12BitSerlDataFrmSDSReg(SftyDmaParkLockEvlnSENTStsInfoRx.data);
++   /* Extract 8-bit message ID from 32-bit value */
++   SftyParkLockEvlnSerlData.msgId     = SftyParkLockEvln_Get8BitMsgIdFrmSDSReg(SftyDmaParkLockEvlnSENTStsInfoRx.data);
++   /* Extract 6-bit serial CRC from 32-bit value */
++   SftyParkLockEvlnSerlData.serlCrc   = SftyParkLockEvln_Get6BitSerlCrcFrmSDSReg(SftyDmaParkLockEvlnSENTStsInfoRx.data);
++   /* Extract 1-bit configuration bit from 32-bit value */
++   SftyParkLockEvlnSerlData.cfgBit    = SftyParkLockEvln_Get1BitCfgDataFrmSDSReg(SftyDmaParkLockEvlnSENTStsInfoRx.data);
++
++   return;
++}
++
+ /*****************************************************************************/
+ /*!
+  * \\fn          void SftyParkLockEvln_GetPosnSnrSerlDataFromDma(void)
+@@ -980,28 +1034,14 @@ LOCAL_INLINE void SftyParkLockEvln_GetPosnSnrSerlDataFromDma(void)
+    /* Check if SENT serial data stimuli is disabled */
+    if(SftyReplcmtParkLockEvlnSENTStsInfoRxDataStiEna == TRUE)
+    {
+-      /* Use replacement value for extracting the data */
+-      /* Extract 12-bit serial message ID data from 32-bit value */
+-      SftyParkLockEvlnSerlData.serlData  = SftyParkLockEvln_Get12BitSerlDataFrmSDSReg(SftyReplcmtParkLockEvlnSENTStsInfoRxDataReplcmtVal);
+-      /* Extract 8-bit message ID from 32-bit value */
+-      SftyParkLockEvlnSerlData.msgId     = SftyParkLockEvln_Get8BitMsgIdFrmSDSReg(SftyReplcmtParkLockEvlnSENTStsInfoRxDataReplcmtVal);
+-      /* Extract 6-bit serial CRC from 32-bit value */
+-      SftyParkLockEvlnSerlData.serlCrc   = SftyParkLockEvln_Get6BitSerlCrcFrmSDSReg(SftyReplcmtParkLockEvlnSENTStsInfoRxDataReplcmtVal);
+-      /* Extract 1-bit configuration bit from 32-bit value */
+-      SftyParkLockEvlnSerlData.cfgBit    = SftyParkLockEvln_Get1BitCfgDataFrmSDSReg(SftyReplcmtParkLockEvlnSENTStsInfoRxDataReplcmtVal);
++      /* Use replacement value for extracting slow channel position sensor data */
++      SftyParkLockEvln_ExtrPosnSnrSerlDataFromReplcmt();
+    }
+    else
+ #endif /* SERIES_PRODUCTION */
+    {
+-      /* Use SENT data from DMA for extracting the data */
+-      /* Extract 12-bit serial message ID data from 32-bit value */
+-      SftyParkLockEvlnSerlData.serlData  = SftyParkLockEvln_Get12BitSerlDataFrmSDSReg(SftyDmaParkLockEvlnSENTStsInfoRx.data);
+-      /* Extract 8-bit message ID from 32-bit value */
+-      SftyParkLockEvlnSerlData.msgId     = SftyParkLockEvln_Get8BitMsgIdFrmSDSReg(SftyDmaParkLockEvlnSENTStsInfoRx.data);
+-      /* Extract 6-bit serial CRC from 32-bit value */
+-      SftyParkLockEvlnSerlData.serlCrc   = SftyParkLockEvln_Get6BitSerlCrcFrmSDSReg(SftyDmaParkLockEvlnSENTStsInfoRx.data);
+-      /* Extract 1-bit configuration bit from 32-bit value */
+-      SftyParkLockEvlnSerlData.cfgBit    = SftyParkLockEvln_Get1BitCfgDataFrmSDSReg(SftyDmaParkLockEvlnSENTStsInfoRx.data);
++      /* Use DMA value for extracting slow channel position sensor data */
++      SftyParkLockEvln_ExtrPosnSnrSerlDataFromDma();
+    }
+ 
+ #ifndef SERIES_PRODUCTION
+@@ -1367,10 +1407,7 @@ FUNC(void, SFTYPARKLOCKEVLN_CODE) SftyParkLockEvln_SlowFunctionArea2(void)
+    SftyParkLockEvln_InitSlowFunctionArea2();
+ 
+    /* Check if power supply to park lock position sensor is enabled */
+-   /******************* For TEMPORARY PURPOSE ONLY ************************/
+-   /* Note: Replacement variable \'SftyReplcmtParkLockActrPosSnsrSts\' shall be replaced
+-    *       with SftyParkLockActrPosSnsrSts during SftyParkLockActr module integration */
+-   if(SftyReplcmtParkLockActrPosSnsrSts == TRUE)
++   if(SftyParkLockActrPosSnsrSts == TRUE)
+    {
+       /* Evaluate park lock position sensor\'s slow channel SENT serial message data */
+       retSerlDataEvlnResult = SftyParkLockEvln_EvlPosnSnrSerlData();
+@@ -1450,10 +1487,7 @@ FUNC(void, SFTYPARKLOCKEVLN_CODE) SftyParkLockEvln_MainFastArea0(void)
+    SftyParkLockEvln_InitMainFastArea0();
+ 
+    /* Check if power supply to park lock position sensor is enabled */
+-   /******************* For TEMPORARY PURPOSE ONLY ************************/
+-   /* Note: Replacement variable \'SftyReplcmtParkLockActrPosSnsrSts\' shall be replaced
+-    *       with SftyParkLockActrPosSnsrSts during SftyParkLockActr module integration */
+-   if(SftyReplcmtParkLockActrPosSnsrSts == TRUE)
++   if(SftyParkLockActrPosSnsrSts == TRUE)
+    {
+       /* Evaluate primary actuator current measurement */
+       SftyParkLockEvln_EvlPrimActrI();
+diff --git a/src/fw_cu/Components/Safety/Sfty_Cmn/SftyParkLockEvln/src/SftyParkLockEvln_data.c b/src/fw_cu/Components/Safety/Sfty_Cmn/SftyParkLockEvln/src/SftyParkLockEvln_data.c
+index 3d15b1b02..06ff7c0d4 100644
+--- a/src/fw_cu/Components/Safety/Sfty_Cmn/SftyParkLockEvln/src/SftyParkLockEvln_data.c
++++ b/src/fw_cu/Components/Safety/Sfty_Cmn/SftyParkLockEvln/src/SftyParkLockEvln_data.c
+@@ -150,8 +150,8 @@ VAR(float32, SFTYPARKLOCKEVLN_VAR) SftyParkLockEvlnPrimActrIMeas = 0.f;
+ @@ END
+ */
+ /*! \\cvar Offset and gain value to get physical value of primary actuator current; unit \'-\' */
+-CONST(SftyOffsetGainType, SFTYPARKLOCKEVLN_VAR) SftyParkLockEvlnPrimActrIScaCfg =
+-   {-2048.f,0.0122100124f};
++CONST(SftyOffsetGainType, SFTYPARKLOCKEVLN_CALIB) SftyParkLockEvlnPrimActrIScaCfg =
++   {-2047.5f,0.0122100124f};
+ 
+ /*
+ @@ INSTANCE = SftyParkLockEvlnPrimActrPosChUScaCfg
+@@ -159,7 +159,7 @@ CONST(SftyOffsetGainType, SFTYPARKLOCKEVLN_VAR) SftyParkLockEvlnPrimActrIScaCfg
+ @@ END
+ */
+ /*! \\cvar Offset and gain value to get physical value of primary actuator P channel voltage; unit \'-\' */
+-CONST(SftyOffsetGainType, SFTYPARKLOCKEVLN_VAR) SftyParkLockEvlnPrimActrPosChUScaCfg =
++CONST(SftyOffsetGainType, SFTYPARKLOCKEVLN_CALIB) SftyParkLockEvlnPrimActrPosChUScaCfg =
+    {0.f,0.0012210012f};
+ 
+ /*
+@@ -168,7 +168,7 @@ CONST(SftyOffsetGainType, SFTYPARKLOCKEVLN_VAR) SftyParkLockEvlnPrimActrPosChUSc
+ @@ END
+ */
+ /*! \\cvar Offset and gain value to get physical value of primary actuator N channel voltage; unit \'-\' */
+-CONST(SftyOffsetGainType, SFTYPARKLOCKEVLN_VAR) SftyParkLockEvlnPrimActrNegChUScaCfg =
++CONST(SftyOffsetGainType, SFTYPARKLOCKEVLN_CALIB) SftyParkLockEvlnPrimActrNegChUScaCfg =
+    {0.f,0.0012210012f};
+ 
+ /*
+@@ -179,7 +179,7 @@ CONST(SftyOffsetGainType, SFTYPARKLOCKEVLN_VAR) SftyParkLockEvlnPrimActrNegChUSc
+ @@ GROUP = SftyParkLockEvln
+ @@ END
+ */
+-CONST(uint32, SFTYPARKLOCKEVLN_VAR) SftyParkLockEvlnMainFastArea2ExecCycTiInUs = 1000UL;
++CONST(uint32, SFTYPARKLOCKEVLN_CALIB) SftyParkLockEvlnMainFastArea2ExecCycTiInUs = 1000UL;
+ 
+ /*
+ @@ SYMBOL = SftyParkLockEvlnActrGearRatio
+@@ -189,7 +189,7 @@ CONST(uint32, SFTYPARKLOCKEVLN_VAR) SftyParkLockEvlnMainFastArea2ExecCycTiInUs =
+ @@ GROUP = SftyParkLockEvln
+ @@ END
+ */
+-CONST(float32, SFTYPARKLOCKEVLN_VAR) SftyParkLockEvlnActrGearRatio = 177.0f;
++CONST(float32, SFTYPARKLOCKEVLN_CALIB) SftyParkLockEvlnActrGearRatio = 177.0f;
+ 
+ /*
+ @@ SYMBOL = SftyParkLockEvlnDeltaPrkgAgIni
+@@ -199,7 +199,7 @@ CONST(float32, SFTYPARKLOCKEVLN_VAR) SftyParkLockEvlnActrGearRatio = 177.0f;
+ @@ GROUP = SftyParkLockEvln
+ @@ END
+ */
+-CONST(float32, SFTYPARKLOCKEVLN_VAR) SftyParkLockEvlnDeltaPrkgAgIni = 2.0f;
++CONST(float32, SFTYPARKLOCKEVLN_CALIB) SftyParkLockEvlnDeltaPrkgAgIni = 2.0f;
+ 
+ /*
+ @@ SYMBOL = SftyParkLockEvlnDeltaPrkgAgNomMax
+@@ -209,7 +209,7 @@ CONST(float32, SFTYPARKLOCKEVLN_VAR) SftyParkLockEvlnDeltaPrkgAgIni = 2.0f;
+ @@ GROUP = SftyParkLockEvln
+ @@ END
+ */
+-CONST(float32, SFTYPARKLOCKEVLN_VAR) SftyParkLockEvlnDeltaPrkgAgNomMax = 3.0f;
++CONST(float32, SFTYPARKLOCKEVLN_CALIB) SftyParkLockEvlnDeltaPrkgAgNomMax = 3.0f;
+ 
+ /*
+ @@ SYMBOL = SftyParkLockEvlnDeltaNoPrkgAgIni
+@@ -219,7 +219,7 @@ CONST(float32, SFTYPARKLOCKEVLN_VAR) SftyParkLockEvlnDeltaPrkgAgNomMax = 3.0f;
+ @@ GROUP = SftyParkLockEvln
+ @@ END
+ */
+-CONST(float32, SFTYPARKLOCKEVLN_VAR) SftyParkLockEvlnDeltaNoPrkgAgIni = 2.0f;
++CONST(float32, SFTYPARKLOCKEVLN_CALIB) SftyParkLockEvlnDeltaNoPrkgAgIni = 2.0f;
+ 
+ /*
+ @@ SYMBOL = SftyParkLockEvlnDeltaNoPrkgAgNomMin
+@@ -229,7 +229,7 @@ CONST(float32, SFTYPARKLOCKEVLN_VAR) SftyParkLockEvlnDeltaNoPrkgAgIni = 2.0f;
+ @@ GROUP = SftyParkLockEvln
+ @@ END
+ */
+-CONST(float32, SFTYPARKLOCKEVLN_VAR) SftyParkLockEvlnDeltaNoPrkgAgNomMin = 3.0f;
++CONST(float32, SFTYPARKLOCKEVLN_CALIB) SftyParkLockEvlnDeltaNoPrkgAgNomMin = 3.0f;
+ 
+ #define SFTYPARKLOCKEVLN_STOP_SEC_CALIB_32
+ #include "MemMap.h"
+@@ -246,7 +246,7 @@ CONST(float32, SFTYPARKLOCKEVLN_VAR) SftyParkLockEvlnDeltaNoPrkgAgNomMin = 3.0f;
+ @@ GROUP = SftyParkLockEvln
+ @@ END
+ */
+-CONST(uint16, SFTYPARKLOCKEVLN_VAR) SftyParkLockEvlnPosnAcqnMinRawVal = 1U;
++CONST(uint16, SFTYPARKLOCKEVLN_CALIB) SftyParkLockEvlnPosnAcqnMinRawVal = 1U;
+ 
+ /*
+ @@ SYMBOL = SftyParkLockEvlnPosnAcqnMaxRawVal
+@@ -256,7 +256,7 @@ CONST(uint16, SFTYPARKLOCKEVLN_VAR) SftyParkLockEvlnPosnAcqnMinRawVal = 1U;
+ @@ GROUP = SftyParkLockEvln
+ @@ END
+ */
+-CONST(uint16, SFTYPARKLOCKEVLN_VAR) SftyParkLockEvlnPosnAcqnMaxRawVal = 4094U;
++CONST(uint16, SFTYPARKLOCKEVLN_CALIB) SftyParkLockEvlnPosnAcqnMaxRawVal = 4094U;
+ 
+ #define SFTYPARKLOCKEVLN_STOP_SEC_CALIB_16
+ #include "MemMap.h"
+diff --git a/src/fw_cu/Components/Safety/Sfty_Cmn/Sfty_Common/include/SftyReplcmt_data.h b/src/fw_cu/Components/Safety/Sfty_Cmn/Sfty_Common/include/SftyReplcmt_data.h
+index 78fd33fd5..48af7ba79 100644
+--- a/src/fw_cu/Components/Safety/Sfty_Cmn/Sfty_Common/include/SftyReplcmt_data.h
++++ b/src/fw_cu/Components/Safety/Sfty_Cmn/Sfty_Common/include/SftyReplcmt_data.h
+@@ -3083,15 +3083,6 @@ extern CONST(uint32, SFTYREPLCMT_CALIB) SftyReplcmtParkLockEvlnSENTStsInfoRxData
+ #include "MemMap.h"
+ /* End: SFTYREPLCMT_STOP_SEC_CALIB_32 (calib) */
+ 
+-/* Begin: SFTYREPLCMT_START_SEC_CALIB_8 (calib) */
+-#define SFTYREPLCMT_START_SEC_CALIB_8
+-#include "MemMap.h"
+-
+-extern CONST(uint8, SFTYREPLCMT_CALIB) SftyReplcmtParkLockActrPosSnsrSts;
+-#define SFTYREPLCMT_STOP_SEC_CALIB_8
+-#include "MemMap.h"
+-/* End: SFTYREPLCMT_STOP_SEC_CALIB_8 (calib) */
+-
+ /* Begin: SFTYREPLCMT_START_SEC_CALIB_8 (calib) */
+ #define SFTYREPLCMT_START_SEC_CALIB_8
+ #include "MemMap.h"
+diff --git a/src/fw_cu/Components/Safety/Sfty_Cmn/Sfty_Common/src/SftyReplcmt_data.c b/src/fw_cu/Components/Safety/Sfty_Cmn/Sfty_Common/src/SftyReplcmt_data.c
+index d4653e592..17b52146a 100644
+--- a/src/fw_cu/Components/Safety/Sfty_Cmn/Sfty_Common/src/SftyReplcmt_data.c
++++ b/src/fw_cu/Components/Safety/Sfty_Cmn/Sfty_Common/src/SftyReplcmt_data.c
+@@ -3533,22 +3533,6 @@ CONST(uint32, SFTYREPLCMT_CALIB) SftyReplcmtParkLockEvlnSENTStsInfoRxDataTiStamp
+ #include "MemMap.h"
+ /* End: SFTYREPLCMT_STOP_SEC_CALIB_32 (calib) */
+ 
+-/* Begin: SFTYREPLCMT_START_SEC_CALIB_8 (calib) */
+-#define SFTYREPLCMT_START_SEC_CALIB_8
+-#include "MemMap.h"
+-/*
+-@@ SYMBOL = SftyReplcmtParkLockActrPosSnsrSts
+-@@ A2L_TYPE = PARAMETER
+-@@ DATA_TYPE = UBYTE
+-@@ DESCRIPTION = "Replacement value for park lock position sensor status; unit \'-\'"
+-@@ GROUP = SftyParkLockEvln
+-@@ END
+-*/
+-CONST(uint8, SFTYREPLCMT_CALIB) SftyReplcmtParkLockActrPosSnsrSts = 0U;
+-#define SFTYREPLCMT_STOP_SEC_CALIB_8
+-#include "MemMap.h"
+-/* End: SFTYREPLCMT_STOP_SEC_CALIB_8 (calib) */
+-
+ /* Begin: SFTYREPLCMT_START_SEC_CALIB_8 (calib) */
+ #define SFTYREPLCMT_START_SEC_CALIB_8
+ #include "MemMap.h"
+'

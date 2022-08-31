@@ -1,0 +1,196 @@
+b'commit dca3030f5fbb3edb64c0dd98443889856bca76f8
+Author: Karthik CHIDAMBARAM (JV EXT) <karthik.chidambaram.jv@valeo.com>
+Date:   Fri Oct 1 16:08:45 2021 +0200
+
+    $100kW-41946$ Part 3 SSW Merge A05 to Mater
+    
+    $100kW-38966$ - FCT_IntSelfProtn - SSW- Update SftySpdMon SW Unit Implementation
+    $100kW-41348$ - SWE.3.2 - [CR 100kW-21594] FCT_CtrlStatSw (update) - SSW - Release SW Unit Implementation for SftyModMgr
+    
+    Change-Id: I74317c7e32e2ca02d66ae1279d4057e5d3916a1f
+
+diff --git a/src/fw_cu/Components/Safety/Sfty_Cmn/SftyModMgr/src/SftyModMgr.c b/src/fw_cu/Components/Safety/Sfty_Cmn/SftyModMgr/src/SftyModMgr.c
+index 14aa5f787..3be801a02 100644
+--- a/src/fw_cu/Components/Safety/Sfty_Cmn/SftyModMgr/src/SftyModMgr.c
++++ b/src/fw_cu/Components/Safety/Sfty_Cmn/SftyModMgr/src/SftyModMgr.c
+@@ -23,50 +23,56 @@
+ /*================== [includes] =============================================*/
+ #include "Std_Types.h"
+ #include "Sfty_Types.h"
+-#include "Mathlib.h"
+ #include "AddEnumTypes.h"
+-#include "SftyUtils.h"
+-#include "SftyErrDeb.h"
+-#include "SftyDcEvln.h"
+-#include "C2cComBswData.h"
++#include "C2cComBswData.h"      /* PRQA S 0380 # macro definitions cannot be split into different files*/
+ #include "C2cComSftyData.h"
+-#include "IfxStm_reg.h"
+-#include "SftyInvActr.h"
++#include "SftyErrDeb.h"
+ #include "SftyModMgr_data.h"
+ #include "SftyModMgr.h"
+ #include "ErrDeb.h"
++#include "AddGlobalDefines.h"
++#include "IfxPort_reg.h"
++#include "SftySysInit.h"
++
++#if 0
++
++#include "Mathlib.h"
++#include "SftyUtils.h"
++#include "SftyDcEvln.h"
++#include "IfxStm_reg.h"
++#include "SftyInvActr.h"
+ #include "IfxCpu_reg.h"
+ #include "IfxScu_reg.h"
+ #include "IfxScu_bf.h"
+-#include "AddGlobalDefines.h"
+-#if SYSCON_FTR_PSM == 1 /* USE_IPMCTRL_CONTROL */
+ #include "SftyRslvrOffsHndlr.h"
+-#endif
+-//#include "SftyE2eRx.h"
+-//#include "SftyE2eP02Lib.h"
+ #include "SftyE2eRx_cfg.h"
+-#include "IfxPort_reg.h"
+-#include "SftySysInit.h"
++
++#endif
++
+ #if defined( SWIT_FC_Active) || defined( SWIT_Active) || defined( SWIT_IT_Active)
+ #include "SWIT_Sfty.h" 
+ #endif
+ 
+-#include "IfxPort_reg.h"
++
+ /*================== [defines] ==============================================*/
+ /* KL15_SBC_SW Port 32, pin 2 */
+ #define SFTY_KL15_PORT_PIN                    (P32_IN.B.P2)
+ /*================== [type definitions] =====================================*/
+ 
++#if 0
+ #define   SFTYMODMGR_N_ASC_TOP_CTRL_RST_DLY   (5U)
+-
++#endif
+ /*================== [definition of local functions] ========================*/
+ 
+ LOCAL_INLINE void SftyModMgr_SbcSleepModeHndlr(void)
+ {
++
+ #ifdef SWIT_FC_Active
+ if((SWIT_SftyModMgr_EN_KEY==SWIT_First_HookEnableKey))
+    SWIT_SftyModMgr_SbcSleepModeHndlr_BgnHook ();
+ #endif
++
++
+    if(BswC2cData.ReqShtdn == 1u)
+    {
+       /* @MRTZ_exclude KL15_LOW->_Ignition_key_is_OFF->Set_the_M_PW_DOWN_to_LOW */
+@@ -76,13 +82,6 @@ if((SWIT_SftyModMgr_EN_KEY==SWIT_First_HookEnableKey))
+    {
+       /* Do nothing */
+    }
+-
+-#ifdef SWIT_Active
+-   if(SWIT_First_HookEnableKey==SWIT_M_PW_Down_PIN_EnableKey){
+-      SWIT_SftyModMgr_SbcSleepModeHndlr_EndHook();
+-   }
+-
+-#endif
+    return;
+ }
+ 
+@@ -863,16 +862,12 @@ ErrDeb_FltStsType   kl15DebSt;
+    {
+       SftyC2cData.Kl15St = STS_KL15_ON;
+    }
++
++
+ #ifdef SWIT_IT_Active
+       SWIT_SftyModMgr_HndlKl15_EndHook();
+ #endif
+ 
+-#ifdef SWIT_Active
+-      if(SWIT_First_HookEnableKey==SWIT_M_KEY_ON_PIN_EnableKey)
+-      {
+-         SWIT_SftyModMgr_HndlKl15_EndHook();
+-      }
+-#endif
+    return;
+ }
+ 
+@@ -952,40 +947,38 @@ FUNC(void, SFTY_MOD_MGR_CODE) SftyModMgr_Init(void)
+ 
+    /* ************* Source code **************** */
+ 
+-   SftyModMgrKl15OffErrMonrSt = ERR_DEB_MONR_STS_INACTIVE;
++#if 0
+ 
++   SftyModMgrKl15OffErrMonrSt = ERR_DEB_MONR_STS_INACTIVE;
+    SftyModMgrStrtUpDiagSeq   = SFTYMODMGR_RSLVR_EXCT_ENA_P;
+    SftyModMgrSepicOffDiagSeq = SFTYMODMGR_SEPIC_OFF_DIAG_INIT;
+-
+-   /* Set KL15 state */
+    SftyModMgrKl15St   = KL15_STATE_UNKNOWN;
+-   SftyC2cData.Kl15St = STS_KL15_UNKNOWN;
+    SftyC2cData.OperRdy = FALSE;
+    SftyC2cData.StabPwrSply = FALSE;
+-
+    SftyModMgrRslvrExctActv = FALSE;
+ 
+    /* Initialize KL15 reset request counter */
+    SftyModMgrFltRstReqKl15 = 0U;
+-
+    SftyModMgrSafActMod = INV_INIT;
+-
+    SftyModMgrKl30InvStReq = STD_ON;
+-
+    SftyModMgrPrevSollMod = 0xFFU;
+-
+    SftyModMgrModSwtTmr = 0UL;
+-
+    SftyModMgrSbcRstReq = 0U;
+ 
+    /* We start up with SEPIC ON, enabled by HW */
+    SftyModMgrStabPwrSplySepic       = TRUE;
+    SftyModMgrStabPwrSplySepicOrHvLv = TRUE;
+ 
++#endif
++
++
++   /* Set KL15 state */
++   SftyC2cData.Kl15St = STS_KL15_UNKNOWN;
++
+    return;
+ }
+ 
+-
++#if 0
+ /******************************************************************/
+ /*!
+  * \\fn      void SftyModMgr_ReinitStartUp(void)
+@@ -1037,6 +1030,8 @@ FUNC(void, SFTY_MOD_MGR_CODE) SftyModMgr_ReinitStartUp(void)
+    return;
+ }
+ 
++#endif
++
+ #define SFTY_MOD_MGR_AREA_CMN_STOP_SEC_CODE_SLOW
+ #include "MemMap.h"
+ 
+Submodule src/fw_cu/Components/Safety/Sfty_Inv/SftyRslvrCompst 894cf06c4..808f9855d:
+  > $100kW-38966$ - FCT_IntSelfProtn - SSW- Update SftySpdMon SW Unit Implementation
+  > $100kW-38966$ - FCT_IntSelfProtn - SSW- Update SftySpdMon SW Unit Implementation
+diff --git a/src/fw_cu/build/a2l/Measurements-to-Timeslices-Mapping.csv b/src/fw_cu/build/a2l/Measurements-to-Timeslices-Mapping.csv
+index 7e45468df..a1492f461 100644
+--- a/src/fw_cu/build/a2l/Measurements-to-Timeslices-Mapping.csv
++++ b/src/fw_cu/build/a2l/Measurements-to-Timeslices-Mapping.csv
+@@ -5439,7 +5439,6 @@ SftyC2cE2ePduDataInvVcuStat3.PduData,Core_1,Core_1_200us,0.2,,,SSW
+ SftyC2cE2ePduDataInvVcuStat7.PduData,Core_1,Core_1_200us,0.2,,,SSW
+ SftyC2cE2eTxTiStampInvVcuStat3,Core_1,Core_1_200us,0.2,,,SSW
+ SftyC2cE2eTxTiStampInvVcuStat7,Core_1,Core_1_200us,0.2,,,SSW
+-SftyC2cE2eUpdCntVcuInvStat1,Core_1,Core_1_200us,0.2,,,SSW
+ SftyE2ePhyDataVcuInvCtrl1ActDischReq,Core_1,Core_1_200us,0.2,,,SSW
+ SftyE2ePhyDataVcuInvCtrl1ModeReq,Core_1,Core_1_200us,0.2,,,SSW
+ SftyE2ePhyDataVcuInvCtrl1TorqReq,Core_1,Core_1_200us,0.2,,,SSW
+'

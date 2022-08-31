@@ -1,0 +1,1737 @@
+b'commit a27e48ccff4ee6f52aaee5ed23b5de786f0939e1
+Author: Sapthagiri GUDIHALLI (JV) <sapthagiri.gudihalli.jv@valeo.com>
+Date:   Thu Jan 20 14:06:10 2022 +0100
+
+    $100kW-50873$ - [WBS] B-Sample - MISC - VSI Serv Integration - BSW VsiSrv_i.h
+    
+    Change-Id: Ib65bc9921f74da836948bab7f3fdcf7b430987d7
+
+diff --git a/src/fw_cu/Components/Inv/ValMeasAndProc/BswFpgaIf/include/VsiSrv_i.h b/src/fw_cu/Components/Inv/ValMeasAndProc/BswFpgaIf/include/VsiSrv_i.h
+new file mode 100644
+index 000000000..eb27b00cc
+--- /dev/null
++++ b/src/fw_cu/Components/Inv/ValMeasAndProc/BswFpgaIf/include/VsiSrv_i.h
+@@ -0,0 +1,618 @@
++/******************************************************************************/
++/*                                                                            */
++/* !Layer           : BSW                                                     */
++/*                                                                            */
++/* !Component       : VSI                                                     */
++/* !Description     : VSI control                                             */
++/*                                                                            */
++/* !Module          : VSISRV                                                  */
++/* !Description     : API\'s services                                          */
++/*                                                                            */
++/* !File            : VSISRV_i.H                                              */
++/*                                                                            */
++/* !Scope           : Public                                                  */
++/*                                                                            */
++/* !Target          : All                                                     */
++/*                                                                            */
++/* !Vendor          : Valeo                                                   */
++/*                                                                            */
++/* Coding language  : C                                                       */
++/*                                                                            */
++/* COPYRIGHT 2011 VALEO                                                       */
++/* all rights reserved                                                        */
++/*                                                                            */
++/******************************************************************************/
++/* PVCS Information                                                           */
++/* $Archive::   P:/VE_Onduleur_Gen2_Sofraci/LOG/60_ComponentArchive/Archives/COMP_SWC_BSWSH72/vsisrv_i.h_v  $ */
++/* $Revision::   1.9       $$Author::   ogarot        $$Date::   28 Nov 2012 $*/
++/******************************************************************************/
++
++#ifndef VSISRV_I_H
++#define VSISRV_I_H
++
++#include "Std_Types.h"
++#include "VsiSrv_typ.h"
++#include "BswFpgaIf.h"
++
++//<<#include "intdrv.h"
++
++/******************************************************************************/
++/* DEFINES                                                                    */
++/******************************************************************************/
++//#define VsisrvFrameTx                        VsisrvBaconFrameTx.FrameTx
++
++#define VsisrvFrameTx  BswFpgaIfFrameTx
++#define VsisrvFrameRx  BswFpgaIfFrameRx
++#define VsisrvIpduTx   BswFpgaIfIpduTx
++#define VsisrvIpduRx   BswFpgaIfIpduRx
++#define VsisrvIpduTxDef BswFpgaIfIpduTxDef
++#define VsisrvIpduRxDef BswFpgaIfIpduRxDef
++
++#define VSISRV_START_DATA8_FRAME_TXS      VsisrvFrameTx.Data.TxS.Data8
++#define VSISRV_START_DATA8_FRAME_TXA      VsisrvFrameTx.Data.TxA.Data8
++#define VSISRV_START_DATA8_FRAME_RXA      VsisrvFrameRx.Data.RxA.Data8
++#define VSISRV_START_DATA8_FRAME_RXS      VsisrvFrameRx.Data.RxS.Data8
++
++#define VSISRV_MODE_TX_PARAM_1_CYCLE_VAL  (uint8)5
++
++/******************************************************************************/
++/* DATA DECLARATION                                                           */
++/******************************************************************************/
++#if 0
++/*The Fpga Rx & Tx buffers are defined in BswFpgaIf.c*/
++#define ISWIF_START_SEC_VAR_FAST_CLEARED
++#include "MemMap.h"
++
++//<<extern volatile VsisrvFrameTxType VsisrvFrameTx;
++extern volatile VsisrvBaconFrameTxType VsisrvBaconFrameTx;
++extern volatile VsisrvBaconFrameTxType VsisrvTstBaconFrameTx;
++extern volatile VsisrvFrameRxType VsisrvFrameRx;
++
++#define ISWIF_STOP_SEC_VAR_FAST_CLEARED
++#include "MemMap.h"
++
++#define ISWIF_START_SEC_VAR_FAST_CLEARED
++#include "MemMap.h"
++extern volatile VsisrvIpduTxType VsisrvIpduTx;
++extern volatile VsisrvIpduRxType VsisrvIpduRx;
++
++extern volatile VsisrvIpduTxType VsisrvIpduTxDef;
++extern volatile VsisrvIpduRxType VsisrvIpduRxDef;
++
++#define ISWIF_STOP_SEC_VAR_FAST_CLEARED
++#include "MemMap.h"
++#endif
++/******************************************************************************/
++
++#define ISWIF_START_SEC_VAR_FAST_CLEARED
++#include "MemMap.h"
++
++extern boolean VSISRV_bComInit;
++
++extern uint8 VSISRV_u8IdTxNm1;
++extern uint8 VSISRV_u8IdRxNm1;
++
++extern uint8 VSISRV_u8IdTxParamCycle;
++extern uint8 VSISRV_u8ModeReqTxNm1;
++extern uint16 VSISRV_u16ModeReq;
++
++extern boolean VSISRV_bCheckStatusRxA;
++extern boolean VSISRV_bCheckStatusRxS;
++extern boolean VSISRV_bCheckStatusIdRx;
++extern boolean VSISRV_bCheckStatusParamDl;
++extern boolean VSISRV_bCheckStatusModeReqRes;
++
++extern uint16 VSISRV_u16ValueMaxGroup1;
++extern uint16 VSISRV_u16ValueMaxGroup2;
++
++extern boolean VSISRV_bAutSigEmergencySwMask;
++extern uint16 VSISRV_u16AutSigEmergencySwDelay;
++
++#define ISWIF_STOP_SEC_VAR_FAST_CLEARED
++#include "MemMap.h"
++
++/******************************************************************************/
++
++#define VSISRV_START_SEC_CONST
++#include "NextGen_MemMap.h"
++
++extern const uint8 VSISRV_u8Crc8LkpTab2F[256];
++extern const uint16 VSISRV_u16Crc16LkpTab4825[256];
++extern const uint16 VSISRV_u16Crc16LkpTab333F[256];
++extern const uint16 VSISRV_u16Crc16LkpTab5643[256];
++
++#define VSISRV_STOP_SEC_CONST
++#include "NextGen_MemMap.h"
++
++/******************************************************************************/
++/* MACRO FUNCTIONS                                                            */
++/******************************************************************************/
++
++/*----------------------------------------------------------------------------*/
++/* MACRO FUNCTIONS Datas protection                                           */
++/*----------------------------------------------------------------------------*/
++#define VSISRV_SecAtomicStart0()                                               \\
++/*   int s32LocalItLevel;*/
++
++#define VSISRV_SecAtomicStart1()                                               \\
++/*   INTDRV_vidSuspendAll(&s32LocalItLevel);*/
++
++#define VSISRV_SecAtomicStart()                                                \\
++/*   int s32LocalItLevel;*/                                                    \\
++/*   INTDRV_vidSuspendAll(&s32LocalItLevel);*/
++
++#define VSISRV_SecAtomicStop()                                                 \\
++/*   INTDRV_vidResumeAll(s32LocalItLevel);*/
++
++/*----------------------------------------------------------------------------*/
++/* MACRO FUNCTIONS Scalings                                                   */
++/*----------------------------------------------------------------------------*/
++/* Scaling fixdt(1,16,14) Group1 to value max */
++#define VSISRV_ScalingGroup1(value)                                            \\
++   (uint16)(((((uint32)value) << 2) * VSISRV_u16ValueMaxGroup1) >> 16)
++
++/* Scaling fixdt(1,16,14) Group1 to value max */
++#define VSISRV_ScalingGroup2(value)                                            \\
++   (uint16)(((((uint32)value) << 2) * VSISRV_u16ValueMaxGroup2) >> 16)
++
++/*----------------------------------------------------------------------------*/
++/* MACRO FUNCTIONS Set Frame                                                  */
++/*----------------------------------------------------------------------------*/
++/*----------------*/
++/* Frame Tx       */
++/*----------------*/
++#define VSISRV_SetFrameTxAId(value)                                            \\
++   VsisrvFrameTx.Data.TxA.Signal.Id = value;
++
++/*----------------------------------------------------------------------------*/
++/* MACRO FUNCTIONS Get Frame                                                  */
++/*----------------------------------------------------------------------------*/
++/*----------------*/
++/* Frame Tx       */
++/*----------------*/
++#define VSISRV_GetFrameTxAId()                                                 \\
++   VsisrvFrameTx.Data.TxA.Signal.Id
++
++#define VSISRV_GetFrameTxSCtrl()                                               \\
++   VsisrvFrameTx.Data.TxS.Signal.Ctrl
++
++#define VSISRV_GetFrameTxACtrl()                                               \\
++   VsisrvFrameTx.Data.TxA.Signal.Ctrl
++
++/*----------------*/
++/* Frame Rx       */
++/*----------------*/
++#define VSISRV_GetFrameRxAId()                                                 \\
++   VsisrvFrameRx.Data.RxA.Signal.Data8[3]
++
++#define VSISRV_GetFrameRxACtrl()                                               \\
++   VsisrvFrameRx.Data.RxA.Signal.Ctrl
++
++#define VSISRV_GetFrameRxSCtrl()                                               \\
++   VsisrvFrameRx.Data.RxS.Signal.Ctrl
++
++/*----------------*/
++/* Frame status   */
++/*----------------*/
++#define VSISRV_GetFrameFS_TXA()                                                \\
++   VsisrvFrameRx.Data.RxS.Signal.FS_TXA
++
++#define VSISRV_GetFrameFS_TXS()                                                \\
++   VsisrvFrameRx.Data.RxS.Signal.FS_TXS
++
++#define VSISRV_GetFrameFS_SOL()                                                \\
++   VsisrvFrameRx.Data.RxS.Signal.FS_SOL
++
++#define VSISRV_GetFrameFS_SOE()                                                \\
++   VsisrvFrameRx.Data.RxS.Signal.FS_SOE
++
++#define VSISRV_GetFrameFS_RXA()                                                \\
++   VSISRV_bCheckStatusRxA
++
++#define VSISRV_GetFrameFS_RXS()                                                \\
++   VSISRV_bCheckStatusRxS
++
++#define VSISRV_GetFrameFS_IdRX()                                               \\
++   VSISRV_bCheckStatusIdRx
++
++/*----------------------------------------------------------------------------*/
++/* MACRO FUNCTIONS Copy ipdu -> frame                                         */
++/*----------------------------------------------------------------------------*/
++
++/******************************************************************************/
++/*                                                                            */
++/* !Description : Copy ipdu TxS to frame TxS                                  */
++/* !Number      : VSISRV.21                                                   */
++/* !Reference   : V01NT1001498.001                                            */
++/* !Reference   : V01NT1001945.002                                            */
++/*                                                                            */
++/******************************************************************************/
++/* !LastAuthor  : O. Garot                                                    */
++/******************************************************************************/
++#define VSISRV_CopyIpduTxSToFrameTxS()                                         \\
++   VsisrvFrameTx.Data.TxS.Data32[0] = VsisrvIpduTx.Data.TxS.Data32[0];               \\
++   VsisrvFrameTx.Data.TxS.Data32[1] = VsisrvIpduTx.Data.TxS.Data32[1];               \\
++   VsisrvFrameTx.Data.TxS.Data32[2] = VsisrvIpduTx.Data.TxS.Data32[2]
++
++/******************************************************************************/
++/*                                                                            */
++/* !Description : Copy ipdu TxA to frame TxA ID 0                             */
++/* !Number      : VSISRV.22                                                   */
++/* !Reference   : V01NT1001498.001                                            */
++/* !Reference   : V01NT1001945.002                                            */
++/*                                                                            */
++/******************************************************************************/
++/* !LastAuthor  : O. Garot                                                    */
++/******************************************************************************/
++#define VSISRV_CopyIpduTxAToFrameTxAId0()                                      \\
++   VsisrvFrameTx.Data.TxA.Data32[0] = VsisrvIpduTx.Data.TxA.IdMx[0].Data32[0];       \\
++   VsisrvFrameTx.Data.TxA.Data32[1] = VsisrvIpduTx.Data.TxA.IdMx[0].Data32[1];       \\
++   VsisrvFrameTx.Data.TxA.Data32[2] = VsisrvIpduTx.Data.TxA.IdMx[0].Data32[2];       \\
++   VsisrvFrameTx.Data.TxA.Data32[3] = VsisrvIpduTx.Data.TxA.IdMx[0].Data32[3];       \\
++   VsisrvFrameTx.Data.TxA.Data32[4] = VsisrvIpduTx.Data.TxA.IdMx[0].Data32[4];       \\
++
++/******************************************************************************/
++/*                                                                            */
++/* !Description : Copy ipdu TxA to frame TxA ID 1                             */
++/* !Number      : VSISRV.23                                                   */
++/* !Reference   : V01NT1001498.001                                            */
++/* !Reference   : V01NT1001945.002                                            */
++/*                                                                            */
++/******************************************************************************/
++/* !LastAuthor  : O. Garot                                                    */
++/******************************************************************************/
++#define VSISRV_CopyIpduTxAToFrameTxAId1()                                      \\
++   VsisrvFrameTx.Data.TxA.Data32[0] = VsisrvIpduTx.Data.TxA.IdMx[1].Data32[0];       \\
++   VsisrvFrameTx.Data.TxA.Data32[1] = VsisrvIpduTx.Data.TxA.IdMx[1].Data32[1];       \\
++   VsisrvFrameTx.Data.TxA.Data32[2] = VsisrvIpduTx.Data.TxA.IdMx[1].Data32[2];       \\
++   VsisrvFrameTx.Data.TxA.Data32[3] = VsisrvIpduTx.Data.TxA.IdMx[1].Data32[3];       \\
++   VsisrvFrameTx.Data.TxA.Data32[4] = VsisrvIpduTx.Data.TxA.IdMx[1].Data32[4];       \\
++
++/******************************************************************************/
++/*                                                                            */
++/* !Description : Copy ipdu TxA to frame TxA ID 2                             */
++/* !Number      : VSISRV.24                                                   */
++/* !Reference   : V01NT1001498.001                                            */
++/* !Reference   : V01NT1001945.002                                            */
++/*                                                                            */
++/******************************************************************************/
++/* !LastAuthor  : O. Garot                                                    */
++/******************************************************************************/
++#define VSISRV_CopyIpduTxAToFrameTxAId2()                                      \\
++   VsisrvFrameTx.Data.TxA.Data32[0] = VsisrvIpduTx.Data.TxA.IdMx[2].Data32[0];       \\
++   VsisrvFrameTx.Data.TxA.Data32[1] = VsisrvIpduTx.Data.TxA.IdMx[2].Data32[1];       \\
++   VsisrvFrameTx.Data.TxA.Data32[2] = VsisrvIpduTx.Data.TxA.IdMx[2].Data32[2];       \\
++   VsisrvFrameTx.Data.TxA.Data32[3] = VsisrvIpduTx.Data.TxA.IdMx[2].Data32[3];       \\
++   VsisrvFrameTx.Data.TxA.Data32[4] = VsisrvIpduTx.Data.TxA.IdMx[2].Data32[4];       \\
++
++/******************************************************************************/
++/*                                                                            */
++/* !Description : Copy ipdu TxA to frame TxA ID 3                             */
++/* !Number      : VSISRV.25                                                   */
++/* !Reference   : V01NT1001498.001                                            */
++/* !Reference   : V01NT1001945.002                                            */
++/*                                                                            */
++/******************************************************************************/
++/* !LastAuthor  : O. Garot                                                    */
++/******************************************************************************/
++#define VSISRV_CopyIpduTxAToFrameTxAId3()                                      \\
++   VsisrvFrameTx.Data.TxA.Data32[0] = VsisrvIpduTx.Data.TxA.IdMx[3].Data32[0];       \\
++   VsisrvFrameTx.Data.TxA.Data32[1] = VsisrvIpduTx.Data.TxA.IdMx[3].Data32[1];       \\
++   VsisrvFrameTx.Data.TxA.Data32[2] = VsisrvIpduTx.Data.TxA.IdMx[3].Data32[2];       \\
++   VsisrvFrameTx.Data.TxA.Data32[3] = VsisrvIpduTx.Data.TxA.IdMx[3].Data32[3];       \\
++   VsisrvFrameTx.Data.TxA.Data32[4] = VsisrvIpduTx.Data.TxA.IdMx[3].Data32[4];       \\
++
++/*----------------------------------------------------------------------------*/
++/* MACRO FUNCTIONS copy frame -> ipdu                                         */
++/*----------------------------------------------------------------------------*/
++
++/******************************************************************************/
++/*                                                                            */
++/* !Description : Copy frame RxS to ipdu RxS                                  */
++/* !Number      : VSISRV.31                                                   */
++/* !Reference   : V01NT1001498.001                                            */
++/* !Reference   : V01NT1001945.002                                            */
++/*                                                                            */
++/******************************************************************************/
++/* !LastAuthor  : O. Garot                                                    */
++/******************************************************************************/
++#define VSISRV_CopyFrameRxSToIpduRxS()                                         \\
++   VsisrvIpduRx.Data.RxS.Data32[0] = VsisrvFrameRx.Data.RxS.Data32[0];               \\
++   VsisrvIpduRx.Data.RxS.Data32[1] = VsisrvFrameRx.Data.RxS.Data32[1];               \\
++   VsisrvIpduRx.Data.RxS.Data32[2] = VsisrvFrameRx.Data.RxS.Data32[2];               \\
++   VsisrvIpduRx.Data.RxS.Data32[3] = VsisrvFrameRx.Data.RxS.Data32[3]
++
++/******************************************************************************/
++/*                                                                            */
++/* !Description : Copy frame RxA to ipdu RxA                                  */
++/* !Number      : VSISRV.32                                                   */
++/* !Reference   : V01NT1001498.001                                            */
++/* !Reference   : V01NT1001945.002                                            */
++/*                                                                            */
++/******************************************************************************/
++/* !LastAuthor  : O. Garot                                                    */
++/******************************************************************************/
++#define VSISRV_CopyFrameRxAToIpduRxA()                                         \\
++   VsisrvIpduRx.Data.RxA.Id.MxA.Data32[0] = VsisrvFrameRx.Data.RxA.Data32[0];        \\
++   VsisrvIpduRx.Data.RxA.Id.MxA.Data32[1] = VsisrvFrameRx.Data.RxA.Data32[1];        \\
++   VsisrvIpduRx.Data.RxA.Id.MxA.Data32[2] = VsisrvFrameRx.Data.RxA.Data32[2];        \\
++   VsisrvIpduRx.Data.RxA.Id.MxA.Data32[3] = VsisrvFrameRx.Data.RxA.Data32[3]
++
++/******************************************************************************/
++/*                                                                            */
++/* !Description : Copy frame RxA to ipdu RxA ID 0                             */
++/* !Number      : VSISRV.33                                                   */
++/* !Reference   : V01NT1001498.001                                            */
++/* !Reference   : V01NT1001945.002                                            */
++/*                                                                            */
++/******************************************************************************/
++/* !LastAuthor  : O. Garot                                                    */
++/******************************************************************************/
++#define VSISRV_CopyFrameRxAToIpduRxAId0()                                      \\
++   /* VsisrvIpduRx.Data.RxA.IdMx[0].Data32[0] = VsisrvFrameRx.Data.RxA.Data32[0]; */ \\
++   /* VsisrvIpduRx.Data.RxA.IdMx[0].Data32[1] = VsisrvFrameRx.Data.RxA.Data32[1]; */ \\
++   VsisrvIpduRx.Data.RxA.IdMx[0].Data32[2] = VsisrvFrameRx.Data.RxA.Data32[2];       \\
++   VsisrvIpduRx.Data.RxA.IdMx[0].Data32[3] = VsisrvFrameRx.Data.RxA.Data32[3]
++
++/******************************************************************************/
++/*                                                                            */
++/* !Description : Copy frame RxA to ipdu RxA ID 1                             */
++/* !Number      : VSISRV.34                                                   */
++/* !Reference   : V01NT1001498.001                                            */
++/* !Reference   : V01NT1001945.002                                            */
++/*                                                                            */
++/******************************************************************************/
++/* !LastAuthor  : O. Garot                                                    */
++/******************************************************************************/
++#define VSISRV_CopyFrameRxAToIpduRxAId1()                                      \\
++   /* VsisrvIpduRx.Data.RxA.IdMx[1].Data32[0] = VsisrvFrameRx.Data.RxA.Data32[0]; */ \\
++   /* VsisrvIpduRx.Data.RxA.IdMx[1].Data32[1] = VsisrvFrameRx.Data.RxA.Data32[1]; */ \\
++   VsisrvIpduRx.Data.RxA.IdMx[1].Data32[2] = VsisrvFrameRx.Data.RxA.Data32[2];       \\
++   VsisrvIpduRx.Data.RxA.IdMx[1].Data32[3] = VsisrvFrameRx.Data.RxA.Data32[3]
++
++/******************************************************************************/
++/*                                                                            */
++/* !Description : Copy frame RxA to ipdu RxA ID 2                             */
++/* !Number      : VSISRV.35                                                   */
++/* !Reference   : V01NT1001498.001                                            */
++/* !Reference   : V01NT1001945.002                                            */
++/*                                                                            */
++/******************************************************************************/
++/* !LastAuthor  : O. Garot                                                    */
++/******************************************************************************/
++#define VSISRV_CopyFrameRxAToIpduRxAId2()                                      \\
++   /* VsisrvIpduRx.Data.RxA.IdMx[2].Data32[0] = VsisrvFrameRx.Data.RxA.Data32[0]; */ \\
++   /* VsisrvIpduRx.Data.RxA.IdMx[2].Data32[1] = VsisrvFrameRx.Data.RxA.Data32[1]; */ \\
++   VsisrvIpduRx.Data.RxA.IdMx[2].Data32[2] = VsisrvFrameRx.Data.RxA.Data32[2];       \\
++   VsisrvIpduRx.Data.RxA.IdMx[2].Data32[3] = VsisrvFrameRx.Data.RxA.Data32[3]
++
++/******************************************************************************/
++/*                                                                            */
++/* !Description : Copy frame RxA to ipdu RxA ID 3                             */
++/* !Number      : VSISRV.36                                                   */
++/* !Reference   : V01NT1001498.001                                            */
++/* !Reference   : V01NT1001945.002                                            */
++/*                                                                            */
++/******************************************************************************/
++/* !LastAuthor  : O. Garot                                                    */
++/******************************************************************************/
++#define VSISRV_CopyFrameRxAToIpduRxAId3()                                      \\
++   /* VsisrvIpduRx.Data.RxA.IdMx[3].Data32[0] = VsisrvFrameRx.Data.RxA.Data32[0]; */ \\
++   /* VsisrvIpduRx.Data.RxA.IdMx[3].Data32[1] = VsisrvFrameRx.Data.RxA.Data32[1]; */ \\
++   VsisrvIpduRx.Data.RxA.IdMx[3].Data32[2] = VsisrvFrameRx.Data.RxA.Data32[2];       \\
++   VsisrvIpduRx.Data.RxA.IdMx[3].Data32[3] = VsisrvFrameRx.Data.RxA.Data32[3]
++
++/*----------------------------------------------------------------------------*/
++/* MACRO FUNCTIONS IdTx                                                       */
++/*----------------------------------------------------------------------------*/
++
++/******************************************************************************/
++/*                                                                            */
++/* !Description : Id Tx read                                                  */
++/* !Number      : VSISRV.41                                                   */
++/* !Reference   : V01NT1001945.002                                            */
++/*                                                                            */
++/******************************************************************************/
++/* !LastAuthor  : O. Garot                                                    */
++/******************************************************************************/
++#define VSISRV_IdTxRead()                                                      \\
++   VSISRV_u8IdTx
++
++/******************************************************************************/
++/*                                                                            */
++/* !Description : Id Tx increment modulo 4 with MSB mode preservation         */
++/* !Number      : VSISRV.42                                                   */
++/* !Reference   : V01NT1001945.002                                            */
++/*                                                                            */
++/******************************************************************************/
++/* !LastAuthor  : O. Garot                                                    */
++/******************************************************************************/
++#define VSISRV_IdTxInc()                                                       \\
++   VSISRV_u8IdTx = (uint8)((VSISRV_u8IdTx + (uint8)0x01) & (uint8)(0xF3))
++
++/******************************************************************************/
++/*                                                                            */
++/* !Description : Id Tx set param mode (MSB = 0x0)                            */
++/* !Number      : VSISRV.43                                                   */
++/* !Reference   : V01NT1001945.002                                            */
++/*                                                                            */
++/******************************************************************************/
++/* !LastAuthor  : O. Garot                                                    */
++/******************************************************************************/
++#define VSISRV_IdTxSetModeParam()                                              \\
++   VSISRV_u8IdTx = (uint8)(VSISRV_u8IdTx | (uint8)(0xF0))
++
++/******************************************************************************/
++/*                                                                            */
++/* !Description : Id Tx set nominal mode (MSB = 0xF)                          */
++/* !Number      : VSISRV.44                                                   */
++/* !Reference   : V01NT1001945.002                                            */
++/*                                                                            */
++/******************************************************************************/
++/* !LastAuthor  : O. Garot                                                    */
++/******************************************************************************/
++#define VSISRV_IdTxSetModeNominal()                                            \\
++   VSISRV_u8IdTx = (uint8)(VSISRV_u8IdTx & (uint8)(0x0F))
++
++/******************************************************************************/
++/*                                                                            */
++/* !Description : Id Tx set param mode (MSB = 0x0) for one cycle              */
++/* !Number      : VSISRV.45                                                   */
++/* !Reference   : V01NT1001945.002                                            */
++/*                                                                            */
++/******************************************************************************/
++/* !LastAuthor  : O. Garot                                                    */
++/******************************************************************************/
++#define VSISRV_IdTxSetModeParam1Cycle()                                        \\
++   VSISRV_bCheckStatusParamDl = VSISRV_STATUS_OK;                                 \\
++   VSISRV_u8IdTxParamCycle = VSISRV_MODE_TX_PARAM_1_CYCLE_VAL
++
++/******************************************************************************/
++/*                                                                            */
++/* !Description : Id Tx Nm1 read                                              */
++/* !Number      : VSISRV.46                                                   */
++/* !Reference   : V01NT1001945.002                                            */
++/*                                                                            */
++/******************************************************************************/
++/* !LastAuthor  : O. Garot                                                    */
++/******************************************************************************/
++#define VSISRV_IdTxNm1Read()                                                   \\
++   VSISRV_u8IdTxNm1
++
++/******************************************************************************/
++/*                                                                            */
++/* !Description : Id Tx Nm1 set                                               */
++/* !Number      : VSISRV.47                                                   */
++/* !Reference   : V01NT1001945.002                                            */
++/*                                                                            */
++/******************************************************************************/
++/* !LastAuthor  : O. Garot                                                    */
++/******************************************************************************/
++#define VSISRV_IdTxNm1Set()                                                    \\
++   VSISRV_u8IdTxNm1 = VSISRV_u8IdTx
++
++/*----------------------------------------------------------------------------*/
++/* MACRO FUNCTIONS IdRx                                                       */
++/*----------------------------------------------------------------------------*/
++
++/******************************************************************************/
++/*                                                                            */
++/* !Description : Id Rx Nm1 read                                              */
++/* !Number      : VSISRV.51                                                   */
++/* !Reference   : V01NT1001945.002                                            */
++/*                                                                            */
++/******************************************************************************/
++/* !LastAuthor  : O. Garot                                                    */
++/******************************************************************************/
++#define VSISRV_IdRxNm1Read()                                                   \\
++   VSISRV_u8IdRxNm1
++
++/******************************************************************************/
++/*                                                                            */
++/* !Description : Id Rx Nm1 set                                               */
++/* !Number      : VSISRV.52                                                   */
++/* !Reference   : V01NT1001945.002                                            */
++/*                                                                            */
++/******************************************************************************/
++/* !LastAuthor  : O. Garot                                                    */
++/******************************************************************************/
++#define VSISRV_IdRxNm1Set(u8IDRx)                                              \\
++   VSISRV_u8IdRxNm1 = u8IDRx
++
++/*----------------------------------------------------------------------------*/
++/* MACRO FUNCTIONS ComInit                                                    */
++/*----------------------------------------------------------------------------*/
++
++/******************************************************************************/
++/*                                                                            */
++/* !Description : Com Init flag read                                          */
++/* !Number      : VSISRV.61                                                   */
++/* !Reference   : V01NT1001945.002                                            */
++/*                                                                            */
++/******************************************************************************/
++/* !LastAuthor  : O. Garot                                                    */
++/******************************************************************************/
++#define VSISRV_ComInitRead()                                                   \\
++   VSISRV_bComInit
++
++/******************************************************************************/
++/*                                                                            */
++/* !Description : Com Init flag off                                           */
++/* !Number      : VSISRV.62                                                   */
++/* !Reference   : V01NT1001945.002                                            */
++/*                                                                            */
++/******************************************************************************/
++/* !LastAuthor  : O. Garot                                                    */
++/******************************************************************************/
++#define VSISRV_ComInitOff()                                                    \\
++   VSISRV_bComInit = 0
++
++/******************************************************************************/
++/*                                                                            */
++/* !Description : Com Init flag on                                            */
++/* !Number      : VSISRV.63                                                   */
++/* !Reference   : V01NT1001945.002                                            */
++/*                                                                            */
++/******************************************************************************/
++/* !LastAuthor  : O. Garot                                                    */
++/******************************************************************************/
++#define VSISRV_ComInitOn()                                                     \\
++   VSISRV_bComInit = 1
++
++/*----------------------------------------------------------------------------*/
++/* MACRO FUNCTIONS Aut                                                        */
++/*----------------------------------------------------------------------------*/
++/******************************************************************************/
++/*                                                                            */
++/* !Description : Aut Signal EmergencySw                                      */
++/* !Number      : VSISRV.71                                                   */
++/* !Reference   : V01NT1001945.002                                            */
++/*                                                                            */
++/******************************************************************************/
++/* !LastAuthor  : O. Garot                                                    */
++/******************************************************************************/
++LOCAL_INLINE void VSISRV_AutSigEmergencySw(boolean value);
++LOCAL_INLINE void VSISRV_AutSigEmergencySw(boolean value)
++{
++   if (value != 0)
++   {
++      VSISRV_bAutSigEmergencySwMask = 0;
++   }
++   else
++   {
++      VSISRV_bAutSigEmergencySwMask = 1;
++   }
++}
++
++/******************************************************************************/
++/*                                                                            */
++/* !Description : Aut Signal EmergencySw delay                                */
++/* !Number      : VSISRV.72                                                   */
++/* !Reference   : V01NT1001945.002                                            */
++/*                                                                            */
++/******************************************************************************/
++/* !LastAuthor  : O. Garot                                                    */
++/******************************************************************************/
++LOCAL_INLINE void VSISRV_AutSigEmergencySwDelay(uint16 value, boolean aut);
++LOCAL_INLINE void VSISRV_AutSigEmergencySwDelay(uint16 value, boolean aut)
++{
++   if (aut != 0)
++   {
++      if (value != 0)
++      {
++         VSISRV_AutSigEmergencySw(0);
++      }
++      VSISRV_u16AutSigEmergencySwDelay = value;
++   }
++}
++
++/******************************************************************************/
++/* FUNCTIONS DECLARATION                                                      */
++/******************************************************************************/
++
++void VSISRV_vidInitIpduDef(void);
++void VSISRV_vidInitIpduTxInitParam(uint16 ParamSet);
++
++#endif  /* VSISRV_I_H */
++
++/*-------------------------------- end of file -------------------------------*/
+diff --git a/src/fw_cu/Components/Inv/ValMeasAndProc/BswFpgaIf/src/VsiSrv_i.c b/src/fw_cu/Components/Inv/ValMeasAndProc/BswFpgaIf/src/VsiSrv_i.c
+new file mode 100644
+index 000000000..639670fc6
+--- /dev/null
++++ b/src/fw_cu/Components/Inv/ValMeasAndProc/BswFpgaIf/src/VsiSrv_i.c
+@@ -0,0 +1,1098 @@
++/******************************************************************************/
++/*                                                                            */
++/* !Layer           : BSW                                                     */
++/*                                                                            */
++/* !Component       : VSI                                                     */
++/* !Description     : VSI control                                             */
++/*                                                                            */
++/* !Module          : VSISRV                                                  */
++/* !Description     : API\'s services                                          */
++/*                                                                            */
++/* !File            : VSISRV_I.C                                              */
++/*                                                                            */
++/* !Scope           : Public                                                  */
++/*                                                                            */
++/* !Target          : All                                                     */
++/*                                                                            */
++/* !Vendor          : Valeo                                                   */
++/*                                                                            */
++/* Coding language  : C                                                       */
++/*                                                                            */
++/* COPYRIGHT 2011 VALEO                                                       */
++/* all rights reserved                                                        */
++/*                                                                            */
++/******************************************************************************/
++/* VSISRV.DEF.1 / VSISRV_vidInitIpduDef                                       */
++/* VSISRV.DEF.2 / VSISRV_vidInitIpduTxInitParam                               */
++/******************************************************************************/
++/* PVCS Information                                                           */
++/* $Archive::                                                                $*/
++/* $Revision::             $$Author::   ogarot        $$Date::               $*/
++/******************************************************************************/
++/* Dimension Informations
++ * %PCMS_HEADER_SUBSTITUTION_START:%
++ * The PID has this format: <Product ID>:<Item ID>.<Variant>-<Item Type>;<Revision>
++ * %PID:%
++ * %PCMS_HEADER_SUBSTITUTION_END:%
++ ******************************************************************************/
++
++#include "Std_Types.h"
++
++#include "VsiSrv.h"
++#include "VsiSrv_L.h"
++#include "VsiSrv_e.h"
++
++/******************************************************************************/
++/* DATA DEFINITION                                                            */
++/******************************************************************************/
++
++#define ISWIF_START_SEC_VAR_FAST_CLEARED
++#include "MemMap.h"
++#if 0
++//<<volatile VsisrvFrameTxType VsisrvFrameTx;
++volatile VsisrvBaconFrameTxType VsisrvBaconFrameTx;
++volatile VsisrvBaconFrameTxType VsisrvTstBaconFrameTx;
++
++__align(0x20) volatile VsisrvFrameRxType VsisrvFrameRx;
++
++__align(0x20) volatile VsisrvFrameTxType VsisrvFrameTx;
++
++__align(0x20) volatile VsisrvFrameRxType FpgaFrameRx;
++
++__align(0x20) volatile VsisrvFrameTxType FpgaFrameTx;
++
++#define ISWIF_STOP_SEC_VAR_FAST_CLEARED
++#include "MemMap.h"
++
++
++#define ISWIF_START_SEC_VAR_FAST_CLEARED
++#include "MemMap.h"
++
++volatile VsisrvIpduTxType VsisrvIpduTx;
++
++volatile VsisrvIpduRxType VsisrvIpduRx;
++
++volatile VsisrvIpduTxType VsisrvIpduTxDef;
++volatile VsisrvIpduRxType VsisrvIpduRxDef;
++#endif
++
++#define ISWIF_STOP_SEC_VAR_FAST_CLEARED
++#include "MemMap.h"
++/*----------------------------------------------------------------------------*/
++
++#define ISWIF_START_SEC_VAR_FAST_CLEARED
++#include "MemMap.h"
++
++boolean VSISRV_bComInit;
++
++uint8 VSISRV_u8IdTxNm1;
++uint8 VSISRV_u8IdRxNm1;
++
++uint8 VSISRV_u8IdTxParamCycle;
++uint8 VSISRV_u8ModeReqTxNm1;
++uint16 VSISRV_u16ModeReq;
++
++boolean VSISRV_bCheckStatusRxA;
++boolean VSISRV_bCheckStatusRxS;
++boolean VSISRV_bCheckStatusIdRx;
++boolean VSISRV_bCheckStatusParamDl;
++boolean VSISRV_bCheckStatusModeReqRes;
++
++uint16 VSISRV_u16ValueMaxGroup1;
++uint16 VSISRV_u16ValueMaxGroup2;
++
++boolean VSISRV_bAutSigEmergencySwMask;
++uint16 VSISRV_u16AutSigEmergencySwDelay;
++
++#define ISWIF_STOP_SEC_VAR_FAST_CLEARED
++#include "MemMap.h"
++
++/*----------------------------------------------------------------------------*/
++
++#define VSISRV_START_SEC_CONST
++#include "NextGen_MemMap.h"
++
++/*----------------------------------------------------------------------------*/
++/* CRC Polynomial lookup table, for TxS, 10 bytes data: 0x4825                */
++/*----------------------------------------------------------------------------*/
++const uint8 VSISRV_u8Crc8LkpTab2F[256] =
++{
++   0x00, 0x2F, 0x5E, 0x71, 0xBC, 0x93, 0xE2, 0xCD,
++   0x57, 0x78, 0x09, 0x26, 0xEB, 0xC4, 0xB5, 0x9A,
++   0xAE, 0x81, 0xF0, 0xDF, 0x12, 0x3D, 0x4C, 0x63,
++   0xF9, 0xD6, 0xA7, 0x88, 0x45, 0x6A, 0x1B, 0x34,
++   0x73, 0x5C, 0x2D, 0x02, 0xCF, 0xE0, 0x91, 0xBE,
++   0x24, 0xB , 0x7A, 0x55, 0x98, 0xB7, 0xC6, 0xE9,
++   0xDD, 0xF2, 0x83, 0xAC, 0x61, 0x4E, 0x3F, 0x10,
++   0x8A, 0xA5, 0xD4, 0xFB, 0x36, 0x19, 0x68, 0x47,
++   0xE6, 0xC9, 0xB8, 0x97, 0x5A, 0x75, 0x04, 0x2B,
++   0xB1, 0x9E, 0xEF, 0xC0, 0x0D, 0x22, 0x53, 0x7C,
++   0x48, 0x67, 0x16, 0x39, 0xF4, 0xDB, 0xAA, 0x85,
++   0x1F, 0x30, 0x41, 0x6E, 0xA3, 0x8C, 0xFD, 0xD2,
++   0x95, 0xBA, 0xCB, 0xE4, 0x29, 0x06, 0x77, 0x58,
++   0xC2, 0xED, 0x9C, 0xB3, 0x7E, 0x51, 0x20, 0x0F,
++   0x3B, 0x14, 0x65, 0x4A, 0x87, 0xA8, 0xD9, 0xF6,
++   0x6C, 0x43, 0x32, 0x1D, 0xD0, 0xFF, 0x8E, 0xA1,
++   0xE3, 0xCC, 0xBD, 0x92, 0x5F, 0x70, 0x01, 0x2E,
++   0xB4, 0x9B, 0xEA, 0xC5, 0x08, 0x27, 0x56, 0x79,
++   0x4D, 0x62, 0x13, 0x3C, 0xF1, 0xDE, 0xAF, 0x80,
++   0x1A, 0x35, 0x44, 0x6B, 0xA6, 0x89, 0xF8, 0xD7,
++   0x90, 0xBF, 0xCE, 0xE1, 0x2C, 0x03, 0x72, 0x5D,
++   0xC7, 0xE8, 0x99, 0xB6, 0x7B, 0x54, 0x25, 0x0A,
++   0x3E, 0x11, 0x60, 0x4F, 0x82, 0xAD, 0xDC, 0xF3,
++   0x69, 0x46, 0x37, 0x18, 0xD5, 0xFA, 0x8B, 0xA4,
++   0x05, 0x2A, 0x5B, 0x74, 0xB9, 0x96, 0xE7, 0xC8,
++   0x52, 0x7D, 0x0C, 0x23, 0xEE, 0xC1, 0xB0, 0x9F,
++   0xAB, 0x84, 0xF5, 0xDA, 0x17, 0x38, 0x49, 0x66,
++   0xFC, 0xD3, 0xA2, 0x8D, 0x40, 0x6F, 0x1E, 0x31,
++   0x76, 0x59, 0x28, 0x07, 0xCA, 0xE5, 0x94, 0xBB,
++   0x21, 0x0E, 0x7F, 0x50, 0x9D, 0xB2, 0xC3, 0xEC,
++   0xD8, 0xF7, 0x86, 0xA9, 0x64, 0x4B, 0x3A, 0x15,
++   0x8F, 0xA0, 0xD1, 0xFE, 0x33, 0x1C, 0x6D, 0x42 
++};
++
++const uint16 VSISRV_u16Crc16LkpTab4825[256] =
++{
++   0x0000, 0x4825, 0x904A, 0xD86F, 0x68B1, 0x2094, 0xF8FB, 0xB0DE,
++   0xD162, 0x9947, 0x4128, 0x090D, 0xB9D3, 0xF1F6, 0x2999, 0x61BC,
++   0xEAE1, 0xA2C4, 0x7AAB, 0x328E, 0x8250, 0xCA75, 0x121A, 0x5A3F,
++   0x3B83, 0x73A6, 0xABC9, 0xE3EC, 0x5332, 0x1B17, 0xC378, 0x8B5D,
++   0x9DE7, 0xD5C2, 0x0DAD, 0x4588, 0xF556, 0xBD73, 0x651C, 0x2D39,
++   0x4C85, 0x04A0, 0xDCCF, 0x94EA, 0x2434, 0x6C11, 0xB47E, 0xFC5B,
++   0x7706, 0x3F23, 0xE74C, 0xAF69, 0x1FB7, 0x5792, 0x8FFD, 0xC7D8,
++   0xA664, 0xEE41, 0x362E, 0x7E0B, 0xCED5, 0x86F0, 0x5E9F, 0x16BA,
++   0x73EB, 0x3BCE, 0xE3A1, 0xAB84, 0x1B5A, 0x537F, 0x8B10, 0xC335,
++   0xA289, 0xEAAC, 0x32C3, 0x7AE6, 0xCA38, 0x821D, 0x5A72, 0x1257,
++   0x990A, 0xD12F, 0x0940, 0x4165, 0xF1BB, 0xB99E, 0x61F1, 0x29D4,
++   0x4868, 0x004D, 0xD822, 0x9007, 0x20D9, 0x68FC, 0xB093, 0xF8B6,
++   0xEE0C, 0xA629, 0x7E46, 0x3663, 0x86BD, 0xCE98, 0x16F7, 0x5ED2,
++   0x3F6E, 0x774B, 0xAF24, 0xE701, 0x57DF, 0x1FFA, 0xC795, 0x8FB0,
++   0x04ED, 0x4CC8, 0x94A7, 0xDC82, 0x6C5C, 0x2479, 0xFC16, 0xB433,
++   0xD58F, 0x9DAA, 0x45C5, 0x0DE0, 0xBD3E, 0xF51B, 0x2D74, 0x6551,
++   0xE7D6, 0xAFF3, 0x779C, 0x3FB9, 0x8F67, 0xC742, 0x1F2D, 0x5708,
++   0x36B4, 0x7E91, 0xA6FE, 0xEEDB, 0x5E05, 0x1620, 0xCE4F, 0x866A,
++   0x0D37, 0x4512, 0x9D7D, 0xD558, 0x6586, 0x2DA3, 0xF5CC, 0xBDE9,
++   0xDC55, 0x9470, 0x4C1F, 0x043A, 0xB4E4, 0xFCC1, 0x24AE, 0x6C8B,
++   0x7A31, 0x3214, 0xEA7B, 0xA25E, 0x1280, 0x5AA5, 0x82CA, 0xCAEF,
++   0xAB53, 0xE376, 0x3B19, 0x733C, 0xC3E2, 0x8BC7, 0x53A8, 0x1B8D,
++   0x90D0, 0xD8F5, 0x009A, 0x48BF, 0xF861, 0xB044, 0x682B, 0x200E,
++   0x41B2, 0x0997, 0xD1F8, 0x99DD, 0x2903, 0x6126, 0xB949, 0xF16C,
++   0x943D, 0xDC18, 0x0477, 0x4C52, 0xFC8C, 0xB4A9, 0x6CC6, 0x24E3,
++   0x455F, 0x0D7A, 0xD515, 0x9D30, 0x2DEE, 0x65CB, 0xBDA4, 0xF581,
++   0x7EDC, 0x36F9, 0xEE96, 0xA6B3, 0x166D, 0x5E48, 0x8627, 0xCE02,
++   0xAFBE, 0xE79B, 0x3FF4, 0x77D1, 0xC70F, 0x8F2A, 0x5745, 0x1F60,
++   0x09DA, 0x41FF, 0x9990, 0xD1B5, 0x616B, 0x294E, 0xF121, 0xB904,
++   0xD8B8, 0x909D, 0x48F2, 0x00D7, 0xB009, 0xF82C, 0x2043, 0x6866,
++   0xE33B, 0xAB1E, 0x7371, 0x3B54, 0x8B8A, 0xC3AF, 0x1BC0, 0x53E5,
++   0x3259, 0x7A7C, 0xA213, 0xEA36, 0x5AE8, 0x12CD, 0xCAA2, 0x8287
++};
++
++/*----------------------------------------------------------------------------*/
++/* CRC Polynomial lookup table, for TxA, 18 bytes data: 0x333F                */
++/*----------------------------------------------------------------------------*/
++const uint16 VSISRV_u16Crc16LkpTab333F[256] =
++{
++   0x0000, 0x333F, 0x667E, 0x5541, 0xCCFC, 0xFFC3, 0xAA82, 0x99BD,
++   0xAAC7, 0x99F8, 0xCCB9, 0xFF86, 0x663B, 0x5504, 0x0045, 0x337A,
++   0x66B1, 0x558E, 0x00CF, 0x33F0, 0xAA4D, 0x9972, 0xCC33, 0xFF0C,
++   0xCC76, 0xFF49, 0xAA08, 0x9937, 0x008A, 0x33B5, 0x66F4, 0x55CB,
++   0xCD62, 0xFE5D, 0xAB1C, 0x9823, 0x019E, 0x32A1, 0x67E0, 0x54DF,
++   0x67A5, 0x549A, 0x01DB, 0x32E4, 0xAB59, 0x9866, 0xCD27, 0xFE18,
++   0xABD3, 0x98EC, 0xCDAD, 0xFE92, 0x672F, 0x5410, 0x0151, 0x326E,
++   0x0114, 0x322B, 0x676A, 0x5455, 0xCDE8, 0xFED7, 0xAB96, 0x98A9,
++   0xA9FB, 0x9AC4, 0xCF85, 0xFCBA, 0x6507, 0x5638, 0x0379, 0x3046,
++   0x033C, 0x3003, 0x6542, 0x567D, 0xCFC0, 0xFCFF, 0xA9BE, 0x9A81,
++   0xCF4A, 0xFC75, 0xA934, 0x9A0B, 0x03B6, 0x3089, 0x65C8, 0x56F7,
++   0x658D, 0x56B2, 0x03F3, 0x30CC, 0xA971, 0x9A4E, 0xCF0F, 0xFC30,
++   0x6499, 0x57A6, 0x02E7, 0x31D8, 0xA865, 0x9B5A, 0xCE1B, 0xFD24,
++   0xCE5E, 0xFD61, 0xA820, 0x9B1F, 0x02A2, 0x319D, 0x64DC, 0x57E3,
++   0x0228, 0x3117, 0x6456, 0x5769, 0xCED4, 0xFDEB, 0xA8AA, 0x9B95,
++   0xA8EF, 0x9BD0, 0xCE91, 0xFDAE, 0x6413, 0x572C, 0x026D, 0x3152,
++   0x60C9, 0x53F6, 0x06B7, 0x3588, 0xAC35, 0x9F0A, 0xCA4B, 0xF974,
++   0xCA0E, 0xF931, 0xAC70, 0x9F4F, 0x06F2, 0x35CD, 0x608C, 0x53B3,
++   0x0678, 0x3547, 0x6006, 0x5339, 0xCA84, 0xF9BB, 0xACFA, 0x9FC5,
++   0xACBF, 0x9F80, 0xCAC1, 0xF9FE, 0x6043, 0x537C, 0x063D, 0x3502,
++   0xADAB, 0x9E94, 0xCBD5, 0xF8EA, 0x6157, 0x5268, 0x0729, 0x3416,
++   0x076C, 0x3453, 0x6112, 0x522D, 0xCB90, 0xF8AF, 0xADEE, 0x9ED1,
++   0xCB1A, 0xF825, 0xAD64, 0x9E5B, 0x07E6, 0x34D9, 0x6198, 0x52A7,
++   0x61DD, 0x52E2, 0x07A3, 0x349C, 0xAD21, 0x9E1E, 0xCB5F, 0xF860,
++   0xC932, 0xFA0D, 0xAF4C, 0x9C73, 0x05CE, 0x36F1, 0x63B0, 0x508F,
++   0x63F5, 0x50CA, 0x058B, 0x36B4, 0xAF09, 0x9C36, 0xC977, 0xFA48,
++   0xAF83, 0x9CBC, 0xC9FD, 0xFAC2, 0x637F, 0x5040, 0x0501, 0x363E,
++   0x0544, 0x367B, 0x633A, 0x5005, 0xC9B8, 0xFA87, 0xAFC6, 0x9CF9,
++   0x0450, 0x376F, 0x622E, 0x5111, 0xC8AC, 0xFB93, 0xAED2, 0x9DED,
++   0xAE97, 0x9DA8, 0xC8E9, 0xFBD6, 0x626B, 0x5154, 0x0415, 0x372A,
++   0x62E1, 0x51DE, 0x049F, 0x37A0, 0xAE1D, 0x9D22, 0xC863, 0xFB5C,
++   0xC826, 0xFB19, 0xAE58, 0x9D67, 0x04DA, 0x37E5, 0x62A4, 0x519B
++};
++
++/*----------------------------------------------------------------------------*/
++/* CRC Polynomial lookup table, for RxA + RxS, 14 bytes data: 0x5643          */
++/*----------------------------------------------------------------------------*/
++const uint16 VSISRV_u16Crc16LkpTab5643[256] =
++{
++   0x0000, 0x5643, 0xAC86, 0xFAC5, 0x0F4F, 0x590C, 0xA3C9, 0xF58A,
++   0x1E9E, 0x48DD, 0xB218, 0xE45B, 0x11D1, 0x4792, 0xBD57, 0xEB14,
++   0x3D3C, 0x6B7F, 0x91BA, 0xC7F9, 0x3273, 0x6430, 0x9EF5, 0xC8B6,
++   0x23A2, 0x75E1, 0x8F24, 0xD967, 0x2CED, 0x7AAE, 0x806B, 0xD628,
++   0x7A78, 0x2C3B, 0xD6FE, 0x80BD, 0x7537, 0x2374, 0xD9B1, 0x8FF2,
++   0x64E6, 0x32A5, 0xC860, 0x9E23, 0x6BA9, 0x3DEA, 0xC72F, 0x916C,
++   0x4744, 0x1107, 0xEBC2, 0xBD81, 0x480B, 0x1E48, 0xE48D, 0xB2CE,
++   0x59DA, 0x0F99, 0xF55C, 0xA31F, 0x5695, 0x00D6, 0xFA13, 0xAC50,
++   0xF4F0, 0xA2B3, 0x5876, 0x0E35, 0xFBBF, 0xADFC, 0x5739, 0x017A,
++   0xEA6E, 0xBC2D, 0x46E8, 0x10AB, 0xE521, 0xB362, 0x49A7, 0x1FE4,
++   0xC9CC, 0x9F8F, 0x654A, 0x3309, 0xC683, 0x90C0, 0x6A05, 0x3C46,
++   0xD752, 0x8111, 0x7BD4, 0x2D97, 0xD81D, 0x8E5E, 0x749B, 0x22D8,
++   0x8E88, 0xD8CB, 0x220E, 0x744D, 0x81C7, 0xD784, 0x2D41, 0x7B02,
++   0x9016, 0xC655, 0x3C90, 0x6AD3, 0x9F59, 0xC91A, 0x33DF, 0x659C,
++   0xB3B4, 0xE5F7, 0x1F32, 0x4971, 0xBCFB, 0xEAB8, 0x107D, 0x463E,
++   0xAD2A, 0xFB69, 0x01AC, 0x57EF, 0xA265, 0xF426, 0x0EE3, 0x58A0,
++   0xBFA3, 0xE9E0, 0x1325, 0x4566, 0xB0EC, 0xE6AF, 0x1C6A, 0x4A29,
++   0xA13D, 0xF77E, 0x0DBB, 0x5BF8, 0xAE72, 0xF831, 0x02F4, 0x54B7,
++   0x829F, 0xD4DC, 0x2E19, 0x785A, 0x8DD0, 0xDB93, 0x2156, 0x7715,
++   0x9C01, 0xCA42, 0x3087, 0x66C4, 0x934E, 0xC50D, 0x3FC8, 0x698B,
++   0xC5DB, 0x9398, 0x695D, 0x3F1E, 0xCA94, 0x9CD7, 0x6612, 0x3051,
++   0xDB45, 0x8D06, 0x77C3, 0x2180, 0xD40A, 0x8249, 0x788C, 0x2ECF,
++   0xF8E7, 0xAEA4, 0x5461, 0x0222, 0xF7A8, 0xA1EB, 0x5B2E, 0x0D6D,
++   0xE679, 0xB03A, 0x4AFF, 0x1CBC, 0xE936, 0xBF75, 0x45B0, 0x13F3,
++   0x4B53, 0x1D10, 0xE7D5, 0xB196, 0x441C, 0x125F, 0xE89A, 0xBED9,
++   0x55CD, 0x038E, 0xF94B, 0xAF08, 0x5A82, 0x0CC1, 0xF604, 0xA047,
++   0x766F, 0x202C, 0xDAE9, 0x8CAA, 0x7920, 0x2F63, 0xD5A6, 0x83E5,
++   0x68F1, 0x3EB2, 0xC477, 0x9234, 0x67BE, 0x31FD, 0xCB38, 0x9D7B,
++   0x312B, 0x6768, 0x9DAD, 0xCBEE, 0x3E64, 0x6827, 0x92E2, 0xC4A1,
++   0x2FB5, 0x79F6, 0x8333, 0xD570, 0x20FA, 0x76B9, 0x8C7C, 0xDA3F,
++   0x0C17, 0x5A54, 0xA091, 0xF6D2, 0x0358, 0x551B, 0xAFDE, 0xF99D,
++   0x1289, 0x44CA, 0xBE0F, 0xE84C, 0x1DC6, 0x4B85, 0xB140, 0xE703
++};
++
++#define VSISRV_STOP_SEC_CONST
++#include "NextGen_MemMap.h"
++
++/******************************************************************************/
++/* GLOBAL FUNCTION DEFINITION                                                 */
++/******************************************************************************/
++#define VSISRV_START_SEC_CODE
++#include "NextGen_MemMap.h"
++
++
++/******************************************************************************/
++/*                                                                            */
++/* !Description : Initialises the VSI IPDU DEF Tx and Rx Default values       */
++/* !Number      : VSISRV.DEF.1                                                */
++/* !Reference   : V01NT1001945.002                                            */
++/*                                                                            */
++/******************************************************************************/
++/* !LastAuthor  : O. Garot                                                    */
++/******************************************************************************/
++void VSISRV_vidInitIpduDef(void)
++{
++/*----------------------------------------------------------------------------*/
++/* VSI IPDU Tx Default value                                                  */
++/*----------------------------------------------------------------------------*/
++/*------------------------------------*/
++/* VSI IPDU TxS                       */
++/*------------------------------------*/
++/*--------------------*/
++/* VSI IPDU TxS MLI   */
++/*--------------------*/
++   VsisrvIpduTxDef.Data.TxS.Signal.PWM_Ul_MSB8                             = 0;
++   VsisrvIpduTxDef.Data.TxS.Signal.PWM_Ul_LSB4                             = 0;
++   VsisrvIpduTxDef.Data.TxS.Signal.PWM_Ur_MSB4                             = 0;
++   VsisrvIpduTxDef.Data.TxS.Signal.PWM_Ur_LSB8                             = 0;
++   VsisrvIpduTxDef.Data.TxS.Signal.PWM_Vl_MSB8                             = 0;
++   VsisrvIpduTxDef.Data.TxS.Signal.PWM_Vl_LSB4                             = 0;
++   VsisrvIpduTxDef.Data.TxS.Signal.PWM_Vr_MSB4                             = 0;
++   VsisrvIpduTxDef.Data.TxS.Signal.PWM_Vr_LSB8                             = 0;
++   VsisrvIpduTxDef.Data.TxS.Signal.PWM_Wl_MSB8                             = 0;
++   VsisrvIpduTxDef.Data.TxS.Signal.PWM_Wl_LSB4                             = 0;
++   VsisrvIpduTxDef.Data.TxS.Signal.PWM_Wr_MSB4                             = 0;
++   VsisrvIpduTxDef.Data.TxS.Signal.PWM_Wr_LSB8                             = 0;
++
++/*--------------------*/
++/* VSI IPDU TxS SVM   */
++/*--------------------*/
++/*   VsisrvIpduTxDef.Data.TxS.SignalSVM.SVM_V1                               = 0; */
++/*   VsisrvIpduTxDef.Data.TxS.SignalSVM.SVM_V2_MSB2                          = 0; */
++/*   VsisrvIpduTxDef.Data.TxS.SignalSVM.SVM_V2_LSB4                          = 0; */
++/*   VsisrvIpduTxDef.Data.TxS.SignalSVM.SVM_V3_MSB4                          = 0; */
++/*   VsisrvIpduTxDef.Data.TxS.SignalSVM.SVM_V3_LSB2                          = 0; */
++/*   VsisrvIpduTxDef.Data.TxS.SignalSVM.SVM_V4                               = 0; */
++/*   VsisrvIpduTxDef.Data.TxS.SignalSVM.SVM_AT1_MSB8                         = 0; */
++/*   VsisrvIpduTxDef.Data.TxS.SignalSVM.SVM_AT1_LSB4                         = 0; */
++/*   VsisrvIpduTxDef.Data.TxS.SignalSVM.SVM_AT2_MSB4                         = 0; */
++/*   VsisrvIpduTxDef.Data.TxS.SignalSVM.SVM_AT2_LSB8                         = 0; */
++/*   VsisrvIpduTxDef.Data.TxS.SignalSVM.SVM_AT3_MSB8                         = 0; */
++/*   VsisrvIpduTxDef.Data.TxS.SignalSVM.SVM_AT3_LSB4                         = 0; */
++/*   VsisrvIpduTxDef.Data.TxS.SignalSVM.SVM_AT4_MSB4                         = 0; */
++/*   VsisrvIpduTxDef.Data.TxS.SignalSVM.SVM_AT4_LSB8                         = 0; */
++
++   VsisrvIpduTxDef.Data.TxS.Signal.PwmFreqDyn_MSB8                         = (2000 >> 6);       /* Param Val = 2000 :10 KHz  */
++   VsisrvIpduTxDef.Data.TxS.Signal.PwmFreqDyn_LSB6                         = (2000 & 0x003F);   /* Param Val = 2000 :10 KHz  */
++   VsisrvIpduTxDef.Data.TxS.Signal.PWM_UVW_ON                              = 0;
++   VsisrvIpduTxDef.Data.TxS.Signal.PWM_RatioFreq                           = VSISRV_SIGNAL_PWM_RATIO_NONE;
++   VsisrvIpduTxDef.Data.TxS.Signal.Ctrl                                    = 0;
++/*------------------------------------*/
++/* VSI IPDU TxA                       */
++/*------------------------------------*/
++/*--------------------*/
++/* VSI IPDU TxA Id0   */
++/*--------------------*/
++   VsisrvIpduTxDef.Data.TxA.Id.Mx0.Signal.Id                               = 0x00;  /* Field updated in Frame */
++   VsisrvIpduTxDef.Data.TxA.Id.Mx0.Signal.StateReq.Field.EmergencySw       = 1;
++   VsisrvIpduTxDef.Data.TxA.Id.Mx0.Signal.StateReq.Field.SCSpeedReady      = 0;
++   VsisrvIpduTxDef.Data.TxA.Id.Mx0.Signal.StateReq.Field.Operation         = VSISRV_SIGNAL_OPERATION_MCU;
++   VsisrvIpduTxDef.Data.TxA.Id.Mx0.Signal.StateReq.Field.SwitchType        = VSISRV_SIGNAL_SWITCHTYPE_MLI_T;
++   VsisrvIpduTxDef.Data.TxA.Id.Mx0.Signal.StateReq.Field.ModeReq           = VSISRV_SIGNAL_MODE_REQ_OFF;
++
++   VsisrvIpduTxDef.Data.TxA.Id.Mx0.Signal.FaultA.Field.EmergencyStop       = 0;
++   VsisrvIpduTxDef.Data.TxA.Id.Mx0.Signal.FaultA.Field.PwrSupLs            = 0;
++   VsisrvIpduTxDef.Data.TxA.Id.Mx0.Signal.FaultA.Field.PwrSupHs            = 0;
++   VsisrvIpduTxDef.Data.TxA.Id.Mx0.Signal.FaultA.Field.PwrSupMul           = 0;
++   VsisrvIpduTxDef.Data.TxA.Id.Mx0.Signal.FaultA.Field.IgbtL               = 0;
++   VsisrvIpduTxDef.Data.TxA.Id.Mx0.Signal.FaultA.Field.IgbtH               = 0;
++   VsisrvIpduTxDef.Data.TxA.Id.Mx0.Signal.FaultA.Field.ActiveDisIn         = 0;
++   VsisrvIpduTxDef.Data.TxA.Id.Mx0.Signal.FaultA.Field.ActiveDisAc         = 0;
++   VsisrvIpduTxDef.Data.TxA.Id.Mx0.Signal.FaultA.Field.Spare07             = 0;
++   VsisrvIpduTxDef.Data.TxA.Id.Mx0.Signal.FaultA.Field.Spare06             = 0;
++   VsisrvIpduTxDef.Data.TxA.Id.Mx0.Signal.FaultA.Field.Spare05             = 0;
++   VsisrvIpduTxDef.Data.TxA.Id.Mx0.Signal.FaultA.Field.Spare04             = 0;
++   VsisrvIpduTxDef.Data.TxA.Id.Mx0.Signal.FaultA.Field.Spare03             = 0;
++   VsisrvIpduTxDef.Data.TxA.Id.Mx0.Signal.FaultA.Field.Spare02             = 0;
++   VsisrvIpduTxDef.Data.TxA.Id.Mx0.Signal.FaultA.Field.Spare01             = 0;
++   VsisrvIpduTxDef.Data.TxA.Id.Mx0.Signal.FaultA.Field.LossComSpi          = 0;
++
++   VsisrvIpduTxDef.Data.TxA.Id.Mx0.Signal.FaultB.Field.OverCurBat          = 0;
++   VsisrvIpduTxDef.Data.TxA.Id.Mx0.Signal.FaultB.Field.OverTempCtrlBd      = 0;
++   VsisrvIpduTxDef.Data.TxA.Id.Mx0.Signal.FaultB.Field.OverTempIgbt        = 0;
++   VsisrvIpduTxDef.Data.TxA.Id.Mx0.Signal.FaultB.Field.OverTempDrvBd       = 0;
++   VsisrvIpduTxDef.Data.TxA.Id.Mx0.Signal.FaultB.Field.UnderVoltVBat       = 0;
++   VsisrvIpduTxDef.Data.TxA.Id.Mx0.Signal.FaultB.Field.OverVoltVBat        = 0;
++   VsisrvIpduTxDef.Data.TxA.Id.Mx0.Signal.FaultB.Field.IgbtMidPointU       = 0;
++   VsisrvIpduTxDef.Data.TxA.Id.Mx0.Signal.FaultB.Field.IgbtMidPointV       = 0;
++   VsisrvIpduTxDef.Data.TxA.Id.Mx0.Signal.FaultB.Field.IgbtMidPointW       = 0;
++   VsisrvIpduTxDef.Data.TxA.Id.Mx0.Signal.FaultB.Field.WdgCpld             = 0;
++   VsisrvIpduTxDef.Data.TxA.Id.Mx0.Signal.FaultB.Field.OverUnderCurWr      = 0;
++   VsisrvIpduTxDef.Data.TxA.Id.Mx0.Signal.FaultB.Field.OverUnderCurWl      = 0;
++   VsisrvIpduTxDef.Data.TxA.Id.Mx0.Signal.FaultB.Field.OverUnderCurVr      = 0;
++   VsisrvIpduTxDef.Data.TxA.Id.Mx0.Signal.FaultB.Field.OverUnderCurVl      = 0;
++   VsisrvIpduTxDef.Data.TxA.Id.Mx0.Signal.FaultB.Field.OverUnderCurUr      = 0;
++   VsisrvIpduTxDef.Data.TxA.Id.Mx0.Signal.FaultB.Field.OverUnderCurUl      = 0;
++
++   VsisrvIpduTxDef.Data.TxA.Id.Mx0.Signal.M0PwmMinDutyCycle_MSB8           = 0;
++   VsisrvIpduTxDef.Data.TxA.Id.Mx0.Signal.M0PwmMinDutyCycle_LSB4           = 0;
++   VsisrvIpduTxDef.Data.TxA.Id.Mx0.Signal.M1Id0Spare_MSB4                  = 0;
++   VsisrvIpduTxDef.Data.TxA.Id.Mx0.Signal.M1Id0Spare_LSB8                  = 0;
++/*--------------------*/
++   VsisrvIpduTxDef.Data.TxA.Id.Mx0.Signal.M2PwmFreq_MSB8                   = (2000 >> 4);       /* Param Val = 2000 :10 KHz  */
++   VsisrvIpduTxDef.Data.TxA.Id.Mx0.Signal.M2PwmFreq_LSB4                   = (2000 & 0x000F);   /* Param Val = 2000 :10 KHz  */
++   VsisrvIpduTxDef.Data.TxA.Id.Mx0.Signal.M3PwmDeadtime_MSB4               = (48 >> 8);         /* Param Val = 48   :1.2 \xb5s  */
++   VsisrvIpduTxDef.Data.TxA.Id.Mx0.Signal.M3PwmDeadtime_LSB8               = (48 & 0x00FF);     /* Param Val = 48   :1.2 \xb5s  */
++   VsisrvIpduTxDef.Data.TxA.Id.Mx0.Signal.M4Id0Spare_MSB8                  = (2000 >> 4);       /* Param Val = 2000 :5 KHz   */
++   VsisrvIpduTxDef.Data.TxA.Id.Mx0.Signal.M4Id0Spare_LSB4                  = (2000 & 0x000F);   /* Param Val = 2000 :5 KHz   */
++   VsisrvIpduTxDef.Data.TxA.Id.Mx0.Signal.M5PwmInitValUl_MSB4              = 0;                 /* Param Val = 0             */
++   VsisrvIpduTxDef.Data.TxA.Id.Mx0.Signal.M5PwmInitValUl_LSB8              = 0;                 /* Param Val = 0             */
++   VsisrvIpduTxDef.Data.TxA.Id.Mx0.Signal.M6PwmInitValUr_MSB8              = 0;                 /* Param Val = 0             */
++   VsisrvIpduTxDef.Data.TxA.Id.Mx0.Signal.M6PwmInitValUr_LSB4              = 0;                 /* Param Val = 0             */
++/*--------------------*/
++   VsisrvIpduTxDef.Data.TxA.Id.Mx0.Signal.Debug_MSB4                       = 0;
++   VsisrvIpduTxDef.Data.TxA.Id.Mx0.Signal.Debug_LSB8                       = 0;
++   VsisrvIpduTxDef.Data.TxA.Id.Mx0.Signal.Ctrl                             = 0;
++/*--------------------*/
++/* VSI IPDU TxA Id1   */
++/*--------------------*/
++   VsisrvIpduTxDef.Data.TxA.Id.Mx1.Signal.Id                               = 0x00;  /* Field updated in Frame */
++   VsisrvIpduTxDef.Data.TxA.Id.Mx1.Signal.StateReq.Field.EmergencySw       = 1;
++   VsisrvIpduTxDef.Data.TxA.Id.Mx1.Signal.StateReq.Field.SCSpeedReady      = 0;
++   VsisrvIpduTxDef.Data.TxA.Id.Mx1.Signal.StateReq.Field.Operation         = VSISRV_SIGNAL_OPERATION_MCU;
++   VsisrvIpduTxDef.Data.TxA.Id.Mx1.Signal.StateReq.Field.SwitchType        = VSISRV_SIGNAL_SWITCHTYPE_MLI_T;
++   VsisrvIpduTxDef.Data.TxA.Id.Mx1.Signal.StateReq.Field.ModeReq           = VSISRV_SIGNAL_MODE_REQ_OFF;
++
++   VsisrvIpduTxDef.Data.TxA.Id.Mx1.Signal.FaultA.Field.EmergencyStop       = 0;
++   VsisrvIpduTxDef.Data.TxA.Id.Mx1.Signal.FaultA.Field.PwrSupLs            = 0;
++   VsisrvIpduTxDef.Data.TxA.Id.Mx1.Signal.FaultA.Field.PwrSupHs            = 0;
++   VsisrvIpduTxDef.Data.TxA.Id.Mx1.Signal.FaultA.Field.PwrSupMul           = 0;
++   VsisrvIpduTxDef.Data.TxA.Id.Mx1.Signal.FaultA.Field.IgbtL               = 0;
++   VsisrvIpduTxDef.Data.TxA.Id.Mx1.Signal.FaultA.Field.IgbtH               = 0;
++   VsisrvIpduTxDef.Data.TxA.Id.Mx1.Signal.FaultA.Field.ActiveDisIn         = 0;
++   VsisrvIpduTxDef.Data.TxA.Id.Mx1.Signal.FaultA.Field.ActiveDisAc         = 0;
++   VsisrvIpduTxDef.Data.TxA.Id.Mx1.Signal.FaultA.Field.Spare07             = 0;
++   VsisrvIpduTxDef.Data.TxA.Id.Mx1.Signal.FaultA.Field.Spare06             = 0;
++   VsisrvIpduTxDef.Data.TxA.Id.Mx1.Signal.FaultA.Field.Spare05             = 0;
++   VsisrvIpduTxDef.Data.TxA.Id.Mx1.Signal.FaultA.Field.Spare04             = 0;
++   VsisrvIpduTxDef.Data.TxA.Id.Mx1.Signal.FaultA.Field.Spare03             = 0;
++   VsisrvIpduTxDef.Data.TxA.Id.Mx1.Signal.FaultA.Field.Spare02             = 0;
++   VsisrvIpduTxDef.Data.TxA.Id.Mx1.Signal.FaultA.Field.Spare01             = 0;
++   VsisrvIpduTxDef.Data.TxA.Id.Mx1.Signal.FaultA.Field.LossComSpi          = 0;
++
++   VsisrvIpduTxDef.Data.TxA.Id.Mx1.Signal.FaultB.Field.OverCurBat          = 0;
++   VsisrvIpduTxDef.Data.TxA.Id.Mx1.Signal.FaultB.Field.OverTempCtrlBd      = 0;
++   VsisrvIpduTxDef.Data.TxA.Id.Mx1.Signal.FaultB.Field.OverTempIgbt        = 0;
++   VsisrvIpduTxDef.Data.TxA.Id.Mx1.Signal.FaultB.Field.OverTempDrvBd       = 0;
++   VsisrvIpduTxDef.Data.TxA.Id.Mx1.Signal.FaultB.Field.UnderVoltVBat       = 0;
++   VsisrvIpduTxDef.Data.TxA.Id.Mx1.Signal.FaultB.Field.OverVoltVBat        = 0;
++   VsisrvIpduTxDef.Data.TxA.Id.Mx1.Signal.FaultB.Field.IgbtMidPointU       = 0;
++   VsisrvIpduTxDef.Data.TxA.Id.Mx1.Signal.FaultB.Field.IgbtMidPointV       = 0;
++   VsisrvIpduTxDef.Data.TxA.Id.Mx1.Signal.FaultB.Field.IgbtMidPointW       = 0;
++   VsisrvIpduTxDef.Data.TxA.Id.Mx1.Signal.FaultB.Field.WdgCpld             = 0;
++   VsisrvIpduTxDef.Data.TxA.Id.Mx1.Signal.FaultB.Field.OverUnderCurWr      = 0;
++   VsisrvIpduTxDef.Data.TxA.Id.Mx1.Signal.FaultB.Field.OverUnderCurWl      = 0;
++   VsisrvIpduTxDef.Data.TxA.Id.Mx1.Signal.FaultB.Field.OverUnderCurVr      = 0;
++   VsisrvIpduTxDef.Data.TxA.Id.Mx1.Signal.FaultB.Field.OverUnderCurVl      = 0;
++   VsisrvIpduTxDef.Data.TxA.Id.Mx1.Signal.FaultB.Field.OverUnderCurUr      = 0;
++   VsisrvIpduTxDef.Data.TxA.Id.Mx1.Signal.FaultB.Field.OverUnderCurUl      = 0;
++
++   VsisrvIpduTxDef.Data.TxA.Id.Mx1.Signal.M0PwmMaxDutyCycle_MSB8           = 0;
++   VsisrvIpduTxDef.Data.TxA.Id.Mx1.Signal.M0PwmMaxDutyCycle_LSB4           = 0;
++   VsisrvIpduTxDef.Data.TxA.Id.Mx1.Signal.M1Id1Spare_MSB4                  = 0;
++   VsisrvIpduTxDef.Data.TxA.Id.Mx1.Signal.M1Id1Spare_LSB8                  = 0;
++/*--------------------*/
++   VsisrvIpduTxDef.Data.TxA.Id.Mx1.Signal.M2PwmInitValVl_MSB8              = 0;     /* Param Val = 0             */
++   VsisrvIpduTxDef.Data.TxA.Id.Mx1.Signal.M2PwmInitValVl_LSB4              = 0;     /* Param Val = 0             */
++   VsisrvIpduTxDef.Data.TxA.Id.Mx1.Signal.M3PwmInitValVr_MSB4              = 0;     /* Param Val = 0             */
++   VsisrvIpduTxDef.Data.TxA.Id.Mx1.Signal.M3PwmInitValVr_LSB8              = 0;     /* Param Val = 0             */
++   VsisrvIpduTxDef.Data.TxA.Id.Mx1.Signal.M4PwmInitValWl_MSB8              = 0;     /* Param Val = 0             */
++   VsisrvIpduTxDef.Data.TxA.Id.Mx1.Signal.M4PwmInitValWl_LSB4              = 0;     /* Param Val = 0             */
++   VsisrvIpduTxDef.Data.TxA.Id.Mx1.Signal.M5PwmInitValWr_MSB4              = 0;     /* Param Val = 0             */
++   VsisrvIpduTxDef.Data.TxA.Id.Mx1.Signal.M5PwmInitValWr_LSB8              = 0;     /* Param Val = 0             */
++   VsisrvIpduTxDef.Data.TxA.Id.Mx1.Signal.M6Id1Spare_MSB8                  = 0;     /* Param Val = 0             */
++   VsisrvIpduTxDef.Data.TxA.Id.Mx1.Signal.M6Id1Spare_LSB4                  = 0;     /* Param Val = 0             */
++/*--------------------*/
++   VsisrvIpduTxDef.Data.TxA.Id.Mx1.Signal.Debug_MSB4                       = 0;
++   VsisrvIpduTxDef.Data.TxA.Id.Mx1.Signal.Debug_LSB8                       = 0;
++   VsisrvIpduTxDef.Data.TxA.Id.Mx1.Signal.Ctrl                             = 0;
++/*--------------------*/
++/* VSI IPDU TxA Id2   */
++/*--------------------*/
++   VsisrvIpduTxDef.Data.TxA.Id.Mx2.Signal.Id                               = 0x00;  /* Field updated in Frame */
++   VsisrvIpduTxDef.Data.TxA.Id.Mx2.Signal.StateReq.Field.EmergencySw       = 1;
++   VsisrvIpduTxDef.Data.TxA.Id.Mx2.Signal.StateReq.Field.SCSpeedReady      = 0;
++   VsisrvIpduTxDef.Data.TxA.Id.Mx2.Signal.StateReq.Field.Operation         = VSISRV_SIGNAL_OPERATION_MCU;
++   VsisrvIpduTxDef.Data.TxA.Id.Mx2.Signal.StateReq.Field.SwitchType        = VSISRV_SIGNAL_SWITCHTYPE_MLI_T;
++   VsisrvIpduTxDef.Data.TxA.Id.Mx2.Signal.StateReq.Field.ModeReq           = VSISRV_SIGNAL_MODE_REQ_OFF;
++
++   VsisrvIpduTxDef.Data.TxA.Id.Mx2.Signal.FaultA.Field.EmergencyStop       = 0;
++   VsisrvIpduTxDef.Data.TxA.Id.Mx2.Signal.FaultA.Field.PwrSupLs            = 0;
++   VsisrvIpduTxDef.Data.TxA.Id.Mx2.Signal.FaultA.Field.PwrSupHs            = 0;
++   VsisrvIpduTxDef.Data.TxA.Id.Mx2.Signal.FaultA.Field.PwrSupMul           = 0;
++   VsisrvIpduTxDef.Data.TxA.Id.Mx2.Signal.FaultA.Field.IgbtL               = 0;
++   VsisrvIpduTxDef.Data.TxA.Id.Mx2.Signal.FaultA.Field.IgbtH               = 0;
++   VsisrvIpduTxDef.Data.TxA.Id.Mx2.Signal.FaultA.Field.ActiveDisIn         = 0;
++   VsisrvIpduTxDef.Data.TxA.Id.Mx2.Signal.FaultA.Field.ActiveDisAc         = 0;
++   VsisrvIpduTxDef.Data.TxA.Id.Mx2.Signal.FaultA.Field.Spare07             = 0;
++   VsisrvIpduTxDef.Data.TxA.Id.Mx2.Signal.FaultA.Field.Spare06             = 0;
++   VsisrvIpduTxDef.Data.TxA.Id.Mx2.Signal.FaultA.Field.Spare05             = 0;
++   VsisrvIpduTxDef.Data.TxA.Id.Mx2.Signal.FaultA.Field.Spare04             = 0;
++   VsisrvIpduTxDef.Data.TxA.Id.Mx2.Signal.FaultA.Field.Spare03             = 0;
++   VsisrvIpduTxDef.Data.TxA.Id.Mx2.Signal.FaultA.Field.Spare02             = 0;
++   VsisrvIpduTxDef.Data.TxA.Id.Mx2.Signal.FaultA.Field.Spare01             = 0;
++   VsisrvIpduTxDef.Data.TxA.Id.Mx2.Signal.FaultA.Field.LossComSpi          = 0;
++
++   VsisrvIpduTxDef.Data.TxA.Id.Mx2.Signal.FaultB.Field.OverCurBat          = 0;
++   VsisrvIpduTxDef.Data.TxA.Id.Mx2.Signal.FaultB.Field.OverTempCtrlBd      = 0;
++   VsisrvIpduTxDef.Data.TxA.Id.Mx2.Signal.FaultB.Field.OverTempIgbt        = 0;
++   VsisrvIpduTxDef.Data.TxA.Id.Mx2.Signal.FaultB.Field.OverTempDrvBd       = 0;
++   VsisrvIpduTxDef.Data.TxA.Id.Mx2.Signal.FaultB.Field.UnderVoltVBat       = 0;
++   VsisrvIpduTxDef.Data.TxA.Id.Mx2.Signal.FaultB.Field.OverVoltVBat        = 0;
++   VsisrvIpduTxDef.Data.TxA.Id.Mx2.Signal.FaultB.Field.IgbtMidPointU       = 0;
++   VsisrvIpduTxDef.Data.TxA.Id.Mx2.Signal.FaultB.Field.IgbtMidPointV       = 0;
++   VsisrvIpduTxDef.Data.TxA.Id.Mx2.Signal.FaultB.Field.IgbtMidPointW       = 0;
++   VsisrvIpduTxDef.Data.TxA.Id.Mx2.Signal.FaultB.Field.WdgCpld             = 0;
++   VsisrvIpduTxDef.Data.TxA.Id.Mx2.Signal.FaultB.Field.OverUnderCurWr      = 0;
++   VsisrvIpduTxDef.Data.TxA.Id.Mx2.Signal.FaultB.Field.OverUnderCurWl      = 0;
++   VsisrvIpduTxDef.Data.TxA.Id.Mx2.Signal.FaultB.Field.OverUnderCurVr      = 0;
++   VsisrvIpduTxDef.Data.TxA.Id.Mx2.Signal.FaultB.Field.OverUnderCurVl      = 0;
++   VsisrvIpduTxDef.Data.TxA.Id.Mx2.Signal.FaultB.Field.OverUnderCurUr      = 0;
++   VsisrvIpduTxDef.Data.TxA.Id.Mx2.Signal.FaultB.Field.OverUnderCurUl      = 0;
++
++   VsisrvIpduTxDef.Data.TxA.Id.Mx2.Signal.M0Id2Spare06To11                 = 0x04;
++   VsisrvIpduTxDef.Data.TxA.Id.Mx2.Signal.PwrSupDrvInh                     = 0;
++   VsisrvIpduTxDef.Data.TxA.Id.Mx2.Signal.PwrSupHbrInh                     = 0;
++   VsisrvIpduTxDef.Data.TxA.Id.Mx2.Signal.M0IFilAverage                    = 0;
++   VsisrvIpduTxDef.Data.TxA.Id.Mx2.Signal.M0VFilAverage                    = 0;
++
++   VsisrvIpduTxDef.Data.TxA.Id.Mx2.Signal.M1Id2Spare_MSB4                  = 0;
++   VsisrvIpduTxDef.Data.TxA.Id.Mx2.Signal.M1Id2Spare_LSB8                  = 0;
++/*--------------------*/
++   VsisrvIpduTxDef.Data.TxA.Id.Mx2.Signal.M2OverCurThBat_MSB8              = 0;     /* Param Val = ???  :50A     */
++   VsisrvIpduTxDef.Data.TxA.Id.Mx2.Signal.M2OverCurThBat_LSB4              = 0;     /* Param Val = ???  :50A     */
++   VsisrvIpduTxDef.Data.TxA.Id.Mx2.Signal.M3OverVoltVbatTh_MSB4            = 0;     /* Param Val = ???  :850V    */
++   VsisrvIpduTxDef.Data.TxA.Id.Mx2.Signal.M3OverVoltVbatTh_LSB8            = 0;     /* Param Val = ???  :850V    */
++   VsisrvIpduTxDef.Data.TxA.Id.Mx2.Signal.M4Id2Spare_MSB8                  = 0;     /* Param Val = 0             */
++   VsisrvIpduTxDef.Data.TxA.Id.Mx2.Signal.M4Id2Spare_LSB4                  = 0;     /* Param Val = 0             */
++   VsisrvIpduTxDef.Data.TxA.Id.Mx2.Signal.M5Id2Spare_MSB4                  = 0;     /* Param Val = 0             */
++   VsisrvIpduTxDef.Data.TxA.Id.Mx2.Signal.M5Id2Spare_LSB8                  = 0;     /* Param Val = 0             */
++   VsisrvIpduTxDef.Data.TxA.Id.Mx2.Signal.M6Id2Spare_MSB8                  = 0;     /* Param Val = 0             */
++   VsisrvIpduTxDef.Data.TxA.Id.Mx2.Signal.M6Id2Spare_LSB4                  = 0;     /* Param Val = 0             */
++/*--------------------*/
++   VsisrvIpduTxDef.Data.TxA.Id.Mx2.Signal.Debug_MSB4                       = 0;
++   VsisrvIpduTxDef.Data.TxA.Id.Mx2.Signal.Debug_LSB8                       = 0;
++   VsisrvIpduTxDef.Data.TxA.Id.Mx2.Signal.Ctrl                             = 0;
++/*--------------------*/
++/* VSI IPDU TxA Id3   */
++/*--------------------*/
++   VsisrvIpduTxDef.Data.TxA.Id.Mx3.Signal.Id                               = 0x00;  /* Field updated in Frame */
++   VsisrvIpduTxDef.Data.TxA.Id.Mx3.Signal.StateReq.Field.EmergencySw       = 1;
++   VsisrvIpduTxDef.Data.TxA.Id.Mx3.Signal.StateReq.Field.SCSpeedReady      = 0;
++   VsisrvIpduTxDef.Data.TxA.Id.Mx3.Signal.StateReq.Field.Operation         = VSISRV_SIGNAL_OPERATION_MCU;
++   VsisrvIpduTxDef.Data.TxA.Id.Mx3.Signal.StateReq.Field.SwitchType        = VSISRV_SIGNAL_SWITCHTYPE_MLI_T;
++   VsisrvIpduTxDef.Data.TxA.Id.Mx3.Signal.StateReq.Field.ModeReq           = VSISRV_SIGNAL_MODE_REQ_OFF;
++
++   VsisrvIpduTxDef.Data.TxA.Id.Mx3.Signal.FaultA.Field.EmergencyStop       = 0;
++   VsisrvIpduTxDef.Data.TxA.Id.Mx3.Signal.FaultA.Field.PwrSupLs            = 0;
++   VsisrvIpduTxDef.Data.TxA.Id.Mx3.Signal.FaultA.Field.PwrSupHs            = 0;
++   VsisrvIpduTxDef.Data.TxA.Id.Mx3.Signal.FaultA.Field.PwrSupMul           = 0;
++   VsisrvIpduTxDef.Data.TxA.Id.Mx3.Signal.FaultA.Field.IgbtL               = 0;
++   VsisrvIpduTxDef.Data.TxA.Id.Mx3.Signal.FaultA.Field.IgbtH               = 0;
++   VsisrvIpduTxDef.Data.TxA.Id.Mx3.Signal.FaultA.Field.ActiveDisIn         = 0;
++   VsisrvIpduTxDef.Data.TxA.Id.Mx3.Signal.FaultA.Field.ActiveDisAc         = 0;
++   VsisrvIpduTxDef.Data.TxA.Id.Mx3.Signal.FaultA.Field.Spare07             = 0;
++   VsisrvIpduTxDef.Data.TxA.Id.Mx3.Signal.FaultA.Field.Spare06             = 0;
++   VsisrvIpduTxDef.Data.TxA.Id.Mx3.Signal.FaultA.Field.Spare05             = 0;
++   VsisrvIpduTxDef.Data.TxA.Id.Mx3.Signal.FaultA.Field.Spare04             = 0;
++   VsisrvIpduTxDef.Data.TxA.Id.Mx3.Signal.FaultA.Field.Spare03             = 0;
++   VsisrvIpduTxDef.Data.TxA.Id.Mx3.Signal.FaultA.Field.Spare02             = 0;
++   VsisrvIpduTxDef.Data.TxA.Id.Mx3.Signal.FaultA.Field.Spare01             = 0;
++   VsisrvIpduTxDef.Data.TxA.Id.Mx3.Signal.FaultA.Field.LossComSpi          = 0;
++
++   VsisrvIpduTxDef.Data.TxA.Id.Mx3.Signal.FaultB.Field.OverCurBat          = 0;
++   VsisrvIpduTxDef.Data.TxA.Id.Mx3.Signal.FaultB.Field.OverTempCtrlBd      = 0;
++   VsisrvIpduTxDef.Data.TxA.Id.Mx3.Signal.FaultB.Field.OverTempIgbt        = 0;
++   VsisrvIpduTxDef.Data.TxA.Id.Mx3.Signal.FaultB.Field.OverTempDrvBd       = 0;
++   VsisrvIpduTxDef.Data.TxA.Id.Mx3.Signal.FaultB.Field.UnderVoltVBat       = 0;
++   VsisrvIpduTxDef.Data.TxA.Id.Mx3.Signal.FaultB.Field.OverVoltVBat        = 0;
++   VsisrvIpduTxDef.Data.TxA.Id.Mx3.Signal.FaultB.Field.IgbtMidPointU       = 0;
++   VsisrvIpduTxDef.Data.TxA.Id.Mx3.Signal.FaultB.Field.IgbtMidPointV       = 0;
++   VsisrvIpduTxDef.Data.TxA.Id.Mx3.Signal.FaultB.Field.IgbtMidPointW       = 0;
++   VsisrvIpduTxDef.Data.TxA.Id.Mx3.Signal.FaultB.Field.WdgCpld             = 0;
++   VsisrvIpduTxDef.Data.TxA.Id.Mx3.Signal.FaultB.Field.OverUnderCurWr      = 0;
++   VsisrvIpduTxDef.Data.TxA.Id.Mx3.Signal.FaultB.Field.OverUnderCurWl      = 0;
++   VsisrvIpduTxDef.Data.TxA.Id.Mx3.Signal.FaultB.Field.OverUnderCurVr      = 0;
++   VsisrvIpduTxDef.Data.TxA.Id.Mx3.Signal.FaultB.Field.OverUnderCurVl      = 0;
++   VsisrvIpduTxDef.Data.TxA.Id.Mx3.Signal.FaultB.Field.OverUnderCurUr      = 0;
++   VsisrvIpduTxDef.Data.TxA.Id.Mx3.Signal.FaultB.Field.OverUnderCurUl      = 0;
++
++   VsisrvIpduTxDef.Data.TxA.Id.Mx3.Signal.M0DebugL_MSB8                    = 0;
++   VsisrvIpduTxDef.Data.TxA.Id.Mx3.Signal.M0DebugL_LSB4                    = 0;
++   VsisrvIpduTxDef.Data.TxA.Id.Mx3.Signal.M1DebugH_MSB4                    = 0;
++   VsisrvIpduTxDef.Data.TxA.Id.Mx3.Signal.M1DebugH_LSB8                    = 0;
++/*--------------------*/
++   VsisrvIpduTxDef.Data.TxA.Id.Mx3.Signal.M2OverCurThMot_MSB8              = 0;                 /* Param Val = ???  :300A    */
++   VsisrvIpduTxDef.Data.TxA.Id.Mx3.Signal.M2OverCurThMot_LSB4              = 0;                 /* Param Val = ???  :300A    */
++   VsisrvIpduTxDef.Data.TxA.Id.Mx3.Signal.M3ActiveDisDur_MSB4              = (2442 >> 8);       /* Param Val = 2442 :4000\xb5s  */
++   VsisrvIpduTxDef.Data.TxA.Id.Mx3.Signal.M3ActiveDisDur_LSB8              = (2442 & 0x00FF);   /* Param Val = 2442 :4000\xb5s  */
++   VsisrvIpduTxDef.Data.TxA.Id.Mx3.Signal.M4SynchroDelay_MSB8              = (436 >> 4);        /* Param Val = 436  :10.900\xb5s*/
++   VsisrvIpduTxDef.Data.TxA.Id.Mx3.Signal.M4SynchroDelay_LSB4              = (436 & 0x000F);    /* Param Val = 436  :10.900\xb5s*/
++   VsisrvIpduTxDef.Data.TxA.Id.Mx3.Signal.M5Id3Spare_MSB4                  = 0;                 /* Param Val = 0             */
++   VsisrvIpduTxDef.Data.TxA.Id.Mx3.Signal.M5Id3Spare_LSB8                  = 0;                 /* Param Val = 0             */
++   VsisrvIpduTxDef.Data.TxA.Id.Mx3.Signal.M6Id3Spare_MSB8                  = 0;                 /* Param Val = 0             */
++   VsisrvIpduTxDef.Data.TxA.Id.Mx3.Signal.M6Id3Spare_LSB4                  = 0;                 /* Param Val = 0             */
++/*--------------------*/
++   VsisrvIpduTxDef.Data.TxA.Id.Mx3.Signal.Debug_MSB4                       = 0;
++   VsisrvIpduTxDef.Data.TxA.Id.Mx3.Signal.Debug_LSB8                       = 0;
++   VsisrvIpduTxDef.Data.TxA.Id.Mx3.Signal.Ctrl                             = 0;
++
++/*----------------------------------------------------------------------------*/
++/* VSI IPDU Rx Default value                                                  */
++/*----------------------------------------------------------------------------*/
++/*------------------------------------*/
++/* VSI IPDU RxA                       */
++/*------------------------------------*/
++/*--------------------*/
++/* VSI IPDU RxA IdA   */
++/*--------------------*/
++   VsisrvIpduRxDef.Data.RxA.Id.MxA.Signal.Id                               = 0;
++   VsisrvIpduRxDef.Data.RxA.Id.MxA.Signal.StateRes.Field.PWM_RatioFreqRes  = 0;
++   VsisrvIpduRxDef.Data.RxA.Id.MxA.Signal.StateRes.Field.CurAcq            = 0;
++   VsisrvIpduRxDef.Data.RxA.Id.MxA.Signal.StateRes.Field.SwitchTypeRes     = 0;
++   VsisrvIpduRxDef.Data.RxA.Id.MxA.Signal.StateRes.Field.ModeRes           = 0;
++
++   VsisrvIpduRxDef.Data.RxA.Id.MxA.Signal.FaultA.Field.EmergencyStop       = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.MxA.Signal.FaultA.Field.PwrSupLs            = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.MxA.Signal.FaultA.Field.PwrSupHs            = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.MxA.Signal.FaultA.Field.PwrSupMul           = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.MxA.Signal.FaultA.Field.IgbtL               = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.MxA.Signal.FaultA.Field.IgbtH               = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.MxA.Signal.FaultA.Field.ActiveDisIn         = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.MxA.Signal.FaultA.Field.ActiveDisAc         = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.MxA.Signal.FaultA.Field.Spare07             = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.MxA.Signal.FaultA.Field.Spare06             = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.MxA.Signal.FaultA.Field.Spare05             = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.MxA.Signal.FaultA.Field.Spare04             = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.MxA.Signal.FaultA.Field.Spare03             = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.MxA.Signal.FaultA.Field.Spare02             = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.MxA.Signal.FaultA.Field.Spare01             = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.MxA.Signal.FaultA.Field.LossComSpi          = 1;
++
++   VsisrvIpduRxDef.Data.RxA.Id.MxA.Signal.FaultB.Field.OverCurBat          = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.MxA.Signal.FaultB.Field.OverTempCtrlBd      = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.MxA.Signal.FaultB.Field.OverTempIgbt        = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.MxA.Signal.FaultB.Field.OverTempDrvBd       = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.MxA.Signal.FaultB.Field.UnderVoltVBat       = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.MxA.Signal.FaultB.Field.OverVoltVBat        = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.MxA.Signal.FaultB.Field.IgbtMidPointU       = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.MxA.Signal.FaultB.Field.IgbtMidPointV       = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.MxA.Signal.FaultB.Field.IgbtMidPointW       = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.MxA.Signal.FaultB.Field.WdgCpld             = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.MxA.Signal.FaultB.Field.OverUnderCurWr      = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.MxA.Signal.FaultB.Field.OverUnderCurWl      = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.MxA.Signal.FaultB.Field.OverUnderCurVr      = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.MxA.Signal.FaultB.Field.OverUnderCurVl      = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.MxA.Signal.FaultB.Field.OverUnderCurUr      = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.MxA.Signal.FaultB.Field.OverUnderCurUl      = 1;
++
++   VsisrvIpduRxDef.Data.RxA.Id.MxA.Signal.FaultC.Field.Spare15             = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.MxA.Signal.FaultC.Field.Spare14             = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.MxA.Signal.FaultC.Field.Spare13             = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.MxA.Signal.FaultC.Field.Spare12             = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.MxA.Signal.FaultC.Field.Spare11             = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.MxA.Signal.FaultC.Field.Spare10             = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.MxA.Signal.FaultC.Field.Spare09             = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.MxA.Signal.FaultC.Field.Spare08             = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.MxA.Signal.FaultC.Field.Spare07             = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.MxA.Signal.FaultC.Field.Spare06             = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.MxA.Signal.FaultC.Field.Spare05             = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.MxA.Signal.FaultC.Field.LowSpeedReach       = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.MxA.Signal.FaultC.Field.Spare03             = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.MxA.Signal.FaultC.Field.PwmClampFlag        = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.MxA.Signal.FaultC.Field.PwmParamFlag        = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.MxA.Signal.FaultC.Field.Spare00             = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.MxA.Signal.Debug64To75_MSB8                 = 0;
++   VsisrvIpduRxDef.Data.RxA.Id.MxA.Signal.Debug64To75_LSB4                 = 0;
++   VsisrvIpduRxDef.Data.RxA.Id.MxA.Signal.M0_MSB4                          = 0;
++   VsisrvIpduRxDef.Data.RxA.Id.MxA.Signal.M0_LSB8                          = 0;
++   VsisrvIpduRxDef.Data.RxA.Id.MxA.Signal.M1_MSB8                          = 0;
++   VsisrvIpduRxDef.Data.RxA.Id.MxA.Signal.M1_LSB4                          = 0;
++   VsisrvIpduRxDef.Data.RxA.Id.MxA.Signal.Debug100To111_MSB4               = 0;
++   VsisrvIpduRxDef.Data.RxA.Id.MxA.Signal.Debug100To111_LSB8               = 0;
++   VsisrvIpduRxDef.Data.RxA.Id.MxA.Signal.Ctrl                             = 0;
++/*--------------------*/
++/* VSI IPDU RxA Id0   */
++/*--------------------*/
++   VsisrvIpduRxDef.Data.RxA.Id.Mx0.Signal.Id                               = 0;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx0.Signal.StateRes.Field.PWM_RatioFreqRes  = 0;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx0.Signal.StateRes.Field.CurAcq            = 0;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx0.Signal.StateRes.Field.SwitchTypeRes     = 0;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx0.Signal.StateRes.Field.ModeRes           = 0;
++
++   VsisrvIpduRxDef.Data.RxA.Id.Mx0.Signal.FaultA.Field.EmergencyStop       = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx0.Signal.FaultA.Field.PwrSupLs            = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx0.Signal.FaultA.Field.PwrSupHs            = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx0.Signal.FaultA.Field.PwrSupMul           = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx0.Signal.FaultA.Field.IgbtL               = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx0.Signal.FaultA.Field.IgbtH               = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx0.Signal.FaultA.Field.ActiveDisIn         = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx0.Signal.FaultA.Field.ActiveDisAc         = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx0.Signal.FaultA.Field.Spare07             = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx0.Signal.FaultA.Field.Spare06             = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx0.Signal.FaultA.Field.Spare05             = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx0.Signal.FaultA.Field.Spare04             = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx0.Signal.FaultA.Field.Spare03             = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx0.Signal.FaultA.Field.Spare02             = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx0.Signal.FaultA.Field.Spare01             = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx0.Signal.FaultA.Field.LossComSpi          = 1;
++
++   VsisrvIpduRxDef.Data.RxA.Id.Mx0.Signal.FaultB.Field.OverCurBat          = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx0.Signal.FaultB.Field.OverTempCtrlBd      = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx0.Signal.FaultB.Field.OverTempIgbt        = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx0.Signal.FaultB.Field.OverTempDrvBd       = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx0.Signal.FaultB.Field.UnderVoltVBat       = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx0.Signal.FaultB.Field.OverVoltVBat        = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx0.Signal.FaultB.Field.IgbtMidPointU       = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx0.Signal.FaultB.Field.IgbtMidPointV       = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx0.Signal.FaultB.Field.IgbtMidPointW       = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx0.Signal.FaultB.Field.WdgCpld             = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx0.Signal.FaultB.Field.OverUnderCurWr      = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx0.Signal.FaultB.Field.OverUnderCurWl      = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx0.Signal.FaultB.Field.OverUnderCurVr      = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx0.Signal.FaultB.Field.OverUnderCurVl      = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx0.Signal.FaultB.Field.OverUnderCurUr      = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx0.Signal.FaultB.Field.OverUnderCurUl      = 1;
++
++   VsisrvIpduRxDef.Data.RxA.Id.Mx0.Signal.FaultC.Field.Spare15             = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx0.Signal.FaultC.Field.Spare14             = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx0.Signal.FaultC.Field.Spare13             = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx0.Signal.FaultC.Field.Spare12             = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx0.Signal.FaultC.Field.Spare11             = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx0.Signal.FaultC.Field.Spare10             = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx0.Signal.FaultC.Field.Spare09             = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx0.Signal.FaultC.Field.Spare08             = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx0.Signal.FaultC.Field.Spare07             = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx0.Signal.FaultC.Field.Spare06             = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx0.Signal.FaultC.Field.Spare05             = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx0.Signal.FaultC.Field.LowSpeedReach       = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx0.Signal.FaultC.Field.Spare03             = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx0.Signal.FaultC.Field.PwmClampFlag        = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx0.Signal.FaultC.Field.PwmParamFlag        = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx0.Signal.FaultC.Field.Spare00             = 1;
++
++   VsisrvIpduRxDef.Data.RxA.Id.Mx0.Signal.Debug64To75_MSB8                 = 0;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx0.Signal.Debug64To75_LSB4                 = 0;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx0.Signal.TempIgbt_MSB4                    = 0;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx0.Signal.TempIgbt_LSB8                    = 0;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx0.Signal.MeasCurBat_MSB8                  = 0;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx0.Signal.MeasCurBat_LSB4                  = 0;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx0.Signal.Debug100To111_MSB4               = 0;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx0.Signal.Debug100To111_LSB8               = 0;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx0.Signal.Ctrl                             = 0;
++/*--------------------*/
++/* VSI IPDU RxA Id1   */
++/*--------------------*/
++   VsisrvIpduRxDef.Data.RxA.Id.Mx1.Signal.Id                               = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx1.Signal.StateRes.Field.PWM_RatioFreqRes  = 0;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx1.Signal.StateRes.Field.CurAcq            = 0;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx1.Signal.StateRes.Field.SwitchTypeRes     = 0;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx1.Signal.StateRes.Field.ModeRes           = 0;
++
++   VsisrvIpduRxDef.Data.RxA.Id.Mx1.Signal.FaultA.Field.EmergencyStop       = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx1.Signal.FaultA.Field.PwrSupLs            = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx1.Signal.FaultA.Field.PwrSupHs            = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx1.Signal.FaultA.Field.PwrSupMul           = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx1.Signal.FaultA.Field.IgbtL               = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx1.Signal.FaultA.Field.IgbtH               = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx1.Signal.FaultA.Field.ActiveDisIn         = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx1.Signal.FaultA.Field.ActiveDisAc         = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx1.Signal.FaultA.Field.Spare07             = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx1.Signal.FaultA.Field.Spare06             = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx1.Signal.FaultA.Field.Spare05             = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx1.Signal.FaultA.Field.Spare04             = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx1.Signal.FaultA.Field.Spare03             = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx1.Signal.FaultA.Field.Spare02             = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx1.Signal.FaultA.Field.Spare01             = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx1.Signal.FaultA.Field.LossComSpi          = 1;
++
++   VsisrvIpduRxDef.Data.RxA.Id.Mx1.Signal.FaultB.Field.OverCurBat          = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx1.Signal.FaultB.Field.OverTempCtrlBd      = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx1.Signal.FaultB.Field.OverTempIgbt        = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx1.Signal.FaultB.Field.OverTempDrvBd       = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx1.Signal.FaultB.Field.UnderVoltVBat       = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx1.Signal.FaultB.Field.OverVoltVBat        = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx1.Signal.FaultB.Field.IgbtMidPointU       = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx1.Signal.FaultB.Field.IgbtMidPointV       = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx1.Signal.FaultB.Field.IgbtMidPointW       = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx1.Signal.FaultB.Field.WdgCpld             = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx1.Signal.FaultB.Field.OverUnderCurWr      = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx1.Signal.FaultB.Field.OverUnderCurWl      = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx1.Signal.FaultB.Field.OverUnderCurVr      = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx1.Signal.FaultB.Field.OverUnderCurVl      = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx1.Signal.FaultB.Field.OverUnderCurUr      = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx1.Signal.FaultB.Field.OverUnderCurUl      = 1;
++
++   VsisrvIpduRxDef.Data.RxA.Id.Mx1.Signal.FaultC.Field.Spare15             = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx1.Signal.FaultC.Field.Spare14             = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx1.Signal.FaultC.Field.Spare13             = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx1.Signal.FaultC.Field.Spare12             = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx1.Signal.FaultC.Field.Spare11             = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx1.Signal.FaultC.Field.Spare10             = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx1.Signal.FaultC.Field.Spare09             = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx1.Signal.FaultC.Field.Spare08             = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx1.Signal.FaultC.Field.Spare07             = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx1.Signal.FaultC.Field.Spare06             = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx1.Signal.FaultC.Field.Spare05             = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx1.Signal.FaultC.Field.LowSpeedReach       = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx1.Signal.FaultC.Field.Spare03             = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx1.Signal.FaultC.Field.PwmClampFlag        = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx1.Signal.FaultC.Field.PwmParamFlag        = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx1.Signal.FaultC.Field.Spare00             = 1;
++
++   VsisrvIpduRxDef.Data.RxA.Id.Mx1.Signal.Debug64To75_MSB8                 = 0;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx1.Signal.Debug64To75_LSB4                 = 0;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx1.Signal.DcLinkCtrlBd_MSB4                = 0;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx1.Signal.DcLinkCtrlBd_LSB8                = 0;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx1.Signal.DcLinkDrvBd_MSB8                 = 0;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx1.Signal.DcLinkDrvBd_LSB4                 = 0;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx1.Signal.Debug100To111_MSB4               = 0;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx1.Signal.Debug100To111_LSB8               = 0;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx1.Signal.Ctrl                             = 0;
++/*--------------------*/
++/* VSI IPDU RxA Id2   */
++/*--------------------*/
++   VsisrvIpduRxDef.Data.RxA.Id.Mx2.Signal.Id                               = 2;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx2.Signal.StateRes.Field.PWM_RatioFreqRes  = 0;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx2.Signal.StateRes.Field.CurAcq            = 0;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx2.Signal.StateRes.Field.SwitchTypeRes     = 0;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx2.Signal.StateRes.Field.ModeRes           = 0;
++
++   VsisrvIpduRxDef.Data.RxA.Id.Mx2.Signal.FaultA.Field.EmergencyStop       = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx2.Signal.FaultA.Field.PwrSupLs            = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx2.Signal.FaultA.Field.PwrSupHs            = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx2.Signal.FaultA.Field.PwrSupMul           = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx2.Signal.FaultA.Field.IgbtL               = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx2.Signal.FaultA.Field.IgbtH               = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx2.Signal.FaultA.Field.ActiveDisIn         = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx2.Signal.FaultA.Field.ActiveDisAc         = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx2.Signal.FaultA.Field.Spare07             = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx2.Signal.FaultA.Field.Spare06             = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx2.Signal.FaultA.Field.Spare05             = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx2.Signal.FaultA.Field.Spare04             = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx2.Signal.FaultA.Field.Spare03             = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx2.Signal.FaultA.Field.Spare02             = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx2.Signal.FaultA.Field.Spare01             = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx2.Signal.FaultA.Field.LossComSpi          = 1;
++
++   VsisrvIpduRxDef.Data.RxA.Id.Mx2.Signal.FaultB.Field.OverCurBat          = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx2.Signal.FaultB.Field.OverTempCtrlBd      = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx2.Signal.FaultB.Field.OverTempIgbt        = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx2.Signal.FaultB.Field.OverTempDrvBd       = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx2.Signal.FaultB.Field.UnderVoltVBat       = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx2.Signal.FaultB.Field.OverVoltVBat        = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx2.Signal.FaultB.Field.IgbtMidPointU       = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx2.Signal.FaultB.Field.IgbtMidPointV       = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx2.Signal.FaultB.Field.IgbtMidPointW       = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx2.Signal.FaultB.Field.WdgCpld             = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx2.Signal.FaultB.Field.OverUnderCurWr      = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx2.Signal.FaultB.Field.OverUnderCurWl      = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx2.Signal.FaultB.Field.OverUnderCurVr      = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx2.Signal.FaultB.Field.OverUnderCurVl      = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx2.Signal.FaultB.Field.OverUnderCurUr      = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx2.Signal.FaultB.Field.OverUnderCurUl      = 1;
++
++   VsisrvIpduRxDef.Data.RxA.Id.Mx2.Signal.FaultC.Field.Spare15             = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx2.Signal.FaultC.Field.Spare14             = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx2.Signal.FaultC.Field.Spare13             = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx2.Signal.FaultC.Field.Spare12             = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx2.Signal.FaultC.Field.Spare11             = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx2.Signal.FaultC.Field.Spare10             = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx2.Signal.FaultC.Field.Spare09             = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx2.Signal.FaultC.Field.Spare08             = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx2.Signal.FaultC.Field.Spare07             = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx2.Signal.FaultC.Field.Spare06             = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx2.Signal.FaultC.Field.Spare05             = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx2.Signal.FaultC.Field.LowSpeedReach       = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx2.Signal.FaultC.Field.Spare03             = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx2.Signal.FaultC.Field.PwmClampFlag        = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx2.Signal.FaultC.Field.PwmParamFlag        = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx2.Signal.FaultC.Field.Spare00             = 1;
++
++   VsisrvIpduRxDef.Data.RxA.Id.Mx2.Signal.Debug64To75_MSB8                 = 0;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx2.Signal.Debug64To75_LSB4                 = 0;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx2.Signal.TempCtrlBd_MSB4                  = 0;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx2.Signal.TempCtrlBd_LSB8                  = 0;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx2.Signal.M1VFpgaL_MSB8                    = 0;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx2.Signal.M1VFpgaL_LSB4                    = 0;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx2.Signal.Debug100To111_MSB4               = 0;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx2.Signal.Debug100To111_LSB8               = 0;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx2.Signal.Ctrl                             = 0;
++/*--------------------*/
++/* VSI IPDU RxA Id3   */
++/*--------------------*/
++   VsisrvIpduRxDef.Data.RxA.Id.Mx3.Signal.Id                               = 3;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx3.Signal.StateRes.Field.PWM_RatioFreqRes  = 0;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx3.Signal.StateRes.Field.CurAcq            = 0;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx3.Signal.StateRes.Field.SwitchTypeRes     = 0;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx3.Signal.StateRes.Field.ModeRes           = 0;
++
++   VsisrvIpduRxDef.Data.RxA.Id.Mx3.Signal.FaultA.Field.EmergencyStop       = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx3.Signal.FaultA.Field.PwrSupLs            = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx3.Signal.FaultA.Field.PwrSupHs            = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx3.Signal.FaultA.Field.PwrSupMul           = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx3.Signal.FaultA.Field.IgbtL               = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx3.Signal.FaultA.Field.IgbtH               = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx3.Signal.FaultA.Field.ActiveDisIn         = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx3.Signal.FaultA.Field.ActiveDisAc         = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx3.Signal.FaultA.Field.Spare07             = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx3.Signal.FaultA.Field.Spare06             = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx3.Signal.FaultA.Field.Spare05             = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx3.Signal.FaultA.Field.Spare04             = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx3.Signal.FaultA.Field.Spare03             = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx3.Signal.FaultA.Field.Spare02             = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx3.Signal.FaultA.Field.Spare01             = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx3.Signal.FaultA.Field.LossComSpi          = 1;
++
++   VsisrvIpduRxDef.Data.RxA.Id.Mx3.Signal.FaultB.Field.OverCurBat          = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx3.Signal.FaultB.Field.OverTempCtrlBd      = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx3.Signal.FaultB.Field.OverTempIgbt        = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx3.Signal.FaultB.Field.OverTempDrvBd       = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx3.Signal.FaultB.Field.UnderVoltVBat       = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx3.Signal.FaultB.Field.OverVoltVBat        = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx3.Signal.FaultB.Field.IgbtMidPointU       = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx3.Signal.FaultB.Field.IgbtMidPointV       = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx3.Signal.FaultB.Field.IgbtMidPointW       = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx3.Signal.FaultB.Field.WdgCpld             = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx3.Signal.FaultB.Field.OverUnderCurWr      = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx3.Signal.FaultB.Field.OverUnderCurWl      = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx3.Signal.FaultB.Field.OverUnderCurVr      = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx3.Signal.FaultB.Field.OverUnderCurVl      = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx3.Signal.FaultB.Field.OverUnderCurUr      = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx3.Signal.FaultB.Field.OverUnderCurUl      = 1;
++
++   VsisrvIpduRxDef.Data.RxA.Id.Mx3.Signal.FaultC.Field.Spare15             = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx3.Signal.FaultC.Field.Spare14             = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx3.Signal.FaultC.Field.Spare13             = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx3.Signal.FaultC.Field.Spare12             = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx3.Signal.FaultC.Field.Spare11             = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx3.Signal.FaultC.Field.Spare10             = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx3.Signal.FaultC.Field.Spare09             = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx3.Signal.FaultC.Field.Spare08             = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx3.Signal.FaultC.Field.Spare07             = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx3.Signal.FaultC.Field.Spare06             = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx3.Signal.FaultC.Field.Spare05             = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx3.Signal.FaultC.Field.LowSpeedReach       = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx3.Signal.FaultC.Field.Spare03             = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx3.Signal.FaultC.Field.PwmClampFlag        = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx3.Signal.FaultC.Field.PwmParamFlag        = 1;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx3.Signal.FaultC.Field.Spare00             = 1;
++
++   VsisrvIpduRxDef.Data.RxA.Id.Mx3.Signal.Debug64To75_MSB8                 = 0;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx3.Signal.Debug64To75_LSB4                 = 0;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx3.Signal.TempDrvBd_MSB4                   = 0;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx3.Signal.TempDrvBd_LSB8                   = 0;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx3.Signal.M1VFpgaH_MSB8                    = 0;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx3.Signal.M1VFpgaH_LSB4                    = 0;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx3.Signal.Debug100To111_MSB4               = 0;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx3.Signal.Debug100To111_LSB8               = 0;
++   VsisrvIpduRxDef.Data.RxA.Id.Mx3.Signal.Ctrl                             = 0;
++/*------------------------------------*/
++/* VSI IPDU RxS                       */
++/*------------------------------------*/
++   VsisrvIpduRxDef.Data.RxS.Signal.HalfCoilCur_Ul_MSB8                     = 0;
++   VsisrvIpduRxDef.Data.RxS.Signal.HalfCoilCur_Ul_LSB4                     = 0;
++   VsisrvIpduRxDef.Data.RxS.Signal.HalfCoilCur_Ur_MSB4                     = 0;
++   VsisrvIpduRxDef.Data.RxS.Signal.HalfCoilCur_Ur_LSB8                     = 0;
++   VsisrvIpduRxDef.Data.RxS.Signal.HalfCoilCur_Vl_MSB8                     = 0;
++   VsisrvIpduRxDef.Data.RxS.Signal.HalfCoilCur_Vl_LSB4                     = 0;
++   VsisrvIpduRxDef.Data.RxS.Signal.HalfCoilCur_Vr_MSB4                     = 0;
++   VsisrvIpduRxDef.Data.RxS.Signal.HalfCoilCur_Vr_LSB8                     = 0;
++   VsisrvIpduRxDef.Data.RxS.Signal.HalfCoilCur_Wl_MSB8                     = 0;
++   VsisrvIpduRxDef.Data.RxS.Signal.HalfCoilCur_Wl_LSB4                     = 0;
++   VsisrvIpduRxDef.Data.RxS.Signal.HalfCoilCur_Wr_MSB4                     = 0;
++   VsisrvIpduRxDef.Data.RxS.Signal.HalfCoilCur_Wr_LSB8                     = 0;
++   VsisrvIpduRxDef.Data.RxS.Signal.GridVoltU_MSB8                          = 0;
++   VsisrvIpduRxDef.Data.RxS.Signal.GridVoltU_LSB4                          = 0;
++   VsisrvIpduRxDef.Data.RxS.Signal.GridVoltV_MSB4                          = 0;
++   VsisrvIpduRxDef.Data.RxS.Signal.GridVoltV_LSB8                          = 0;
++   VsisrvIpduRxDef.Data.RxS.Signal.GridVoltW_MSB8                          = 0;
++   VsisrvIpduRxDef.Data.RxS.Signal.GridVoltW_LSB4                          = 0;
++   VsisrvIpduRxDef.Data.RxS.Signal.FS_TXA                                  = 0;
++   VsisrvIpduRxDef.Data.RxS.Signal.FS_TXS                                  = 0;
++   VsisrvIpduRxDef.Data.RxS.Signal.FS_SOL                                  = 0;
++   VsisrvIpduRxDef.Data.RxS.Signal.FS_SOE                                  = 0;
++   VsisrvIpduRxDef.Data.RxS.Signal.Ctrl                                    = 0;
++
++   VsisrvIpduTxDef.Data.TxS.Signal.PWM_Ur_MSB4    = 0x3u;
++   VsisrvIpduTxDef.Data.TxS.Signal.PWM_Ur_LSB8    = 0xE8u;
++   VsisrvIpduTxDef.Data.TxS.Signal.PWM_Vr_MSB4    = 0x3u;
++   VsisrvIpduTxDef.Data.TxS.Signal.PWM_Vr_LSB8    = 0xE8u;
++   VsisrvIpduTxDef.Data.TxS.Signal.PWM_Wr_MSB4    = 0x3u;
++   VsisrvIpduTxDef.Data.TxS.Signal.PWM_Wr_LSB8    = 0xE8u;
++   VSISRV_SetSignalPWM_UVW_ON(1u);
++   VSISRV_SetSignalPWM_RatioFreq(0u);
++
++
++
++}
++
++/******************************************************************************/
++/*                                                                            */
++/* !Description : Initialises the VSI IPDU Tx with parameters values Set X    */
++/* !Number      : VSISRV.DEF.2                                                */
++/* !Reference   : V01NT1001945.002                                            */
++/*                                                                            */
++/******************************************************************************/
++/* !LastAuthor  : O. Garot                                                    */
++/******************************************************************************/
++void VSISRV_vidInitIpduTxInitParam(
++   uint16 ParamSet   /* !Comment : parameters values Set X                    */
++                     /* !Range   : VSISRV_VSI_MODE_REQ_INIT_CAL1              */
++                     /*            VSISRV_VSI_MODE_REQ_INIT_CAL2              */
++                     /*            VSISRV_VSI_MODE_REQ_INIT_CAL3              */
++)
++{
++   switch (ParamSet)
++   {
++      case VSISRV_VSI_MODE_REQ_INIT_CAL1:
++         /*------*/
++         VSISRV_SetSignalPwmFreq(            VSISRV_u16Cal1PwmFreqC);
++         VSISRV_SetSignalPwmInitValVl(       VSISRV_u16Cal1PwmInitValVlC);
++         VSISRV_SetSignalOverCurThBat(       VSISRV_u16Cal1OverCurThBatC);
++         VSISRV_SetSignalOverCurThMot(       VSISRV_u16Cal1OverCurThMotC);
++         /*------*/
++         VSISRV_SetSignalPwmDeadtime(        VSISRV_u16Cal1PwmDeadtimeC);
++         VSISRV_SetSignalPwmInitValVr(       VSISRV_u16Cal1PwmInitValVrC);
++         VSISRV_SetSignalOverVoltVbatTh(     VSISRV_u16Cal1OverVoltVbatThC);
++         VSISRV_SetSignalActiveDisDur(       VSISRV_u16Cal1ActiveDisDurC);
++         /*------*/
++         VSISRV_SetSignalM4Id0Spare(         VSISRV_u16Cal1TxaPwmExcFreqC);
++         VSISRV_SetSignalPwmInitValWl(       VSISRV_u16Cal1PwmInitValWlC);
++         VSISRV_SetSignalM4Id2Spare(         VSISRV_u16Cal1M4Id2SpareC);
++         VSISRV_SetSignalSynchroDelay(       VSISRV_u16Cal1SynchroDelayC);
++         /*------*/
++         VSISRV_SetSignalPwmInitValUl(       VSISRV_u16Cal1PwmInitValUlC);
++         VSISRV_SetSignalPwmInitValWr(       VSISRV_u16Cal1PwmInitValWrC);
++         VSISRV_SetSignalM5Id2Spare(         VSISRV_u16Cal1M5Id2SpareC);
++         VSISRV_SetSignalM5Id3Spare(         VSISRV_u16Cal1M5Id3SpareC);
++         /*------*/
++         VSISRV_SetSignalPwmInitValUr(       VSISRV_u16Cal1PwmInitValUrC);
++         VSISRV_SetSignalM6Id1Spare(         VSISRV_u16Cal1M6Id1SpareC);
++         VSISRV_SetSignalM6Id2Spare(         VSISRV_u16Cal1M6Id2SpareC);
++         VSISRV_SetSignalM6Id3Spare(         VSISRV_u16Cal1M6Id3SpareC);
++         /*------*/
++         break;
++
++      case VSISRV_VSI_MODE_REQ_INIT_CAL2:
++         /*------*/
++         VSISRV_SetSignalPwmFreq(            VSISRV_u16Cal2PwmFreqC);
++         VSISRV_SetSignalPwmInitValVl(       VSISRV_u16Cal2PwmInitValVlC);
++         VSISRV_SetSignalOverCurThBat(       VSISRV_u16Cal2OverCurThBatC);
++         VSISRV_SetSignalOverCurThMot(       VSISRV_u16Cal2OverCurThMotC);
++         /*------*/
++         VSISRV_SetSignalPwmDeadtime(        VSISRV_u16Cal2PwmDeadtimeC);
++         VSISRV_SetSignalPwmInitValVr(       VSISRV_u16Cal2PwmInitValVrC);
++         VSISRV_SetSignalOverVoltVbatTh(     VSISRV_u16Cal2OverVoltVbatThC);
++         VSISRV_SetSignalActiveDisDur(       VSISRV_u16Cal2ActiveDisDurC);
++         /*------*/
++         VSISRV_SetSignalM4Id0Spare(         VSISRV_u16Cal2TxaPwmExcFreqC);
++         VSISRV_SetSignalPwmInitValWl(       VSISRV_u16Cal2PwmInitValWlC);
++         VSISRV_SetSignalM4Id2Spare(         VSISRV_u16Cal2M4Id2SpareC);
++         VSISRV_SetSignalSynchroDelay(       VSISRV_u16Cal2SynchroDelayC);
++         /*------*/
++         VSISRV_SetSignalPwmInitValUl(       VSISRV_u16Cal2PwmInitValUlC);
++         VSISRV_SetSignalPwmInitValWr(       VSISRV_u16Cal2PwmInitValWrC);
++         VSISRV_SetSignalM5Id2Spare(         VSISRV_u16Cal2M5Id2SpareC);
++         VSISRV_SetSignalM5Id3Spare(         VSISRV_u16Cal2M5Id3SpareC);
++         /*------*/
++         VSISRV_SetSignalPwmInitValUr(       VSISRV_u16Cal2PwmInitValUrC);
++         VSISRV_SetSignalM6Id1Spare(         VSISRV_u16Cal2M6Id1SpareC);
++         VSISRV_SetSignalM6Id2Spare(         VSISRV_u16Cal2M6Id2SpareC);
++         VSISRV_SetSignalM6Id3Spare(         VSISRV_u16Cal2M6Id3SpareC);
++         /*------*/
++         break;
++
++      case VSISRV_VSI_MODE_REQ_INIT_CAL3:
++         /*------*/
++         VSISRV_SetSignalPwmFreq(            VSISRV_u16Cal3PwmFreqC);
++         VSISRV_SetSignalPwmInitValVl(       VSISRV_u16Cal3PwmInitValVlC);
++         VSISRV_SetSignalOverCurThBat(       VSISRV_u16Cal3OverCurThBatC);
++         VSISRV_SetSignalOverCurThMot(       VSISRV_u16Cal3OverCurThMotC);
++         /*------*/
++         VSISRV_SetSignalPwmDeadtime(        VSISRV_u16Cal3PwmDeadtimeC);
++         VSISRV_SetSignalPwmInitValVr(       VSISRV_u16Cal3PwmInitValVrC);
++         VSISRV_SetSignalOverVoltVbatTh(     VSISRV_u16Cal3OverVoltVbatThC);
++         VSISRV_SetSignalActiveDisDur(       VSISRV_u16Cal3ActiveDisDurC);
++         /*------*/
++         VSISRV_SetSignalM4Id0Spare(         VSISRV_u16Cal3TxaPwmExcFreqC);
++         VSISRV_SetSignalPwmInitValWl(       VSISRV_u16Cal3PwmInitValWlC);
++         VSISRV_SetSignalM4Id2Spare(         VSISRV_u16Cal3M4Id2SpareC);
++         VSISRV_SetSignalSynchroDelay(       VSISRV_u16Cal3SynchroDelayC);
++         /*------*/
++         VSISRV_SetSignalPwmInitValUl(       VSISRV_u16Cal3PwmInitValUlC);
++         VSISRV_SetSignalPwmInitValWr(       VSISRV_u16Cal3PwmInitValWrC);
++         VSISRV_SetSignalM5Id2Spare(         VSISRV_u16Cal3M5Id2SpareC);
++         VSISRV_SetSignalM5Id3Spare(         VSISRV_u16Cal3M5Id3SpareC);
++         /*------*/
++         VSISRV_SetSignalPwmInitValUr(       VSISRV_u16Cal3PwmInitValUrC);
++         VSISRV_SetSignalM6Id1Spare(         VSISRV_u16Cal3M6Id1SpareC);
++         VSISRV_SetSignalM6Id2Spare(         VSISRV_u16Cal3M6Id2SpareC);
++         VSISRV_SetSignalM6Id3Spare(         VSISRV_u16Cal3M6Id3SpareC);
++         /*------*/
++         break;
++
++      default:
++         break;
++   }
++}
++
++#define VSISRV_STOP_SEC_CODE
++#include "NextGen_MemMap.h"
++
++
++/*-------------------------------- end of file -------------------------------*/
+'

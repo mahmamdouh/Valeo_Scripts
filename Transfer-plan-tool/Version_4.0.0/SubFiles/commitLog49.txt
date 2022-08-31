@@ -1,0 +1,3802 @@
+b'commit 79238fa2b9b104f4df90f6dee5e22ba67ecb6293
+Author: Mohammed ANDALOUSSI (JV) <mohammed.andaloussi.jv@valeo.com>
+Date:   Thu Jan 27 18:33:37 2022 +0100
+
+    $100kW-51135$ - Implement IGBT Temp range switch
+    
+                              Rename Ac Over current interface
+                      Fix UT issue for SftyCrc module
+    
+    Change-Id: I7f5e2f4407f6d7029e7c202ef1cdef33658f9333
+
+diff --git a/src/fw_cu/Components/Cmn/MngFlts/ErrDeb/src/ErrDeb_cfg.c b/src/fw_cu/Components/Cmn/MngFlts/ErrDeb/src/ErrDeb_cfg.c
+index ed3498ee6..bc6365aa6 100644
+--- a/src/fw_cu/Components/Cmn/MngFlts/ErrDeb/src/ErrDeb_cfg.c
++++ b/src/fw_cu/Components/Cmn/MngFlts/ErrDeb/src/ErrDeb_cfg.c
+@@ -1899,7 +1899,7 @@ CONST(ErrDeb_FltCfgType, ERRDEB_CONST) ErrDebFltCfg[ERR_DEB_FLT_CNT] =
+    /* INV_HVACI_OC_HWP_U */
+    { 
+       &ErrDebFltData_INV_HVACI_OC_HWP_U, /* Fault data */
+-      &SftyAcEvlnPhaseUOcHWErrMonrSt,/*&SftyAcEvlnOCPhaUErrMonrSt,*/ /* Direct pointer to monitor status */
++      &SftyAcEvlnOCPhaUErrMonrSt,/*&SftyAcEvlnOCPhaUErrMonrSt,*/ /* Direct pointer to monitor status */
+       NULL_PTR, /* Status update function used if MonrStsPtr == NULL_PTR */
+       &SftyAcEvln_OverCurrPhaUReinitMonrData, /* Monitor init function */
+       FCT_ID_LOCK_INV_HVACI_OC_HWP_U, /* FID for fault locking */
+@@ -1909,7 +1909,7 @@ CONST(ErrDeb_FltCfgType, ERRDEB_CONST) ErrDebFltCfg[ERR_DEB_FLT_CNT] =
+    /* INV_HVACI_OC_HWP_V */
+    { 
+       &ErrDebFltData_INV_HVACI_OC_HWP_V, /* Fault data */
+-      &SftyAcEvlnPhaseVOcHWErrMonrSt,/*&SftyAcEvlnOCPhaVErrMonrSt,*/ /* Direct pointer to monitor status */
++      &SftyAcEvlnOCPhaVErrMonrSt,/*&SftyAcEvlnOCPhaVErrMonrSt,*/ /* Direct pointer to monitor status */
+       NULL_PTR, /* Status update function used if MonrStsPtr == NULL_PTR */
+       &SftyAcEvln_OverCurrPhaVReinitMonrData, /* Monitor init function */
+       FCT_ID_LOCK_INV_HVACI_OC_HWP_V, /* FID for fault locking */
+@@ -1919,7 +1919,7 @@ CONST(ErrDeb_FltCfgType, ERRDEB_CONST) ErrDebFltCfg[ERR_DEB_FLT_CNT] =
+    /* INV_HVACI_OC_HWP_W */
+    { 
+       &ErrDebFltData_INV_HVACI_OC_HWP_W, /* Fault data */
+-      &SftyAcEvlnPhaseWOcHWErrMonrSt,/*&SftyAcEvlnOCPhaWErrMonrSt,*/ /* Direct pointer to monitor status */
++      &SftyAcEvlnOCPhaWErrMonrSt,/*&SftyAcEvlnOCPhaWErrMonrSt,*/ /* Direct pointer to monitor status */
+       NULL_PTR, /* Status update function used if MonrStsPtr == NULL_PTR */
+       &SftyAcEvln_OverCurrPhaWReinitMonrData, /* Monitor init function */
+       FCT_ID_LOCK_INV_HVACI_OC_HWP_W, /* FID for fault locking */
+@@ -1931,7 +1931,7 @@ CONST(ErrDeb_FltCfgType, ERRDEB_CONST) ErrDebFltCfg[ERR_DEB_FLT_CNT] =
+       &ErrDebFltData_INV_HVACI_PLAUS_HWP, /* Fault data */
+       &SftyAcEvlnPlausErrMonrSt, /* Direct pointer to monitor status */
+       NULL_PTR, /* Status update function used if MonrStsPtr == NULL_PTR */
+-      NULL_PTR, /* Monitor init function */
++      &SftyAcEvln_PlausReinitMonrData, /* Monitor init function */
+       FCT_ID_LOCK_INV_HVACI_PLAUS_HWP, /* FID for fault locking */
+       DemConf_DemEventParameter_INV_HVACI_PLAUS_HWP, /* Dem paramter configured */
+       DEM_EVENT_ID_INVALID 
+@@ -2471,7 +2471,7 @@ CONST(ErrDeb_FltCfgType, ERRDEB_CONST) ErrDebFltCfg[ERR_DEB_FLT_CNT] =
+       &ErrDebFltData_CAN_E2E_TOUT_CTRL1, /* Fault data */
+       &SftyE2eVcuInvCtrl1TiOutErrMonrSt, /* Direct pointer to monitor status */
+       NULL_PTR, /* Status update function used if MonrStsPtr == NULL_PTR */
+-      NULL_PTR, /* Monitor init function */
++      &SftyE2eRx_ReInitVcuInvCtrl1Data, /* Monitor init function */
+       FCT_ID_LOCK_CAN_E2E_TOUT_CTRL1, /* FID for fault locking */
+       DemConf_DemEventParameter_CAN_E2E_TOUT_CTRL1, /* Dem paramter configured */
+       DEM_EVENT_ID_INVALID 
+@@ -2481,7 +2481,7 @@ CONST(ErrDeb_FltCfgType, ERRDEB_CONST) ErrDebFltCfg[ERR_DEB_FLT_CNT] =
+       &ErrDebFltData_CAN_E2E_COUNTER_CTRL1, /* Fault data */
+       &SftyE2eVcuInvCtrl1CntrErrMonrSt, /* Direct pointer to monitor status */
+       NULL_PTR, /* Status update function used if MonrStsPtr == NULL_PTR */
+-      NULL_PTR, /* Monitor init function */
++      &SftyE2eRx_ReInitVcuInvCtrl1Data, /* Monitor init function */
+       FCT_ID_LOCK_CAN_E2E_COUNTER_CTRL1, /* FID for fault locking */
+       DemConf_DemEventParameter_CAN_E2E_COUNTER_CTRL1, /* Dem paramter configured */
+       DEM_EVENT_ID_INVALID 
+@@ -2491,7 +2491,7 @@ CONST(ErrDeb_FltCfgType, ERRDEB_CONST) ErrDebFltCfg[ERR_DEB_FLT_CNT] =
+       &ErrDebFltData_CAN_E2E_CRC_CTRL1, /* Fault data */
+       &SftyE2eVcuInvCtrl1CrcErrMonrSt, /* Direct pointer to monitor status */
+       NULL_PTR, /* Status update function used if MonrStsPtr == NULL_PTR */
+-      NULL_PTR, /* Monitor init function */
++      &SftyE2eRx_ReInitVcuInvCtrl1Data, /* Monitor init function */
+       FCT_ID_LOCK_CAN_E2E_CRC_CTRL1, /* FID for fault locking */
+       DemConf_DemEventParameter_CAN_E2E_CRC_CTRL1, /* Dem paramter configured */
+       DEM_EVENT_ID_INVALID 
+@@ -2511,7 +2511,7 @@ CONST(ErrDeb_FltCfgType, ERRDEB_CONST) ErrDebFltCfg[ERR_DEB_FLT_CNT] =
+       &ErrDebFltData_CAN_E2E_TOUT_CTRL2, /* Fault data */
+       &SftyE2eVcuInvCtrl2TiOutErrMonrSt, /* Direct pointer to monitor status */
+       NULL_PTR, /* Status update function used if MonrStsPtr == NULL_PTR */
+-      NULL_PTR, /* Monitor init function */
++      &SftyE2eRx_ReInitVcuInvCtrl2Data, /* Monitor init function */
+       FCT_ID_LOCK_CAN_E2E_TOUT_CTRL2, /* FID for fault locking */
+       DemConf_DemEventParameter_CAN_E2E_TOUT_CTRL2, /* Dem paramter configured */
+       DEM_EVENT_ID_INVALID 
+@@ -2521,7 +2521,7 @@ CONST(ErrDeb_FltCfgType, ERRDEB_CONST) ErrDebFltCfg[ERR_DEB_FLT_CNT] =
+       &ErrDebFltData_CAN_E2E_COUNTER_CTRL2, /* Fault data */
+       &SftyE2eVcuInvCtrl2CntrErrMonrSt, /* Direct pointer to monitor status */
+       NULL_PTR, /* Status update function used if MonrStsPtr == NULL_PTR */
+-      NULL_PTR, /* Monitor init function */
++      &SftyE2eRx_ReInitVcuInvCtrl2Data, /* Monitor init function */
+       FCT_ID_LOCK_CAN_E2E_COUNTER_CTRL2, /* FID for fault locking */
+       DemConf_DemEventParameter_CAN_E2E_COUNTER_CTRL2, /* Dem paramter configured */
+       DEM_EVENT_ID_INVALID 
+@@ -2531,7 +2531,7 @@ CONST(ErrDeb_FltCfgType, ERRDEB_CONST) ErrDebFltCfg[ERR_DEB_FLT_CNT] =
+       &ErrDebFltData_CAN_E2E_CRC_CTRL2, /* Fault data */
+       &SftyE2eVcuInvCtrl2CrcErrMonrSt, /* Direct pointer to monitor status */
+       NULL_PTR, /* Status update function used if MonrStsPtr == NULL_PTR */
+-      NULL_PTR, /* Monitor init function */
++      &SftyE2eRx_ReInitVcuInvCtrl2Data, /* Monitor init function */
+       FCT_ID_LOCK_CAN_E2E_CRC_CTRL2, /* FID for fault locking */
+       DemConf_DemEventParameter_CAN_E2E_CRC_CTRL2, /* Dem paramter configured */
+       DEM_EVENT_ID_INVALID 
+@@ -2551,7 +2551,7 @@ CONST(ErrDeb_FltCfgType, ERRDEB_CONST) ErrDebFltCfg[ERR_DEB_FLT_CNT] =
+       &ErrDebFltData_CAN_E2E_TOUT_STAT1, /* Fault data */
+       &SftyE2eVcuInvStat1TiOutErrMonrSt, /* Direct pointer to monitor status */
+       NULL_PTR, /* Status update function used if MonrStsPtr == NULL_PTR */
+-      NULL_PTR, /* Monitor init function */
++      &SftyE2eRx_ReInitVcuInvStat1Data, /* Monitor init function */
+       FCT_ID_LOCK_CAN_E2E_TOUT_STAT1, /* FID for fault locking */
+       DemConf_DemEventParameter_CAN_E2E_TOUT_STAT1, /* Dem paramter configured */
+       DEM_EVENT_ID_INVALID 
+@@ -2561,7 +2561,7 @@ CONST(ErrDeb_FltCfgType, ERRDEB_CONST) ErrDebFltCfg[ERR_DEB_FLT_CNT] =
+       &ErrDebFltData_CAN_E2E_COUNTER_STAT1, /* Fault data */
+       &SftyE2eVcuInvStat1CntrErrMonrSt, /* Direct pointer to monitor status */
+       NULL_PTR, /* Status update function used if MonrStsPtr == NULL_PTR */
+-      NULL_PTR, /* Monitor init function */
++      &SftyE2eRx_ReInitVcuInvStat1Data, /* Monitor init function */
+       FCT_ID_LOCK_CAN_E2E_COUNTER_STAT1, /* FID for fault locking */
+       DemConf_DemEventParameter_CAN_E2E_COUNTER_STAT1, /* Dem paramter configured */
+       DEM_EVENT_ID_INVALID 
+@@ -2571,7 +2571,7 @@ CONST(ErrDeb_FltCfgType, ERRDEB_CONST) ErrDebFltCfg[ERR_DEB_FLT_CNT] =
+       &ErrDebFltData_CAN_E2E_CRC_STAT1, /* Fault data */
+       &SftyE2eVcuInvStat1CrcErrMonrSt, /* Direct pointer to monitor status */
+       NULL_PTR, /* Status update function used if MonrStsPtr == NULL_PTR */
+-      NULL_PTR, /* Monitor init function */
++      &SftyE2eRx_ReInitVcuInvStat1Data, /* Monitor init function */
+       FCT_ID_LOCK_CAN_E2E_CRC_STAT1, /* FID for fault locking */
+       DemConf_DemEventParameter_CAN_E2E_CRC_STAT1, /* Dem paramter configured */
+       DEM_EVENT_ID_INVALID 
+@@ -2600,7 +2600,7 @@ CONST(ErrDeb_FltCfgType, ERRDEB_CONST) ErrDebFltCfg[ERR_DEB_FLT_CNT] =
+    { 
+       &ErrDebFltData_INV_CRASH_SERIOUS, /* Fault data */
+       NULL_PTR, /*&SftyCrashSigMonCrashSeriousErrMonrSt,*/ /* Direct pointer to monitor status */
+-      NULL_PTR, /* Status update function used if MonrStsPtr == NULL_PTR */
++      &SftyErrDeb_HndlCrashFmErr, /* Status update function used if MonrStsPtr == NULL_PTR */
+       NULL_PTR, /* Monitor init function */
+       FCT_ID_LOCK_INV_CRASH_SERIOUS, /* FID for fault locking */
+       DemConf_DemEventParameter_INV_CRASH_SERIOUS, /* Dem paramter configured */
+diff --git a/src/fw_cu/Components/Safety/Sfty_Cmn/SftyCrc/include/SftyCrc.h b/src/fw_cu/Components/Safety/Sfty_Cmn/SftyCrc/include/SftyCrc.h
+index d3b0086f1..0944eb269 100644
+--- a/src/fw_cu/Components/Safety/Sfty_Cmn/SftyCrc/include/SftyCrc.h
++++ b/src/fw_cu/Components/Safety/Sfty_Cmn/SftyCrc/include/SftyCrc.h
+@@ -132,6 +132,28 @@ typedef struct SftyCrc_FceCrcRegType_
+     bittype CRC      : 32;  /*!< CRC Input */
+ }SftyCrc_FceCrcRegType;
+ 
++/*================== [macros] ================================================*/
++
++/*! \\brief FCE CLC Register */
++#define SFTYCRC_FCE_CLC         (*(SftyCrc_FceClcRegType *)0xF0000000UL)
++
++/*! \\brief FCE Input Register 0 */
++#define SFTYCRC_FCE_IR0         (*(SftyCrc_FceInpRegType *)0xF0000100UL)
++
++/*! \\brief FCE Result Register 0 */
++#define SFTYCRC_FCE_RES0        (*(SftyCrc_FceResRegType *)0xF0000104UL)
++
++/*! \\brief FCE Configuration Register 0 */
++#define SFTYCRC_FCE_CFG0        (*(SftyCrc_FceCfgRegType *)0xF0000108UL)
++
++/*! \\brief FCE Status Register 0 */
++#define SFTYCRC_FCE_STS0        (*(SftyCrc_FceStsRegType *)0xF000010CUL)
++
++/*! \\brief FCE Length Register 0 */
++#define SFTYCRC_FCE_LEN0        (*(SftyCrc_FceLenRegType *)0xF0000110UL)
++
++/*! \\brief FCE CRC Register 0 */
++#define SFTYCRC_FCE_CRC0        (*(SftyCrc_FceCrcRegType *)0xF0000118UL)
+ 
+ /*================== [declaration of global functions] ======================*/
+ 
+diff --git a/src/fw_cu/Components/Safety/Sfty_Cmn/SftyCrc/src/SftyCrc.c b/src/fw_cu/Components/Safety/Sfty_Cmn/SftyCrc/src/SftyCrc.c
+index 89efd8614..83c638d43 100644
+--- a/src/fw_cu/Components/Safety/Sfty_Cmn/SftyCrc/src/SftyCrc.c
++++ b/src/fw_cu/Components/Safety/Sfty_Cmn/SftyCrc/src/SftyCrc.c
+@@ -64,26 +64,6 @@
+ 
+ /* --------------------------------------- Register definitions start -----------------------------------------------*/
+ 
+-/*! \\brief FCE CLC Register */
+-#define SFTYCRC_FCE_CLC         (*(SftyCrc_FceClcRegType *)0xF0000000UL)
+-
+-/*! \\brief FCE Input Register 0 */
+-#define SFTYCRC_FCE_IR0         (*(SftyCrc_FceInpRegType *)0xF0000100UL)
+-
+-/*! \\brief FCE Result Register 0 */
+-#define SFTYCRC_FCE_RES0        (*(SftyCrc_FceResRegType *)0xF0000104UL)
+-
+-/*! \\brief FCE Configuration Register 0 */
+-#define SFTYCRC_FCE_CFG0        (*(SftyCrc_FceCfgRegType *)0xF0000108UL)
+-
+-/*! \\brief FCE Status Register 0 */
+-#define SFTYCRC_FCE_STS0        (*(SftyCrc_FceStsRegType *)0xF000010CUL)
+-
+-/*! \\brief FCE Length Register 0 */
+-#define SFTYCRC_FCE_LEN0        (*(SftyCrc_FceLenRegType *)0xF0000110UL)
+-
+-/*! \\brief FCE CRC Register 0 */
+-#define SFTYCRC_FCE_CRC0        (*(SftyCrc_FceCrcRegType *)0xF0000118UL)
+ 
+ /*================== [type definitions] ================================================*/
+ 
+diff --git a/src/fw_cu/Components/Safety/Sfty_Cmn/SftyE2eFpga/include/SftyE2eFpga.h b/src/fw_cu/Components/Safety/Sfty_Cmn/SftyE2eFpga/include/SftyE2eFpga.h
+index 72091dd0a..10644c8bb 100644
+--- a/src/fw_cu/Components/Safety/Sfty_Cmn/SftyE2eFpga/include/SftyE2eFpga.h
++++ b/src/fw_cu/Components/Safety/Sfty_Cmn/SftyE2eFpga/include/SftyE2eFpga.h
+@@ -7,7 +7,7 @@
+ /* Department: Valeo Siemens eAutomotive                                  */
+ /* I DT EC R&D                                                            */
+ /* ********************************************************************** */
+-/* Copyright (C) Valeo Siemens eAutomotive Germany GmbH 2020              */
++/* Copyright (C) Valeo Siemens eAutomotive Germany GmbH 2022              */
+ /* All Rights Reserved. Confidential                                      */
+ /* ********************************************************************** */
+ #ifndef SFTYE2EFPGA_H
+@@ -40,7 +40,7 @@ extern FUNC(void, SFTYE2EFPGA_CODE) SftyE2eFpga_MainFunction(void);
+ /*! @} doxygen end of group definition */
+ #endif
+ /* ********************************************************************** */
+-/* Copyright (C) Valeo Siemens eAutomotive Germany GmbH 2020              */
++/* Copyright (C) Valeo Siemens eAutomotive Germany GmbH 2022              */
+ /* All Rights Reserved. Confidential */
+ /* ********************************************************************** */
+ /*==================[end of file]============================================*/
+diff --git a/src/fw_cu/Components/Safety/Sfty_Cmn/SftyE2eFpga/include/SftyE2eFpga_data.h b/src/fw_cu/Components/Safety/Sfty_Cmn/SftyE2eFpga/include/SftyE2eFpga_data.h
+index 6cc7132ae..6b46a3220 100644
+--- a/src/fw_cu/Components/Safety/Sfty_Cmn/SftyE2eFpga/include/SftyE2eFpga_data.h
++++ b/src/fw_cu/Components/Safety/Sfty_Cmn/SftyE2eFpga/include/SftyE2eFpga_data.h
+@@ -3,7 +3,7 @@
+ /* ADD Container: SftyE2eFpga                                         */
+ /* ADD Container Version:                                             */
+ /* *****************************************************************  */
+-/* Copyright (C) Valeo-Siemens eAutomotive GmbH 2020                  */
++/* Copyright (C) Valeo-Siemens eAutomotive GmbH 2022                  */
+ /* All Rights Reserved. Confidential                                  */
+ /* *****************************************************************  */
+ #ifndef  SFTYE2EFPGA_DATA_H
+@@ -55,6 +55,7 @@ extern VAR(boolean, SFTYE2EFPGA_VAR) SftyE2eFpgaScSpdReadyFltSts;
+ extern VAR(boolean, SFTYE2EFPGA_VAR) SftyE2eFpgaHsGateDrvrFltSts;
+ extern VAR(boolean, SFTYE2EFPGA_VAR) SftyE2eFpgaLoGateDrvrFltSts;
+ extern VAR(boolean, SFTYE2EFPGA_VAR) SftyE2eFpgaMidPointPhaFltSts[SYSDEF_EM_PHA_CNT_MAX];
++extern VAR(boolean, SFTYE2EFPGA_VAR) SftyE2eFpgaIgbtTempRngSwtSts;
+ 
+ #define SFTYE2EFPGA_STOP_SEC_VAR_AREA_CMN_FAST_CLEARED
+ #include "MemMap.h"
+diff --git a/src/fw_cu/Components/Safety/Sfty_Cmn/SftyE2eFpga/src/SftyE2eFpga.c b/src/fw_cu/Components/Safety/Sfty_Cmn/SftyE2eFpga/src/SftyE2eFpga.c
+index 67bddbf78..f4b7c6ee0 100644
+--- a/src/fw_cu/Components/Safety/Sfty_Cmn/SftyE2eFpga/src/SftyE2eFpga.c
++++ b/src/fw_cu/Components/Safety/Sfty_Cmn/SftyE2eFpga/src/SftyE2eFpga.c
+@@ -2637,6 +2637,7 @@ FUNC(void, SFTYE2EFPGA_CODE) SftyE2eFpga_Init(void)
+    SftyE2eFpgaFirstRunDone                               = FALSE;
+    SftyE2eFpgaFirstRunCntrChkDone                        = FALSE;
+    SftyE2eFpgaTiStampChkFirstRun                         = FALSE;
++   SftyE2eFpgaIgbtTempRngSwtSts                          = FALSE;
+    SftyE2eFpgaAlvCntr                                    = 0xFFu;
+    SftyE2eFpgaDmaDataCurrIdx                             = 0x00u;
+    SftyE2eFpgaDmaDataLstIdx                              = 0x00u;
+diff --git a/src/fw_cu/Components/Safety/Sfty_Cmn/SftyE2eFpga/src/SftyE2eFpga_data.c b/src/fw_cu/Components/Safety/Sfty_Cmn/SftyE2eFpga/src/SftyE2eFpga_data.c
+index 6313c3589..f2bf0331e 100644
+--- a/src/fw_cu/Components/Safety/Sfty_Cmn/SftyE2eFpga/src/SftyE2eFpga_data.c
++++ b/src/fw_cu/Components/Safety/Sfty_Cmn/SftyE2eFpga/src/SftyE2eFpga_data.c
+@@ -248,6 +248,15 @@ VAR(boolean, SFTYE2EFPGA_VAR) SftyE2eFpgaLoGateDrvrFltSts;
+ */
+ VAR(boolean, SFTYE2EFPGA_VAR) SftyE2eFpgaMidPointPhaFltSts[SYSDEF_EM_PHA_CNT_MAX];
+ 
++/*
++@@ SYMBOL = SftyE2eFpgaIgbtTempRngSwtSts
++@@ A2L_TYPE = MEASURE
++@@ DATA_TYPE = UBYTE
++@@ DESCRIPTION = "Igbt Temp range switch status"
++@@ GROUP = SftyE2eFpga
++@@ END
++*/
++VAR(boolean, SFTYE2EFPGA_VAR) SftyE2eFpgaIgbtTempRngSwtSts;
+ 
+ #define SFTYE2EFPGA_STOP_SEC_VAR_AREA_CMN_FAST_CLEARED
+ #include "MemMap.h"
+@@ -529,7 +538,7 @@ CONST(uint16, SFTYREPLCMT_CALIB) SftyE2eFpgaReiniCombinedFltOvrdVal = SFTY_E2E_F
+ #include "MemMap.h"
+ /* End: SFTYREPLCMT_STOP_SEC_CALIB_8 (calib) */
+ 
+-/* ***************************[closure]******************************* */
++/* ***************************[closure]***************************** */
+ /* Copyright (C) Valeo-Siemens eAutomotive GmbH 2022                 */
+ /* All Rights Reserved. Confidential                                 */
+ /* ***************************************************************** */
+diff --git a/src/fw_cu/Components/Safety/Sfty_Cmn/SftyErrDeb/include/SftyErrDeb_data.h b/src/fw_cu/Components/Safety/Sfty_Cmn/SftyErrDeb/include/SftyErrDeb_data.h
+index 3c1b31b10..aaaeeda8e 100644
+--- a/src/fw_cu/Components/Safety/Sfty_Cmn/SftyErrDeb/include/SftyErrDeb_data.h
++++ b/src/fw_cu/Components/Safety/Sfty_Cmn/SftyErrDeb/include/SftyErrDeb_data.h
+@@ -16,1581 +16,275 @@
+ #ifndef SW_INTERFACE
+ 
+ 
+-   /* Begin: SFTYACTVDCHACTRLRIF_START_SEC_VAR_AREA_CMN_FAST_INIT_8 (online) */
+-#define SFTYACTVDCHACTRLRIF_START_SEC_VAR_AREA_CMN_FAST_INIT_8
+-#include "MemMap.h"
+-
+-
+-
+-
+-
+-
+ 
++/* ************ P2-100KW ************ */
+ 
+-extern VAR(uint8, SFTYACTVDCHACTRLRIF_VAR) SftyActvDchaCtrlrIfIHiHwCircFltErrMonrSt;
+-   #define SFTYACTVDCHACTRLRIF_STOP_SEC_VAR_AREA_CMN_FAST_INIT_8
++/* Begin: SFTYTEMPEVLN_START_SEC_VAR_AREA_0_FAST_INIT_8 (online) */
++#define SFTYTEMPEVLN_START_SEC_VAR_AREA_0_FAST_INIT_8
+ #include "MemMap.h"
+-/* End: SFTYACTVDCHACTRLRIF_STOP_SEC_VAR_AREA_CMN_FAST_INIT_8 (online) */
+-
+-
+ 
+-
+-
+-
+-   /* Begin: SFTYACTVDCHACTRLRIF_START_SEC_VAR_AREA_CMN_FAST_INIT_8 (online) */
+-#define SFTYACTVDCHACTRLRIF_START_SEC_VAR_AREA_CMN_FAST_INIT_8
++/*! \\cvar Error monitoring state for over DC BUS or capacitor temperature; unit \'-\' */
++extern VAR(uint8, SFTYTEMPEVLN_VAR) SftyTempEvlnDcLinkTempHwpMonrSt;
++#define SFTYTEMPEVLN_STOP_SEC_VAR_AREA_0_FAST_INIT_8
+ #include "MemMap.h"
++/* End: SFTYTEMPEVLN_STOP_SEC_VAR_AREA_0_FAST_INIT_8 (online) */
+ 
+-extern VAR(uint8, SFTYACTVDCHACTRLRIF_VAR) SftyActvDchaCtrlrIfIHiLoHwCircFltErrMonrSt;
+-   #define SFTYACTVDCHACTRLRIF_STOP_SEC_VAR_AREA_CMN_FAST_INIT_8
++/* Begin: SFTYSPDMON_START_SEC_VAR_AREA_CMN_SLOW_INIT_8 (online) */
++#define SFTYSPDMON_START_SEC_VAR_AREA_CMN_SLOW_INIT_8
+ #include "MemMap.h"
+-/* End: SFTYACTVDCHACTRLRIF_STOP_SEC_VAR_AREA_CMN_FAST_INIT_8 (online) */
+-
+-
+-
+ 
+-
+-
+-   /* Begin: SFTYACTVDCHACTRLRIF_START_SEC_VAR_AREA_CMN_FAST_INIT_8 (online) */
+-#define SFTYACTVDCHACTRLRIF_START_SEC_VAR_AREA_CMN_FAST_INIT_8
++extern VAR(uint8, SFTYSPDMON_VAR) SftySpdMonOvrSpdErrMonrSt;
++   #define SFTYSPDMON_STOP_SEC_VAR_AREA_CMN_SLOW_INIT_8
+ #include "MemMap.h"
++/* End: SFTYSPDMON_STOP_SEC_VAR_AREA_CMN_SLOW_INIT_8 (online) */
+ 
+-extern VAR(uint8, SFTYACTVDCHACTRLRIF_VAR) SftyActvDchaCtrlrIfPsP15HvLimUErrMonrSt;
+-   #define SFTYACTVDCHACTRLRIF_STOP_SEC_VAR_AREA_CMN_FAST_INIT_8
++/* Begin: SFTYRSLVROFFSHNDLR_START_SEC_VAR_AREA_CMN_SLOW_INIT_8 (online) */
++#define SFTYRSLVROFFSHNDLR_START_SEC_VAR_AREA_CMN_SLOW_INIT_8
+ #include "MemMap.h"
+-/* End: SFTYACTVDCHACTRLRIF_STOP_SEC_VAR_AREA_CMN_FAST_INIT_8 (online) */
+-
+ 
+-
+-
+-
+-
+-
+-
+-
+-
+-
+-   /* Begin: SFTYDCEVLN_START_SEC_VAR_AREA_2_FAST_INIT_8 (online) */
+-#define SFTYDCEVLN_START_SEC_VAR_AREA_2_FAST_INIT_8
++extern VAR(uint8, SFTYRSLVROFFSHNDLR_VAR) SftyRslvrOffsHndlrRslvrOffsCrcErrMonrSt;
++#define SFTYRSLVROFFSHNDLR_STOP_SEC_VAR_AREA_CMN_SLOW_INIT_8
+ #include "MemMap.h"
++/* End: SFTYRSLVROFFSHNDLR_STOP_SEC_VAR_AREA_CMN_SLOW_INIT_8 (online) */
+ 
+-extern VAR(uint8, SFTYDCEVLN_VAR) SftyDcEvlnAscTogFltCuErrMonrSt;
+-   #define SFTYDCEVLN_STOP_SEC_VAR_AREA_2_FAST_INIT_8
++/* Begin: SFTYRSLVROFFSHNDLR_START_SEC_VAR_AREA_CMN_SLOW_INIT_8 (online) */
++#define SFTYRSLVROFFSHNDLR_START_SEC_VAR_AREA_CMN_SLOW_INIT_8
+ #include "MemMap.h"
+-/* End: SFTYDCEVLN_STOP_SEC_VAR_AREA_2_FAST_INIT_8 (online) */
+ 
+-
+-
+-
+-
+-
+-   /* Begin: SFTYDCEVLN_START_SEC_VAR_AREA_1_FAST_INIT_8 (online) */
+-#define SFTYDCEVLN_START_SEC_VAR_AREA_1_FAST_INIT_8
++extern VAR(uint8, SFTYRSLVROFFSHNDLR_VAR) SftyRslvrOffsHndlrAscIqPlausErrMonrSt;
++   #define SFTYRSLVROFFSHNDLR_STOP_SEC_VAR_AREA_CMN_SLOW_INIT_8
+ #include "MemMap.h"
++/* End: SFTYRSLVROFFSHNDLR_STOP_SEC_VAR_AREA_CMN_SLOW_INIT_8 (online) */
+ 
+-extern VAR(uint8, SFTYDCEVLN_VAR) SftyDcEvlnAscTogFltPuErrMonrSt;
+-   #define SFTYDCEVLN_STOP_SEC_VAR_AREA_1_FAST_INIT_8
++/* Begin: SFTYRSLVROFFSHNDLR_START_SEC_VAR_AREA_CMN_SLOW_INIT_8 (online) */
++#define SFTYRSLVROFFSHNDLR_START_SEC_VAR_AREA_CMN_SLOW_INIT_8
+ #include "MemMap.h"
+-/* End: SFTYDCEVLN_STOP_SEC_VAR_AREA_1_FAST_INIT_8 (online) */
+-
+-
+-
+-
+ 
++extern VAR(uint8, SFTYRSLVROFFSHNDLR_VAR) SftyRslvrOffsHndlrRslvrOffsRngErrMonrSt;
+ 
+-   /* Begin: SFTYDCEVLN_START_SEC_VAR_AREA_2_FAST_INIT_8 (online) */
+-#define SFTYDCEVLN_START_SEC_VAR_AREA_2_FAST_INIT_8
++#define SFTYRSLVROFFSHNDLR_STOP_SEC_VAR_AREA_CMN_SLOW_INIT_8
+ #include "MemMap.h"
++/* End: SFTYRSLVROFFSHNDLR_STOP_SEC_VAR_AREA_CMN_SLOW_INIT_8 (online) */
+ 
+-extern VAR(uint8, SFTYDCEVLN_VAR) SftyDcEvlnDsAdcHvDcRngHiErrMonrSt;
+-   #define SFTYDCEVLN_STOP_SEC_VAR_AREA_2_FAST_INIT_8
++/* Begin: SFTYHVINTERLOCK_START_SEC_VAR_AREA_2_SLOW_INIT_8 (online) */
++#define SFTYHVINTERLOCK_START_SEC_VAR_AREA_2_SLOW_INIT_8
+ #include "MemMap.h"
+-/* End: SFTYDCEVLN_STOP_SEC_VAR_AREA_2_FAST_INIT_8 (online) */
+ 
++extern VAR(uint8, SftyHVINTERLOCK_VAR) SftyHvInterlockRngHiErrMonrSt;
+ 
++extern VAR(uint8, SftyHVINTERLOCK_VAR) SftyHvInterlockRngLoErrMonrSt;
+ 
++extern VAR(uint8, SftyHVINTERLOCK_VAR) SftyHvInterlockPasErrMonrSt;
+ 
++extern VAR(uint8, SftyHVINTERLOCK_VAR) SftyHvInterlockActvErrMonrSt;
+ 
++extern VAR(uint8, SftyHVINTERLOCK_VAR) SftyHvInterlockTiErrMonrSt;
+ 
+-   /* Begin: SFTYDCEVLN_START_SEC_VAR_AREA_2_FAST_INIT_8 (online) */
+-#define SFTYDCEVLN_START_SEC_VAR_AREA_2_FAST_INIT_8
++#define SFTYHVINTERLOCK_STOP_SEC_VAR_AREA_2_SLOW_INIT_8
+ #include "MemMap.h"
++/* End: SFTYHVINTERLOCK_STOP_SEC_VAR_AREA_2_SLOW_INIT_8 (online) */
+ 
+-extern VAR(uint8, SFTYDCEVLN_VAR) SftyDcEvlnDsAdcHvDcTiStampErrMonrSt;
+-   #define SFTYDCEVLN_STOP_SEC_VAR_AREA_2_FAST_INIT_8
++/* Begin: SFTYCRASHSIGMON_START_SEC_VAR_AREA_1_SLOW_INIT_8 (online) */
++#define SFTYCRASHSIGMON_START_SEC_VAR_AREA_1_SLOW_INIT_8
+ #include "MemMap.h"
+-/* End: SFTYDCEVLN_STOP_SEC_VAR_AREA_2_FAST_INIT_8 (online) */
+-
+-
+ 
++/*! \\cvar Crash HW signal range high evaluation status; unit \'-\' */
++extern VAR(uint8, SFTYCRASHSIGMON_VAR) SftyCrashSigMonRngHiErrMonrSt;
++/*! \\cvar TimeStamp error monitor status; unit \'-\' */
++extern VAR(uint8, SFTYCRASHSIGMON_VAR) SftyCrashSigMonTiStampErrMonrSt;
+ 
++extern VAR(uint8, SFTYCRASHSIGMON_VAR) SftyCrashSigMonCANErrMonrSt;
+ 
++extern VAR(uint8, SFTYCRASHSIGMON_VAR) SftyCrashSigMonAnErrMonrSt;
+ 
+-   /* Begin: SFTYDCEVLN_START_SEC_VAR_AREA_1_SLOW_INIT_8 (online) */
+-#define SFTYDCEVLN_START_SEC_VAR_AREA_1_SLOW_INIT_8
++#define SFTYCRASHSIGMON_STOP_SEC_VAR_AREA_1_SLOW_INIT_8
+ #include "MemMap.h"
++/* End: SFTYCRASHSIGMON_STOP_SEC_VAR_AREA_1_SLOW_INIT_8 (online) */
+ 
+-extern VAR(uint8, SFTYDCEVLN_VAR) SftyDcEvlnExtAdcElecHiErrMonrSt;
+-   #define SFTYDCEVLN_STOP_SEC_VAR_AREA_1_SLOW_INIT_8
++/* Begin: SFTYE2E_START_SEC_VAR_AREA_CMN_FAST_INIT_8 (online) */
++#define SFTYE2E_START_SEC_VAR_AREA_CMN_FAST_INIT_8
+ #include "MemMap.h"
+-/* End: SFTYDCEVLN_STOP_SEC_VAR_AREA_1_SLOW_INIT_8 (online) */
+-
+-
+-
+ 
+-
+-
+-   /* Begin: SFTYDCEVLN_START_SEC_VAR_AREA_1_SLOW_INIT_8 (online) */
+-#define SFTYDCEVLN_START_SEC_VAR_AREA_1_SLOW_INIT_8
++extern VAR(uint8, SFTYE2E_VAR) SftyE2eVcuInvStat1CrcErrMonrSt;
++#define SFTYE2E_STOP_SEC_VAR_AREA_CMN_FAST_INIT_8
+ #include "MemMap.h"
++/* End: SFTYE2E_STOP_SEC_VAR_AREA_CMN_FAST_IIT_N8 (online) */
+ 
+-extern VAR(uint8, SFTYDCEVLN_VAR) SftyDcEvlnExtAdcRngHiErrMonrSt;
+-   #define SFTYDCEVLN_STOP_SEC_VAR_AREA_1_SLOW_INIT_8
++/* Begin: SFTYE2E_START_SEC_VAR_AREA_CMN_FAST_INIT_8 (online) */
++#define SFTYE2E_START_SEC_VAR_AREA_CMN_FAST_INIT_8
+ #include "MemMap.h"
+-/* End: SFTYDCEVLN_STOP_SEC_VAR_AREA_1_SLOW_INIT_8 (online) */
+-
+-
+-
+-
+-
+ 
+-   /* Begin: SFTYDCEVLN_START_SEC_VAR_AREA_CMN_SLOW_INIT_8 (online) */
+-#define SFTYDCEVLN_START_SEC_VAR_AREA_CMN_SLOW_INIT_8
++extern VAR(uint8, SFTYE2E_VAR) SftyE2eVcuInvStat1CntrErrMonrSt;
++#define SFTYE2E_STOP_SEC_VAR_AREA_CMN_FAST_INIT_8
+ #include "MemMap.h"
++/* End: SFTYE2E_STOP_SEC_VAR_AREA_CMN_FAST_IIT_N8 (online) */
+ 
+-extern VAR(uint8, SFTYDCEVLN_VAR) SftyDcEvlnKl15PlausErrMonrSt;
+-   #define SFTYDCEVLN_STOP_SEC_VAR_AREA_CMN_SLOW_INIT_8
++/* Begin: SFTYE2E_START_SEC_VAR_AREA_CMN_FAST_INIT_8 (online) */
++#define SFTYE2E_START_SEC_VAR_AREA_CMN_FAST_INIT_8
+ #include "MemMap.h"
+-/* End: SFTYDCEVLN_STOP_SEC_VAR_AREA_CMN_SLOW_INIT_8 (online) */
+-
+-
+-
+ 
+-
+-
+-   /* Begin: SFTYDCEVLN_START_SEC_VAR_AREA_1_SLOW_INIT_8 (online) */
+-#define SFTYDCEVLN_START_SEC_VAR_AREA_1_SLOW_INIT_8
++extern VAR(uint8, SFTYE2E_VAR) SftyE2eVcuInvStat1TiOutErrMonrSt;
++#define SFTYE2E_STOP_SEC_VAR_AREA_CMN_FAST_INIT_8
+ #include "MemMap.h"
++/* End: SFTYE2E_STOP_SEC_VAR_AREA_CMN_FAST_IIT_N8 (online) */
+ 
+-extern VAR(uint8, SFTYDCEVLN_VAR) SftyDcEvlnKl15RngHiErrMonrSt;
+-   #define SFTYDCEVLN_STOP_SEC_VAR_AREA_1_SLOW_INIT_8
++/* Begin: SFTYE2E_START_SEC_VAR_AREA_CMN_FAST_INIT_8 (online) */
++#define SFTYE2E_START_SEC_VAR_AREA_CMN_FAST_INIT_8
+ #include "MemMap.h"
+-/* End: SFTYDCEVLN_STOP_SEC_VAR_AREA_1_SLOW_INIT_8 (online) */
+-
+ 
+-
+-
+-
+-
+-   /* Begin: SFTYDCEVLN_START_SEC_VAR_AREA_1_SLOW_INIT_8 (online) */
+-#define SFTYDCEVLN_START_SEC_VAR_AREA_1_SLOW_INIT_8
++extern VAR(uint8, SFTYE2E_VAR) SftyE2eVcuInvCtrl2CrcErrMonrSt;
++#define SFTYE2E_STOP_SEC_VAR_AREA_CMN_FAST_INIT_8
+ #include "MemMap.h"
++/* End: SFTYE2E_STOP_SEC_VAR_AREA_CMN_FAST_IIT_N8 (online) */
+ 
+-extern VAR(uint8, SFTYDCEVLN_VAR) SftyDcEvlnKl15TiStmpErrMonrSt;
+-   #define SFTYDCEVLN_STOP_SEC_VAR_AREA_1_SLOW_INIT_8
++/* Begin: SFTYE2E_START_SEC_VAR_AREA_CMN_FAST_INIT_8 (online) */
++#define SFTYE2E_START_SEC_VAR_AREA_CMN_FAST_INIT_8
+ #include "MemMap.h"
+-/* End: SFTYDCEVLN_STOP_SEC_VAR_AREA_1_SLOW_INIT_8 (online) */
+-
+-
+-
+ 
+-
+-
+-   /* Begin: SFTYDCEVLN_START_SEC_VAR_AREA_2_SLOW_INIT_8 (online) */
+-#define SFTYDCEVLN_START_SEC_VAR_AREA_2_SLOW_INIT_8
++extern VAR(uint8, SFTYE2E_VAR) SftyE2eVcuInvCtrl2CntrErrMonrSt;
++#define SFTYE2E_STOP_SEC_VAR_AREA_CMN_FAST_INIT_8
+ #include "MemMap.h"
++/* End: SFTYE2E_STOP_SEC_VAR_AREA_CMN_FAST_IIT_N8 (online) */
+ 
+-extern VAR(uint8, SFTYDCEVLN_VAR) SftyDcEvlnKl30BElecHiErrMonrSt;
+-   #define SFTYDCEVLN_STOP_SEC_VAR_AREA_2_SLOW_INIT_8
++/* Begin: SFTYE2E_START_SEC_VAR_AREA_CMN_FAST_INIT_8 (online) */
++#define SFTYE2E_START_SEC_VAR_AREA_CMN_FAST_INIT_8
+ #include "MemMap.h"
+-/* End: SFTYDCEVLN_STOP_SEC_VAR_AREA_2_SLOW_INIT_8 (online) */
+-
+-
+-
+-
+-
+ 
+-   /* Begin: SFTYDCEVLN_START_SEC_VAR_AREA_2_SLOW_INIT_8 (online) */
+-#define SFTYDCEVLN_START_SEC_VAR_AREA_2_SLOW_INIT_8
++extern VAR(uint8, SFTYE2E_VAR) SftyE2eVcuInvCtrl2TiOutErrMonrSt;
++#define SFTYE2E_STOP_SEC_VAR_AREA_CMN_FAST_INIT_8
+ #include "MemMap.h"
++/* End: SFTYE2E_STOP_SEC_VAR_AREA_CMN_FAST_IIT_N8 (online) */
+ 
+-extern VAR(uint8, SFTYDCEVLN_VAR) SftyDcEvlnKl30BElecLoErrMonrSt;
+-   #define SFTYDCEVLN_STOP_SEC_VAR_AREA_2_SLOW_INIT_8
++/* Begin: SFTYE2E_START_SEC_VAR_AREA_CMN_FAST_INIT_8 (online) */
++#define SFTYE2E_START_SEC_VAR_AREA_CMN_FAST_INIT_8
+ #include "MemMap.h"
+-/* End: SFTYDCEVLN_STOP_SEC_VAR_AREA_2_SLOW_INIT_8 (online) */
+-
+-
+-
+ 
+-
+-
+-   /* Begin: SFTYDCEVLN_START_SEC_VAR_AREA_2_SLOW_INIT_8 (online) */
+-#define SFTYDCEVLN_START_SEC_VAR_AREA_2_SLOW_INIT_8
++extern VAR(uint8, SFTYE2E_VAR) SftyE2eVcuInvCtrl1CrcErrMonrSt;
++#define SFTYE2E_STOP_SEC_VAR_AREA_CMN_FAST_INIT_8
+ #include "MemMap.h"
++/* End: SFTYE2E_STOP_SEC_VAR_AREA_CMN_FAST_IIT_N8 (online) */
+ 
+-extern VAR(uint8, SFTYDCEVLN_VAR) SftyDcEvlnKl30BRngHiErrMonrSt;
+-   #define SFTYDCEVLN_STOP_SEC_VAR_AREA_2_SLOW_INIT_8
++/* Begin: SFTYE2E_START_SEC_VAR_AREA_CMN_FAST_INIT_8 (online) */
++#define SFTYE2E_START_SEC_VAR_AREA_CMN_FAST_INIT_8
+ #include "MemMap.h"
+-/* End: SFTYDCEVLN_STOP_SEC_VAR_AREA_2_SLOW_INIT_8 (online) */
+-
+ 
+-
+-
+-
+-
+-   /* Begin: SFTYDCEVLN_START_SEC_VAR_AREA_2_SLOW_INIT_8 (online) */
+-#define SFTYDCEVLN_START_SEC_VAR_AREA_2_SLOW_INIT_8
++extern VAR(uint8, SFTYE2E_VAR) SftyE2eVcuInvCtrl1CntrErrMonrSt;
++#define SFTYE2E_STOP_SEC_VAR_AREA_CMN_FAST_INIT_8
+ #include "MemMap.h"
++/* End: SFTYE2E_STOP_SEC_VAR_AREA_CMN_FAST_IIT_N8 (online) */
+ 
+-extern VAR(uint8, SFTYDCEVLN_VAR) SftyDcEvlnKl30BRngLoErrMonrSt;
+-   #define SFTYDCEVLN_STOP_SEC_VAR_AREA_2_SLOW_INIT_8
++/* Begin: SFTYE2E_START_SEC_VAR_AREA_CMN_FAST_INIT_8 (online) */
++#define SFTYE2E_START_SEC_VAR_AREA_CMN_FAST_INIT_8
+ #include "MemMap.h"
+-/* End: SFTYDCEVLN_STOP_SEC_VAR_AREA_2_SLOW_INIT_8 (online) */
+-
+-
+-
+ 
+-
+-
+-   /* Begin: SFTYDCEVLN_START_SEC_VAR_AREA_1_FAST_INIT_8 (online) */
+-#define SFTYDCEVLN_START_SEC_VAR_AREA_1_FAST_INIT_8
++extern VAR(uint8, SFTYE2E_VAR) SftyE2eVcuInvCtrl1TiOutErrMonrSt;
++#define SFTYE2E_STOP_SEC_VAR_AREA_CMN_FAST_INIT_8
+ #include "MemMap.h"
++/* End: SFTYE2E_STOP_SEC_VAR_AREA_CMN_FAST_IIT_N8 (online) */
+ 
+-extern VAR(uint8, SFTYDCEVLN_VAR) SftyDcEvlnKl30ElecHiErrMonrSt;
+-   #define SFTYDCEVLN_STOP_SEC_VAR_AREA_1_FAST_INIT_8
++/* Begin: SFTYTEMPEVLN_START_SEC_VAR_AREA_0_FAST_INIT_8 (online) */
++#define SFTYTEMPEVLN_START_SEC_VAR_AREA_0_FAST_INIT_8
+ #include "MemMap.h"
+-/* End: SFTYDCEVLN_STOP_SEC_VAR_AREA_1_FAST_INIT_8 (online) */
+-
+-
+-
+ 
+-
+-
+-   /* Begin: SFTYDCEVLN_START_SEC_VAR_AREA_1_FAST_INIT_8 (online) */
+-#define SFTYDCEVLN_START_SEC_VAR_AREA_1_FAST_INIT_8
++extern VAR(uint8, SFTYTEMPEVLN_VAR) SftyTempEvlnMotStatorTempStuckErrMonrSt;
++#define SFTYTEMPEVLN_STOP_SEC_VAR_AREA_0_FAST_INIT_8
+ #include "MemMap.h"
++/* End: SFTYTEMPEVLN_STOP_SEC_VAR_AREA_0_FAST_INIT_8 (online) */
+ 
+-extern VAR(uint8, SFTYDCEVLN_VAR) SftyDcEvlnKl30ElecLoErrMonrSt;
+-   #define SFTYDCEVLN_STOP_SEC_VAR_AREA_1_FAST_INIT_8
++/* Begin: SFTYTEMPEVLN_START_SEC_VAR_AREA_0_FAST_INIT_8 (online) */
++#define SFTYTEMPEVLN_START_SEC_VAR_AREA_0_FAST_INIT_8
+ #include "MemMap.h"
+-/* End: SFTYDCEVLN_STOP_SEC_VAR_AREA_1_FAST_INIT_8 (online) */
+-
+-
+-
+ 
+-
+-
+-   /* Begin: SFTYDCEVLN_START_SEC_VAR_AREA_1_FAST_INIT_8 (online) */
+-#define SFTYDCEVLN_START_SEC_VAR_AREA_1_FAST_INIT_8
++extern VAR(uint8, SFTYTEMPEVLN_VAR) SftyTempEvlnMotStatorTempRngLoErrMonrSt;
++#define SFTYTEMPEVLN_STOP_SEC_VAR_AREA_0_FAST_INIT_8
+ #include "MemMap.h"
++/* End: SFTYTEMPEVLN_STOP_SEC_VAR_AREA_0_FAST_INIT_8 (online) */
+ 
+-extern VAR(uint8, SFTYDCEVLN_VAR) SftyDcEvlnKl30PrMeasATiStmpErrMonrSt;
+-   #define SFTYDCEVLN_STOP_SEC_VAR_AREA_1_FAST_INIT_8
++/* Begin: SFTYTEMPEVLN_START_SEC_VAR_AREA_0_FAST_INIT_8 (online) */
++#define SFTYTEMPEVLN_START_SEC_VAR_AREA_0_FAST_INIT_8
+ #include "MemMap.h"
+-/* End: SFTYDCEVLN_STOP_SEC_VAR_AREA_1_FAST_INIT_8 (online) */
+-
+-
+-
+ 
+-
+-
+-   /* Begin: SFTYDCEVLN_START_SEC_VAR_AREA_2_SLOW_INIT_8 (online) */
+-#define SFTYDCEVLN_START_SEC_VAR_AREA_2_SLOW_INIT_8
++extern VAR(uint8, SFTYTEMPEVLN_VAR) SftyTempEvlnMotStatorTempRngHiErrMonrSt;
++#define SFTYTEMPEVLN_STOP_SEC_VAR_AREA_0_FAST_INIT_8
+ #include "MemMap.h"
++/* End: SFTYTEMPEVLN_STOP_SEC_VAR_AREA_0_FAST_INIT_8 (online) */
+ 
+-extern VAR(uint8, SFTYDCEVLN_VAR) SftyDcEvlnKl30PrMeasBTiStmpErrMonrSt;
+-   #define SFTYDCEVLN_STOP_SEC_VAR_AREA_2_SLOW_INIT_8
++/* Begin: SFTYRSLVREVLN_START_SEC_VAR_AREA_CMN_FAST_INIT_8 (online) */
++#define SFTYRSLVREVLN_START_SEC_VAR_AREA_CMN_FAST_INIT_8
+ #include "MemMap.h"
+-/* End: SFTYDCEVLN_STOP_SEC_VAR_AREA_2_SLOW_INIT_8 (online) */
+-
+-
+-
+-
+ 
++extern VAR(uint8, SFTYRSLVREVLN_VAR) SftyInvActrMidPointPhaWErrMonrSt;
+ 
+-   /* Begin: SFTYDCEVLN_START_SEC_VAR_AREA_1_FAST_INIT_8 (online) */
+-#define SFTYDCEVLN_START_SEC_VAR_AREA_1_FAST_INIT_8
++#define SFTYRSLVREVLN_STOP_SEC_VAR_AREA_CMN_FAST_INIT_8
+ #include "MemMap.h"
++/* End: SFTYRSLVREVLN_STOP_SEC_VAR_AREA_CMN_FAST_INIT_8 (online) */
+ 
+-extern VAR(uint8, SFTYDCEVLN_VAR) SftyDcEvlnKl30RngHiErrMonrSt;
+-   #define SFTYDCEVLN_STOP_SEC_VAR_AREA_1_FAST_INIT_8
++/* Begin: SFTYRSLVREVLN_START_SEC_VAR_AREA_CMN_FAST_INIT_8 (online) */
++#define SFTYRSLVREVLN_START_SEC_VAR_AREA_CMN_FAST_INIT_8
+ #include "MemMap.h"
+-/* End: SFTYDCEVLN_STOP_SEC_VAR_AREA_1_FAST_INIT_8 (online) */
+-
+-
+-
+-
+ 
++extern VAR(uint8, SFTYRSLVREVLN_VAR) SftyInvActrMidPointPhaVErrMonrSt;
+ 
+-   /* Begin: SFTYDCEVLN_START_SEC_VAR_AREA_1_FAST_INIT_8 (online) */
+-#define SFTYDCEVLN_START_SEC_VAR_AREA_1_FAST_INIT_8
++#define SFTYRSLVREVLN_STOP_SEC_VAR_AREA_CMN_FAST_INIT_8
+ #include "MemMap.h"
++/* End: SFTYRSLVREVLN_STOP_SEC_VAR_AREA_CMN_FAST_INIT_8 (online) */
+ 
+-extern VAR(uint8, SFTYDCEVLN_VAR) SftyDcEvlnKl30RngLoErrMonrSt;
+-   #define SFTYDCEVLN_STOP_SEC_VAR_AREA_1_FAST_INIT_8
++/* Begin: SFTYRSLVREVLN_START_SEC_VAR_AREA_CMN_FAST_INIT_8 (online) */
++#define SFTYRSLVREVLN_START_SEC_VAR_AREA_CMN_FAST_INIT_8
+ #include "MemMap.h"
+-/* End: SFTYDCEVLN_STOP_SEC_VAR_AREA_1_FAST_INIT_8 (online) */
+-
+-
+-
+-
+ 
++extern VAR(uint8, SFTYRSLVREVLN_VAR) SftyInvActrMidPointPhaUErrMonrSt;
+ 
+-   /* Begin: SFTYDCEVLN_START_SEC_VAR_AREA_1_FAST_INIT_8 (online) */
+-#define SFTYDCEVLN_START_SEC_VAR_AREA_1_FAST_INIT_8
++#define SFTYRSLVREVLN_STOP_SEC_VAR_AREA_CMN_FAST_INIT_8
+ #include "MemMap.h"
++/* End: SFTYRSLVREVLN_STOP_SEC_VAR_AREA_CMN_FAST_INIT_8 (online) */
+ 
+-extern VAR(uint8, SFTYDCEVLN_VAR) SftyDcEvlnKl30RngOvCanErrMonrSt;
+-   #define SFTYDCEVLN_STOP_SEC_VAR_AREA_1_FAST_INIT_8
++/* Begin: SFTYRSLVREVLN_START_SEC_VAR_AREA_CMN_FAST_INIT_8 (online) */
++#define SFTYRSLVREVLN_START_SEC_VAR_AREA_CMN_FAST_INIT_8
+ #include "MemMap.h"
+-/* End: SFTYDCEVLN_STOP_SEC_VAR_AREA_1_FAST_INIT_8 (online) */
+ 
+-
+-
+-
+-
+-
+-   /* Begin: SFTYDCEVLN_START_SEC_VAR_AREA_1_FAST_INIT_8 (online) */
+-#define SFTYDCEVLN_START_SEC_VAR_AREA_1_FAST_INIT_8
+-#include "MemMap.h"
+-
+-extern VAR(uint8, SFTYDCEVLN_VAR) SftyDcEvlnKl30RngOvErrMonrSt;
+-   #define SFTYDCEVLN_STOP_SEC_VAR_AREA_1_FAST_INIT_8
+-#include "MemMap.h"
+-/* End: SFTYDCEVLN_STOP_SEC_VAR_AREA_1_FAST_INIT_8 (online) */
+-
+-
+-
+-
+-
+-
+-   /* Begin: SFTYDCEVLN_START_SEC_VAR_AREA_CMN_SLOW_INIT_8 (online) */
+-#define SFTYDCEVLN_START_SEC_VAR_AREA_CMN_SLOW_INIT_8
+-#include "MemMap.h"
+-
+-extern VAR(uint8, SFTYDCEVLN_VAR) SftyDcEvlnKl30RngPlausErrMonrSt;
+-   #define SFTYDCEVLN_STOP_SEC_VAR_AREA_CMN_SLOW_INIT_8
+-#include "MemMap.h"
+-/* End: SFTYDCEVLN_STOP_SEC_VAR_AREA_CMN_SLOW_INIT_8 (online) */
+-
+-
+-
+-
+-
+-
+-   /* Begin: SFTYDCEVLN_START_SEC_VAR_AREA_1_FAST_INIT_8 (online) */
+-#define SFTYDCEVLN_START_SEC_VAR_AREA_1_FAST_INIT_8
+-#include "MemMap.h"
+-
+-extern VAR(uint8, SFTYDCEVLN_VAR) SftyDcEvlnKl30RngUvCanErrMonrSt;
+-   #define SFTYDCEVLN_STOP_SEC_VAR_AREA_1_FAST_INIT_8
+-#include "MemMap.h"
+-/* End: SFTYDCEVLN_STOP_SEC_VAR_AREA_1_FAST_INIT_8 (online) */
+-
+-
+-
+-
+-
+-
+-   /* Begin: SFTYDCEVLN_START_SEC_VAR_AREA_1_FAST_INIT_8 (online) */
+-#define SFTYDCEVLN_START_SEC_VAR_AREA_1_FAST_INIT_8
+-#include "MemMap.h"
+-
+-extern VAR(uint8, SFTYDCEVLN_VAR) SftyDcEvlnKl30RngUvErrMonrSt;
+-   #define SFTYDCEVLN_STOP_SEC_VAR_AREA_1_FAST_INIT_8
+-#include "MemMap.h"
+-/* End: SFTYDCEVLN_STOP_SEC_VAR_AREA_1_FAST_INIT_8 (online) */
+-
+-
+-
+-
+-
+-
+-   /* Begin: SFTYDCEVLN_START_SEC_VAR_AREA_1_FAST_INIT_8 (online) */
+-#define SFTYDCEVLN_START_SEC_VAR_AREA_1_FAST_INIT_8
+-#include "MemMap.h"
+-
+-extern VAR(uint8, SFTYDCEVLN_VAR) SftyDcEvlnKl30RngUvHwpErrMonrSt;
+-   #define SFTYDCEVLN_STOP_SEC_VAR_AREA_1_FAST_INIT_8
+-#include "MemMap.h"
+-/* End: SFTYDCEVLN_STOP_SEC_VAR_AREA_1_FAST_INIT_8 (online) */
+-
+-
+-
+-
+-
+-
+-   /* Begin: SFTYDCEVLN_START_SEC_VAR_AREA_1_SLOW_INIT_8 (online) */
+-#define SFTYDCEVLN_START_SEC_VAR_AREA_1_SLOW_INIT_8
+-#include "MemMap.h"
+-
+-extern VAR(uint8, SFTYDCEVLN_VAR) SftyDcEvlnP14HvLvErrMonrSt;
+-   #define SFTYDCEVLN_STOP_SEC_VAR_AREA_1_SLOW_INIT_8
+-#include "MemMap.h"
+-/* End: SFTYDCEVLN_STOP_SEC_VAR_AREA_1_SLOW_INIT_8 (online) */
+-
+-
+-
+-
+-
+-
+-   /* Begin: SFTYDCEVLN_START_SEC_VAR_AREA_1_SLOW_INIT_8 (online) */
+-#define SFTYDCEVLN_START_SEC_VAR_AREA_1_SLOW_INIT_8
+-#include "MemMap.h"
+-
+-extern VAR(uint8, SFTYDCEVLN_VAR) SftyDcEvlnP14HvLvTiStampErrMonrSt;
+-   #define SFTYDCEVLN_STOP_SEC_VAR_AREA_1_SLOW_INIT_8
+-#include "MemMap.h"
+-/* End: SFTYDCEVLN_STOP_SEC_VAR_AREA_1_SLOW_INIT_8 (online) */
+-
+-
+-
+-
+-
+-
+-   /* Begin: SFTYDCEVLN_START_SEC_VAR_AREA_1_SLOW_INIT_8 (online) */
+-#define SFTYDCEVLN_START_SEC_VAR_AREA_1_SLOW_INIT_8
+-#include "MemMap.h"
+-
+-extern VAR(uint8, SFTYDCEVLN_VAR) SftyDcEvlnP15FltErrMonrSt;
+-   #define SFTYDCEVLN_STOP_SEC_VAR_AREA_1_SLOW_INIT_8
+-#include "MemMap.h"
+-/* End: SFTYDCEVLN_STOP_SEC_VAR_AREA_1_SLOW_INIT_8 (online) */
+-
+-
+-
+-
+-
+-
+-   /* Begin: SFTYDCEVLN_START_SEC_VAR_AREA_1_SLOW_INIT_8 (online) */
+-#define SFTYDCEVLN_START_SEC_VAR_AREA_1_SLOW_INIT_8
+-#include "MemMap.h"
+-
+-extern VAR(uint8, SFTYDCEVLN_VAR) SftyDcEvlnP15GrdtErrMonrSt;
+-   #define SFTYDCEVLN_STOP_SEC_VAR_AREA_1_SLOW_INIT_8
+-#include "MemMap.h"
+-/* End: SFTYDCEVLN_STOP_SEC_VAR_AREA_1_SLOW_INIT_8 (online) */
+-
+-
+-
+-
+-
+-
+-   /* Begin: SFTYDCEVLN_START_SEC_VAR_AREA_1_SLOW_INIT_8 (online) */
+-#define SFTYDCEVLN_START_SEC_VAR_AREA_1_SLOW_INIT_8
+-#include "MemMap.h"
+-
+-extern VAR(uint8, SFTYDCEVLN_VAR) SftyDcEvlnP15ResErrMonrSt;
+-   #define SFTYDCEVLN_STOP_SEC_VAR_AREA_1_SLOW_INIT_8
+-#include "MemMap.h"
+-/* End: SFTYDCEVLN_STOP_SEC_VAR_AREA_1_SLOW_INIT_8 (online) */
+-
+-
+-
+-
+-
+-
+-   /* Begin: SFTYDCEVLN_START_SEC_VAR_AREA_1_SLOW_NO_INIT_8 (online) */
+-#define SFTYDCEVLN_START_SEC_VAR_AREA_1_SLOW_NO_INIT_8
+-#include "MemMap.h"
+-
+-extern VAR(uint8, SFTYDCEVLN_VAR) SftyDcEvlnP15ResStrtUpErrMonrSt;
+-   #define SFTYDCEVLN_STOP_SEC_VAR_AREA_1_SLOW_NO_INIT_8
+-#include "MemMap.h"
+-/* End: SFTYDCEVLN_STOP_SEC_VAR_AREA_1_SLOW_NO_INIT_8 (online) */
+-
+-
+-
+-
+-
+-
+-   /* Begin: SFTYDCEVLN_START_SEC_VAR_AREA_1_SLOW_INIT_8 (online) */
+-#define SFTYDCEVLN_START_SEC_VAR_AREA_1_SLOW_INIT_8
+-#include "MemMap.h"
+-
+-extern VAR(uint8, SFTYDCEVLN_VAR) SftyDcEvlnP15ResTiStampErrMonrSt;
+-   #define SFTYDCEVLN_STOP_SEC_VAR_AREA_1_SLOW_INIT_8
+-#include "MemMap.h"
+-/* End: SFTYDCEVLN_STOP_SEC_VAR_AREA_1_SLOW_INIT_8 (online) */
+-
+-
+-
+-
+-
+-
+-   /* Begin: SFTYDCEVLN_START_SEC_VAR_AREA_1_SLOW_INIT_8 (online) */
+-#define SFTYDCEVLN_START_SEC_VAR_AREA_1_SLOW_INIT_8
+-#include "MemMap.h"
+-
+-extern VAR(uint8, SFTYDCEVLN_VAR) SftyDcEvlnP15StrtUpErrMonrSt;
+-   #define SFTYDCEVLN_STOP_SEC_VAR_AREA_1_SLOW_INIT_8
+-#include "MemMap.h"
+-/* End: SFTYDCEVLN_STOP_SEC_VAR_AREA_1_SLOW_INIT_8 (online) */
+-
+-
+-
+-
+-
+-
+-   /* Begin: SFTYDCEVLN_START_SEC_VAR_AREA_1_SLOW_INIT_8 (online) */
+-#define SFTYDCEVLN_START_SEC_VAR_AREA_1_SLOW_INIT_8
+-#include "MemMap.h"
+-
+-extern VAR(uint8, SFTYDCEVLN_VAR) SftyDcEvlnP15TiStampErrMonrSt;
+-   #define SFTYDCEVLN_STOP_SEC_VAR_AREA_1_SLOW_INIT_8
+-#include "MemMap.h"
+-/* End: SFTYDCEVLN_STOP_SEC_VAR_AREA_1_SLOW_INIT_8 (online) */
+-
+-
+-
+-
+-
+-
+-   /* Begin: SFTYDCEVLN_START_SEC_VAR_AREA_1_SLOW_INIT_8 (online) */
+-#define SFTYDCEVLN_START_SEC_VAR_AREA_1_SLOW_INIT_8
+-#include "MemMap.h"
+-
+-extern VAR(uint8, SFTYDCEVLN_VAR) SftyDcEvlnP15UErrMonrSt;
+-   #define SFTYDCEVLN_STOP_SEC_VAR_AREA_1_SLOW_INIT_8
+-#include "MemMap.h"
+-/* End: SFTYDCEVLN_STOP_SEC_VAR_AREA_1_SLOW_INIT_8 (online) */
+-
+-
+-
+-
+-
+-
+-   /* Begin: SFTYDCEVLN_START_SEC_VAR_AREA_1_SLOW_NO_INIT_8 (online) */
+-#define SFTYDCEVLN_START_SEC_VAR_AREA_1_SLOW_NO_INIT_8
+-#include "MemMap.h"
+-
+-extern VAR(uint8, SFTYDCEVLN_VAR) SftyDcEvlnP15UStrtUpErrMonrSt;
+-   #define SFTYDCEVLN_STOP_SEC_VAR_AREA_1_SLOW_NO_INIT_8
+-#include "MemMap.h"
+-/* End: SFTYDCEVLN_STOP_SEC_VAR_AREA_1_SLOW_NO_INIT_8 (online) */
+-
+-
+-
+-
+-
+-
+-   /* Begin: SFTYDCEVLN_START_SEC_VAR_AREA_1_SLOW_INIT_8 (online) */
+-#define SFTYDCEVLN_START_SEC_VAR_AREA_1_SLOW_INIT_8
+-#include "MemMap.h"
+-
+-extern VAR(uint8, SFTYDCEVLN_VAR) SftyDcEvlnP15UTiStampErrMonrSt;
+-   #define SFTYDCEVLN_STOP_SEC_VAR_AREA_1_SLOW_INIT_8
+-#include "MemMap.h"
+-/* End: SFTYDCEVLN_STOP_SEC_VAR_AREA_1_SLOW_INIT_8 (online) */
+-
+-
+-
+-
+-
+-
+-   /* Begin: SFTYDCEVLN_START_SEC_VAR_AREA_1_SLOW_INIT_8 (online) */
+-#define SFTYDCEVLN_START_SEC_VAR_AREA_1_SLOW_INIT_8
+-#include "MemMap.h"
+-
+-extern VAR(uint8, SFTYDCEVLN_VAR) SftyDcEvlnP15VErrMonrSt;
+-   #define SFTYDCEVLN_STOP_SEC_VAR_AREA_1_SLOW_INIT_8
+-#include "MemMap.h"
+-/* End: SFTYDCEVLN_STOP_SEC_VAR_AREA_1_SLOW_INIT_8 (online) */
+-
+-
+-
+-
+-
+-
+-   /* Begin: SFTYDCEVLN_START_SEC_VAR_AREA_1_SLOW_NO_INIT_8 (online) */
+-#define SFTYDCEVLN_START_SEC_VAR_AREA_1_SLOW_NO_INIT_8
+-#include "MemMap.h"
+-
+-extern VAR(uint8, SFTYDCEVLN_VAR) SftyDcEvlnP15VStrtUpErrMonrSt;
+-   #define SFTYDCEVLN_STOP_SEC_VAR_AREA_1_SLOW_NO_INIT_8
+-#include "MemMap.h"
+-/* End: SFTYDCEVLN_STOP_SEC_VAR_AREA_1_SLOW_NO_INIT_8 (online) */
+-
+-
+-
+-
+-
+-
+-   /* Begin: SFTYDCEVLN_START_SEC_VAR_AREA_1_SLOW_INIT_8 (online) */
+-#define SFTYDCEVLN_START_SEC_VAR_AREA_1_SLOW_INIT_8
+-#include "MemMap.h"
+-
+-extern VAR(uint8, SFTYDCEVLN_VAR) SftyDcEvlnP15VTiStampErrMonrSt;
+-   #define SFTYDCEVLN_STOP_SEC_VAR_AREA_1_SLOW_INIT_8
+-#include "MemMap.h"
+-/* End: SFTYDCEVLN_STOP_SEC_VAR_AREA_1_SLOW_INIT_8 (online) */
+-
+-
+-
+-
+-
+-
+-   /* Begin: SFTYDCEVLN_START_SEC_VAR_AREA_1_SLOW_INIT_8 (online) */
+-#define SFTYDCEVLN_START_SEC_VAR_AREA_1_SLOW_INIT_8
+-#include "MemMap.h"
+-
+-extern VAR(uint8, SFTYDCEVLN_VAR) SftyDcEvlnP15WErrMonrSt;
+-   #define SFTYDCEVLN_STOP_SEC_VAR_AREA_1_SLOW_INIT_8
+-#include "MemMap.h"
+-/* End: SFTYDCEVLN_STOP_SEC_VAR_AREA_1_SLOW_INIT_8 (online) */
+-
+-
+-
+-
+-
+-
+-   /* Begin: SFTYDCEVLN_START_SEC_VAR_AREA_1_SLOW_NO_INIT_8 (online) */
+-#define SFTYDCEVLN_START_SEC_VAR_AREA_1_SLOW_NO_INIT_8
+-#include "MemMap.h"
+-
+-extern VAR(uint8, SFTYDCEVLN_VAR) SftyDcEvlnP15WStrtUpErrMonrSt;
+-   #define SFTYDCEVLN_STOP_SEC_VAR_AREA_1_SLOW_NO_INIT_8
+-#include "MemMap.h"
+-/* End: SFTYDCEVLN_STOP_SEC_VAR_AREA_1_SLOW_NO_INIT_8 (online) */
+-
+-
+-
+-
+-
+-
+-   /* Begin: SFTYDCEVLN_START_SEC_VAR_AREA_1_SLOW_INIT_8 (online) */
+-#define SFTYDCEVLN_START_SEC_VAR_AREA_1_SLOW_INIT_8
+-#include "MemMap.h"
+-
+-extern VAR(uint8, SFTYDCEVLN_VAR) SftyDcEvlnP15WTiStampErrMonrSt;
+-   #define SFTYDCEVLN_STOP_SEC_VAR_AREA_1_SLOW_INIT_8
+-#include "MemMap.h"
+-/* End: SFTYDCEVLN_STOP_SEC_VAR_AREA_1_SLOW_INIT_8 (online) */
+-
+-
+-
+-
+-
+-
+-   /* Begin: SFTYDCEVLN_START_SEC_VAR_AREA_1_SLOW_INIT_8 (online) */
+-#define SFTYDCEVLN_START_SEC_VAR_AREA_1_SLOW_INIT_8
+-#include "MemMap.h"
+-
+-extern VAR(uint8, SFTYDCEVLN_VAR) SftyDcEvlnP5Asc2ErrMonrSt;
+-   #define SFTYDCEVLN_STOP_SEC_VAR_AREA_1_SLOW_INIT_8
+-#include "MemMap.h"
+-/* End: SFTYDCEVLN_STOP_SEC_VAR_AREA_1_SLOW_INIT_8 (online) */
+-
+-
+-
+-
+-
+-
+-   /* Begin: SFTYDCEVLN_START_SEC_VAR_AREA_1_SLOW_INIT_8 (online) */
+-#define SFTYDCEVLN_START_SEC_VAR_AREA_1_SLOW_INIT_8
+-#include "MemMap.h"
+-
+-extern VAR(uint8, SFTYDCEVLN_VAR) SftyDcEvlnP5Asc2TiStampErrMonrSt;
+-   #define SFTYDCEVLN_STOP_SEC_VAR_AREA_1_SLOW_INIT_8
+-#include "MemMap.h"
+-/* End: SFTYDCEVLN_STOP_SEC_VAR_AREA_1_SLOW_INIT_8 (online) */
+-
+-
+-
+-
+-
+-
+-   /* Begin: SFTYDCEVLN_START_SEC_VAR_AREA_1_SLOW_INIT_8 (online) */
+-#define SFTYDCEVLN_START_SEC_VAR_AREA_1_SLOW_INIT_8
+-#include "MemMap.h"
+-
+-extern VAR(uint8, SFTYDCEVLN_VAR) SftyDcEvlnP5UErrMonrSt;
+-   #define SFTYDCEVLN_STOP_SEC_VAR_AREA_1_SLOW_INIT_8
+-#include "MemMap.h"
+-/* End: SFTYDCEVLN_STOP_SEC_VAR_AREA_1_SLOW_INIT_8 (online) */
+-
+-
+-
+-
+-
+-
+-   /* Begin: SFTYDCEVLN_START_SEC_VAR_AREA_1_SLOW_INIT_8 (online) */
+-#define SFTYDCEVLN_START_SEC_VAR_AREA_1_SLOW_INIT_8
+-#include "MemMap.h"
+-
+-extern VAR(uint8, SFTYDCEVLN_VAR) SftyDcEvlnP5UTiStampErrMonrSt;
+-   #define SFTYDCEVLN_STOP_SEC_VAR_AREA_1_SLOW_INIT_8
+-#include "MemMap.h"
+-/* End: SFTYDCEVLN_STOP_SEC_VAR_AREA_1_SLOW_INIT_8 (online) */
+-
+-
+-
+-
+-
+-
+-   /* Begin: SFTYDCEVLN_START_SEC_VAR_AREA_1_SLOW_INIT_8 (online) */
+-#define SFTYDCEVLN_START_SEC_VAR_AREA_1_SLOW_INIT_8
+-#include "MemMap.h"
+-
+-extern VAR(uint8, SFTYDCEVLN_VAR) SftyDcEvlnP5VErrMonrSt;
+-   #define SFTYDCEVLN_STOP_SEC_VAR_AREA_1_SLOW_INIT_8
+-#include "MemMap.h"
+-/* End: SFTYDCEVLN_STOP_SEC_VAR_AREA_1_SLOW_INIT_8 (online) */
+-
+-
+-
+-
+-
+-
+-   /* Begin: SFTYDCEVLN_START_SEC_VAR_AREA_1_SLOW_INIT_8 (online) */
+-#define SFTYDCEVLN_START_SEC_VAR_AREA_1_SLOW_INIT_8
+-#include "MemMap.h"
+-
+-extern VAR(uint8, SFTYDCEVLN_VAR) SftyDcEvlnP5VTiStampErrMonrSt;
+-   #define SFTYDCEVLN_STOP_SEC_VAR_AREA_1_SLOW_INIT_8
+-#include "MemMap.h"
+-/* End: SFTYDCEVLN_STOP_SEC_VAR_AREA_1_SLOW_INIT_8 (online) */
+-
+-
+-
+-
+-
+-
+-   /* Begin: SFTYDCEVLN_START_SEC_VAR_AREA_1_SLOW_INIT_8 (online) */
+-#define SFTYDCEVLN_START_SEC_VAR_AREA_1_SLOW_INIT_8
+-#include "MemMap.h"
+-
+-extern VAR(uint8, SFTYDCEVLN_VAR) SftyDcEvlnP5WErrMonrSt;
+-   #define SFTYDCEVLN_STOP_SEC_VAR_AREA_1_SLOW_INIT_8
+-#include "MemMap.h"
+-/* End: SFTYDCEVLN_STOP_SEC_VAR_AREA_1_SLOW_INIT_8 (online) */
+-
+-
+-
+-
+-
+-
+-   /* Begin: SFTYDCEVLN_START_SEC_VAR_AREA_1_SLOW_INIT_8 (online) */
+-#define SFTYDCEVLN_START_SEC_VAR_AREA_1_SLOW_INIT_8
+-#include "MemMap.h"
+-
+-extern VAR(uint8, SFTYDCEVLN_VAR) SftyDcEvlnP5WTiStampErrMonrSt;
+-   #define SFTYDCEVLN_STOP_SEC_VAR_AREA_1_SLOW_INIT_8
+-#include "MemMap.h"
+-/* End: SFTYDCEVLN_STOP_SEC_VAR_AREA_1_SLOW_INIT_8 (online) */
+-
+-
+-
+-
+-
+-
+-   /* Begin: SFTYDCEVLN_START_SEC_VAR_AREA_1_SLOW_INIT_8 (online) */
+-#define SFTYDCEVLN_START_SEC_VAR_AREA_1_SLOW_INIT_8
+-#include "MemMap.h"
+-
+-extern VAR(uint8, SFTYDCEVLN_VAR) SftyDcEvlnSepicOutFltErrMonrSt;
+-   #define SFTYDCEVLN_STOP_SEC_VAR_AREA_1_SLOW_INIT_8
+-#include "MemMap.h"
+-/* End: SFTYDCEVLN_STOP_SEC_VAR_AREA_1_SLOW_INIT_8 (online) */
+-
+-
+-
+-
+-
+-
+-   /* Begin: SFTYDCEVLN_START_SEC_VAR_AREA_1_SLOW_INIT_8 (online) */
+-#define SFTYDCEVLN_START_SEC_VAR_AREA_1_SLOW_INIT_8
+-#include "MemMap.h"
+-
+-extern VAR(uint8, SFTYDCEVLN_VAR) SftyDcEvlnSepicOutStrtUpErrMonrSt;
+-   #define SFTYDCEVLN_STOP_SEC_VAR_AREA_1_SLOW_INIT_8
+-#include "MemMap.h"
+-/* End: SFTYDCEVLN_STOP_SEC_VAR_AREA_1_SLOW_INIT_8 (online) */
+-
+-
+-
+-
+-
+-
+-   /* Begin: SFTYDCEVLN_START_SEC_VAR_AREA_1_SLOW_INIT_8 (online) */
+-#define SFTYDCEVLN_START_SEC_VAR_AREA_1_SLOW_INIT_8
+-#include "MemMap.h"
+-
+-extern VAR(uint8, SFTYDCEVLN_VAR) SftyDcEvlnSepicOutTiStmpErrMonrSt;
+-   #define SFTYDCEVLN_STOP_SEC_VAR_AREA_1_SLOW_INIT_8
+-#include "MemMap.h"
+-/* End: SFTYDCEVLN_STOP_SEC_VAR_AREA_1_SLOW_INIT_8 (online) */
+-
+-
+-
+-
+-
+-
+-   /* Begin: SFTYDCEVLN_START_SEC_VAR_AREA_CMN_SLOW_INIT_8 (online) */
+-#define SFTYDCEVLN_START_SEC_VAR_AREA_CMN_SLOW_INIT_8
+-#include "MemMap.h"
+-
+-extern VAR(uint8, SFTYDCEVLN_VAR) SftyDcEvlnUdcValPlausErrMonrSt;
+-   #define SFTYDCEVLN_STOP_SEC_VAR_AREA_CMN_SLOW_INIT_8
+-#include "MemMap.h"
+-/* End: SFTYDCEVLN_STOP_SEC_VAR_AREA_CMN_SLOW_INIT_8 (online) */
+-
+-
+-
+-
+-
+-
+-   /* Begin: SFTYDCEVLN_START_SEC_VAR_AREA_2_SLOW_INIT_8 (online) */
+-#define SFTYDCEVLN_START_SEC_VAR_AREA_2_SLOW_INIT_8
+-#include "MemMap.h"
+-
+-extern VAR(uint8, SFTYDCEVLN_VAR) SftyDcEvlnVadcDcU1MMonTiStampErrMonrSt;
+-   #define SFTYDCEVLN_STOP_SEC_VAR_AREA_2_SLOW_INIT_8
+-#include "MemMap.h"
+-/* End: SFTYDCEVLN_STOP_SEC_VAR_AREA_2_SLOW_INIT_8 (online) */
+-
+-
+-
+-
+-
+-
+-   /* Begin: SFTYDCEVLN_START_SEC_VAR_AREA_2_SLOW_INIT_8 (online) */
+-#define SFTYDCEVLN_START_SEC_VAR_AREA_2_SLOW_INIT_8
+-#include "MemMap.h"
+-
+-extern VAR(uint8, SFTYDCEVLN_VAR) SftyDcEvlnVadcDcU1PMonTiStampErrMonrSt;
+-   #define SFTYDCEVLN_STOP_SEC_VAR_AREA_2_SLOW_INIT_8
+-#include "MemMap.h"
+-/* End: SFTYDCEVLN_STOP_SEC_VAR_AREA_2_SLOW_INIT_8 (online) */
+-
+-
+-
+-
+-
+-
+-   /* Begin: SFTYDCEVLN_START_SEC_VAR_AREA_2_FAST_INIT_8 (online) */
+-#define SFTYDCEVLN_START_SEC_VAR_AREA_2_FAST_INIT_8
+-#include "MemMap.h"
+-
+-extern VAR(uint8, SFTYDCEVLN_VAR) SftyDcEvlnVadcHvDcElecHiErrMonrSt;
+-   #define SFTYDCEVLN_STOP_SEC_VAR_AREA_2_FAST_INIT_8
+-#include "MemMap.h"
+-/* End: SFTYDCEVLN_STOP_SEC_VAR_AREA_2_FAST_INIT_8 (online) */
+-
+-
+-
+-
+-   /* Begin: SFTYE2E_START_SEC_VAR_AREA_CMN_FAST_INIT_8 (online) */
+-#define SFTYE2E_START_SEC_VAR_AREA_CMN_FAST_INIT_8
+-#include "MemMap.h"
+-
+-extern VAR(uint8, SFTYE2E_VAR) SftyE2eAirBag01CrashSeriousErrMonrSt;
+-   #define SFTYE2E_STOP_SEC_VAR_AREA_CMN_FAST_INIT_8
+-#include "MemMap.h"
+-/* End: SFTYE2E_STOP_SEC_VAR_AREA_CMN_FAST_INIT_8 (online) */
+-
+-
+-
+-
+-
+-
+-
+-
+-
+-
+-
+-
+-
+-
+-
+-
+-   /* Begin: SFTYMODMGR_START_SEC_VAR_AREA_CMN_FAST_INIT_8 (online) */
+-#define SFTYMODMGR_START_SEC_VAR_AREA_CMN_FAST_INIT_8
+-#include "MemMap.h"
+-
+-extern VAR(uint8, SFTYMODMGR_VAR) SftyModMgrKl15OffErrMonrSt;
+-   #define SFTYMODMGR_STOP_SEC_VAR_AREA_CMN_FAST_INIT_8
+-#include "MemMap.h"
+-/* End: SFTYMODMGR_STOP_SEC_VAR_AREA_CMN_FAST_INIT_8 (online) */
+-
+-
+-
+-
+-
+-
+-   /* Begin: SFTYMODMGR_START_SEC_VAR_AREA_CMN_FAST_INIT_8 (online) */
+-#define SFTYMODMGR_START_SEC_VAR_AREA_CMN_FAST_INIT_8
+-#include "MemMap.h"
+-
+-extern VAR(uint8, SFTYMODMGR_VAR) SftyModMgrModPlausErrMonrSt;
+-   #define SFTYMODMGR_STOP_SEC_VAR_AREA_CMN_FAST_INIT_8
+-#include "MemMap.h"
+-/* End: SFTYMODMGR_STOP_SEC_VAR_AREA_CMN_FAST_INIT_8 (online) */
+-
+-
+-
+-
+-
+-
+-   /* Begin: SFTYRSLVRCALCN_START_SEC_VAR_AREA_CMN_FAST_INIT_8 (online) */
+-#define SFTYRSLVRCALCN_START_SEC_VAR_AREA_CMN_FAST_INIT_8
+-#include "MemMap.h"
+-
+-extern VAR(uint8, SFTYRSLVRCALCN_VAR) SftyRslvrCalcnSpdPlausErrMonrSt;
+-   #define SFTYRSLVRCALCN_STOP_SEC_VAR_AREA_CMN_FAST_INIT_8
+-#include "MemMap.h"
+-/* End: SFTYRSLVRCALCN_STOP_SEC_VAR_AREA_CMN_FAST_INIT_8 (online) */
+-
+-
+-
+-
+-
+-
+-   /* Begin: SFTYRSLVREVLN_START_SEC_VAR_AREA_CMN_FAST_INIT_8 (online) */
+-#define SFTYRSLVREVLN_START_SEC_VAR_AREA_CMN_FAST_INIT_8
+-#include "MemMap.h"
+-
+-extern VAR(uint8, SFTYRSLVREVLN_VAR) SftyRslvrEvlnCosAmpErrMonrSt;
+-   #define SFTYRSLVREVLN_STOP_SEC_VAR_AREA_CMN_FAST_INIT_8
+-#include "MemMap.h"
+-/* End: SFTYRSLVREVLN_STOP_SEC_VAR_AREA_CMN_FAST_INIT_8 (online) */
+-
+-
+-/* Begin: SFTYRSLVREVLN_START_SEC_VAR_AREA_CMN_FAST_INIT_8 (online) */
+-#define SFTYRSLVREVLN_START_SEC_VAR_AREA_CMN_FAST_INIT_8
+-#include "MemMap.h"
+-   
+-extern VAR(uint8, SFTYRSLVREVLN_VAR) SftyInvActrMidPointPhaUErrMonrSt;
+-
+-#define SFTYRSLVREVLN_STOP_SEC_VAR_AREA_CMN_FAST_INIT_8
+-#include "MemMap.h"
+-/* End: SFTYRSLVREVLN_STOP_SEC_VAR_AREA_CMN_FAST_INIT_8 (online) */
+-
+-
+-/* Begin: SFTYRSLVREVLN_START_SEC_VAR_AREA_CMN_FAST_INIT_8 (online) */
+-#define SFTYRSLVREVLN_START_SEC_VAR_AREA_CMN_FAST_INIT_8
+-#include "MemMap.h"
+-\t  
+-extern VAR(uint8, SFTYRSLVREVLN_VAR) SftyInvActrMidPointPhaVErrMonrSt;
+-   
+-#define SFTYRSLVREVLN_STOP_SEC_VAR_AREA_CMN_FAST_INIT_8
+-#include "MemMap.h"
+-/* End: SFTYRSLVREVLN_STOP_SEC_VAR_AREA_CMN_FAST_INIT_8 (online) */
+-
+-   
+-/* Begin: SFTYRSLVREVLN_START_SEC_VAR_AREA_CMN_FAST_INIT_8 (online) */
+-#define SFTYRSLVREVLN_START_SEC_VAR_AREA_CMN_FAST_INIT_8
+-#include "MemMap.h"
+-\t\t 
+-extern VAR(uint8, SFTYRSLVREVLN_VAR) SftyInvActrMidPointPhaWErrMonrSt;
+-\t  
+-#define SFTYRSLVREVLN_STOP_SEC_VAR_AREA_CMN_FAST_INIT_8
+-#include "MemMap.h"
+-/* End: SFTYRSLVREVLN_STOP_SEC_VAR_AREA_CMN_FAST_INIT_8 (online) */
+-
+-
+-
+-
+-   /* Begin: SFTYRSLVREVLN_START_SEC_VAR_AREA_CMN_FAST_INIT_8 (online) */
+-#define SFTYRSLVREVLN_START_SEC_VAR_AREA_CMN_FAST_INIT_8
+-#include "MemMap.h"
+-
+-extern VAR(uint8, SFTYRSLVREVLN_VAR) SftyRslvrEvlnCosOffsErrMonrSt;
+-   #define SFTYRSLVREVLN_STOP_SEC_VAR_AREA_CMN_FAST_INIT_8
+-#include "MemMap.h"
+-/* End: SFTYRSLVREVLN_STOP_SEC_VAR_AREA_CMN_FAST_INIT_8 (online) */
+-
+-/* Begin: SFTYE2E_START_SEC_VAR_AREA_CMN_FAST_INIT_8 (online) */
+-#define SFTYE2E_START_SEC_VAR_AREA_CMN_FAST_INIT_8
+-#include "MemMap.h"
+-
+-extern VAR(uint8, SFTYE2E_VAR) SftyE2eVcuInvStat1CrcErrMonrSt;
+-#define SFTYE2E_STOP_SEC_VAR_AREA_CMN_FAST_INIT_8
+-#include "MemMap.h"
+-/* End: SFTYE2E_STOP_SEC_VAR_AREA_CMN_FAST_IIT_N8 (online) */
+-
+-/* Begin: SFTYE2E_START_SEC_VAR_AREA_CMN_FAST_INIT_8 (online) */
+-#define SFTYE2E_START_SEC_VAR_AREA_CMN_FAST_INIT_8
+-#include "MemMap.h"
+-
+-extern VAR(uint8, SFTYE2E_VAR) SftyE2eVcuInvStat1CntrErrMonrSt;
+-#define SFTYE2E_STOP_SEC_VAR_AREA_CMN_FAST_INIT_8
+-#include "MemMap.h"
+-/* End: SFTYE2E_STOP_SEC_VAR_AREA_CMN_FAST_IIT_N8 (online) */
+-
+-/* Begin: SFTYE2E_START_SEC_VAR_AREA_CMN_FAST_INIT_8 (online) */
+-#define SFTYE2E_START_SEC_VAR_AREA_CMN_FAST_INIT_8
+-#include "MemMap.h"
+-
+-extern VAR(uint8, SFTYE2E_VAR) SftyE2eVcuInvStat1TiOutErrMonrSt;
+-#define SFTYE2E_STOP_SEC_VAR_AREA_CMN_FAST_INIT_8
+-#include "MemMap.h"
+-/* End: SFTYE2E_STOP_SEC_VAR_AREA_CMN_FAST_IIT_N8 (online) */
+-
+-/* Begin: SFTYE2E_START_SEC_VAR_AREA_CMN_FAST_INIT_8 (online) */
+-#define SFTYE2E_START_SEC_VAR_AREA_CMN_FAST_INIT_8
+-#include "MemMap.h"
+-
+-extern VAR(uint8, SFTYE2E_VAR) SftyE2eVcuInvCtrl1CrcErrMonrSt;
+-#define SFTYE2E_STOP_SEC_VAR_AREA_CMN_FAST_INIT_8
+-#include "MemMap.h"
+-/* End: SFTYE2E_STOP_SEC_VAR_AREA_CMN_FAST_IIT_N8 (online) */
+-
+-/* Begin: SFTYE2E_START_SEC_VAR_AREA_CMN_FAST_INIT_8 (online) */
+-#define SFTYE2E_START_SEC_VAR_AREA_CMN_FAST_INIT_8
+-#include "MemMap.h"
+-
+-extern VAR(uint8, SFTYE2E_VAR) SftyE2eVcuInvCtrl1CntrErrMonrSt;
+-#define SFTYE2E_STOP_SEC_VAR_AREA_CMN_FAST_INIT_8
+-#include "MemMap.h"
+-/* End: SFTYE2E_STOP_SEC_VAR_AREA_CMN_FAST_IIT_N8 (online) */
+-
+-/* Begin: SFTYE2E_START_SEC_VAR_AREA_CMN_FAST_INIT_8 (online) */
+-#define SFTYE2E_START_SEC_VAR_AREA_CMN_FAST_INIT_8
+-#include "MemMap.h"
+-
+-extern VAR(uint8, SFTYE2E_VAR) SftyE2eVcuInvCtrl1TiOutErrMonrSt;
+-#define SFTYE2E_STOP_SEC_VAR_AREA_CMN_FAST_INIT_8
+-#include "MemMap.h"
+-/* End: SFTYE2E_STOP_SEC_VAR_AREA_CMN_FAST_IIT_N8 (online) */
+-
+-/* Begin: SFTYE2E_START_SEC_VAR_AREA_CMN_FAST_INIT_8 (online) */
+-#define SFTYE2E_START_SEC_VAR_AREA_CMN_FAST_INIT_8
+-#include "MemMap.h"
+-
+-extern VAR(uint8, SFTYE2E_VAR) SftyE2eVcuInvCtrl2CrcErrMonrSt;
+-#define SFTYE2E_STOP_SEC_VAR_AREA_CMN_FAST_INIT_8
+-#include "MemMap.h"
+-/* End: SFTYE2E_STOP_SEC_VAR_AREA_CMN_FAST_IIT_N8 (online) */
+-
+-/* Begin: SFTYE2E_START_SEC_VAR_AREA_CMN_FAST_INIT_8 (online) */
+-#define SFTYE2E_START_SEC_VAR_AREA_CMN_FAST_INIT_8
+-#include "MemMap.h"
+-
+-extern VAR(uint8, SFTYE2E_VAR) SftyE2eVcuInvCtrl2CntrErrMonrSt;
+-#define SFTYE2E_STOP_SEC_VAR_AREA_CMN_FAST_INIT_8
+-#include "MemMap.h"
+-/* End: SFTYE2E_STOP_SEC_VAR_AREA_CMN_FAST_IIT_N8 (online) */
+-
+-/* Begin: SFTYE2E_START_SEC_VAR_AREA_CMN_FAST_INIT_8 (online) */
+-#define SFTYE2E_START_SEC_VAR_AREA_CMN_FAST_INIT_8
+-#include "MemMap.h"
+-
+-extern VAR(uint8, SFTYE2E_VAR) SftyE2eVcuInvCtrl2TiOutErrMonrSt;
+-#define SFTYE2E_STOP_SEC_VAR_AREA_CMN_FAST_INIT_8
+-#include "MemMap.h"
+-/* End: SFTYE2E_STOP_SEC_VAR_AREA_CMN_FAST_IIT_N8 (online) */
+-
+-
+-/* Begin: SFTYE2E_START_SEC_VAR_AREA_CMN_FAST_INIT_8 (online) */
+-#define SFTYE2E_START_SEC_VAR_AREA_CMN_FAST_INIT_8
+-#include "MemMap.h"
+-
+-extern VAR(uint8, SFTYE2E_VAR) SftyE2eVcuInvStat1ErrMonrSt;
+-#define SFTYE2E_STOP_SEC_VAR_AREA_CMN_FAST_INIT_8
+-#include "MemMap.h"
+-/* End: SFTYE2E_STOP_SEC_VAR_AREA_CMN_FAST_IIT_N8 (online) */
+-
+-/* Begin: SFTYE2E_START_SEC_VAR_AREA_CMN_FAST_INIT_8 (online) */
+-#define SFTYE2E_START_SEC_VAR_AREA_CMN_FAST_INIT_8
+-#include "MemMap.h"
+-
+-extern VAR(uint8, SFTYE2E_VAR) SftyE2eVcuInvCtrl1ErrMonrSt;
+-#define SFTYE2E_STOP_SEC_VAR_AREA_CMN_FAST_INIT_8
+-#include "MemMap.h"
+-/* End: SFTYE2E_STOP_SEC_VAR_AREA_CMN_FAST_IIT_N8 (online) */
+-
+-/* Begin: SFTYE2E_START_SEC_VAR_AREA_CMN_FAST_INIT_8 (online) */
+-#define SFTYE2E_START_SEC_VAR_AREA_CMN_FAST_INIT_8
+-#include "MemMap.h"
+-
+-extern VAR(uint8, SFTYE2E_VAR) SftyE2eVcuInvCtrl2ErrMonrSt;
+-#define SFTYE2E_STOP_SEC_VAR_AREA_CMN_FAST_INIT_8
+-#include "MemMap.h"
+-/* End: SFTYE2E_STOP_SEC_VAR_AREA_CMN_FAST_IIT_N8 (online) */
+-
+-
+-   /* Begin: SFTYRSLVREVLN_START_SEC_VAR_AREA_2_FAST_INIT_8 (online) */
+-#define SFTYRSLVREVLN_START_SEC_VAR_AREA_2_FAST_INIT_8
+-#include "MemMap.h"
+-
+-extern VAR(uint8, SFTYRSLVREVLN_VAR) SftyRslvrEvlnDsadcDmaErrMonrSt;
+-   #define SFTYRSLVREVLN_STOP_SEC_VAR_AREA_2_FAST_INIT_8
+-#include "MemMap.h"
+-/* End: SFTYRSLVREVLN_STOP_SEC_VAR_AREA_2_FAST_INIT_8 (online) */
+-
+-
+-
+-
+-
+-
+-   /* Begin: SFTYRSLVREVLN_START_SEC_VAR_AREA_2_FAST_INIT_8 (online) */
+-#define SFTYRSLVREVLN_START_SEC_VAR_AREA_2_FAST_INIT_8
+-#include "MemMap.h"
+-
+-extern VAR(uint8, SFTYRSLVREVLN_VAR) SftyRslvrEvlnDsadcOldTiStampErrMonrSt;
+-   #define SFTYRSLVREVLN_STOP_SEC_VAR_AREA_2_FAST_INIT_8
+-#include "MemMap.h"
+-/* End: SFTYRSLVREVLN_STOP_SEC_VAR_AREA_2_FAST_INIT_8 (online) */
+-
+-
+-
+-
+-
+-
+-   /* Begin: SFTYRSLVREVLN_START_SEC_VAR_AREA_CMN_FAST_INIT_8 (online) */
+-#define SFTYRSLVREVLN_START_SEC_VAR_AREA_CMN_FAST_INIT_8
+-#include "MemMap.h"
+-
+-extern VAR(uint8, SFTYRSLVREVLN_VAR) SftyRslvrEvlnSinAmpErrMonrSt;
+-   #define SFTYRSLVREVLN_STOP_SEC_VAR_AREA_CMN_FAST_INIT_8
+-#include "MemMap.h"
+-/* End: SFTYRSLVREVLN_STOP_SEC_VAR_AREA_CMN_FAST_INIT_8 (online) */
+-
+-
+-
+-
+-
+-
+-   /* Begin: SFTYRSLVREVLN_START_SEC_VAR_AREA_CMN_FAST_INIT_8 (online) */
+-#define SFTYRSLVREVLN_START_SEC_VAR_AREA_CMN_FAST_INIT_8
+-#include "MemMap.h"
+-
+-extern VAR(uint8, SFTYRSLVREVLN_VAR) SftyRslvrEvlnSinCosPlausAmpErrMonrSt;
+-   #define SFTYRSLVREVLN_STOP_SEC_VAR_AREA_CMN_FAST_INIT_8
+-#include "MemMap.h"
+-/* End: SFTYRSLVREVLN_STOP_SEC_VAR_AREA_CMN_FAST_INIT_8 (online) */
+-
+-
+-
+-
+-
+-
+-   /* Begin: SFTYRSLVREVLN_START_SEC_VAR_AREA_CMN_FAST_INIT_8 (online) */
+-#define SFTYRSLVREVLN_START_SEC_VAR_AREA_CMN_FAST_INIT_8
+-#include "MemMap.h"
+-
+-extern VAR(uint8, SFTYRSLVREVLN_VAR) SftyRslvrEvlnSinOffsErrMonrSt;
+-   #define SFTYRSLVREVLN_STOP_SEC_VAR_AREA_CMN_FAST_INIT_8
+-#include "MemMap.h"
+-/* End: SFTYRSLVREVLN_STOP_SEC_VAR_AREA_CMN_FAST_INIT_8 (online) */
+-
+-
+-
+-
+-
+-
+-   /* Begin: SFTYRSLVREVLN_START_SEC_VAR_AREA_CMN_FAST_INIT_8 (online) */
+-#define SFTYRSLVREVLN_START_SEC_VAR_AREA_CMN_FAST_INIT_8
+-#include "MemMap.h"
+-
+-extern VAR(uint8, SFTYRSLVREVLN_VAR) SftyRslvrEvlnSqdSumErrMonrSt;
+-   #define SFTYRSLVREVLN_STOP_SEC_VAR_AREA_CMN_FAST_INIT_8
+-#include "MemMap.h"
+-/* End: SFTYRSLVREVLN_STOP_SEC_VAR_AREA_CMN_FAST_INIT_8 (online) */
+-
+-
+-
+-
+-
+-
+-   /* Begin: SFTYRSLVREVLN_START_SEC_VAR_AREA_CMN_FAST_INIT_8 (online) */
+-#define SFTYRSLVREVLN_START_SEC_VAR_AREA_CMN_FAST_INIT_8
+-#include "MemMap.h"
+-
+-extern VAR(uint8, SFTYRSLVREVLN_VAR) SftyRslvrEvlnVadcCosElecHiErrMonrSt;
+-   #define SFTYRSLVREVLN_STOP_SEC_VAR_AREA_CMN_FAST_INIT_8
+-#include "MemMap.h"
+-/* End: SFTYRSLVREVLN_STOP_SEC_VAR_AREA_CMN_FAST_INIT_8 (online) */
+-
+-
+-
+-
+-
+-
+-   /* Begin: SFTYRSLVREVLN_START_SEC_VAR_AREA_CMN_FAST_INIT_8 (online) */
+-#define SFTYRSLVREVLN_START_SEC_VAR_AREA_CMN_FAST_INIT_8
+-#include "MemMap.h"
+-
+-extern VAR(uint8, SFTYRSLVREVLN_VAR) SftyRslvrEvlnVadcCosElecLoErrMonrSt;
+-   #define SFTYRSLVREVLN_STOP_SEC_VAR_AREA_CMN_FAST_INIT_8
+-#include "MemMap.h"
+-/* End: SFTYRSLVREVLN_STOP_SEC_VAR_AREA_CMN_FAST_INIT_8 (online) */
+-
+-
+-
+-
+-
+-
+-   /* Begin: SFTYRSLVREVLN_START_SEC_VAR_AREA_CMN_FAST_INIT_8 (online) */
+-#define SFTYRSLVREVLN_START_SEC_VAR_AREA_CMN_FAST_INIT_8
+-#include "MemMap.h"
+-
+-extern VAR(uint8, SFTYRSLVREVLN_VAR) SftyRslvrEvlnVadcCosElecOpenErrMonrSt;
+-   #define SFTYRSLVREVLN_STOP_SEC_VAR_AREA_CMN_FAST_INIT_8
+-#include "MemMap.h"
+-/* End: SFTYRSLVREVLN_STOP_SEC_VAR_AREA_CMN_FAST_INIT_8 (online) */
+-
+-
+-
+-
+-
+-
+-   /* Begin: SFTYRSLVREVLN_START_SEC_VAR_AREA_CMN_FAST_INIT_8 (online) */
+-#define SFTYRSLVREVLN_START_SEC_VAR_AREA_CMN_FAST_INIT_8
+-#include "MemMap.h"
+-
+-extern VAR(uint8, SFTYRSLVREVLN_VAR) SftyRslvrEvlnVadcCosRngHiErrMonrSt;
+-   #define SFTYRSLVREVLN_STOP_SEC_VAR_AREA_CMN_FAST_INIT_8
+-#include "MemMap.h"
+-/* End: SFTYRSLVREVLN_STOP_SEC_VAR_AREA_CMN_FAST_INIT_8 (online) */
+-
+-
+-
+-
+-
+-
+-   /* Begin: SFTYRSLVREVLN_START_SEC_VAR_AREA_CMN_FAST_INIT_8 (online) */
+-#define SFTYRSLVREVLN_START_SEC_VAR_AREA_CMN_FAST_INIT_8
+-#include "MemMap.h"
+-
+-extern VAR(uint8, SFTYRSLVREVLN_VAR) SftyRslvrEvlnVadcCosRngLoErrMonrSt;
+-   #define SFTYRSLVREVLN_STOP_SEC_VAR_AREA_CMN_FAST_INIT_8
+-#include "MemMap.h"
+-/* End: SFTYRSLVREVLN_STOP_SEC_VAR_AREA_CMN_FAST_INIT_8 (online) */
+-
+-
+-
+-
+-
+-
+-   /* Begin: SFTYRSLVREVLN_START_SEC_VAR_AREA_1_FAST_INIT_8 (online) */
+-#define SFTYRSLVREVLN_START_SEC_VAR_AREA_1_FAST_INIT_8
+-#include "MemMap.h"
+-
+-extern VAR(uint8, SFTYRSLVREVLN_VAR) SftyRslvrEvlnVadcDmaErrMonrSt;
+-   #define SFTYRSLVREVLN_STOP_SEC_VAR_AREA_1_FAST_INIT_8
+-#include "MemMap.h"
+-/* End: SFTYRSLVREVLN_STOP_SEC_VAR_AREA_1_FAST_INIT_8 (online) */
+-
+-
+-
+-
+-
+-
+-   /* Begin: SFTYRSLVREVLN_START_SEC_VAR_AREA_CMN_FAST_INIT_8 (online) */
+-#define SFTYRSLVREVLN_START_SEC_VAR_AREA_CMN_FAST_INIT_8
+-#include "MemMap.h"
+-
+-extern VAR(uint8, SFTYRSLVREVLN_VAR) SftyRslvrEvlnVadcExctAmpRngHiErrMonrSt;
+-   #define SFTYRSLVREVLN_STOP_SEC_VAR_AREA_CMN_FAST_INIT_8
+-#include "MemMap.h"
+-/* End: SFTYRSLVREVLN_STOP_SEC_VAR_AREA_CMN_FAST_INIT_8 (online) */
+-
+-
+-
+-
+-
+-
+-   /* Begin: SFTYRSLVREVLN_START_SEC_VAR_AREA_CMN_FAST_INIT_8 (online) */
+-#define SFTYRSLVREVLN_START_SEC_VAR_AREA_CMN_FAST_INIT_8
+-#include "MemMap.h"
+-
+-extern VAR(uint8, SFTYRSLVREVLN_VAR) SftyRslvrEvlnVadcExctAmpRngLoErrMonrSt;
+-   #define SFTYRSLVREVLN_STOP_SEC_VAR_AREA_CMN_FAST_INIT_8
+-#include "MemMap.h"
+-/* End: SFTYRSLVREVLN_STOP_SEC_VAR_AREA_CMN_FAST_INIT_8 (online) */
+-
+-
+-
+-
+-
+-
+-   /* Begin: SFTYRSLVREVLN_START_SEC_VAR_AREA_CMN_FAST_INIT_8 (online) */
+-#define SFTYRSLVREVLN_START_SEC_VAR_AREA_CMN_FAST_INIT_8
+-#include "MemMap.h"
+-
+-extern VAR(uint8, SFTYRSLVREVLN_VAR) SftyRslvrEvlnVadcExctElecHiErrMonrSt;
+-   #define SFTYRSLVREVLN_STOP_SEC_VAR_AREA_CMN_FAST_INIT_8
+-#include "MemMap.h"
+-/* End: SFTYRSLVREVLN_STOP_SEC_VAR_AREA_CMN_FAST_INIT_8 (online) */
+-
+-
+-
+-
+-
+-
+-   /* Begin: SFTYRSLVREVLN_START_SEC_VAR_AREA_CMN_FAST_INIT_8 (online) */
+-#define SFTYRSLVREVLN_START_SEC_VAR_AREA_CMN_FAST_INIT_8
+-#include "MemMap.h"
+-
+-extern VAR(uint8, SFTYRSLVREVLN_VAR) SftyRslvrEvlnVadcExctElecLoErrMonrSt;
+-   #define SFTYRSLVREVLN_STOP_SEC_VAR_AREA_CMN_FAST_INIT_8
+-#include "MemMap.h"
+-/* End: SFTYRSLVREVLN_STOP_SEC_VAR_AREA_CMN_FAST_INIT_8 (online) */
+-
+-
+-
+-
+-
+-
+-   /* Begin: SFTYRSLVREVLN_START_SEC_VAR_AREA_CMN_FAST_INIT_8 (online) */
+-#define SFTYRSLVREVLN_START_SEC_VAR_AREA_CMN_FAST_INIT_8
+-#include "MemMap.h"
+-
+-extern VAR(uint8, SFTYRSLVREVLN_VAR) SftyRslvrEvlnVadcExctElecOpenErrMonrSt;
+-   #define SFTYRSLVREVLN_STOP_SEC_VAR_AREA_CMN_FAST_INIT_8
+-#include "MemMap.h"
+-/* End: SFTYRSLVREVLN_STOP_SEC_VAR_AREA_CMN_FAST_INIT_8 (online) */
+-
+-
+-
+-
+-
+-
+-   /* Begin: SFTYRSLVREVLN_START_SEC_VAR_AREA_1_FAST_INIT_8 (online) */
+-#define SFTYRSLVREVLN_START_SEC_VAR_AREA_1_FAST_INIT_8
+-#include "MemMap.h"
+-
+-extern VAR(uint8, SFTYRSLVREVLN_VAR) SftyRslvrEvlnVadcExctOldTiStampErrMonrSt;
+-   #define SFTYRSLVREVLN_STOP_SEC_VAR_AREA_1_FAST_INIT_8
+-#include "MemMap.h"
+-/* End: SFTYRSLVREVLN_STOP_SEC_VAR_AREA_1_FAST_INIT_8 (online) */
+-
+-
+-
+-
+-
+-
+-   /* Begin: SFTYRSLVREVLN_START_SEC_VAR_AREA_CMN_FAST_INIT_8 (online) */
+-#define SFTYRSLVREVLN_START_SEC_VAR_AREA_CMN_FAST_INIT_8
+-#include "MemMap.h"
+-
+-extern VAR(uint8, SFTYRSLVREVLN_VAR) SftyRslvrEvlnVadcExctPlausErrMonrSt;
+-   #define SFTYRSLVREVLN_STOP_SEC_VAR_AREA_CMN_FAST_INIT_8
+-#include "MemMap.h"
+-/* End: SFTYRSLVREVLN_STOP_SEC_VAR_AREA_CMN_FAST_INIT_8 (online) */
+-
+-
+-
+-
+-
+-
+-   /* Begin: SFTYRSLVREVLN_START_SEC_VAR_AREA_1_FAST_INIT_8 (online) */
+-#define SFTYRSLVREVLN_START_SEC_VAR_AREA_1_FAST_INIT_8
+-#include "MemMap.h"
+-
+-extern VAR(uint8, SFTYRSLVREVLN_VAR) SftyRslvrEvlnVadcOldTiStampErrMonrSt;
+-   #define SFTYRSLVREVLN_STOP_SEC_VAR_AREA_1_FAST_INIT_8
+-#include "MemMap.h"
+-/* End: SFTYRSLVREVLN_STOP_SEC_VAR_AREA_1_FAST_INIT_8 (online) */
+-
+-
+-
+-
+-
+-
+-   /* Begin: SFTYRSLVREVLN_START_SEC_VAR_AREA_CMN_FAST_INIT_8 (online) */
+-#define SFTYRSLVREVLN_START_SEC_VAR_AREA_CMN_FAST_INIT_8
+-#include "MemMap.h"
+-
+-extern VAR(uint8, SFTYRSLVREVLN_VAR) SftyRslvrEvlnVadcSinElecHiErrMonrSt;
+-   #define SFTYRSLVREVLN_STOP_SEC_VAR_AREA_CMN_FAST_INIT_8
+-#include "MemMap.h"
+-/* End: SFTYRSLVREVLN_STOP_SEC_VAR_AREA_CMN_FAST_INIT_8 (online) */
+-
+-
+-
+-
+-
+-
+-   /* Begin: SFTYRSLVREVLN_START_SEC_VAR_AREA_CMN_FAST_INIT_8 (online) */
+-#define SFTYRSLVREVLN_START_SEC_VAR_AREA_CMN_FAST_INIT_8
+-#include "MemMap.h"
+-
+-extern VAR(uint8, SFTYRSLVREVLN_VAR) SftyRslvrEvlnVadcSinElecLoErrMonrSt;
+-   #define SFTYRSLVREVLN_STOP_SEC_VAR_AREA_CMN_FAST_INIT_8
+-#include "MemMap.h"
+-/* End: SFTYRSLVREVLN_STOP_SEC_VAR_AREA_CMN_FAST_INIT_8 (online) */
+-
+-
+-
+-
+-
+-
+-   /* Begin: SFTYRSLVREVLN_START_SEC_VAR_AREA_CMN_FAST_INIT_8 (online) */
+-#define SFTYRSLVREVLN_START_SEC_VAR_AREA_CMN_FAST_INIT_8
+-#include "MemMap.h"
+-
+-extern VAR(uint8, SFTYRSLVREVLN_VAR) SftyRslvrEvlnVadcSinElecOpenErrMonrSt;
+-   #define SFTYRSLVREVLN_STOP_SEC_VAR_AREA_CMN_FAST_INIT_8
+-#include "MemMap.h"
+-/* End: SFTYRSLVREVLN_STOP_SEC_VAR_AREA_CMN_FAST_INIT_8 (online) */
+-
+-
+-
+-
+-
+-
+-   /* Begin: SFTYRSLVREVLN_START_SEC_VAR_AREA_CMN_FAST_INIT_8 (online) */
+-#define SFTYRSLVREVLN_START_SEC_VAR_AREA_CMN_FAST_INIT_8
+-#include "MemMap.h"
+-
+-extern VAR(uint8, SFTYRSLVREVLN_VAR) SftyRslvrEvlnVadcSinRngHiErrMonrSt;
+-   #define SFTYRSLVREVLN_STOP_SEC_VAR_AREA_CMN_FAST_INIT_8
+-#include "MemMap.h"
+-/* End: SFTYRSLVREVLN_STOP_SEC_VAR_AREA_CMN_FAST_INIT_8 (online) */
+-
+-
+-
+-
+-
+-
+-   /* Begin: SFTYRSLVREVLN_START_SEC_VAR_AREA_CMN_FAST_INIT_8 (online) */
+-#define SFTYRSLVREVLN_START_SEC_VAR_AREA_CMN_FAST_INIT_8
+-#include "MemMap.h"
+-
+-extern VAR(uint8, SFTYRSLVREVLN_VAR) SftyRslvrEvlnVadcSinRngLoErrMonrSt;
+-   #define SFTYRSLVREVLN_STOP_SEC_VAR_AREA_CMN_FAST_INIT_8
+-#include "MemMap.h"
+-/* End: SFTYRSLVREVLN_STOP_SEC_VAR_AREA_CMN_FAST_INIT_8 (online) */
+-
+-
+-
+-
+-
+-
+-   /* Begin: SFTYRSLVREVLN_START_SEC_VAR_AREA_CMN_FAST_INIT_8 (online) */
+-#define SFTYRSLVREVLN_START_SEC_VAR_AREA_CMN_FAST_INIT_8
+-#include "MemMap.h"
+-
+-extern VAR(uint8, SFTYRSLVREVLN_VAR) SftyRslvrEvlnValCompErrMonrSt;
+-   #define SFTYRSLVREVLN_STOP_SEC_VAR_AREA_CMN_FAST_INIT_8
+-#include "MemMap.h"
+-/* End: SFTYRSLVREVLN_STOP_SEC_VAR_AREA_CMN_FAST_INIT_8 (online) */
+-
+-
+-
+-
+-
+-/* Begin: SFTYRSLVREVLN_START_SEC_VAR_AREA_CMN_FAST_INIT_8 (online) */
+-#define SFTYRSLVREVLN_START_SEC_VAR_AREA_CMN_FAST_INIT_8
+-#include "MemMap.h"
+-
+-extern VAR(uint8, SFTYRSLVREVLN_VAR) SftyRslvrEvlnAurixHwFltErrMonrSt;
+-#define SFTYRSLVREVLN_STOP_SEC_VAR_AREA_CMN_FAST_INIT_8
++extern VAR(uint8, SFTYRSLVREVLN_VAR) SftyRslvrEvlnCosAmpErrMonrSt;
++   #define SFTYRSLVREVLN_STOP_SEC_VAR_AREA_CMN_FAST_INIT_8
+ #include "MemMap.h"
+ /* End: SFTYRSLVREVLN_STOP_SEC_VAR_AREA_CMN_FAST_INIT_8 (online) */
+ 
+-
+-
+-
+-
+-   /* Begin: SFTYRSLVROFFSHNDLR_START_SEC_VAR_AREA_CMN_SLOW_INIT_8 (online) */
+-#define SFTYRSLVROFFSHNDLR_START_SEC_VAR_AREA_CMN_SLOW_INIT_8
+-#include "MemMap.h"
+-
+-extern VAR(uint8, SFTYRSLVROFFSHNDLR_VAR) SftyRslvrOffsHndlrAscIqPlausErrMonrSt;
+-   #define SFTYRSLVROFFSHNDLR_STOP_SEC_VAR_AREA_CMN_SLOW_INIT_8
+-#include "MemMap.h"
+-/* End: SFTYRSLVROFFSHNDLR_STOP_SEC_VAR_AREA_CMN_SLOW_INIT_8 (online) */
+-
+-
+-
+-/* Begin: SFTYRSLVROFFSHNDLR_START_SEC_VAR_AREA_CMN_SLOW_INIT_8 (online) */
+-#define SFTYRSLVROFFSHNDLR_START_SEC_VAR_AREA_CMN_SLOW_INIT_8
+-#include "MemMap.h"
+-
+-extern VAR(uint8, SFTYRSLVROFFSHNDLR_VAR) SftyRslvrOffsHndlrRslvrOffsNvmWrErrMonrSt;
+-#define SFTYRSLVROFFSHNDLR_STOP_SEC_VAR_AREA_CMN_SLOW_INIT_8
+-#include "MemMap.h"
+-/* End: SFTYRSLVROFFSHNDLR_STOP_SEC_VAR_AREA_CMN_SLOW_INIT_8 (online) */
+-
+-
+-
+-
+-
+-
+-
+-
+-
+-
+-   /* Begin: SFTYRSLVROFFSHNDLR_START_SEC_VAR_AREA_CMN_SLOW_INIT_8 (online) */
+-#define SFTYRSLVROFFSHNDLR_START_SEC_VAR_AREA_CMN_SLOW_INIT_8
+-#include "MemMap.h"
+-
+-extern VAR(uint8, SFTYRSLVROFFSHNDLR_VAR) SftyRslvrOffsHndlrRslvrOffsRngErrMonrSt;
+-   #define SFTYRSLVROFFSHNDLR_STOP_SEC_VAR_AREA_CMN_SLOW_INIT_8
+-#include "MemMap.h"
+-/* End: SFTYRSLVROFFSHNDLR_STOP_SEC_VAR_AREA_CMN_SLOW_INIT_8 (online) */
+-
+-
+-/* Begin: SFTYRSLVROFFSHNDLR_START_SEC_VAR_AREA_CMN_SLOW_INIT_8 (online) */
+-#define SFTYRSLVROFFSHNDLR_START_SEC_VAR_AREA_CMN_SLOW_INIT_8
+-#include "MemMap.h"
+-
+-extern VAR(uint8, SFTYRSLVROFFSHNDLR_VAR) SftyRslvrOffsHndlrRslvrOffsCrcErrMonrSt;
+-#define SFTYRSLVROFFSHNDLR_STOP_SEC_VAR_AREA_CMN_SLOW_INIT_8
+-#include "MemMap.h"
+-/* End: SFTYRSLVROFFSHNDLR_STOP_SEC_VAR_AREA_CMN_SLOW_INIT_8 (online) */
+-
+-
+-
+-   /* Begin: SFTYSBCCTRL_START_SEC_VAR_AREA_2_SLOW_INIT_8 (online) */
+-#define SFTYSBCCTRL_START_SEC_VAR_AREA_2_SLOW_INIT_8
+-#include "MemMap.h"
+-
+-extern VAR(uint8, SFTYSBCCTRL_VAR) SftySbcCtrlComErrMonrSt;
+-   #define SFTYSBCCTRL_STOP_SEC_VAR_AREA_2_SLOW_INIT_8
+-#include "MemMap.h"
+-/* End: SFTYSBCCTRL_STOP_SEC_VAR_AREA_2_SLOW_INIT_8 (online) */
+-
+-
+-
+-
+-
+-
+-   /* Begin: SFTYSBCCTRL_START_SEC_VAR_AREA_2_SLOW_INIT_8 (online) */
+-#define SFTYSBCCTRL_START_SEC_VAR_AREA_2_SLOW_INIT_8
++/* Begin: SFTYRSLVREVLN_START_SEC_VAR_AREA_CMN_FAST_INIT_8 (online) */
++#define SFTYRSLVREVLN_START_SEC_VAR_AREA_CMN_FAST_INIT_8
+ #include "MemMap.h"
+ 
+-extern VAR(uint8, SFTYSBCCTRL_VAR) SftySbcCtrlFs0bErrMonrSt;
+-   #define SFTYSBCCTRL_STOP_SEC_VAR_AREA_2_SLOW_INIT_8
++extern VAR(uint8, SFTYRSLVREVLN_VAR) SftyRslvrEvlnCosOffsErrMonrSt;
++   #define SFTYRSLVREVLN_STOP_SEC_VAR_AREA_CMN_FAST_INIT_8
+ #include "MemMap.h"
+-/* End: SFTYSBCCTRL_STOP_SEC_VAR_AREA_2_SLOW_INIT_8 (online) */
+-
+-
+-
++/* End: SFTYRSLVREVLN_STOP_SEC_VAR_AREA_CMN_FAST_INIT_8 (online) */
+ 
+-   /* Begin: SFTYSHUTOFFPAHTST_START_SEC_VAR_AREA_CMN_FAST_INIT_8 (online) */
+-#define SFTYSHUTOFFPAHTST_START_SEC_VAR_AREA_CMN_FAST_INIT_8
++/* Begin: SFTYRSLVREVLN_START_SEC_VAR_AREA_CMN_FAST_INIT_8 (online) */
++#define SFTYRSLVREVLN_START_SEC_VAR_AREA_CMN_FAST_INIT_8
+ #include "MemMap.h"
+ 
+-extern VAR(uint8, SFTYSHUTOFFPAHTST_VAR) SftyShutoffPahTstIvtrErrMonrSt;
+-   #define SFTYSHUTOFFPAHTST_STOP_SEC_VAR_AREA_CMN_FAST_INIT_8
++extern VAR(uint8, SFTYRSLVREVLN_VAR) SftyRslvrEvlnSinAmpErrMonrSt;
++   #define SFTYRSLVREVLN_STOP_SEC_VAR_AREA_CMN_FAST_INIT_8
+ #include "MemMap.h"
+-/* End: SFTYSHUTOFFPAHTST_STOP_SEC_VAR_AREA_CMN_FAST_INIT_8 (online) */
+-
+-
+-
+-
+-
++/* End: SFTYRSLVREVLN_STOP_SEC_VAR_AREA_CMN_FAST_INIT_8 (online) */
+ 
+-   /* Begin: SFTYSPDMON_START_SEC_VAR_AREA_CMN_SLOW_INIT_8 (online) */
+-#define SFTYSPDMON_START_SEC_VAR_AREA_CMN_SLOW_INIT_8
++/* Begin: SFTYRSLVREVLN_START_SEC_VAR_AREA_CMN_FAST_INIT_8 (online) */
++#define SFTYRSLVREVLN_START_SEC_VAR_AREA_CMN_FAST_INIT_8
+ #include "MemMap.h"
+ 
+-extern VAR(uint8, SFTYSPDMON_VAR) SftySpdMonOvrSpdErrMonrSt;
+-   #define SFTYSPDMON_STOP_SEC_VAR_AREA_CMN_SLOW_INIT_8
++extern VAR(uint8, SFTYRSLVREVLN_VAR) SftyRslvrEvlnSinOffsErrMonrSt;
++   #define SFTYRSLVREVLN_STOP_SEC_VAR_AREA_CMN_FAST_INIT_8
+ #include "MemMap.h"
+-/* End: SFTYSPDMON_STOP_SEC_VAR_AREA_CMN_SLOW_INIT_8 (online) */
+-
+-
+-
++/* End: SFTYRSLVREVLN_STOP_SEC_VAR_AREA_CMN_FAST_INIT_8 (online) */
+ 
++/* Begin: SFTYRSLVREVLN_START_SEC_VAR_AREA_CMN_FAST_INIT_8 (online) */
++#define SFTYRSLVREVLN_START_SEC_VAR_AREA_CMN_FAST_INIT_8
++#include "MemMap.h"
+ 
++extern VAR(uint8, SFTYRSLVREVLN_VAR) SftyRslvrEvlnAurixHwFltErrMonrSt;
++#define SFTYRSLVREVLN_STOP_SEC_VAR_AREA_CMN_FAST_INIT_8
++#include "MemMap.h"
++/* End: SFTYRSLVREVLN_STOP_SEC_VAR_AREA_CMN_FAST_INIT_8 (online) */
+ 
+-   /* Begin: SFTYSPDMON_START_SEC_VAR_AREA_CMN_SLOW_INIT_8 (online) */
++/* Begin: SFTYSPDMON_START_SEC_VAR_AREA_CMN_SLOW_INIT_8 (online) */
+ #define SFTYSPDMON_START_SEC_VAR_AREA_CMN_SLOW_INIT_8
+ #include "MemMap.h"
+ 
+@@ -1599,212 +293,173 @@ extern VAR(uint8, SFTYSPDMON_VAR) SftySpdMonSpdPlausErrMonrSt;
+ #include "MemMap.h"
+ /* End: SFTYSPDMON_STOP_SEC_VAR_AREA_CMN_SLOW_INIT_8 (online) */
+ 
+-
+-
+-
+-
+-   /* Begin: SFTYTQESTIMRPWRMDL_START_SEC_VAR_AREA_1_FAST_INIT_8 (online) */
+-#define SFTYTQESTIMRPWRMDL_START_SEC_VAR_AREA_1_FAST_INIT_8
++/* Begin: SFTYRSLVREVLN_START_SEC_VAR_AREA_CMN_FAST_INIT_8 (online) */
++#define SFTYRSLVREVLN_START_SEC_VAR_AREA_CMN_FAST_INIT_8
+ #include "MemMap.h"
+ 
+-extern VAR(uint8, SFTYTQESTIMRPWRMDL_VAR) SftyTqEstimrPwrMdlDmaErrMonrSt;
+-   #define SFTYTQESTIMRPWRMDL_STOP_SEC_VAR_AREA_1_FAST_INIT_8
++extern VAR(uint8, SFTYRSLVREVLN_VAR) SftyRslvrEvlnSqdSumErrMonrSt;
++   #define SFTYRSLVREVLN_STOP_SEC_VAR_AREA_CMN_FAST_INIT_8
+ #include "MemMap.h"
+-/* End: SFTYTQESTIMRPWRMDL_STOP_SEC_VAR_AREA_1_FAST_INIT_8 (online) */
+-
+-
++/* End: SFTYRSLVREVLN_STOP_SEC_VAR_AREA_CMN_FAST_INIT_8 (online) */
+ 
+-/* Begin: SFTYHVINTERLOCK_START_SEC_VAR_AREA_2_SLOW_INIT_8 (online) */
+-#define SFTYHVINTERLOCK_START_SEC_VAR_AREA_2_SLOW_INIT_8
++/* Begin: SFTYRSLVREVLN_START_SEC_VAR_AREA_CMN_FAST_INIT_8 (online) */
++#define SFTYRSLVREVLN_START_SEC_VAR_AREA_CMN_FAST_INIT_8
+ #include "MemMap.h"
+ 
+-extern VAR(uint8, SFTYCRASHSIGMON_VAR) SftyHvInterlockRngHiErrMonrSt;
+-
+-extern VAR(uint8, SFTYCRASHSIGMON_VAR) SftyHvInterlockRngLoErrMonrSt;
+-
+-extern VAR(uint8, SFTYCRASHSIGMON_VAR) SftyHvInterlockPasErrMonrSt;
+-
+-extern VAR(uint8, SFTYCRASHSIGMON_VAR) SftyHvInterlockActvErrMonrSt;
+-
+-extern VAR(uint8, SFTYCRASHSIGMON_VAR) SftyHvInterlockTiErrMonrSt;
+-#define SFTYHVINTERLOCK_STOP_SEC_VAR_AREA_2_SLOW_INIT_8
++extern VAR(uint8, SFTYRSLVREVLN_VAR) SftyRslvrEvlnSinCosPlausAmpErrMonrSt;
++   #define SFTYRSLVREVLN_STOP_SEC_VAR_AREA_CMN_FAST_INIT_8
+ #include "MemMap.h"
+-/* End: SFTYHVINTERLOCK_STOP_SEC_VAR_AREA_2_SLOW_INIT_8 (online) */
+-
++/* End: SFTYRSLVREVLN_STOP_SEC_VAR_AREA_CMN_FAST_INIT_8 (online) */
+ 
+-/* Begin: SFTYLVSPLYEVLN_START_SEC_VAR_AREA_2_SLOW_INIT_8 (online) */
+-#define SFTYLVSPLYEVLN_START_SEC_VAR_AREA_2_SLOW_INIT_8
++/* Begin: SFTYRSLVREVLN_START_SEC_VAR_AREA_CMN_FAST_INIT_8 (online) */
++#define SFTYRSLVREVLN_START_SEC_VAR_AREA_CMN_FAST_INIT_8
+ #include "MemMap.h"
+ 
+-extern VAR(uint8, SFTYLVSPLYEVLN_VAR) SftyLvSplyEvlnKl30RngLoErrMonrSt;
+-
+-extern VAR(uint8, SFTYLVSPLYEVLN_VAR) SftyLvSplyEvlnKl30RngHiErrMonrSt;
+-
+-#define SFTYLVSPLYEVLN_STOP_SEC_VAR_AREA_2_SLOW_INIT_8
++extern VAR(uint8, SFTYRSLVREVLN_VAR) SftyRslvrEvlnVadcExctPlausErrMonrSt;
++   #define SFTYRSLVREVLN_STOP_SEC_VAR_AREA_CMN_FAST_INIT_8
+ #include "MemMap.h"
+-/* End: SFTYLVSPLYEVLN_STOP_SEC_VAR_AREA_2_SLOW_INIT_8 (online) */
+-
++/* End: SFTYRSLVREVLN_STOP_SEC_VAR_AREA_CMN_FAST_INIT_8 (online) */
+ 
+-   /* Begin: SFTYTQESTIMRPWRMDL_START_SEC_VAR_AREA_1_FAST_INIT_8 (online) */
+-#define SFTYTQESTIMRPWRMDL_START_SEC_VAR_AREA_1_FAST_INIT_8
++/* Begin: SFTYRSLVREVLN_START_SEC_VAR_AREA_CMN_FAST_INIT_8 (online) */
++#define SFTYRSLVREVLN_START_SEC_VAR_AREA_CMN_FAST_INIT_8
+ #include "MemMap.h"
+ 
+-extern VAR(uint8, SFTYTQESTIMRPWRMDL_VAR) SftyTqEstimrPwrMdlPwmDtyCycPlausErrMonrSt;
+-   #define SFTYTQESTIMRPWRMDL_STOP_SEC_VAR_AREA_1_FAST_INIT_8
++extern VAR(uint8, SFTYRSLVREVLN_VAR) SftyRslvrEvlnVadcExctAmpRngLoErrMonrSt;
++   #define SFTYRSLVREVLN_STOP_SEC_VAR_AREA_CMN_FAST_INIT_8
+ #include "MemMap.h"
+-/* End: SFTYTQESTIMRPWRMDL_STOP_SEC_VAR_AREA_1_FAST_INIT_8 (online) */
+-
++/* End: SFTYRSLVREVLN_STOP_SEC_VAR_AREA_CMN_FAST_INIT_8 (online) */
+ 
+-/* Begin: SFTYCRASHSIGMON_START_SEC_VAR_AREA_1_SLOW_INIT_8 (online) */
+-#define SFTYCRASHSIGMON_START_SEC_VAR_AREA_1_SLOW_INIT_8
++/* Begin: SFTYRSLVREVLN_START_SEC_VAR_AREA_CMN_FAST_INIT_8 (online) */
++#define SFTYRSLVREVLN_START_SEC_VAR_AREA_CMN_FAST_INIT_8
+ #include "MemMap.h"
+ 
+-/*! \\cvar Crash HW signal range high evaluation status; unit \'-\' */
+-extern VAR(uint8, SFTYCRASHSIGMON_VAR) SftyCrashSigMonRngHiErrMonrSt;
+-
+-
+-/*! \\cvar Crash Analog status; unit \'-\' */
+-extern VAR(uint8, SFTYCRASHSIGMON_VAR) SftyCrashSigMonAnErrMonrSt;
+-
+-
+-/*! \\cvar Crash CAN status; unit \'-\' */
+-extern VAR(uint8, SFTYCRASHSIGMON_VAR) SftyCrashSigMonCANErrMonrSt;
+-
+-/*! \\cvar TimeStamp error monitor status; unit \'-\' */
+-extern VAR(uint8, SFTYCRASHSIGMON_VAR) SftyCrashSigMonTiStampErrMonrSt;
+-#define SFTYCRASHSIGMON_STOP_SEC_VAR_AREA_1_SLOW_INIT_8
++extern VAR(uint8, SFTYRSLVREVLN_VAR) SftyRslvrEvlnVadcExctAmpRngHiErrMonrSt;
++   #define SFTYRSLVREVLN_STOP_SEC_VAR_AREA_CMN_FAST_INIT_8
+ #include "MemMap.h"
+-/* End: SFTYCRASHSIGMON_STOP_SEC_VAR_AREA_1_SLOW_INIT_8 (online) */
+-
+-
++/* End: SFTYRSLVREVLN_STOP_SEC_VAR_AREA_CMN_FAST_INIT_8 (online) */
+ 
+-   /* Begin: SFTYTQESTIMRPWRMDL_START_SEC_VAR_AREA_1_FAST_INIT_8 (online) */
+-#define SFTYTQESTIMRPWRMDL_START_SEC_VAR_AREA_1_FAST_INIT_8
++/* Begin: SFTYRSLVREVLN_START_SEC_VAR_AREA_CMN_FAST_INIT_8 (online) */
++#define SFTYRSLVREVLN_START_SEC_VAR_AREA_CMN_FAST_INIT_8
+ #include "MemMap.h"
+ 
+-extern VAR(uint8, SFTYTQESTIMRPWRMDL_VAR) SftyTqEstimrPwrMdlPwmFrqPlausErrMonrSt;
+-   #define SFTYTQESTIMRPWRMDL_STOP_SEC_VAR_AREA_1_FAST_INIT_8
++extern VAR(uint8, SFTYRSLVREVLN_VAR) SftyRslvrEvlnVadcCosRngLoErrMonrSt;
++   #define SFTYRSLVREVLN_STOP_SEC_VAR_AREA_CMN_FAST_INIT_8
+ #include "MemMap.h"
+-/* End: SFTYTQESTIMRPWRMDL_STOP_SEC_VAR_AREA_1_FAST_INIT_8 (online) */
+-
+-
+-
+-
+-
++/* End: SFTYRSLVREVLN_STOP_SEC_VAR_AREA_CMN_FAST_INIT_8 (online) */
+ 
+-   /* Begin: SFTYTQMON_START_SEC_VAR_AREA_CMN_FAST_INIT_8 (online) */
+-#define SFTYTQMON_START_SEC_VAR_AREA_CMN_FAST_INIT_8
++/* Begin: SFTYRSLVREVLN_START_SEC_VAR_AREA_CMN_FAST_INIT_8 (online) */
++#define SFTYRSLVREVLN_START_SEC_VAR_AREA_CMN_FAST_INIT_8
+ #include "MemMap.h"
+ 
+-extern VAR(uint8, SFTYTQMON_VAR) SftyTqMonCurMdlPwrMdlPlausErrMonrSt;
+-   #define SFTYTQMON_STOP_SEC_VAR_AREA_CMN_FAST_INIT_8
++extern VAR(uint8, SFTYRSLVREVLN_VAR) SftyRslvrEvlnVadcCosRngHiErrMonrSt;
++   #define SFTYRSLVREVLN_STOP_SEC_VAR_AREA_CMN_FAST_INIT_8
+ #include "MemMap.h"
+-/* End: SFTYTQMON_STOP_SEC_VAR_AREA_CMN_FAST_INIT_8 (online) */
+-
+-
+-
+-
+-
++/* End: SFTYRSLVREVLN_STOP_SEC_VAR_AREA_CMN_FAST_INIT_8 (online) */
+ 
+-   /* Begin: SFTYTQMON_START_SEC_VAR_AREA_CMN_FAST_INIT_8 (online) */
+-#define SFTYTQMON_START_SEC_VAR_AREA_CMN_FAST_INIT_8
++/* Begin: SFTYRSLVREVLN_START_SEC_VAR_AREA_CMN_FAST_INIT_8 (online) */
++#define SFTYRSLVREVLN_START_SEC_VAR_AREA_CMN_FAST_INIT_8
+ #include "MemMap.h"
+ 
+-extern VAR(uint8, SFTYTQMON_VAR) SftyTqMonCurMdlQmTqPlausErrMonrSt;
+-   #define SFTYTQMON_STOP_SEC_VAR_AREA_CMN_FAST_INIT_8
++extern VAR(uint8, SFTYRSLVREVLN_VAR) SftyRslvrEvlnVadcSinRngLoErrMonrSt;
++   #define SFTYRSLVREVLN_STOP_SEC_VAR_AREA_CMN_FAST_INIT_8
+ #include "MemMap.h"
+-/* End: SFTYTQMON_STOP_SEC_VAR_AREA_CMN_FAST_INIT_8 (online) */
+-
+-
+-
+-
+-
++/* End: SFTYRSLVREVLN_STOP_SEC_VAR_AREA_CMN_FAST_INIT_8 (online) */
+ 
+-   /* Begin: SFTYTQMON_START_SEC_VAR_AREA_CMN_FAST_INIT_8 (online) */
+-#define SFTYTQMON_START_SEC_VAR_AREA_CMN_FAST_INIT_8
++/* Begin: SFTYRSLVREVLN_START_SEC_VAR_AREA_CMN_FAST_INIT_8 (online) */
++#define SFTYRSLVREVLN_START_SEC_VAR_AREA_CMN_FAST_INIT_8
+ #include "MemMap.h"
+ 
+-extern VAR(uint8, SFTYTQMON_VAR) SftyTqMonTqEspErrMonrSt;
+-   #define SFTYTQMON_STOP_SEC_VAR_AREA_CMN_FAST_INIT_8
++extern VAR(uint8, SFTYRSLVREVLN_VAR) SftyRslvrEvlnVadcSinRngHiErrMonrSt;
++   #define SFTYRSLVREVLN_STOP_SEC_VAR_AREA_CMN_FAST_INIT_8
+ #include "MemMap.h"
+-/* End: SFTYTQMON_STOP_SEC_VAR_AREA_CMN_FAST_INIT_8 (online) */
++/* End: SFTYRSLVREVLN_STOP_SEC_VAR_AREA_CMN_FAST_INIT_8 (online) */
+ 
+-/* Begin: SFTYDCEVLN_START_SEC_VAR_AREA_CMN_FAST_INIT_8 (online) */
+-#define SFTYDCEVLN_START_SEC_VAR_AREA_CMN_FAST_INIT_8
++/* Begin: SFTYRSLVREVLN_START_SEC_VAR_AREA_CMN_FAST_INIT_8 (online) */
++#define SFTYRSLVREVLN_START_SEC_VAR_AREA_CMN_FAST_INIT_8
+ #include "MemMap.h"
+ 
+-extern VAR(uint8, SFTYDCEVLN_VAR) SftyHvDcUEvlnPlausErrMonrSt;
++extern VAR(uint8, SFTYRSLVREVLN_VAR) SftyRslvrEvlnVadcExctElecOpenErrMonrSt;
++   #define SFTYRSLVREVLN_STOP_SEC_VAR_AREA_CMN_FAST_INIT_8
++#include "MemMap.h"
++/* End: SFTYRSLVREVLN_STOP_SEC_VAR_AREA_CMN_FAST_INIT_8 (online) */
+ 
+-#define SFTYDCEVLN_STOP_SEC_VAR_AREA_CMN_FAST_INIT_8
++/* Begin: SFTYRSLVREVLN_START_SEC_VAR_AREA_CMN_FAST_INIT_8 (online) */
++#define SFTYRSLVREVLN_START_SEC_VAR_AREA_CMN_FAST_INIT_8
+ #include "MemMap.h"
+-/* End: SFTYDCEVLN_STOP_SEC_VAR_AREA_CMN_FAST_INIT_8 (online) */
+ 
+-/* Begin: SFTYACEVLN_START_SEC_VAR_AREA_CMN_FAST_INIT_8 (online) */
+-#define SFTYACEVLN_START_SEC_VAR_AREA_CMN_FAST_INIT_8
++extern VAR(uint8, SFTYRSLVREVLN_VAR) SftyRslvrEvlnVadcExctElecLoErrMonrSt;
++   #define SFTYRSLVREVLN_STOP_SEC_VAR_AREA_CMN_FAST_INIT_8
+ #include "MemMap.h"
++/* End: SFTYRSLVREVLN_STOP_SEC_VAR_AREA_CMN_FAST_INIT_8 (online) */
+ 
+-extern VAR(uint8, SFTYDCEVLN_VAR) SftyAcEvlnPlausErrMonrSt;
++/* Begin: SFTYRSLVREVLN_START_SEC_VAR_AREA_CMN_FAST_INIT_8 (online) */
++#define SFTYRSLVREVLN_START_SEC_VAR_AREA_CMN_FAST_INIT_8
++#include "MemMap.h"
+ 
+-#define SFTYACEVLN_STOP_SEC_VAR_AREA_CMN_FAST_INIT_8
++extern VAR(uint8, SFTYRSLVREVLN_VAR) SftyRslvrEvlnVadcExctElecHiErrMonrSt;
++   #define SFTYRSLVREVLN_STOP_SEC_VAR_AREA_CMN_FAST_INIT_8
+ #include "MemMap.h"
+-/* End: SFTYACEVLN_STOP_SEC_VAR_AREA_CMN_FAST_INIT_8 (online) */
++/* End: SFTYRSLVREVLN_STOP_SEC_VAR_AREA_CMN_FAST_INIT_8 (online) */
+ 
+-/* Begin: SFTYTEMPEVLN_START_SEC_VAR_AREA_0_FAST_INIT_8 (online) */
+-#define SFTYTEMPEVLN_START_SEC_VAR_AREA_0_FAST_INIT_8
++/* Begin: SFTYRSLVREVLN_START_SEC_VAR_AREA_CMN_FAST_INIT_8 (online) */
++#define SFTYRSLVREVLN_START_SEC_VAR_AREA_CMN_FAST_INIT_8
+ #include "MemMap.h"
+ 
+-extern VAR(uint8, SFTYTEMPEVLN_VAR) SftyTempEvlnMotStatorTempStuckErrMonrSt;
+-#define SFTYTEMPEVLN_STOP_SEC_VAR_AREA_0_FAST_INIT_8
++extern VAR(uint8, SFTYRSLVREVLN_VAR) SftyRslvrEvlnVadcCosElecOpenErrMonrSt;
++   #define SFTYRSLVREVLN_STOP_SEC_VAR_AREA_CMN_FAST_INIT_8
+ #include "MemMap.h"
+-/* End: SFTYTEMPEVLN_STOP_SEC_VAR_AREA_0_FAST_INIT_8 (online) */
++/* End: SFTYRSLVREVLN_STOP_SEC_VAR_AREA_CMN_FAST_INIT_8 (online) */
+ 
+-/* Begin: SFTYTEMPEVLN_START_SEC_VAR_AREA_0_FAST_INIT_8 (online) */
+-#define SFTYTEMPEVLN_START_SEC_VAR_AREA_0_FAST_INIT_8
++/* Begin: SFTYRSLVREVLN_START_SEC_VAR_AREA_CMN_FAST_INIT_8 (online) */
++#define SFTYRSLVREVLN_START_SEC_VAR_AREA_CMN_FAST_INIT_8
+ #include "MemMap.h"
+ 
+-extern VAR(uint8, SFTYTEMPEVLN_VAR) SftyTempEvlnMotStatorTempRngHiErrMonrSt;
+-#define SFTYTEMPEVLN_STOP_SEC_VAR_AREA_0_FAST_INIT_8
++extern VAR(uint8, SFTYRSLVREVLN_VAR) SftyRslvrEvlnVadcCosElecLoErrMonrSt;
++   #define SFTYRSLVREVLN_STOP_SEC_VAR_AREA_CMN_FAST_INIT_8
+ #include "MemMap.h"
+-/* End: SFTYTEMPEVLN_STOP_SEC_VAR_AREA_0_FAST_INIT_8 (online) */
++/* End: SFTYRSLVREVLN_STOP_SEC_VAR_AREA_CMN_FAST_INIT_8 (online) */
+ 
+-/* Begin: SFTYTEMPEVLN_START_SEC_VAR_AREA_0_FAST_INIT_8 (online) */
+-#define SFTYTEMPEVLN_START_SEC_VAR_AREA_0_FAST_INIT_8
++/* Begin: SFTYRSLVREVLN_START_SEC_VAR_AREA_CMN_FAST_INIT_8 (online) */
++#define SFTYRSLVREVLN_START_SEC_VAR_AREA_CMN_FAST_INIT_8
+ #include "MemMap.h"
+ 
+-/*! \\cvar Error monitoring state for over DC BUS or capacitor temperature; unit \'-\' */
+-extern VAR(uint8, SFTYTEMPEVLN_VAR) SftyTempEvlnDcLinkTempHwpMonrSt;
+-#define SFTYTEMPEVLN_STOP_SEC_VAR_AREA_0_FAST_INIT_8
++extern VAR(uint8, SFTYRSLVREVLN_VAR) SftyRslvrEvlnVadcCosElecHiErrMonrSt;
++   #define SFTYRSLVREVLN_STOP_SEC_VAR_AREA_CMN_FAST_INIT_8
+ #include "MemMap.h"
+-/* End: SFTYTEMPEVLN_STOP_SEC_VAR_AREA_0_FAST_INIT_8 (online) */
++/* End: SFTYRSLVREVLN_STOP_SEC_VAR_AREA_CMN_FAST_INIT_8 (online) */
+ 
+-/* Begin: SFTYTEMPEVLN_START_SEC_VAR_AREA_0_FAST_INIT_8 (online) */
+-#define SFTYTEMPEVLN_START_SEC_VAR_AREA_0_FAST_INIT_8
++
++
++/* Begin: SFTYRSLVREVLN_START_SEC_VAR_AREA_CMN_FAST_INIT_8 (online) */
++#define SFTYRSLVREVLN_START_SEC_VAR_AREA_CMN_FAST_INIT_8
+ #include "MemMap.h"
+ 
+-extern VAR(uint8, SFTYTEMPEVLN_VAR) SftyTempEvlnMotStatorTempRngLoErrMonrSt;
+-#define SFTYTEMPEVLN_STOP_SEC_VAR_AREA_0_FAST_INIT_8
++extern VAR(uint8, SFTYRSLVREVLN_VAR) SftyRslvrEvlnVadcSinElecOpenErrMonrSt;
++   #define SFTYRSLVREVLN_STOP_SEC_VAR_AREA_CMN_FAST_INIT_8
+ #include "MemMap.h"
+-/* End: SFTYTEMPEVLN_STOP_SEC_VAR_AREA_0_FAST_INIT_8 (online) */
++/* End: SFTYRSLVREVLN_STOP_SEC_VAR_AREA_CMN_FAST_INIT_8 (online) */
+ 
+ 
+ 
+-/* Begin: SFTYACEVLN_START_SEC_VAR_AREA_1_FAST_INIT_8 (online) */
+-#define SFTYACEVLN_START_SEC_VAR_AREA_1_FAST_INIT_8
++/* Begin: SFTYRSLVREVLN_START_SEC_VAR_AREA_CMN_FAST_INIT_8 (online) */
++#define SFTYRSLVREVLN_START_SEC_VAR_AREA_CMN_FAST_INIT_8
+ #include "MemMap.h"
+ 
+-extern VAR(uint8, SFTYACEVLN_VAR) SftyAcEvlnRngHiErrMonrSt[SYSDEF_EM_PHA_SET_CNT_MAX][SYSDEF_EM_PHA_CNT_MAX];
+-#define SFTYACEVLN_STOP_SEC_VAR_AREA_1_FAST_INIT_8
++extern VAR(uint8, SFTYRSLVREVLN_VAR) SftyRslvrEvlnVadcSinElecLoErrMonrSt;
++   #define SFTYRSLVREVLN_STOP_SEC_VAR_AREA_CMN_FAST_INIT_8
+ #include "MemMap.h"
+-/* End: SFTYACEVLN_STOP_SEC_VAR_AREA_1_FAST_INIT_8 (online) */
++/* End: SFTYRSLVREVLN_STOP_SEC_VAR_AREA_CMN_FAST_INIT_8 (online) */
+ 
+-/* Begin: SFTYACEVLN_START_SEC_VAR_AREA_1_FAST_INIT_8 (online) */
+-#define SFTYACEVLN_START_SEC_VAR_AREA_1_FAST_INIT_8
++
++/* Begin: SFTYRSLVREVLN_START_SEC_VAR_AREA_CMN_FAST_INIT_8 (online) */
++#define SFTYRSLVREVLN_START_SEC_VAR_AREA_CMN_FAST_INIT_8
+ #include "MemMap.h"
+ 
+-extern VAR(uint8, SFTYACEVLN_VAR) SftyAcEvlnRngLoErrMonrSt[SYSDEF_EM_PHA_SET_CNT_MAX][SYSDEF_EM_PHA_CNT_MAX];
+-#define SFTYACEVLN_STOP_SEC_VAR_AREA_1_FAST_INIT_8
++extern VAR(uint8, SFTYRSLVREVLN_VAR) SftyRslvrEvlnVadcSinElecHiErrMonrSt;
++   #define SFTYRSLVREVLN_STOP_SEC_VAR_AREA_CMN_FAST_INIT_8
+ #include "MemMap.h"
+-/* End: SFTYACEVLN_STOP_SEC_VAR_AREA_1_FAST_INIT_8 (online) */
++/* End: SFTYRSLVREVLN_STOP_SEC_VAR_AREA_CMN_FAST_INIT_8 (online) */
++
+ 
+ /* Begin: SFTYACEVLN_START_SEC_VAR_AREA_2_FAST_INIT_8 (online) */
+ #define SFTYACEVLN_START_SEC_VAR_AREA_2_FAST_INIT_8
+@@ -1816,47 +471,46 @@ extern VAR(uint8, SFTYACEVLN_VAR) SftyAcEvlnSumErrMonrSt[SYSDEF_EM_PHA_SET_CNT_M
+ /* End: SFTYACEVLN_STOP_SEC_VAR_AREA_2_FAST_INIT_8 (online) */
+ 
+ 
+-
+-   /* Begin: SFTYTQMON_START_SEC_VAR_AREA_CMN_FAST_INIT_8 (online) */
+-#define SFTYTQMON_START_SEC_VAR_AREA_CMN_FAST_INIT_8
++/* Begin: SFTYACEVLN_START_SEC_VAR_AREA_1_FAST_INIT_8 (online) */
++#define SFTYACEVLN_START_SEC_VAR_AREA_1_FAST_INIT_8
+ #include "MemMap.h"
+ 
+-extern VAR(uint8, SFTYTQMON_VAR) SftyTqMonTqOscnErrMonrSt;
+-   #define SFTYTQMON_STOP_SEC_VAR_AREA_CMN_FAST_INIT_8
++extern VAR(uint8, SFTYACEVLN_VAR) SftyAcEvlnRngLoErrMonrSt[SYSDEF_EM_PHA_SET_CNT_MAX][SYSDEF_EM_PHA_CNT_MAX];
++#define SFTYACEVLN_STOP_SEC_VAR_AREA_1_FAST_INIT_8
+ #include "MemMap.h"
+-/* End: SFTYTQMON_STOP_SEC_VAR_AREA_CMN_FAST_INIT_8 (online) */
+-
+-
+-
+-
++/* End: SFTYACEVLN_STOP_SEC_VAR_AREA_1_FAST_INIT_8 (online) */
+ 
+ 
+-   /* Begin: SFTYTQMON_START_SEC_VAR_AREA_CMN_FAST_INIT_8 (online) */
+-#define SFTYTQMON_START_SEC_VAR_AREA_CMN_FAST_INIT_8
++/* Begin: SFTYACEVLN_START_SEC_VAR_AREA_1_FAST_INIT_8 (online) */
++#define SFTYACEVLN_START_SEC_VAR_AREA_1_FAST_INIT_8
+ #include "MemMap.h"
+ 
+-extern VAR(uint8, SFTYTQMON_VAR) SftyTqMonTqReqErrMonrSt;
+-   #define SFTYTQMON_STOP_SEC_VAR_AREA_CMN_FAST_INIT_8
++extern VAR(uint8, SFTYACEVLN_VAR) SftyAcEvlnRngHiErrMonrSt[SYSDEF_EM_PHA_SET_CNT_MAX][SYSDEF_EM_PHA_CNT_MAX];
++#define SFTYACEVLN_STOP_SEC_VAR_AREA_1_FAST_INIT_8
+ #include "MemMap.h"
+-/* End: SFTYTQMON_STOP_SEC_VAR_AREA_CMN_FAST_INIT_8 (online) */
+-
+-
++/* End: SFTYACEVLN_STOP_SEC_VAR_AREA_1_FAST_INIT_8 (online) */
+ 
+ 
++/* Begin: SFTYACEVLN_START_SEC_VAR_AREA_CMN_FAST_INIT_8 (online) */
++#define SFTYACEVLN_START_SEC_VAR_AREA_CMN_FAST_INIT_8
++#include "MemMap.h"
+ 
++extern VAR(uint8, SFTYDCEVLN_VAR) SftyAcEvlnPlausErrMonrSt;
+ 
+-   /* Begin: SFTYTQMON_START_SEC_VAR_AREA_CMN_FAST_INIT_8 (online) */
+-#define SFTYTQMON_START_SEC_VAR_AREA_CMN_FAST_INIT_8
++#define SFTYACEVLN_STOP_SEC_VAR_AREA_CMN_FAST_INIT_8
+ #include "MemMap.h"
++/* End: SFTYACEVLN_STOP_SEC_VAR_AREA_CMN_FAST_INIT_8 (online) */
+ 
+-extern VAR(uint8, SFTYTQMON_VAR) SftyTqMonTqRngErrMonrSt;
+-   #define SFTYTQMON_STOP_SEC_VAR_AREA_CMN_FAST_INIT_8
++/* Begin: SFTYDCEVLN_START_SEC_VAR_AREA_CMN_FAST_INIT_8 (online) */
++#define SFTYDCEVLN_START_SEC_VAR_AREA_CMN_FAST_INIT_8
+ #include "MemMap.h"
+-/* End: SFTYTQMON_STOP_SEC_VAR_AREA_CMN_FAST_INIT_8 (online) */
+ 
++extern VAR(uint8, SFTYDCEVLN_VAR) SftyHvDcUEvlnPlausErrMonrSt;
+ 
++#define SFTYDCEVLN_STOP_SEC_VAR_AREA_CMN_FAST_INIT_8
++#include "MemMap.h"
++/* End: SFTYDCEVLN_STOP_SEC_VAR_AREA_CMN_FAST_INIT_8 (online) */
+ 
+-/* ************ P2-100KW ************ */
+ 
+ #define SFTYE2EFPGA_START_SEC_VAR_AREA_CMN_FAST_INIT_8
+ #include "MemMap.h"
+@@ -2131,7 +785,7 @@ extern VAR(uint8, SFTYDCEVLN_VAR) SftyHvDcUEvlnOvHWErrMonrSt;
+ #define SFTYACEVLN_START_SEC_VAR_AREA_1_FAST_INIT_8
+ #include "MemMap.h"
+ 
+-extern VAR(uint8, SFTYACEVLN_VAR) SftyAcEvlnPhaseUOcHWErrMonrSt;
++extern VAR(uint8, SFTYACEVLN_VAR) SftyAcEvlnOCPhaUErrMonrSt;
+ #define SFTYACEVLN_STOP_SEC_VAR_AREA_1_FAST_INIT_8
+ #include "MemMap.h"
+ /* End: SFTYACEVLN_STOP_SEC_VAR_AREA_1_FAST_INIT_8 (online) */
+@@ -2140,7 +794,7 @@ extern VAR(uint8, SFTYACEVLN_VAR) SftyAcEvlnPhaseUOcHWErrMonrSt;
+ #define SFTYACEVLN_START_SEC_VAR_AREA_1_FAST_INIT_8
+ #include "MemMap.h"
+ 
+-extern VAR(uint8, SFTYACEVLN_VAR) SftyAcEvlnPhaseVOcHWErrMonrSt;
++extern VAR(uint8, SFTYACEVLN_VAR) SftyAcEvlnOCPhaVErrMonrSt;
+ #define SFTYACEVLN_STOP_SEC_VAR_AREA_1_FAST_INIT_8
+ #include "MemMap.h"
+ /* End: SFTYACEVLN_STOP_SEC_VAR_AREA_1_FAST_INIT_8 (online) */
+@@ -2149,7 +803,7 @@ extern VAR(uint8, SFTYACEVLN_VAR) SftyAcEvlnPhaseVOcHWErrMonrSt;
+ #define SFTYACEVLN_START_SEC_VAR_AREA_1_FAST_INIT_8
+ #include "MemMap.h"
+ 
+-extern VAR(uint8, SFTYACEVLN_VAR) SftyAcEvlnPhaseWOcHWErrMonrSt;
++extern VAR(uint8, SFTYACEVLN_VAR) SftyAcEvlnOCPhaWErrMonrSt;
+ #define SFTYACEVLN_STOP_SEC_VAR_AREA_1_FAST_INIT_8
+ #include "MemMap.h"
+ /* End: SFTYACEVLN_STOP_SEC_VAR_AREA_1_FAST_INIT_8 (online) */
+diff --git a/src/fw_cu/Components/Safety/Sfty_Cmn/SftyParkLockPosnAcqn/include/SftyParkLockPosnAcqn_data.h b/src/fw_cu/Components/Safety/Sfty_Cmn/SftyParkLockPosnAcqn/include/SftyParkLockPosnAcqn_data.h
+index 6f529fb71..14bd35f58 100644
+--- a/src/fw_cu/Components/Safety/Sfty_Cmn/SftyParkLockPosnAcqn/include/SftyParkLockPosnAcqn_data.h
++++ b/src/fw_cu/Components/Safety/Sfty_Cmn/SftyParkLockPosnAcqn/include/SftyParkLockPosnAcqn_data.h
+@@ -1,6 +1,6 @@
+ /* ***************************************************************** */
+-/* Sourcefile: SftyParkLockPosnAcqn_data.h                                  */
+-/* ADD Container: SftyParkLockPosnAcqn                                      */
++/* Sourcefile: SftyParkLockPosnAcqn_data.h                           */
++/* ADD Container: SftyParkLockPosnAcqn                               */
+ /* ADD Container Version: 01.00                                      */
+ /* ***************************************************************** */
+ /* Copyright (C) Valeo-Siemens eAutomotive GmbH 2021                 */
+diff --git a/src/fw_cu/Components/Safety/Sfty_Cmn/SftyShutoffPahTst/src/SftyShutoffPahTst.c b/src/fw_cu/Components/Safety/Sfty_Cmn/SftyShutoffPahTst/src/SftyShutoffPahTst.c
+index e328a8c64..b244a51f0 100644
+--- a/src/fw_cu/Components/Safety/Sfty_Cmn/SftyShutoffPahTst/src/SftyShutoffPahTst.c
++++ b/src/fw_cu/Components/Safety/Sfty_Cmn/SftyShutoffPahTst/src/SftyShutoffPahTst.c
+@@ -35,7 +35,6 @@
+ #include "Std_Types.h"
+ #include "Sfty_Types.h"
+ #include "IfxPort_reg.h"
+-#include "SftyInvActr_cfg.h"
+ #ifdef TC27X_USED
+ #include "Smu.h"
+ #endif
+diff --git a/src/fw_cu/Components/Safety/Sfty_Cmn/Sfty_Common/include/SftyReplcmt_data.h b/src/fw_cu/Components/Safety/Sfty_Cmn/Sfty_Common/include/SftyReplcmt_data.h
+index e298d7ee6..d94b76f80 100644
+--- a/src/fw_cu/Components/Safety/Sfty_Cmn/Sfty_Common/include/SftyReplcmt_data.h
++++ b/src/fw_cu/Components/Safety/Sfty_Cmn/Sfty_Common/include/SftyReplcmt_data.h
+@@ -2729,6 +2729,24 @@ extern CONST(uint8, SFTYREPLCMT_CALIB) SftyReplcmtTempEvlnTempIPhaValStiEna;
+ #include "MemMap.h"
+ /* End: SFTYREPLCMT_STOP_SEC_CALIB_8 (calib) */
+ 
++/* Begin: SFTYREPLCMT_START_SEC_CALIB_8 (calib) */
++#define SFTYREPLCMT_START_SEC_CALIB_8
++#include "MemMap.h"
++
++extern CONST(boolean, SFTYREPLCMT_CALIB) SftyReplcmtIgbtTempRngSwtStsVal;
++#define SFTYREPLCMT_STOP_SEC_CALIB_8
++#include "MemMap.h"
++/* End: SFTYREPLCMT_STOP_SEC_CALIB_8 (calib) */
++
++/* Begin: SFTYREPLCMT_START_SEC_CALIB_8 (calib) */
++#define SFTYREPLCMT_START_SEC_CALIB_8
++#include "MemMap.h"
++
++extern CONST(uint8, SFTYREPLCMT_CALIB) SftyReplcmtIgbtTempRngSwtStsValStiEna;
++#define SFTYREPLCMT_STOP_SEC_CALIB_8
++#include "MemMap.h"
++/* End: SFTYREPLCMT_STOP_SEC_CALIB_8 (calib) */
++
+ /* Begin: SFTYREPLCMT_START_SEC_CALIB_16 (calib) */
+ #define SFTYREPLCMT_START_SEC_CALIB_16
+ #include "MemMap.h"
+@@ -2738,6 +2756,7 @@ extern CONST(uint16, SFTYREPLCMT_CALIB) SftyReplcmtTempEvlnTempIGBTPhaURawVal;
+ #include "MemMap.h"
+ /* End: SFTYREPLCMT_STOP_SEC_CALIB_16 (calib) */
+ 
++
+ /* Begin: SFTYREPLCMT_START_SEC_CALIB_16 (calib) */
+ #define SFTYREPLCMT_START_SEC_CALIB_16
+ #include "MemMap.h"
+diff --git a/src/fw_cu/Components/Safety/Sfty_Cmn/Sfty_Common/src/SftyReplcmt_data.c b/src/fw_cu/Components/Safety/Sfty_Cmn/Sfty_Common/src/SftyReplcmt_data.c
+index c82d4184e..9c1717b51 100644
+--- a/src/fw_cu/Components/Safety/Sfty_Cmn/Sfty_Common/src/SftyReplcmt_data.c
++++ b/src/fw_cu/Components/Safety/Sfty_Cmn/Sfty_Common/src/SftyReplcmt_data.c
+@@ -2945,6 +2945,38 @@ CONST(uint8, SFTYREPLCMT_CALIB) SftyReplcmtTempEvlnTempIPhaValStiEna = 0U;
+ #include "MemMap.h"
+ /* End: SFTYREPLCMT_STOP_SEC_CALIB_8 (calib) */
+ 
++/* Begin: SFTYREPLCMT_START_SEC_CALIB_8 (calib) */
++#define SFTYREPLCMT_START_SEC_CALIB_8
++#include "MemMap.h"
++/*
++@@ SYMBOL = SftyReplcmtIgbtTempRngSwtStsValStiEna
++@@ A2L_TYPE = PARAMETER
++@@ DATA_TYPE = UBYTE
++@@ DESCRIPTION = "Enable flag for the stimulation of range switch"
++@@ GROUP = SftyTempEvln
++@@ END
++*/
++CONST(uint8, SFTYREPLCMT_CALIB) SftyReplcmtIgbtTempRngSwtStsValStiEna = 0U;
++#define SFTYREPLCMT_STOP_SEC_CALIB_8
++#include "MemMap.h"
++/* End: SFTYREPLCMT_STOP_SEC_CALIB_8 (calib) */
++
++/* Begin: SFTYREPLCMT_START_SEC_CALIB_8 (calib) */
++#define SFTYREPLCMT_START_SEC_CALIB_8
++#include "MemMap.h"
++/*
++@@ SYMBOL = SftyReplcmtIgbtTempRngSwtStsVal
++@@ A2L_TYPE = PARAMETER
++@@ DATA_TYPE = UBYTE
++@@ DESCRIPTION = "Replacement value for range switch status"
++@@ GROUP = SftyTempEvln
++@@ END
++*/
++CONST(boolean, SFTYREPLCMT_CALIB) SftyReplcmtIgbtTempRngSwtStsVal = 0U;
++#define SFTYREPLCMT_STOP_SEC_CALIB_8
++#include "MemMap.h"
++/* End: SFTYREPLCMT_STOP_SEC_CALIB_8 (calib) */
++
+ /* Begin: SFTYREPLCMT_START_SEC_CALIB_16 (calib) */
+ #define SFTYREPLCMT_START_SEC_CALIB_16
+ #include "MemMap.h"
+diff --git a/src/fw_cu/Components/Safety/Sfty_CtrlrMonr/WdgAndMcuSplyMonCompst_Cfg/SftySbcCtrlIf_Cfg/src/SftySbcCtrlIf_cfg.c b/src/fw_cu/Components/Safety/Sfty_CtrlrMonr/WdgAndMcuSplyMonCompst_Cfg/SftySbcCtrlIf_Cfg/src/SftySbcCtrlIf_cfg.c
+index 958e99151..40356a62d 100644
+--- a/src/fw_cu/Components/Safety/Sfty_CtrlrMonr/WdgAndMcuSplyMonCompst_Cfg/SftySbcCtrlIf_Cfg/src/SftySbcCtrlIf_cfg.c
++++ b/src/fw_cu/Components/Safety/Sfty_CtrlrMonr/WdgAndMcuSplyMonCompst_Cfg/SftySbcCtrlIf_Cfg/src/SftySbcCtrlIf_cfg.c
+@@ -36,11 +36,11 @@
+ FUNC(boolean, SFTYSBCCTRLIF_CODE) SftySbcCtrlIf_SafeStReqCfg(void)
+ {
+    /* ******** Variables declaration *********** */
+-   boolean retVal = STD_OFF;
++   boolean retVal;
+ 
+ /* If SBC FS6500 is used, accumulate the safe state requests */
+ #if FTR_SBC_FS6500 == 1
+-
++   retVal = STD_OFF;
+ #endif
+ 
+ /* If SBC TLF35584 is used, accumulate the safe state requests */
+@@ -65,14 +65,14 @@ FUNC(boolean, SFTYSBCCTRLIF_CODE) SftySbcCtrlIf_SafeStReqCfg(void)
+ FUNC(SftySbcCtrlIfWkSrcType, SFTYSBCCTRLIF_CODE) SftySbcCtrlIf_WkSrcCfg(void)
+ {
+    /* ******** Variables declaration *********** */
+-   SftySbcCtrlIfWkSrcType retVal = 0U;
++   SftySbcCtrlIfWkSrcType retVal;
+ #if FTR_SBC_TLF35584 == 1
+-   SftyTlf35584WkSrcType regValTlf35584WkSrc;
++   SftyTlf35584WkSrcType regValTlf35584WkSrc; /* PRQA S 0759 # Union is needed to get access to every signal */
+ #endif
+ 
+ /* If SBC FS6500 is used, set the wake source based on the wake source from the SBC */
+ #if FTR_SBC_FS6500 == 1
+-
++   retVal = SFTYSBCTRLIF_WK_SRC_KL15;
+ #endif
+ 
+ /* If SBC TLF35584 is used, set the wake source based on the wake source from the SBC */
+diff --git a/src/fw_cu/Components/Safety/Sfty_Inv/SftyAcEvln/include/SftyAcEvln.h b/src/fw_cu/Components/Safety/Sfty_Inv/SftyAcEvln/include/SftyAcEvln.h
+index 7ecf8d8fc..4d3e36090 100644
+--- a/src/fw_cu/Components/Safety/Sfty_Inv/SftyAcEvln/include/SftyAcEvln.h
++++ b/src/fw_cu/Components/Safety/Sfty_Inv/SftyAcEvln/include/SftyAcEvln.h
+@@ -7,7 +7,7 @@
+ /* Department: Valeo Siemens eAutomotive                                  */
+ /* I DT EC R&D                                                            */
+ /* ********************************************************************** */
+-/* Copyright (C) Valeo Siemens eAutomotive Germany GmbH 2021              */
++/* Copyright (C) Valeo Siemens eAutomotive Germany GmbH 2022              */
+ /* All Rights Reserved. Confidential                                      */
+ /* ********************************************************************** */
+ #ifndef SFTYACEVLN_H
+@@ -96,7 +96,7 @@ extern FUNC(void, SFTY_AC_EVLN_CODE) SftyAcEvln_OverCurrPhaWReinitMonrData(void)
+ /*! @} doxygen end of group definition */
+ #endif
+ /* ********************************************************************** */
+-/* Copyright (C) Valeo Siemens eAutomotive Germany GmbH 2021              */
++/* Copyright (C) Valeo Siemens eAutomotive Germany GmbH 2022              */
+ /* All Rights Reserved. Confidential */
+ /* ********************************************************************** */
+-/*==================[end of file]============================================*/
++/*==================[end of file]=========================================*/
+diff --git a/src/fw_cu/Components/Safety/Sfty_Inv/SftyAcEvln/include/SftyAcEvln_data.h b/src/fw_cu/Components/Safety/Sfty_Inv/SftyAcEvln/include/SftyAcEvln_data.h
+index 08582e0e0..0d1c34239 100644
+--- a/src/fw_cu/Components/Safety/Sfty_Inv/SftyAcEvln/include/SftyAcEvln_data.h
++++ b/src/fw_cu/Components/Safety/Sfty_Inv/SftyAcEvln/include/SftyAcEvln_data.h
+@@ -3,7 +3,7 @@
+ /* ADD Container: SftyAcEvln                                         */
+ /* ADD Container Version:01.01                                       */
+ /* ***************************************************************** */
+-/* Copyright (C) Valeo-Siemens eAutomotive GmbH 2021                 */
++/* Copyright (C) Valeo-Siemens eAutomotive GmbH 2022                 */
+ /* All Rights Reserved. Confidential                                 */
+ /* ***************************************************************** */
+ #ifndef\tSFTYACEVLN_DATA_H
+@@ -61,7 +61,7 @@ extern VAR(uint8, SFTYACEVLN_VAR) SftyAcEvlnRngHiErrMonrSt[SYSDEF_EM_PHA_SET_CNT
+ #define SFTYACEVLN_START_SEC_VAR_AREA_1_FAST_INIT_8
+ #include "MemMap.h"
+ 
+-extern VAR(uint8, SFTYACEVLN_VAR) SftyAcEvlnPhaseUOcHWErrMonrSt;
++extern VAR(uint8, SFTYACEVLN_VAR) SftyAcEvlnOCPhaUErrMonrSt;
+ #define SFTYACEVLN_STOP_SEC_VAR_AREA_1_FAST_INIT_8
+ #include "MemMap.h"
+ /* End: SFTYACEVLN_STOP_SEC_VAR_AREA_1_FAST_INIT_8 (online) */
+@@ -70,7 +70,7 @@ extern VAR(uint8, SFTYACEVLN_VAR) SftyAcEvlnPhaseUOcHWErrMonrSt;
+ #define SFTYACEVLN_START_SEC_VAR_AREA_1_FAST_INIT_8
+ #include "MemMap.h"
+ 
+-extern VAR(uint8, SFTYACEVLN_VAR) SftyAcEvlnPhaseVOcHWErrMonrSt;
++extern VAR(uint8, SFTYACEVLN_VAR) SftyAcEvlnOCPhaVErrMonrSt;
+ #define SFTYACEVLN_STOP_SEC_VAR_AREA_1_FAST_INIT_8
+ #include "MemMap.h"
+ /* End: SFTYACEVLN_STOP_SEC_VAR_AREA_1_FAST_INIT_8 (online) */
+@@ -79,7 +79,7 @@ extern VAR(uint8, SFTYACEVLN_VAR) SftyAcEvlnPhaseVOcHWErrMonrSt;
+ #define SFTYACEVLN_START_SEC_VAR_AREA_1_FAST_INIT_8
+ #include "MemMap.h"
+ 
+-extern VAR(uint8, SFTYACEVLN_VAR) SftyAcEvlnPhaseWOcHWErrMonrSt;
++extern VAR(uint8, SFTYACEVLN_VAR) SftyAcEvlnOCPhaWErrMonrSt;
+ #define SFTYACEVLN_STOP_SEC_VAR_AREA_1_FAST_INIT_8
+ #include "MemMap.h"
+ /* End: SFTYACEVLN_STOP_SEC_VAR_AREA_1_FAST_INIT_8 (online) */
+@@ -294,7 +294,7 @@ extern CONST(uint8, SFTYDCEVLN_VAR) SftyReplcmtAcEvlnMeasCoherFltSts;
+ 
+ #endif
+ /* ***************************************************************** */
+-/* Copyright (C) Valeo-Siemens eAutomotive GmbH 2021                 */
++/* Copyright (C) Valeo-Siemens eAutomotive GmbH 2022                 */
+ /* All Rights Reserved. Confidential                                 */
+ /* ***************************************************************** */
+ /*==================[end of file]====================================*/
+diff --git a/src/fw_cu/Components/Safety/Sfty_Inv/SftyAcEvln/src/SftyAcEvln.c b/src/fw_cu/Components/Safety/Sfty_Inv/SftyAcEvln/src/SftyAcEvln.c
+index b11e5fd1d..31c5194d7 100644
+--- a/src/fw_cu/Components/Safety/Sfty_Inv/SftyAcEvln/src/SftyAcEvln.c
++++ b/src/fw_cu/Components/Safety/Sfty_Inv/SftyAcEvln/src/SftyAcEvln.c
+@@ -8,7 +8,7 @@
+ /* Department: Valeo Siemens eAutomotive                                  */
+ /* I DT EC R&D                                                            */
+ /* ********************************************************************** */
+-/* Copyright (C) Valeo Siemens eAutomotive Germany GmbH 2021              */
++/* Copyright (C) Valeo Siemens eAutomotive Germany GmbH 2022              */
+ /* All Rights Reserved. Confidential                                      */
+ /* ********************************************************************** */
+ 
+@@ -279,15 +279,15 @@ LOCAL_INLINE void SftyAcEvln_OcHWErrMonrStUpd(uint8 idx, uint8 errMonrSt)
+    /* set hw fault status fail */
+    if (idx == SYSDEF_PHA_U)
+    {
+-      SftyAcEvlnPhaseUOcHWErrMonrSt = errMonrSt;
++      SftyAcEvlnOCPhaUErrMonrSt = errMonrSt;
+    }
+    else if (idx == SYSDEF_PHA_V)
+    {
+-      SftyAcEvlnPhaseVOcHWErrMonrSt = errMonrSt;
++      SftyAcEvlnOCPhaVErrMonrSt = errMonrSt;
+    }
+    else   /* ==> (idx == SYSDEF_PHA_W) */
+    {
+-      SftyAcEvlnPhaseWOcHWErrMonrSt = errMonrSt;
++      SftyAcEvlnOCPhaWErrMonrSt = errMonrSt;
+    }
+ 
+    return;
+@@ -812,10 +812,10 @@ FUNC(void, SFTY_AC_EVLN_CODE) SftyAcEvln_InitAreaCmn(void)
+    SWIT_SftyAcEvln_InitAreaCmn_BgnHook();
+ #endif
+     /* Initialize Error Monitor Status */
+-\tSftyAcEvlnPlausErrMonrSt      = ERR_DEB_MONR_STS_INACTIVE;
+-\tSftyAcEvlnPhaseUOcHWErrMonrSt = ERR_DEB_MONR_STS_INACTIVE;
+-\tSftyAcEvlnPhaseVOcHWErrMonrSt = ERR_DEB_MONR_STS_INACTIVE;
+-\tSftyAcEvlnPhaseWOcHWErrMonrSt = ERR_DEB_MONR_STS_INACTIVE;
++\tSftyAcEvlnPlausErrMonrSt  = ERR_DEB_MONR_STS_INACTIVE;
++\tSftyAcEvlnOCPhaUErrMonrSt = ERR_DEB_MONR_STS_INACTIVE;
++\tSftyAcEvlnOCPhaVErrMonrSt = ERR_DEB_MONR_STS_INACTIVE;
++\tSftyAcEvlnOCPhaWErrMonrSt = ERR_DEB_MONR_STS_INACTIVE;
+ 
+ \tSftyAcEvlnOverUnderCurFltSts[SYSDEF_PHA_U] = SFTY_AC_EVLN_FLT_STS_PASSED;
+ \tSftyAcEvlnOverUnderCurFltSts[SYSDEF_PHA_V] = SFTY_AC_EVLN_FLT_STS_PASSED;
+@@ -932,7 +932,7 @@ FUNC(void, SFTY_AC_EVLN_CODE) SftyAcEvln_OverCurrPhaWReinitMonrData(void)/* PRQA
+ /*================== [closure] ==============================================*/
+ /*! @} doxygen end of group definition */
+ /* ************************************************************************* */
+-/* Copyright (C) Valeo Siemens eAutomotive Germany GmbH 2021                 */
++/* Copyright (C) Valeo Siemens eAutomotive Germany GmbH 2022                 */
+ /* All Rights Reserved. Confidential                                         */
+ /* ************************************************************************* */
+ /*==================[end of file]============================================*/
+diff --git a/src/fw_cu/Components/Safety/Sfty_Inv/SftyAcEvln/src/SftyAcEvln_data.c b/src/fw_cu/Components/Safety/Sfty_Inv/SftyAcEvln/src/SftyAcEvln_data.c
+index 6a5bbf4c0..900f80b47 100644
+--- a/src/fw_cu/Components/Safety/Sfty_Inv/SftyAcEvln/src/SftyAcEvln_data.c
++++ b/src/fw_cu/Components/Safety/Sfty_Inv/SftyAcEvln/src/SftyAcEvln_data.c
+@@ -3,7 +3,7 @@
+ /* ADD Container: SftyAcEvln                                         */
+ /* ADD Container Version: 01.01                                      */
+ /* ***************************************************************** */
+-/* Copyright (C) Valeo-Siemens eAutomotive GmbH 2021                 */
++/* Copyright (C) Valeo-Siemens eAutomotive GmbH 2022                 */
+ /* All Rights Reserved. Confidential                                 */
+ /* ***************************************************************** */
+ 
+@@ -101,7 +101,7 @@ VAR(uint8, SFTYACEVLN_VAR) SftyAcEvlnRngHiErrMonrSt[SYSDEF_EM_PHA_SET_CNT_MAX][S
+ #define SFTYACEVLN_START_SEC_VAR_AREA_1_FAST_INIT_8
+ #include "MemMap.h"
+ /*
+-@@ SYMBOL = SftyAcEvlnPhaseUOcHWErrMonrSt
++@@ SYMBOL = SftyAcEvlnOCPhaUErrMonrSt
+ @@ A2L_TYPE = MEASURE
+ @@ DATA_TYPE = UBYTE [0 ... 2]
+ @@ CONVERSION = TABLE 0 "INACTIVE" 1 "PASSED" 2 "FAILED"
+@@ -110,7 +110,7 @@ VAR(uint8, SFTYACEVLN_VAR) SftyAcEvlnRngHiErrMonrSt[SYSDEF_EM_PHA_SET_CNT_MAX][S
+ @@ END
+ */
+ /*! \\cvar Error monitoirng status for Phase current electrical value higher than allowed; unit \'-\' */
+-VAR(uint8, SFTYACEVLN_VAR) SftyAcEvlnPhaseUOcHWErrMonrSt = 0u;
++VAR(uint8, SFTYACEVLN_VAR) SftyAcEvlnOCPhaUErrMonrSt = 0u;
+ 
+ #define SFTYACEVLN_STOP_SEC_VAR_AREA_1_FAST_INIT_8
+ #include "MemMap.h"
+@@ -120,7 +120,7 @@ VAR(uint8, SFTYACEVLN_VAR) SftyAcEvlnPhaseUOcHWErrMonrSt = 0u;
+ #define SFTYACEVLN_START_SEC_VAR_AREA_1_FAST_INIT_8
+ #include "MemMap.h"
+ /*
+-@@ SYMBOL = SftyAcEvlnPhaseVOcHWErrMonrSt
++@@ SYMBOL = SftyAcEvlnOCPhaVErrMonrSt
+ @@ A2L_TYPE = MEASURE
+ @@ DATA_TYPE = UBYTE [0 ... 2]
+ @@ CONVERSION = TABLE 0 "INACTIVE" 1 "PASSED" 2 "FAILED"
+@@ -129,7 +129,7 @@ VAR(uint8, SFTYACEVLN_VAR) SftyAcEvlnPhaseUOcHWErrMonrSt = 0u;
+ @@ END
+ */
+ /*! \\cvar Error monitoirng status for Phase current electrical value higher than allowed; unit \'-\' */
+-VAR(uint8, SFTYACEVLN_VAR) SftyAcEvlnPhaseVOcHWErrMonrSt = 0u;
++VAR(uint8, SFTYACEVLN_VAR) SftyAcEvlnOCPhaVErrMonrSt = 0u;
+ 
+ #define SFTYACEVLN_STOP_SEC_VAR_AREA_1_FAST_INIT_8
+ #include "MemMap.h"
+@@ -139,7 +139,7 @@ VAR(uint8, SFTYACEVLN_VAR) SftyAcEvlnPhaseVOcHWErrMonrSt = 0u;
+ #define SFTYACEVLN_START_SEC_VAR_AREA_1_FAST_INIT_8
+ #include "MemMap.h"
+ /*
+-@@ SYMBOL = SftyAcEvlnPhaseWOcHWErrMonrSt
++@@ SYMBOL = SftyAcEvlnOCPhaWErrMonrSt
+ @@ A2L_TYPE = MEASURE
+ @@ DATA_TYPE = UBYTE [0 ... 2]
+ @@ CONVERSION = TABLE 0 "INACTIVE" 1 "PASSED" 2 "FAILED"
+@@ -148,7 +148,7 @@ VAR(uint8, SFTYACEVLN_VAR) SftyAcEvlnPhaseVOcHWErrMonrSt = 0u;
+ @@ END
+ */
+ /*! \\cvar Error monitoirng status for Phase current electrical value higher than allowed; unit \'-\' */
+-VAR(uint8, SFTYACEVLN_VAR) SftyAcEvlnPhaseWOcHWErrMonrSt = 0u;
++VAR(uint8, SFTYACEVLN_VAR) SftyAcEvlnOCPhaWErrMonrSt = 0u;
+ 
+ #define SFTYACEVLN_STOP_SEC_VAR_AREA_1_FAST_INIT_8
+ #include "MemMap.h"
+@@ -576,7 +576,7 @@ VAR(uint8, SFTYACEVLN_VAR) SftyAcEvlnRxCrcErrMonrSt = 0U;
+ 
+ 
+ /* ***************************************************************** */
+-/* Copyright (C) Valeo-Siemens eAutomotive GmbH 2021                 */
++/* Copyright (C) Valeo-Siemens eAutomotive GmbH 2022                 */
+ /* All Rights Reserved. Confidential                                 */
+ /* ***************************************************************** */
+ /*==================[end of file]====================================*/
+diff --git a/src/fw_cu/Components/Safety/Sfty_Inv/SftyActvDchaCtrl/include/SftyActvDchaCtrl_data.h b/src/fw_cu/Components/Safety/Sfty_Inv/SftyActvDchaCtrl/include/SftyActvDchaCtrl_data.h
+index b03878c3f..66d386d67 100644
+--- a/src/fw_cu/Components/Safety/Sfty_Inv/SftyActvDchaCtrl/include/SftyActvDchaCtrl_data.h
++++ b/src/fw_cu/Components/Safety/Sfty_Inv/SftyActvDchaCtrl/include/SftyActvDchaCtrl_data.h
+@@ -3,7 +3,7 @@
+ /* ADD Container: SftyActvDchaCtrl\t\t\t\t\t\t\t\t\t */
+ /* ADD Container Version: 01.00\t\t\t\t\t\t\t\t\t\t */
+ /* ***************************************************************** */
+-/* Copyright (C) Valeo Siemens eAutomotive GmbH 2021 \t\t\t\t */
++/* Copyright (C) Valeo Siemens eAutomotive GmbH 2022 \t\t\t\t */
+ /* All Rights Reserved. Confidential \t\t\t\t\t\t\t\t */
+ /* ***************************************************************** */
+ 
+@@ -166,7 +166,7 @@ typedef struct SftyActvDchaPrmDataType_
+    @@ STRUCTURE = SftyActvDchaPrmDataType
+    @@ A2L_TYPE = PARAMETER
+    @@ DATA_TYPE = UBYTE [0 ... 10]
+-   @@ DESCRIPTION = "The maximum fail times for checking the dv/dt of\xc2\xa0active discharge by resistor in a row"
++   @@ DESCRIPTION = "The maximum fail times for checking the dv/dt of active discharge by resistor in a row"
+    @@ GROUP = SftyActvDchaCtrl
+    @@ END
+    */
+@@ -492,7 +492,7 @@ extern CONST(float32, SFTYREPLCMT_CALIB) SftyReplcmtActvDchaCtrlHvDcVolt; /* PRQ
+ /*! @} doxygen end of group definition */
+ #endif /* SFTYACTVDCHACTRL_DATA_H */
+ /* ***************************************************************** */
+-/* Copyright (C) Valeo Siemens eAutomotive GmbH 2021                 */
++/* Copyright (C) Valeo Siemens eAutomotive GmbH 2022                 */
+ /* All Rights Reserved. Confidential                                 */
+ /* ***************************************************************** */
+ /*==================[end of file]============================================*/
+diff --git a/src/fw_cu/Components/Safety/Sfty_Inv/SftyActvDchaCtrl/src/SftyActvDchaCtrl.c b/src/fw_cu/Components/Safety/Sfty_Inv/SftyActvDchaCtrl/src/SftyActvDchaCtrl.c
+index 6d8f34549..3d275c9ab 100644
+--- a/src/fw_cu/Components/Safety/Sfty_Inv/SftyActvDchaCtrl/src/SftyActvDchaCtrl.c
++++ b/src/fw_cu/Components/Safety/Sfty_Inv/SftyActvDchaCtrl/src/SftyActvDchaCtrl.c
+@@ -7,7 +7,7 @@
+ /* Department: Valeo Siemens eAutomotive                                  */
+ /* I DT EC R&D                                                            */
+ /* ********************************************************************** */
+-/* Copyright (C) Valeo Siemens eAutomotive Germany GmbH 2021              */
++/* Copyright (C) Valeo Siemens eAutomotive Germany GmbH 2022              */
+ /* All Rights Reserved. Confidential                                      */
+ /* ********************************************************************** */
+ 
+@@ -1149,7 +1149,7 @@ FUNC(void, SFTYACTVDCHACTRL) SftyActvDchaCtrl_Init(void)
+ /*================== [closure] ==============================================*/
+ /*! @} doxygen end of group definition */
+ /* ********************************************************************** */
+-/* Copyright (C) Valeo Siemens eAutomotive Germany GmbH 2021              */
++/* Copyright (C) Valeo Siemens eAutomotive Germany GmbH 2022              */
+ /* All Rights Reserved. Confidential                                      */
+ /* ********************************************************************** */
+ /*==================[end of file]============================================*/
+diff --git a/src/fw_cu/Components/Safety/Sfty_Inv/SftyActvDchaCtrl/src/SftyActvDchaCtrl_data.c b/src/fw_cu/Components/Safety/Sfty_Inv/SftyActvDchaCtrl/src/SftyActvDchaCtrl_data.c
+index 84c42b3f0..293d12665 100644
+--- a/src/fw_cu/Components/Safety/Sfty_Inv/SftyActvDchaCtrl/src/SftyActvDchaCtrl_data.c
++++ b/src/fw_cu/Components/Safety/Sfty_Inv/SftyActvDchaCtrl/src/SftyActvDchaCtrl_data.c
+@@ -3,7 +3,7 @@
+ /* ADD Container: SftyActvDchaCtrl                                   */
+ /* ADD Container Version:01.00                                       */
+ /* ***************************************************************** */
+-/* Copyright (C) Valeo Siemens eAutomotive GmbH 2021                 */
++/* Copyright (C) Valeo Siemens eAutomotive GmbH 2022                 */
+ /* All Rights Reserved. Confidential                                 */
+ /* ***************************************************************** */
+ /*!
+@@ -650,7 +650,7 @@ CONST(float32, SFTYREPLCMT_CALIB) SftyReplcmtActvDchaCtrlHvDcVolt = 0.0f;
+ /*================== [closure] ==============================================*/
+ /** @} doxygen end group definition */
+ /* ***************************************************************** */
+-/* Copyright (C) Valeo Siemens eAutomotive GmbH 2021                 */
++/* Copyright (C) Valeo Siemens eAutomotive GmbH 2022                 */
+ /* All Rights Reserved. Confidential                                 */
+ /* ***************************************************************** */
+ /*==================[end of file]============================================*/
+diff --git a/src/fw_cu/Components/Safety/Sfty_Inv/SftyHvDcUEvln/include/SftyHvDcUEvln.h b/src/fw_cu/Components/Safety/Sfty_Inv/SftyHvDcUEvln/include/SftyHvDcUEvln.h
+index 0637196d8..5aaa4175f 100644
+--- a/src/fw_cu/Components/Safety/Sfty_Inv/SftyHvDcUEvln/include/SftyHvDcUEvln.h
++++ b/src/fw_cu/Components/Safety/Sfty_Inv/SftyHvDcUEvln/include/SftyHvDcUEvln.h
+@@ -7,7 +7,7 @@
+ /* Department: Valeo Siemens eAutomotive                                  */
+ /* I DT EC R&D                                                            */
+ /* ********************************************************************** */
+-/* Copyright (C) Valeo Siemens eAutomotive Germany GmbH 2021              */
++/* Copyright (C) Valeo Siemens eAutomotive Germany GmbH 2022              */
+ /* All Rights Reserved. Confidential                                      */
+ /* ********************************************************************** */
+ 
+@@ -109,7 +109,7 @@ extern FUNC(void, SFTY_DC_EVLN_CODE) SftyHvDcUEvln_PlausReinitMonrData(void);
+ /*! @} doxygen end of group definition */
+ #endif   /* SFTYHVDCUEVLN_H */
+ /* ***************************************************************** */
+-/* Copyright (C) Valeo-Siemens eAutomotive GmbH 2021                 */
++/* Copyright (C) Valeo-Siemens eAutomotive GmbH 2022                 */
+ /* All Rights Reserved. Confidential                                 */
+ /* ***************************************************************** */
+ /*==================[end of file]====================================*/
+diff --git a/src/fw_cu/Components/Safety/Sfty_Inv/SftyHvDcUEvln/include/SftyHvDcUEvln_data.h b/src/fw_cu/Components/Safety/Sfty_Inv/SftyHvDcUEvln/include/SftyHvDcUEvln_data.h
+index bc2ff36b9..956d07a41 100644
+--- a/src/fw_cu/Components/Safety/Sfty_Inv/SftyHvDcUEvln/include/SftyHvDcUEvln_data.h
++++ b/src/fw_cu/Components/Safety/Sfty_Inv/SftyHvDcUEvln/include/SftyHvDcUEvln_data.h
+@@ -3,7 +3,7 @@
+ /* ADD Container: SftyHvDcUEvln                                      */
+ /* ADD Container Version: 01.02                                      */
+ /* ***************************************************************** */
+-/* Copyright (C) Valeo-Siemens eAutomotive GmbH 2021                 */
++/* Copyright (C) Valeo-Siemens eAutomotive GmbH 2022                 */
+ /* All Rights Reserved. Confidential                                 */
+ /* ***************************************************************** */
+ /*!
+@@ -689,7 +689,7 @@ extern CONST(uint16, SFTYDCEVLN_CALIB) SftyHvDcUEvlnOvRstTi;
+ /*! @} doxygen end of group definition */
+ #endif  /* SFTYHVDCUEVLN_DATA_H */
+ /* ***************************************************************** */
+-/* Copyright (C) Valeo-Siemens eAutomotive GmbH 2021                 */
++/* Copyright (C) Valeo-Siemens eAutomotive GmbH 2022                 */
+ /* All Rights Reserved. Confidential                                 */
+ /* ***************************************************************** */
+ /*==================[end of file]====================================*/
+diff --git a/src/fw_cu/Components/Safety/Sfty_Inv/SftyHvDcUEvln/src/SftyHvDcUEvln.c b/src/fw_cu/Components/Safety/Sfty_Inv/SftyHvDcUEvln/src/SftyHvDcUEvln.c
+index 86610fdd5..6f8684141 100644
+--- a/src/fw_cu/Components/Safety/Sfty_Inv/SftyHvDcUEvln/src/SftyHvDcUEvln.c
++++ b/src/fw_cu/Components/Safety/Sfty_Inv/SftyHvDcUEvln/src/SftyHvDcUEvln.c
+@@ -7,7 +7,7 @@
+ /* Department: Valeo Siemens eAutomotive                                  */
+ /* I DT EC R&D                                                            */
+ /* ********************************************************************** */
+-/* Copyright (C) Valeo Siemens eAutomotive Germany GmbH 2021              */
++/* Copyright (C) Valeo Siemens eAutomotive Germany GmbH 2022              */
+ /* All Rights Reserved. Confidential                                      */
+ /* ********************************************************************** */
+ 
+@@ -1098,7 +1098,7 @@ FUNC(void, SFTY_DC_EVLN_CODE) SftyHvDcUEvln_MainFunctionAreaCmn(void)
+ /*================== [closure] ==============================================*/
+ /*! @} doxygen end of group definition */
+ /* ********************************************************************** */
+-/* Copyright (C) Valeo Siemens eAutomotive Germany GmbH 2021              */
++/* Copyright (C) Valeo Siemens eAutomotive Germany GmbH 2022              */
+ /* All Rights Reserved. Confidential                                      */
+ /* ********************************************************************** */
+ /*==================[end of file]=========================================*/
+diff --git a/src/fw_cu/Components/Safety/Sfty_Inv/SftyHvDcUEvln/src/SftyHvDcUEvln_data.c b/src/fw_cu/Components/Safety/Sfty_Inv/SftyHvDcUEvln/src/SftyHvDcUEvln_data.c
+index 228fd3a7f..0d1c55274 100644
+--- a/src/fw_cu/Components/Safety/Sfty_Inv/SftyHvDcUEvln/src/SftyHvDcUEvln_data.c
++++ b/src/fw_cu/Components/Safety/Sfty_Inv/SftyHvDcUEvln/src/SftyHvDcUEvln_data.c
+@@ -3,7 +3,7 @@
+ /* ADD Container: SftyHvDcUEvln                                      */
+ /* ADD Container Version:01.02                                       */
+ /* ***************************************************************** */
+-/* Copyright (C) Valeo-Siemens eAutomotive GmbH 2021                 */
++/* Copyright (C) Valeo-Siemens eAutomotive GmbH 2022                 */
+ /* All Rights Reserved. Confidential                                 */
+ /* ***************************************************************** */
+ /*!
+diff --git a/src/fw_cu/Components/Safety/Sfty_Inv/SftyHvInterlock/include/SftyHvInterlock.h b/src/fw_cu/Components/Safety/Sfty_Inv/SftyHvInterlock/include/SftyHvInterlock.h
+index 977b7742b..446985102 100644
+--- a/src/fw_cu/Components/Safety/Sfty_Inv/SftyHvInterlock/include/SftyHvInterlock.h
++++ b/src/fw_cu/Components/Safety/Sfty_Inv/SftyHvInterlock/include/SftyHvInterlock.h
+@@ -1,5 +1,5 @@
+ /* ********************************************************************** */
+-/* Sourcefile: SftyHvInterlock.h                                               */
++/* Sourcefile: SftyHvInterlock.h                                          */
+ /*                                                                        */
+ /* Project: 100KW                                                         */
+ /* Aurix                                                                  */
+@@ -7,7 +7,7 @@
+ /* Department: Valeo Siemens eAutomotive                                  */
+ /* I DT EC R&D                                                            */
+ /* ********************************************************************** */
+-/* Copyright (C) Valeo Siemens eAutomotive Germany GmbH 2021              */
++/* Copyright (C) Valeo Siemens eAutomotive Germany GmbH 2022              */
+ /* All Rights Reserved. Confidential                                      */
+ /* ********************************************************************** */
+ #ifndef SFTYHVINTERLOCK_H
+@@ -44,7 +44,7 @@ extern FUNC(void, SFTYHVINTERLOCK) SftyHvInterlock_Init(void);
+ /*! @} doxygen end of group definition */
+ #endif /* SFTYHVINTERLOCK_H_ */
+ /* ********************************************************************** */
+-/* Copyright (C) Valeo Siemens eAutomotive Germany GmbH 2021              */
++/* Copyright (C) Valeo Siemens eAutomotive Germany GmbH 2022              */
+ /* All Rights Reserved.  Confidential                                     */
+ /* ********************************************************************** */
+ /*==================[end of file]============================================*/
+diff --git a/src/fw_cu/Components/Safety/Sfty_Inv/SftyHvInterlock/include/SftyHvInterlock_data.h b/src/fw_cu/Components/Safety/Sfty_Inv/SftyHvInterlock/include/SftyHvInterlock_data.h
+index 1b692627e..1e9119b71 100644
+--- a/src/fw_cu/Components/Safety/Sfty_Inv/SftyHvInterlock/include/SftyHvInterlock_data.h
++++ b/src/fw_cu/Components/Safety/Sfty_Inv/SftyHvInterlock/include/SftyHvInterlock_data.h
+@@ -1,9 +1,9 @@
+ /* ***************************************************************** */
+-/* Sourcefile: SftyHVInterlock_data.h                                  */
+-/* ADD Container: SftyHVInterlock                                      */
++/* Sourcefile: SftyHVInterlock_data.h                                */
++/* ADD Container: SftyHVInterlock                                    */
+ /* ADD Container Version: 01.00                                      */
+ /* ***************************************************************** */
+-/* Copyright (C) Valeo-Siemens eAutomotive GmbH 2021                 */
++/* Copyright (C) Valeo-Siemens eAutomotive GmbH 2022                 */
+ /* All Rights Reserved. Confidential                                 */
+ /* ***************************************************************** */
+ /*!
+@@ -64,10 +64,10 @@ extern CONST(uint16, SFTYHVINTERLOCK_CALIB) SftyHvInterlockDtctAcc;
+ /* End: SFTYHVINTERLOCK_STOP_SEC_CALIB_16 (calib) */
+ 
+ 
+-/*================== [closure] ==============================================*/
+-/*! @} doxygen end of group definition */
++/*================== [closure] ======================================*/
++/*! @} doxygen end of group definition                               */
+ #endif
+-/* Copyright (C) Valeo-Siemens eAutomotive GmbH 2021                 */
++/* Copyright (C) Valeo-Siemens eAutomotive GmbH 2022                 */
+ /* All Rights Reserved. Confidential                                 */
+ /* ***************************************************************** */
+ /*==================[end of file]====================================*/
+diff --git a/src/fw_cu/Components/Safety/Sfty_Inv/SftyHvInterlock/src/SftyHvInterlock.c b/src/fw_cu/Components/Safety/Sfty_Inv/SftyHvInterlock/src/SftyHvInterlock.c
+index 750d5aa64..6098cf584 100644
+--- a/src/fw_cu/Components/Safety/Sfty_Inv/SftyHvInterlock/src/SftyHvInterlock.c
++++ b/src/fw_cu/Components/Safety/Sfty_Inv/SftyHvInterlock/src/SftyHvInterlock.c
+@@ -1,5 +1,5 @@
+ /* ********************************************************************** */
+-/* Sourcefile:    SftyHvInterlock.c                                            */
++/* Sourcefile:    SftyHvInterlock.c                                       */
+ /*                                                                        */
+ /* Project:       100kw                                                   */
+ /* TriCore                                                                */
+@@ -8,10 +8,10 @@
+ /* Department: Valeo Siemens eAutomotive                                  */
+ /* I DT EC R&D                                                            */
+ /* ********************************************************************** */
+-/* ***************************************************************** */
+-/* Copyright (C) Valeo-Siemens eAutomotive GmbH 2021                 */
+-/* All Rights Reserved. Confidential                                 */
+-/* ***************************************************************** */
++/* ********************************************************************** */
++/* Copyright (C) Valeo-Siemens eAutomotive GmbH 2022                      */
++/* All Rights Reserved. Confidential                                      */
++/* ********************************************************************** */
+ 
+ /*!
+ * \\defgroup SftyHVInterlock SftyHVInterlock - Safety High Voltage Interlock
+@@ -442,7 +442,7 @@ FUNC(void, SFTYHVINTERLOCK) SftyHvInterlock_Init(void)
+ #include "MemMap.h"
+ 
+ /* ************************************************************************* */
+-/* Copyright (C) Valeo Siemens eAutomotive Germany GmbH 2021                 */
++/* Copyright (C) Valeo Siemens eAutomotive Germany GmbH 2022                 */
+ /* All Rights Reserved. Confidential                                         */
+ /* ************************************************************************* */
+ /*==================[end of file]============================================*/
+diff --git a/src/fw_cu/Components/Safety/Sfty_Inv/SftyHvInterlock/src/SftyHvInterlock_data.c b/src/fw_cu/Components/Safety/Sfty_Inv/SftyHvInterlock/src/SftyHvInterlock_data.c
+index 07c4837f3..74380938a 100644
+--- a/src/fw_cu/Components/Safety/Sfty_Inv/SftyHvInterlock/src/SftyHvInterlock_data.c
++++ b/src/fw_cu/Components/Safety/Sfty_Inv/SftyHvInterlock/src/SftyHvInterlock_data.c
+@@ -1,9 +1,9 @@
+ /* ***************************************************************** */
+-/* Sourcefile: SftyHvInterlock_data.c                                     */
+-/* ADD Container: SftyHvInterlock                                        */
+-/* ADD Container Version: 01.00                                        */
++/* Sourcefile: SftyHvInterlock_data.c                                */
++/* ADD Container: SftyHvInterlock                                    */
++/* ADD Container Version: 01.00                                      */
+ /* ***************************************************************** */
+-/* Copyright (C) Valeo-Siemens eAutomotive GmbH 2021                 */
++/* Copyright (C) Valeo-Siemens eAutomotive GmbH 2022                 */
+ /* All Rights Reserved. Confidential                                 */
+ /* ***************************************************************** */
+ /*!
+@@ -34,7 +34,7 @@
+ @@ END
+ */
+ /*! \\cvar Interlock HW signal range high evaluation status; unit \'-\' */
+-VAR(uint8, SFTYCRASHSIGMON_VAR) SftyHvInterlockRngHiErrMonrSt = 0U;
++VAR(uint8, SftyHVINTERLOCK_VAR) SftyHvInterlockRngHiErrMonrSt = 0U;
+ 
+ /*
+ @@ SYMBOL = SftyHvInterlockRngLoErrMonrSt
+@@ -45,7 +45,7 @@ VAR(uint8, SFTYCRASHSIGMON_VAR) SftyHvInterlockRngHiErrMonrSt = 0U;
+ @@ END
+ */
+ /*! \\cvar Interlock HW signal range low evaluation status; unit \'-\' */
+-VAR(uint8, SFTYCRASHSIGMON_VAR) SftyHvInterlockRngLoErrMonrSt = 0U;
++VAR(uint8, SftyHVINTERLOCK_VAR) SftyHvInterlockRngLoErrMonrSt = 0U;
+ 
+ /*
+ @@ SYMBOL = SftyHvInterlockPasErrMonrSt
+@@ -56,7 +56,7 @@ VAR(uint8, SFTYCRASHSIGMON_VAR) SftyHvInterlockRngLoErrMonrSt = 0U;
+ @@ END
+ */
+ /*! \\cvar Passive inter-lock status; unit \'-\' */
+-VAR(uint8, SFTYCRASHSIGMON_VAR) SftyHvInterlockPasErrMonrSt = 0U;
++VAR(uint8, SftyHVINTERLOCK_VAR) SftyHvInterlockPasErrMonrSt = 0U;
+ 
+ /*
+ @@ SYMBOL = SftyHvInterlockActvErrMonrSt
+@@ -67,7 +67,7 @@ VAR(uint8, SFTYCRASHSIGMON_VAR) SftyHvInterlockPasErrMonrSt = 0U;
+ @@ END
+ */
+ /*! \\cvar Active inter-lock status; unit \'-\' */
+-VAR(uint8, SFTYCRASHSIGMON_VAR) SftyHvInterlockActvErrMonrSt = 0U;
++VAR(uint8, SftyHVINTERLOCK_VAR) SftyHvInterlockActvErrMonrSt = 0U;
+ 
+ /*
+ @@ SYMBOL = SftyHvInterlockTiErrMonrSt
+@@ -78,7 +78,7 @@ VAR(uint8, SFTYCRASHSIGMON_VAR) SftyHvInterlockActvErrMonrSt = 0U;
+ @@ END
+ */
+ /*! \\cvar Inter-lock Timestamp monitor status; unit \'-\' */
+-VAR(uint8, SFTYCRASHSIGMON_VAR) SftyHvInterlockTiErrMonrSt = 0U;
++VAR(uint8, SftyHVINTERLOCK_VAR) SftyHvInterlockTiErrMonrSt = 0U;
+ 
+ /*
+ @@ SYMBOL = SftyHvInterlockMonrStsToVeh
+@@ -89,7 +89,7 @@ VAR(uint8, SFTYCRASHSIGMON_VAR) SftyHvInterlockTiErrMonrSt = 0U;
+ @@ END
+ */
+ /*! \\cvar Signal for reporting status of the active interlock loop to vehicle */
+-VAR(uint8, SFTYCRASHSIGMON_VAR) SftyHvInterlockMonrStsToVeh = 0U;
++VAR(uint8, SftyHVINTERLOCK_VAR) SftyHvInterlockMonrStsToVeh = 0U;
+ 
+ #define SFTYHVINTERLOCK_STOP_SEC_VAR_AREA_2_SLOW_INIT_8
+ #include "MemMap.h"
+@@ -159,7 +159,7 @@ CONST(uint16, SFTYHVINTERLOCK_CALIB) SftyHvInterlockDtctAcc = 205U;
+ 
+ /** @} doxygen end group definition */
+ /* ***************************************************************** */
+-/* Copyright (C) Valeo-Siemens eAutomotive GmbH 2021                 */
++/* Copyright (C) Valeo-Siemens eAutomotive GmbH 2022                 */
+ /* All Rights Reserved. Confidential                                 */
+ /* ***************************************************************** */
+ /*==================[end of file]====================================*/
+diff --git a/src/fw_cu/Components/Safety/Sfty_Inv/SftyInvActr/include/SftyInvActr.h b/src/fw_cu/Components/Safety/Sfty_Inv/SftyInvActr/include/SftyInvActr.h
+index f51d77f89..64f448b87 100644
+--- a/src/fw_cu/Components/Safety/Sfty_Inv/SftyInvActr/include/SftyInvActr.h
++++ b/src/fw_cu/Components/Safety/Sfty_Inv/SftyInvActr/include/SftyInvActr.h
+@@ -7,7 +7,7 @@
+ /* Department: Valeo Siemens eAutomotive                                  */
+ /* I DT EC R&D                                                            */
+ /* ********************************************************************** */
+-/* Copyright (C) Valeo Siemens eAutomotive Germany GmbH 2021              */
++/* Copyright (C) Valeo Siemens eAutomotive Germany GmbH 2022              */
+ /* All Rights Reserved. Confidential                                      */
+ /* ********************************************************************** */
+ 
+@@ -79,7 +79,7 @@ extern FUNC(void, SFTY_INV_ACTR_CODE) SftyInvActr_ReinitMonrData(void);
+ /*! @} doxygen end of group definition */
+ #endif /* SFTYINVACTR_H */
+ /* ********************************************************************** */
+-/* Copyright (C) Valeo Siemens eAutomotive GmbH 2021                      */
++/* Copyright (C) Valeo Siemens eAutomotive GmbH 2022                      */
+ /* All Rights Reserved. Confidential */
+ /* ********************************************************************** */
+ /*==================[end of file]=========================================*/
+diff --git a/src/fw_cu/Components/Safety/Sfty_Inv/SftyInvActr/include/SftyInvActr_cfg.h b/src/fw_cu/Components/Safety/Sfty_Inv/SftyInvActr/include/SftyInvActr_cfg.h
+index 8700d43f3..47341cbb5 100644
+--- a/src/fw_cu/Components/Safety/Sfty_Inv/SftyInvActr/include/SftyInvActr_cfg.h
++++ b/src/fw_cu/Components/Safety/Sfty_Inv/SftyInvActr/include/SftyInvActr_cfg.h
+@@ -1,16 +1,13 @@
+ /* ********************************************************************** */
+ /* Sourcefile: SftyInvActr_cfg.h                                          */
+ /*                                                                        */
+-/* Project: NextGen                                                       */
++/* Project: 100KW                                                         */
+ /* Aurix                                                                  */
+ /*                                                                        */
+-/* Department: SIEMENS AG                                                 */
++/* Department: Valeo Siemens eAutomotive                                  */
+ /* I DT EC R&D                                                            */
+-/*                                                                        */
+-/* First author: Alexander Bochem                                         */
+-/* Other authors: -                                                       */
+ /* ********************************************************************** */
+-/* Copyright (C) Siemens AG 2015                                          */
++/* Copyright (C) Valeo Siemens eAutomotive Germany GmbH 2022              */
+ /* All Rights Reserved. Confidential                                      */
+ /* ********************************************************************** */
+ #ifndef SFTYINVACTR_CFG_H
+@@ -34,8 +31,8 @@
+ /*! @} doxygen end of group definition */
+ #endif /* SFTYINVACTR_CFG_H */
+ /* ********************************************************************** */
+-/* Copyright (C) Siemens AG 2015 */
++/* Copyright (C) Valeo Siemens eAutomotive GmbH 2022                      */
+ /* All Rights Reserved. Confidential */
+ /* ********************************************************************** */
+-/*==================[end of file]============================================*/
++/*==================[end of file]=========================================*/
+ 
+diff --git a/src/fw_cu/Components/Safety/Sfty_Inv/SftyInvActr/include/SftyInvActr_data.h b/src/fw_cu/Components/Safety/Sfty_Inv/SftyInvActr/include/SftyInvActr_data.h
+index c63f5291a..0544c820c 100644
+--- a/src/fw_cu/Components/Safety/Sfty_Inv/SftyInvActr/include/SftyInvActr_data.h
++++ b/src/fw_cu/Components/Safety/Sfty_Inv/SftyInvActr/include/SftyInvActr_data.h
+@@ -1,10 +1,10 @@
+ /* ***************************************************************** */
+-/* Sourcefile: SftyInvActr_data.h\t\t\t\t\t\t\t\t\t */
+-/* ADD Container: SftyInvActr\t\t\t\t\t\t\t\t\t\t */
+-/* ADD Container Version: 01.01\t\t\t\t\t\t\t\t\t\t */
++/* Sourcefile: SftyInvActr_data.h\t\t\t\t\t\t\t\t\t         */
++/* ADD Container: SftyInvActr\t\t\t\t\t\t\t\t\t\t            */
++/* ADD Container Version: 01.01\t\t\t\t\t\t\t\t\t         \t*/
+ /* ***************************************************************** */
+-/* Copyright (C) Valeo Siemens eAutomotive GmbH 2021 \t\t\t\t */
+-/* All Rights Reserved. Confidential \t\t\t\t\t\t\t\t */
++/* Copyright (C) Valeo Siemens eAutomotive GmbH 2022 \t\t\t\t      */
++/* All Rights Reserved. Confidential \t\t\t\t\t\t\t\t         */
+ /* ***************************************************************** */
+ 
+ /*!
+@@ -331,7 +331,7 @@ extern CONST(float32, SFTYINVACTR_CALIB) SftyReplcmtInvActrMotorSpdFild;
+ /*! @} doxygen end of group definition */
+ #endif /* SFTYINVACTR_DATA_H */
+ /* ***************************************************************** */
+-/* Copyright (C) Valeo Siemens eAutomotive GmbH 2021                 */
++/* Copyright (C) Valeo Siemens eAutomotive GmbH 2022                 */
+ /* All Rights Reserved. Confidential                                 */
+ /* ***************************************************************** */
+ /*==================[end of file]====================================*/
+diff --git a/src/fw_cu/Components/Safety/Sfty_Inv/SftyInvActr/src/SftyInvActr.c b/src/fw_cu/Components/Safety/Sfty_Inv/SftyInvActr/src/SftyInvActr.c
+index 4cc0a09f6..0e9dcd88b 100644
+--- a/src/fw_cu/Components/Safety/Sfty_Inv/SftyInvActr/src/SftyInvActr.c
++++ b/src/fw_cu/Components/Safety/Sfty_Inv/SftyInvActr/src/SftyInvActr.c
+@@ -10,7 +10,7 @@
+ /* Department: Valeo Siemens eAutomotive                                  */
+ /* I DT EC R&D                                                            */
+ /* ********************************************************************** */
+-/* Copyright (C) Valeo Siemens eAutomotive Germany GmbH 2021              */
++/* Copyright (C) Valeo Siemens eAutomotive Germany GmbH 2022              */
+ /* All Rights Reserved. Confidential                                      */
+ /* ********************************************************************** */
+ 
+@@ -917,7 +917,7 @@ FUNC(void, SFTY_INV_ACTR_CODE) SftyInvActr_ReinitMonrData(void)   /* PRQA S 1503
+ /*================== [closure] ==============================================*/
+ /*! @} doxygen end of group definition */
+ /* ********************************************************************** */
+-/* Copyright (C) Valeo Siemens eAutomotive Germany GmbH 2021              */
++/* Copyright (C) Valeo Siemens eAutomotive Germany GmbH 2022              */
+ /* All Rights Reserved. Confidential                                      */
+ /* ********************************************************************** */
+ /*==================[end of file]============================================*/
+diff --git a/src/fw_cu/Components/Safety/Sfty_Inv/SftyInvActr/src/SftyInvActr_data.c b/src/fw_cu/Components/Safety/Sfty_Inv/SftyInvActr/src/SftyInvActr_data.c
+index 032deeaed..952a3ec56 100644
+--- a/src/fw_cu/Components/Safety/Sfty_Inv/SftyInvActr/src/SftyInvActr_data.c
++++ b/src/fw_cu/Components/Safety/Sfty_Inv/SftyInvActr/src/SftyInvActr_data.c
+@@ -3,7 +3,7 @@
+ /* ADD Container: SftyInvActr                                        */
+ /* ADD Container Version:01.01                                       */
+ /* ***************************************************************** */
+-/* Copyright (C) Valeo Siemens eAutomotive GmbH 2021                 */
++/* Copyright (C) Valeo Siemens eAutomotive GmbH 2022                 */
+ /* All Rights Reserved. Confidential                                 */
+ /* ***************************************************************** */
+ /*!
+@@ -742,6 +742,6 @@ CONST(float32, SFTYINVACTR_CALIB) SftyReplcmtInvActrMotorSpdFild = 0.0f;
+ 
+ /** @} doxygen end group definition */
+ /* ***************************************************************** */
+-/* Copyright (C) Valeo Siemens eAutomotive GmbH 2021                 */
++/* Copyright (C) Valeo Siemens eAutomotive GmbH 2022                 */
+ /* All Rights Reserved. Confidential                                 */
+ /* ***************************************************************** */
+diff --git a/src/fw_cu/Components/Safety/Sfty_Inv/SftyTempEvln/include/SftyTempEvln_data.h b/src/fw_cu/Components/Safety/Sfty_Inv/SftyTempEvln/include/SftyTempEvln_data.h
+index c7e29fd69..8c2fa8bbf 100644
+--- a/src/fw_cu/Components/Safety/Sfty_Inv/SftyTempEvln/include/SftyTempEvln_data.h
++++ b/src/fw_cu/Components/Safety/Sfty_Inv/SftyTempEvln/include/SftyTempEvln_data.h
+@@ -111,13 +111,22 @@ extern VAR(uint8, SFTYTEMPEVLN_VAR) SftyTempEvlnDcLinkTempHwpMonrSt;
+ extern _map CONST(float32, SFTYTEMPEVLN_CALIB) SftyTempEvlnMotStatorTSnsrLoChartcTPrmL[21];
+ 
+ /*! IGBT temperature values; unit \'degree C\' */
+-extern _map CONST(float32, SFTYTEMPEVLN_CALIB) SftyTempEvlnIgbtPhyValPhU[21];
++extern _map CONST(float32, SFTYTEMPEVLN_CALIB) SftyTempEvlnIgbtUTSnsrLoChartcTPrmL[19];
+ 
+ /*! IGBT temperature values; unit \'degree C\' */
+-extern _map CONST(float32, SFTYTEMPEVLN_CALIB) SftyTempEvlnIgbtPhyValPhW[21];
++extern _map CONST(float32, SFTYTEMPEVLN_CALIB) SftyTempEvlnIgbtUTSnsrHiChartcTPrmL[23];
+ 
+ /*! IGBT temperature values; unit \'degree C\' */
+-extern _map CONST(float32, SFTYTEMPEVLN_CALIB) SftyTempEvlnIgbtPhyValPhV[21];
++extern _map CONST(float32, SFTYTEMPEVLN_CALIB) SftyTempEvlnIgbtVTSnsrLoChartcTPrmL[19];
++
++/*! IGBT temperature values; unit \'degree C\' */
++extern _map CONST(float32, SFTYTEMPEVLN_CALIB) SftyTempEvlnIgbtVTSnsrHiChartcTPrmL[23];
++
++/*! IGBT temperature values; unit \'degree C\' */
++extern _map CONST(float32, SFTYTEMPEVLN_CALIB) SftyTempEvlnIgbtWTSnsrLoChartcTPrmL[19];
++
++/*! IGBT temperature values; unit \'degree C\' */
++extern _map CONST(float32, SFTYTEMPEVLN_CALIB) SftyTempEvlnIgbtWTSnsrHiChartcTPrmL[23];
+ 
+ extern CONST(uint32, SFTYTEMPEVLN_CALIB) SftyTempEvlnPlausChkTimOutinUs;
+ 
+@@ -170,13 +179,22 @@ extern CONST(uint16, SFTYTEMPEVLN_CALIB) SftyTempEvlnIgbtTempHWPRngHiThd;
+ extern CONST(uint16, SFTYTEMPEVLN_CALIB) SftyTempEvlnIgbtTempHWPRngLoThd;  /* change this value */
+ 
+ /*! IGBT temperature raw values; unit \'U\' */
+-extern CONST(uint16, SFTYTEMPEVLN_CALIB) SftyTempEvlnIgbtRawValU[22];
++extern CONST(uint16, SFTYTEMPEVLN_CALIB) SftyTempEvlnIgbtUTSnsrLoChartcVPrmA[20];
+ 
+-/*! IGBT temperature raw values; unit \'V\' */
+-extern CONST(uint16, SFTYTEMPEVLN_CALIB) SftyTempEvlnIgbtRawValV[22];
++/*! IGBT temperature raw values; unit \'U\' */
++extern CONST(uint16, SFTYTEMPEVLN_CALIB) SftyTempEvlnIgbtUTSnsrHiChartcVPrmA[24];
++
++/*! IGBT temperature raw values; unit \'U\' */
++extern CONST(uint16, SFTYTEMPEVLN_CALIB) SftyTempEvlnIgbtVTSnsrLoChartcVPrmA[20];
+ 
+-/*! IGBT temperature raw values; unit \'W\' */
+-extern CONST(uint16, SFTYTEMPEVLN_CALIB) SftyTempEvlnIgbtRawValW[22];
++/*! IGBT temperature raw values; unit \'U\' */
++extern CONST(uint16, SFTYTEMPEVLN_CALIB) SftyTempEvlnIgbtVTSnsrHiChartcVPrmA[24];
++
++/*! IGBT temperature raw values; unit \'U\' */
++extern CONST(uint16, SFTYTEMPEVLN_CALIB) SftyTempEvlnIgbtWTSnsrLoChartcVPrmA[20];
++
++/*! IGBT temperature raw values; unit \'U\' */
++extern CONST(uint16, SFTYTEMPEVLN_CALIB) SftyTempEvlnIgbtWTSnsrHiChartcVPrmA[24];
+ 
+ /*! Safety Motor stator temperature sensor characteristic input voltage value; unit \'V\' */
+ extern CONST(uint16, SFTYTEMPEVLN_CALIB) SftyTempEvlnMotStatorTSnsrLoChartcVPrmA[22]; /* PRQA S 0777 # the identifier is unique and differs from other identifier */
+@@ -206,42 +224,6 @@ extern CONST(uint8, SFTYREPLCMT_CALIB) SftyReplcmtTempEvlnTempMeclSpdFildAbsStiE
+ #include "MemMap.h"
+ /* End: SFTYREPLCMT_STOP_SEC_CALIB_8 (calib) */
+ 
+-/* Begin: SFTYREPLCMT_START_SEC_CALIB_8 (calib) */
+-#define SFTYREPLCMT_START_SEC_CALIB_8
+-#include "MemMap.h"
+-
+-extern CONST(uint8, SFTYREPLCMT_CALIB) SftyReplcmtTempEvlnTempIPhaValStiEna;
+-#define SFTYREPLCMT_STOP_SEC_CALIB_8
+-#include "MemMap.h"
+-/* End: SFTYREPLCMT_STOP_SEC_CALIB_8 (calib) */
+-
+-/* Begin: SFTYREPLCMT_START_SEC_CALIB_16 (calib) */
+-#define SFTYREPLCMT_START_SEC_CALIB_16
+-#include "MemMap.h"
+-
+-extern CONST(uint16, SFTYREPLCMT_CALIB) SftyReplcmtTempEvlnTempIGBTPhaURawVal;
+-#define SFTYREPLCMT_STOP_SEC_CALIB_16
+-#include "MemMap.h"
+-/* End: SFTYREPLCMT_STOP_SEC_CALIB_16 (calib) */
+-
+-/* Begin: SFTYREPLCMT_START_SEC_CALIB_16 (calib) */
+-#define SFTYREPLCMT_START_SEC_CALIB_16
+-#include "MemMap.h"
+-
+-extern CONST(uint16, SFTYREPLCMT_CALIB) SftyReplcmtTempEvlnTempIGBTPhaVRawVal;
+-#define SFTYREPLCMT_STOP_SEC_CALIB_16
+-#include "MemMap.h"
+-/* End: SFTYREPLCMT_STOP_SEC_CALIB_16 (calib) */
+-
+-/* Begin: SFTYREPLCMT_START_SEC_CALIB_16 (calib) */
+-#define SFTYREPLCMT_START_SEC_CALIB_16
+-#include "MemMap.h"
+-
+-extern CONST(uint16, SFTYREPLCMT_CALIB) SftyReplcmtTempEvlnTempIGBTPhaWRawVal;
+-#define SFTYREPLCMT_STOP_SEC_CALIB_16
+-#include "MemMap.h"
+-/* End: SFTYREPLCMT_STOP_SEC_CALIB_16 (calib) */
+-
+ /* Begin: SFTYREPLCMT_START_SEC_CALIB_32 (calib) */
+ #define SFTYREPLCMT_START_SEC_CALIB_32
+ #include "MemMap.h"
+diff --git a/src/fw_cu/Components/Safety/Sfty_Inv/SftyTempEvln/src/SftyTempEvln.c b/src/fw_cu/Components/Safety/Sfty_Inv/SftyTempEvln/src/SftyTempEvln.c
+index a938d6d85..279a39830 100644
+--- a/src/fw_cu/Components/Safety/Sfty_Inv/SftyTempEvln/src/SftyTempEvln.c
++++ b/src/fw_cu/Components/Safety/Sfty_Inv/SftyTempEvln/src/SftyTempEvln.c
+@@ -36,6 +36,7 @@
+ #include "SftyAcEvln_data.h"
+ #include "C2cComDrvCtrlData.h"
+ #include "C2cComBswData.h"
++#include "SftyReplcmt_data.h"
+ 
+ #if  defined(SWIT_IT_Active)
+ #include "SWIT_Sfty.h"
+@@ -60,6 +61,18 @@
+ /* Begin:  SFTYTEMPEVLN_AREA_0_START_SEC_VAR_FAST_CLEARED (online) */
+ #define SFTYTEMPEVLN_AREA_0_START_SEC_VAR_FAST_CLEARED
+ #include "MemMap.h"
++
++/*
++@@ SYMBOL = SftyTempEvlnIgbtRngSwtSts
++@@ A2L_TYPE = MEASURE
++@@ DATA_TYPE = UBYTE
++@@ DESCRIPTION = "Range switch"
++@@ GROUP = SftyTempEvln
++@@ END
++*/
++/*! \\cvar Range switch */
++STATIC VAR(boolean, SFTYTEMPEVLN_VAR) SftyTempEvlnIgbtRngSwtSts;
++
+ /*
+ @@ SYMBOL = SftyTempEvlnIgbtTRawVal
+ @@ A2L_TYPE = MEASURE
+@@ -455,6 +468,22 @@ LOCAL_INLINE void SftyTempEvln_GetIGBTData(void)
+       SftyTempEvlnIgbtTRawVal[SYSDEF_PHA_W] = SftyE2eFpgaTempIGBTRawVal[SYSDEF_PHA_W];
+    }
+ 
++#ifndef SERIES_PRODUCTION
++   /* Replacement stimulus enable */
++   if(SftyReplcmtIgbtTempRngSwtStsValStiEna == TRUE)
++   {
++      /* Replacement values for phase temperature */
++      SftyTempEvlnIgbtRngSwtSts = SftyReplcmtIgbtTempRngSwtStsVal;
++
++   }
++   else
++#endif /* SERIES_PRODUCTION */
++   {
++      /* Phase value from SftyE2eFpga */
++      SftyTempEvlnIgbtRngSwtSts = SftyE2eFpgaIgbtTempRngSwtSts;
++
++   }
++
+    return;
+ }
+ 
+@@ -671,27 +700,27 @@ LOCAL_INLINE void SftyTempEvln_IgbtJuncTempChk(void)
+ /*******************************************************************************************************************/
+ /*!
+  * \\fn        void SftyTempEvln_IgbtTempRawToPhyValConv(void)
+- * \\brief     This function converts the raw temperature value to the physical value and updates the C2c interfaces
++ * \\brief     This function converts the raw temperature value to the physical value using range High
+  * \\Parent_DD SftyTempEvln_MainFunction
+  */
+ /*******************************************************************************************************************/
+-LOCAL_INLINE void SftyTempEvln_IgbtTempRawToPhyValConv(void)
++LOCAL_INLINE void SftyTempEvln_IgbtTempRawToPhyValConvLo(void)
+ {
+    /* ******** Variables declaration *********** */
+ 
+   /* ************* Source code **************** */
+ 
+    /* Convert the Igbt raw temperature value to their physical value */
+-   SftyTempEvlnIGBTPhyVal[SYSDEF_PHA_U] = SftyTempEvln_ConvRawToPhy(SftyTempEvlnIgbtPhyValPhU
+-                                                               ,SftyTempEvlnIgbtRawValU
++   SftyTempEvlnIGBTPhyVal[SYSDEF_PHA_U] = SftyTempEvln_ConvRawToPhy(SftyTempEvlnIgbtUTSnsrLoChartcTPrmL
++                                                               ,SftyTempEvlnIgbtUTSnsrLoChartcVPrmA
+                                                                ,SftyTempEvlnIgbtTRawVal[SYSDEF_PHA_U]);
+ 
+-   SftyTempEvlnIGBTPhyVal[SYSDEF_PHA_V] = SftyTempEvln_ConvRawToPhy(SftyTempEvlnIgbtPhyValPhV
+-                                                               ,SftyTempEvlnIgbtRawValV
++   SftyTempEvlnIGBTPhyVal[SYSDEF_PHA_V] = SftyTempEvln_ConvRawToPhy(SftyTempEvlnIgbtVTSnsrLoChartcTPrmL
++                                                               ,SftyTempEvlnIgbtVTSnsrLoChartcVPrmA
+                                                                ,SftyTempEvlnIgbtTRawVal[SYSDEF_PHA_V]);
+ 
+-   SftyTempEvlnIGBTPhyVal[SYSDEF_PHA_W] = SftyTempEvln_ConvRawToPhy(SftyTempEvlnIgbtPhyValPhW
+-                                                               ,SftyTempEvlnIgbtRawValW
++   SftyTempEvlnIGBTPhyVal[SYSDEF_PHA_W] = SftyTempEvln_ConvRawToPhy(SftyTempEvlnIgbtWTSnsrLoChartcTPrmL
++                                                               ,SftyTempEvlnIgbtWTSnsrLoChartcVPrmA
+                                                                ,SftyTempEvlnIgbtTRawVal[SYSDEF_PHA_W]);
+ 
+    /* Determine the maximum phase temperature*/
+@@ -704,6 +733,68 @@ LOCAL_INLINE void SftyTempEvln_IgbtTempRawToPhyValConv(void)
+ 
+ }
+ 
++/*******************************************************************************************************************/
++/*!
++ * \\fn        void SftyTempEvln_IgbtTempRawToPhyValConv(void)
++ * \\brief     This function converts the raw temperature value to the physical value using range low
++ * \\Parent_DD SftyTempEvln_MainFunction
++ */
++/*******************************************************************************************************************/
++LOCAL_INLINE void SftyTempEvln_IgbtTempRawToPhyValConvHi(void)
++{
++   /* ******** Variables declaration *********** */
++
++  /* ************* Source code **************** */
++
++   /* Convert the Igbt raw temperature value to their physical value */
++   SftyTempEvlnIGBTPhyVal[SYSDEF_PHA_U] = SftyTempEvln_ConvRawToPhy(SftyTempEvlnIgbtUTSnsrHiChartcTPrmL
++                                                               ,SftyTempEvlnIgbtUTSnsrHiChartcVPrmA
++                                                               ,SftyTempEvlnIgbtTRawVal[SYSDEF_PHA_U]);
++
++   SftyTempEvlnIGBTPhyVal[SYSDEF_PHA_V] = SftyTempEvln_ConvRawToPhy(SftyTempEvlnIgbtVTSnsrHiChartcTPrmL
++                                                               ,SftyTempEvlnIgbtVTSnsrHiChartcVPrmA
++                                                               ,SftyTempEvlnIgbtTRawVal[SYSDEF_PHA_V]);
++
++   SftyTempEvlnIGBTPhyVal[SYSDEF_PHA_W] = SftyTempEvln_ConvRawToPhy(SftyTempEvlnIgbtWTSnsrHiChartcTPrmL
++                                                               ,SftyTempEvlnIgbtWTSnsrHiChartcVPrmA
++                                                               ,SftyTempEvlnIgbtTRawVal[SYSDEF_PHA_W]);
++
++   /* Determine the maximum phase temperature*/
++   SftyTempEvlnIgbtTMaxPhyVal=  SftyTempEvln_FindMaxVal(SftyTempEvlnIGBTPhyVal[SYSDEF_PHA_U],
++                                                        SftyTempEvlnIGBTPhyVal[SYSDEF_PHA_V],
++                                                        SftyTempEvlnIGBTPhyVal[SYSDEF_PHA_W]);
++
++
++   return;
++
++}
++
++/*******************************************************************************************************************/
++/*!
++ * \\fn        void SftyTempEvln_IgbtTempRawToPhyValConv(void)
++ * \\brief     This function converts the raw temperature value to the physical value
++ * \\Parent_DD SftyTempEvln_MainFunction
++ */
++/*******************************************************************************************************************/
++LOCAL_INLINE void SftyTempEvln_IgbtTempRawToPhyValConv(void)
++{
++   /* ******** Variables declaration *********** */
++
++  /* ************* Source code **************** */
++
++   /* Convert the Igbt raw temperature value to their physical value */
++   if(SftyTempEvlnIgbtRngSwtSts == FALSE)
++   {
++      SftyTempEvln_IgbtTempRawToPhyValConvLo();
++   }
++   else
++   {
++      SftyTempEvln_IgbtTempRawToPhyValConvHi();
++   }
++   return;
++
++}
++
+ /*******************************************************************************************************************/
+ /*!
+  * \\fn        uint8 SftyTempEvln_IgbtTempRawToPhyValConv(void)
+@@ -822,10 +913,6 @@ LOCAL_INLINE void SftyTempEvln_EvlnIgbtTemp(void)
+    /* Do High and Low range check for the IGBT temperature value*/
+    SftyTempEvln_IgbtRngChk();
+ 
+-   /* Convert the IGBT temperature raw value to physical value */
+-   SftyTempEvln_IgbtTempRawToPhyValConv();
+-
+-
+    /* Ensure IGBT temperature is within the range*/
+    if ((SftyTempEvlnIgbtTempURngHiErrMonrSt == ERR_DEB_MONR_STS_PASSED) &&
+        (SftyTempEvlnIgbtTempVRngHiErrMonrSt == ERR_DEB_MONR_STS_PASSED) &&
+@@ -834,6 +921,9 @@ LOCAL_INLINE void SftyTempEvln_EvlnIgbtTemp(void)
+        (SftyTempEvlnIgbtTempVRngLoErrMonrSt == ERR_DEB_MONR_STS_PASSED) &&
+        (SftyTempEvlnIgbtTempWRngLoErrMonrSt == ERR_DEB_MONR_STS_PASSED))
+    {
++      /* Convert the IGBT temperature raw value to physical value */
++      SftyTempEvln_IgbtTempRawToPhyValConv();
++
+       /* Precondition for Plausibility Check*/
+       plausEntryChkSts = SftyTempEvln_IgbtTempPlausPreCondChk();
+ 
+@@ -850,18 +940,18 @@ LOCAL_INLINE void SftyTempEvln_EvlnIgbtTemp(void)
+       {
+          /* Do Nothing*/
+       }
++
++      /* Update C2c variables */
++      SftyC2cData.IgbtTempU = SftyTempEvlnIGBTPhyVal[SYSDEF_PHA_U];
++      SftyC2cData.IgbtTempV = SftyTempEvlnIGBTPhyVal[SYSDEF_PHA_V];
++      SftyC2cData.IgbtTempW = SftyTempEvlnIGBTPhyVal[SYSDEF_PHA_W];
++      SftyC2cData.IgbtTempMax = SftyTempEvlnIgbtTMaxPhyVal;
+    }
+    else
+    {
+       /* Do Nothing*/
+    }
+ 
+-   /* Update C2c variables */
+-   SftyC2cData.IgbtTempU = SftyTempEvlnIGBTPhyVal[SYSDEF_PHA_U];
+-   SftyC2cData.IgbtTempV = SftyTempEvlnIGBTPhyVal[SYSDEF_PHA_V];
+-   SftyC2cData.IgbtTempW = SftyTempEvlnIGBTPhyVal[SYSDEF_PHA_W];
+-   SftyC2cData.IgbtTempMax = SftyTempEvlnIgbtTMaxPhyVal;
+-
+    return;
+ }
+ 
+@@ -996,6 +1086,7 @@ FUNC(void, SFTY_TEMP_EVLN_CODE) SftyTempEvln_Init(void)
+    SftyTempEvlnPlausCntr = 0U;
+    SftyTempEvlnDcBusBarTemp = 0.f;
+    SftyTempEvlnDcDcLinkCpTemp = 0.f;
++   SftyTempEvlnIgbtRngSwtSts = FALSE;
+ 
+    return;
+ }
+diff --git a/src/fw_cu/Components/Safety/Sfty_Inv/SftyTempEvln/src/SftyTempEvln_data.c b/src/fw_cu/Components/Safety/Sfty_Inv/SftyTempEvln/src/SftyTempEvln_data.c
+index bb9d1c75d..4d68ab841 100644
+--- a/src/fw_cu/Components/Safety/Sfty_Inv/SftyTempEvln/src/SftyTempEvln_data.c
++++ b/src/fw_cu/Components/Safety/Sfty_Inv/SftyTempEvln/src/SftyTempEvln_data.c
+@@ -273,47 +273,89 @@ _map CONST(float32, SFTYTEMPEVLN_CALIB) SftyTempEvlnMotStatorTSnsrLoChartcTPrmL[
+    28.f,15.f,2.f,-11.f,-24.f,-37.f,-50.f};
+ 
+ /*
+-@@ SYMBOL = SftyTempEvlnIgbtPhyValPhU
++@@ SYMBOL = SftyTempEvlnIgbtUTSnsrLoChartcTPrmL
+ @@ A2L_TYPE = PARAMETER
+ @@ DATA_TYPE = FLOAT
+-@@ DIMENSION = 21
++@@ DIMENSION = 19
+ @@ DESCRIPTION = "IGBT temperature values U"
+ @@ GROUP = SftyTempEvln
+ @@ END
+ */
+ /*! IGBT temperature values; unit \'degree C\' */
+-_map CONST(float32, SFTYTEMPEVLN_CALIB) SftyTempEvlnIgbtPhyValPhU[21] =
+-   {171.f,161.f,151.f,141.f,131.f,121.f,111.f,101.f,91.f,81.f,70.f,59.f,48.f,37.f,
+-   26.f,15.f,-4.f,-14.f,-25.f,-35.f,-45.f};
++_map CONST(float32, SFTYTEMPEVLN_CALIB) SftyTempEvlnIgbtUTSnsrLoChartcTPrmL[19] =
++   {50.f,45.f,40.f,35.f,30.f,25.f,20.f,15.f,10.f,5.f,0.f,-5.f,-10.f,-15.f,
++   -20.f,-25.f,-30.f,-35.f,-40.f};
+ 
+ /*
+-@@ SYMBOL = SftyTempEvlnIgbtPhyValPhV
++@@ SYMBOL = SftyTempEvlnIgbtUTSnsrHiChartcTPrmL
+ @@ A2L_TYPE = PARAMETER
+ @@ DATA_TYPE = FLOAT
+-@@ DIMENSION = 21
++@@ DIMENSION = 23
++@@ DESCRIPTION = "IGBT temperature values U"
++@@ GROUP = SftyTempEvln
++@@ END
++*/
++/*! IGBT temperature values; unit \'degree C\' */
++_map CONST(float32, SFTYTEMPEVLN_CALIB) SftyTempEvlnIgbtUTSnsrHiChartcTPrmL[23] =
++   {150.f,145.f,140.f,135.f,130.f,125.f,120.f,115.f,110.f,105.f,100.f,95.f,90.f,85.f,
++    80.f,75.f,70.f,65.f,60.f,55.f,50.f,45.f,40.f};
++
++/*
++@@ SYMBOL = SftyTempEvlnIgbtVTSnsrLoChartcTPrmL
++@@ A2L_TYPE = PARAMETER
++@@ DATA_TYPE = FLOAT
++@@ DIMENSION = 19
+ @@ DESCRIPTION = "IGBT temperature values V"
+ @@ GROUP = SftyTempEvln
+ @@ END
+ */
+ /*! IGBT temperature values; unit \'degree C\' */
+-_map CONST(float32, SFTYTEMPEVLN_CALIB) SftyTempEvlnIgbtPhyValPhV[21] =
+-   {171.f,161.f,151.f,141.f,131.f,121.f,111.f,101.f,91.f,81.f,70.f,59.f,48.f,37.f,
+-   26.f,15.f,-4.f,-14.f,-25.f,-35.f,-45.f};
++_map CONST(float32, SFTYTEMPEVLN_CALIB) SftyTempEvlnIgbtVTSnsrLoChartcTPrmL[19] =
++   {50.f,45.f,40.f,35.f,30.f,25.f,20.f,15.f,10.f,5.f,0.f,-5.f,-10.f,-15.f,
++   -20.f,-25.f,-30.f,-35.f,-40.f};
++
++/*
++@@ SYMBOL = SftyTempEvlnIgbtVTSnsrHiChartcTPrmL
++@@ A2L_TYPE = PARAMETER
++@@ DATA_TYPE = FLOAT
++@@ DIMENSION = 23
++@@ DESCRIPTION = "IGBT temperature values V"
++@@ GROUP = SftyTempEvln
++@@ END
++*/
++/*! IGBT temperature values; unit \'degree C\' */
++_map CONST(float32, SFTYTEMPEVLN_CALIB) SftyTempEvlnIgbtVTSnsrHiChartcTPrmL[23] =
++   {150.f,145.f,140.f,135.f,130.f,125.f,120.f,115.f,110.f,105.f,100.f,95.f,90.f,85.f,
++    80.f,75.f,70.f,65.f,60.f,55.f,50.f,45.f,40.f};
+ 
+ 
+ /*
+-@@ SYMBOL = SftyTempEvlnIgbtPhyValPhW
++@@ SYMBOL = SftyTempEvlnIgbtWTSnsrLoChartcTPrmL
+ @@ A2L_TYPE = PARAMETER
+ @@ DATA_TYPE = FLOAT
+-@@ DIMENSION = 21
++@@ DIMENSION = 19
+ @@ DESCRIPTION = "IGBT temperature values W"
+ @@ GROUP = SftyTempEvln
+ @@ END
+ */
+ /*! IGBT temperature values; unit \'degree C\' */
+-_map CONST(float32, SFTYTEMPEVLN_CALIB) SftyTempEvlnIgbtPhyValPhW[21] =
+-   {171.f,161.f,151.f,141.f,131.f,121.f,111.f,101.f,91.f,81.f,70.f,59.f,48.f,37.f,
+-   26.f,15.f,-4.f,-14.f,-25.f,-35.f,-45.f};
++_map CONST(float32, SFTYTEMPEVLN_CALIB) SftyTempEvlnIgbtWTSnsrLoChartcTPrmL[19] =
++   {50.f,45.f,40.f,35.f,30.f,25.f,20.f,15.f,10.f,5.f,0.f,-5.f,-10.f,-15.f,
++   -20.f,-25.f,-30.f,-35.f,-40.f};
++
++/*
++@@ SYMBOL = SftyTempEvlnIgbtWTSnsrHiChartcTPrmL
++@@ A2L_TYPE = PARAMETER
++@@ DATA_TYPE = FLOAT
++@@ DIMENSION = 23
++@@ DESCRIPTION = "IGBT temperature values W"
++@@ GROUP = SftyTempEvln
++@@ END
++*/
++/*! IGBT temperature values; unit \'degree C\' */
++_map CONST(float32, SFTYTEMPEVLN_CALIB) SftyTempEvlnIgbtWTSnsrHiChartcTPrmL[23] =
++   {150.f,145.f,140.f,135.f,130.f,125.f,120.f,115.f,110.f,105.f,100.f,95.f,90.f,85.f,
++    80.f,75.f,70.f,65.f,60.f,55.f,50.f,45.f,40.f};
+ 
+ /*
+ @@ SYMBOL = SftyTempEvlnPlausChkTimOutinUs
+@@ -533,46 +575,89 @@ CONST(uint16, SFTYTEMPEVLN_CALIB) SftyTempEvlnIgbtTempHWPRngHiThd =  170U;
+ CONST(uint16, SFTYTEMPEVLN_CALIB) SftyTempEvlnIgbtTempHWPRngLoThd =  875U;  /* change this value */
+ 
+ /*
+-@@ SYMBOL = SftyTempEvlnIgbtRawValU
++@@ SYMBOL = SftyTempEvlnIgbtUTSnsrLoChartcVPrmA
+ @@ A2L_TYPE = PARAMETER
+ @@ DATA_TYPE = UWORD
+-@@ DIMENSION = 22
++@@ DIMENSION = 20
+ @@ DESCRIPTION = "IGBT temperature raw values U"
+ @@ GROUP = SftyTempEvln
+ @@ END
+ */
+ /*! IGBT temperature raw values; unit \'U\' */
+-CONST(uint16, SFTYTEMPEVLN_CALIB) SftyTempEvlnIgbtRawValU[22] =
+-   {21U,428U,501U,588U,693U,818U,967U,1143U,1348U,1583U,1846U,2176U,2502U,2840U,
+-   3133U,3391U,3604U,3861U,3946U,4009U,4045U,4068U};
++CONST(uint16, SFTYTEMPEVLN_CALIB) SftyTempEvlnIgbtUTSnsrLoChartcVPrmA[20] =
++   {19U,706U,808U,924U,1055U,1202U,1365U,1543U,1736U,1940U,2152U,2369U,2584U,2794U,
++    2993U,3177U,3343U,3489U,3614U,3720U};
+ 
+ /*
+-@@ SYMBOL = SftyTempEvlnIgbtRawValV
++@@ SYMBOL = SftyTempEvlnIgbtUTSnsrHiChartcVPrmA
+ @@ A2L_TYPE = PARAMETER
+ @@ DATA_TYPE = UWORD
+-@@ DIMENSION = 22
++@@ DIMENSION = 24
++@@ DESCRIPTION = "IGBT temperature raw values U"
++@@ GROUP = SftyTempEvln
++@@ END
++*/
++/*! IGBT temperature raw values; unit \'U\' */
++CONST(uint16, SFTYTEMPEVLN_CALIB) SftyTempEvlnIgbtUTSnsrHiChartcVPrmA[24] =
++   {23U,1074U,1156U,1244U,1338U,1437U,1543U,1654U,1770U,1891U,2016U,2144U,2274U,2406U,
++    2538U,2669U,2798U,2923U,3044U,3159U,3268U,3369U,3463U,3548U};
++
++/*
++@@ SYMBOL = SftyTempEvlnIgbtVTSnsrLoChartcVPrmA
++@@ A2L_TYPE = PARAMETER
++@@ DATA_TYPE = UWORD
++@@ DIMENSION = 20
++@@ DESCRIPTION = "IGBT temperature raw values V"
++@@ GROUP = SftyTempEvln
++@@ END
++*/
++/*! IGBT temperature raw values; unit \'U\' */
++CONST(uint16, SFTYTEMPEVLN_CALIB) SftyTempEvlnIgbtVTSnsrLoChartcVPrmA[20] =
++   {19U,706U,808U,924U,1055U,1202U,1365U,1543U,1736U,1940U,2152U,2369U,2584U,2794U,
++    2993U,3177U,3343U,3489U,3614U,3720U};
++
++/*
++@@ SYMBOL = SftyTempEvlnIgbtVTSnsrHiChartcVPrmA
++@@ A2L_TYPE = PARAMETER
++@@ DATA_TYPE = UWORD
++@@ DIMENSION = 24
+ @@ DESCRIPTION = "IGBT temperature raw values V"
+ @@ GROUP = SftyTempEvln
+ @@ END
+ */
+ /*! IGBT temperature raw values; unit \'V\' */
+-CONST(uint16, SFTYTEMPEVLN_CALIB) SftyTempEvlnIgbtRawValV[22] =
+-   {21U,428U,501U,588U,693U,818U,967U,1143U,1348U,1583U,1846U,2176U,2502U,2840U,
+-   3133U,3391U,3604U,3861U,3946U,4009U,4045U,4068U};
++CONST(uint16, SFTYTEMPEVLN_CALIB) SftyTempEvlnIgbtVTSnsrHiChartcVPrmA[24] =
++   {23U,1074U,1156U,1244U,1338U,1437U,1543U,1654U,1770U,1891U,2016U,2144U,2274U,2406U,
++    2538U,2669U,2798U,2923U,3044U,3159U,3268U,3369U,3463U,3548U};
+ 
+ /*
+-@@ SYMBOL = SftyTempEvlnIgbtRawValW
++@@ SYMBOL = SftyTempEvlnIgbtWTSnsrLoChartcVPrmA
+ @@ A2L_TYPE = PARAMETER
+ @@ DATA_TYPE = UWORD
+-@@ DIMENSION = 22
++@@ DIMENSION = 20
+ @@ DESCRIPTION = "IGBT temperature raw values W"
+ @@ GROUP = SftyTempEvln
+ @@ END
+ */
+ /*! IGBT temperature raw values; unit \'W\' */
+-CONST(uint16, SFTYTEMPEVLN_CALIB) SftyTempEvlnIgbtRawValW[22] =
+-   {21U,428U,501U,588U,693U,818U,967U,1143U,1348U,1583U,1846U,2176U,2502U,2840U,
+-   3133U,3391U,3604U,3861U,3946U,4009U,4045U,4068U};
++CONST(uint16, SFTYTEMPEVLN_CALIB) SftyTempEvlnIgbtWTSnsrLoChartcVPrmA[20] =
++   {19U,706U,808U,924U,1055U,1202U,1365U,1543U,1736U,1940U,2152U,2369U,2584U,2794U,
++    2993U,3177U,3343U,3489U,3614U,3720U};
++
++/*
++@@ SYMBOL = SftyTempEvlnIgbtWTSnsrHiChartcVPrmA
++@@ A2L_TYPE = PARAMETER
++@@ DATA_TYPE = UWORD
++@@ DIMENSION = 24
++@@ DESCRIPTION = "IGBT temperature raw values W"
++@@ GROUP = SftyTempEvln
++@@ END
++*/
++/*! IGBT temperature raw values; unit \'W\' */
++CONST(uint16, SFTYTEMPEVLN_CALIB) SftyTempEvlnIgbtWTSnsrHiChartcVPrmA[24] =
++   {23U,1074U,1156U,1244U,1338U,1437U,1543U,1654U,1770U,1891U,2016U,2144U,2274U,2406U,
++    2538U,2669U,2798U,2923U,3044U,3159U,3268U,3369U,3463U,3548U};
++
+ 
+ /*
+ @@ SYMBOL = SftyTempEvlnMotStatorTSnsrLoChartcVPrmA
+diff --git a/src/fw_cu/build/a2l/Measurements-to-Timeslices-Mapping.csv b/src/fw_cu/build/a2l/Measurements-to-Timeslices-Mapping.csv
+index 248e75100..753863152 100644
+--- a/src/fw_cu/build/a2l/Measurements-to-Timeslices-Mapping.csv
++++ b/src/fw_cu/build/a2l/Measurements-to-Timeslices-Mapping.csv
+@@ -5154,9 +5154,6 @@ SftyActvDchaCtrlActvDchaReq,Core_1,Core_1_200us,1,,,SSW
+ SftyActvDchaCtrlActvDchaReqExtel,Core_1,Core_1_200us,1,,,SSW
+ SftyActvDchaCtrlActvDchaReqIntel,Core_1,Core_1_200us,1,,,SSW
+ SftyActvDchaCtrlActvDchaReqViaR,Core_1,Core_1_200us,1,,,SSW
+-SftyAcEvlnPhaseUOcHWErrMonrSt,Core_1,Core_1_200us,0.2,,,SSW
+-SftyAcEvlnPhaseVOcHWErrMonrSt,Core_1,Core_1_200us,0.2,,,SSW
+-SftyAcEvlnPhaseWOcHWErrMonrSt,Core_1,Core_1_200us,0.2,,,SSW
+ SftyAcEvlnReinitCntr,Core_1,Core_1_200us,0.2,,,SSW
+ SftyAcEvlnReinitTimCntr,Core_1,Core_1_200us,0.2,,,SSW
+ SftyActvDchaCtrlCmd.ActvDchaInhb,Core_1,Core_1_200us,0.2,,,SSW
+@@ -5477,6 +5474,9 @@ SftyFlshVldtProdDataAdminBlkCrc.CalcCrc,Core_1,Core_1_200us,0.2,,,SSW
+ SftyFlshVldtProdDataAdminBlkCrc.ExpectedCrc,Core_1,Core_1_200us,0.2,,,SSW
+ SftyFlshVldtSecuCrcErrMonrSt,Core_1,Core_1_200us,0.2,,,SSW
+ SftyAcEvlnMeasCoherFltSts,Core_1,Core_1_200us,0.2,,,SSW
++SftyAcEvlnOCPhaUErrMonrSt,Core_1,Core_1_200us,0.2,,,SSW
++SftyAcEvlnOCPhaVErrMonrSt,Core_1,Core_1_200us,0.2,,,SSW
++SftyAcEvlnOCPhaWErrMonrSt,Core_1,Core_1_200us,0.2,,,SSW
+ SftyHvDcUEvlnOvHWErrMonrSt,Core_1,Core_1_200us,0.2,,,SSW
+ SftyPwrSplyEvlnHvP16Prsnt,Core_1,Core_1_200us,0.2,,,SSW
+ SftyRslvrCalcnAcICsTime,Core_1,Core_1_200us,0.2,,,SSW
+@@ -5867,6 +5867,7 @@ SftyTempEvlnDcBusBarTemp,Core_1,Core_1_200us,0.2,,,SSW
+ SftyTempEvlnDcDcLinkCpTemp,Core_1,Core_1_200us,0.2,,,SSW
+ SftyTempEvlnDcLinkTempHwpMonrSt,Core_1,Core_1_200us,2,,,SSW
+ SftyTempEvlnIGBTPhyVal,Core_1,Core_1_200us,0.2,,,SSW
++SftyTempEvlnIgbtRngSwtSts,Core_1,Core_1_200us,0.2,,,SSW
+ SftyTempEvlnIgbtTempHWPErrMonrSt,Core_1,Core_1_200us,0.2,,,SSW
+ SftyTempEvlnIgbtTempUPlausErrMonrSt,Core_1,Core_1_200us,0.2,,,SSW
+ SftyTempEvlnIgbtTempURngHiErrMonrSt,Core_1,Core_1_200us,0.2,,,SSW
+@@ -7142,6 +7143,7 @@ SftyE2eFpgaMeasCohrncFltStsAcc,Core_1,Core_1_200us,0.2,,,SSW
+ SftyE2eFpgaFirstRunDone,Core_1,Core_1_200us,0.2,,,SSW
+ SftyE2eFpgaHsGateDrvrFltSts,Core_1,Core_1_200us,0.2,,,SSW
+ SftyE2eFpgaHsGateDrvrFltStsAcc,Core_1,Core_1_200us,0.2,,,SSW
++SftyE2eFpgaIgbtTempRngSwtSts,Core_1,Core_1_200us,0.2,,,SSW
+ SftyE2eFpgaMidPointPhaFltSts,Core_1,Core_1_200us,0.2,,,SSW
+ SftyE2eFpgaMidPointPhaFltStsAcc,Core_1,Core_1_200us,0.2,,,SSW
+ SftyE2eFpgaModPlausErrMonrSt,Core_1,Core_1_200us,0.2,,,SSW
+'

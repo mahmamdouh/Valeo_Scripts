@@ -1,0 +1,1614 @@
+b'commit a2c88c173b6070cec01427bc641678a639b32945
+Author: Neehara ODANKY <neehara.odanky.jv.ext@valeo.com>
+Date:   Wed Mar 23 15:07:41 2022 +0530
+
+    $100kW-54477$ - FCT_CtrlParkPos - Release Unit Construction [B03]
+    
+    Change-Id: Ic5b7b963832c11be0821309f80010a6005fe8411
+
+diff --git a/src/fw_cu/Components/Safety/Sfty_Cmn/SftyCrc/src/SftyCrc.c b/src/fw_cu/Components/Safety/Sfty_Cmn/SftyCrc/src/SftyCrc.c
+index 83c638d43..ea40b327f 100644
+--- a/src/fw_cu/Components/Safety/Sfty_Cmn/SftyCrc/src/SftyCrc.c
++++ b/src/fw_cu/Components/Safety/Sfty_Cmn/SftyCrc/src/SftyCrc.c
+@@ -7,7 +7,7 @@
+ /* Department: Valeo Siemens eAutomotive                                  */
+ /* I DT EC R&D                                                            */
+ /* ********************************************************************** */
+-/* Copyright (C) Valeo Siemens eAutomotive Germany GmbH 2021              */
++/* Copyright (C) Valeo Siemens eAutomotive Germany GmbH 2022              */
+ /* All Rights Reserved. Confidential                                      */
+ /* ********************************************************************** */
+ 
+@@ -211,7 +211,6 @@ FUNC (uint8, SFTYCRC) SftyCrc_CalcCRC4
+   boolean Crc_IsFirstCall
+ )
+ {
+-   uint8\ttempData;
+    uint8\tidx;
+    uint8\tCrc_RetValue4;
+    
+@@ -228,13 +227,12 @@ FUNC (uint8, SFTYCRC) SftyCrc_CalcCRC4
+    /* Do the crc calculation for all data */
+    for(idx = 0U; idx < Crc_Length; idx++)
+    {
+-       tempData = (uint8)(Crc_RetValue4 ^ Crc_Data[idx]); 
+-\t   /* Calculate the crc value */
+-       Crc_RetValue4 = (uint8)SftyCrc_Tbl4[tempData];
++      /* Calculate checksum */
++      Crc_RetValue4 = (uint8)(Crc_Data[idx] ^ SftyCrc_Tbl4[Crc_RetValue4]);
+    }
+    
+-   /* Do Final XOR crc value */
+-   Crc_RetValue4 ^= CRC_XOR_VALUE4;  
++   /* Get final checksum value */
++   Crc_RetValue4 = SftyCrc_Tbl4[Crc_RetValue4];
+    
+    return Crc_RetValue4;
+ }
+@@ -544,7 +542,7 @@ FUNC(void, SFTYCRC) SftyCrc_InitArea0(void)
+ 
+ /*! @} doxygen end of group definition                                    */
+ /* ********************************************************************** */
+-/* Copyright (C) Valeo Siemens eAutomotive Germany GmbH 2021              */
++/* Copyright (C) Valeo Siemens eAutomotive Germany GmbH 2022              */
+ /* All Rights Reserved. Confidential                                      */
+ /* ********************************************************************** */
+ /*==================[end of file]=========================================*/
+diff --git a/src/fw_cu/Components/Safety/Sfty_Cmn/SftyParkLockActr/include/SftyParkLockActr_data.h b/src/fw_cu/Components/Safety/Sfty_Cmn/SftyParkLockActr/include/SftyParkLockActr_data.h
+index d179b1904..acb89850c 100644
+--- a/src/fw_cu/Components/Safety/Sfty_Cmn/SftyParkLockActr/include/SftyParkLockActr_data.h
++++ b/src/fw_cu/Components/Safety/Sfty_Cmn/SftyParkLockActr/include/SftyParkLockActr_data.h
+@@ -3,7 +3,7 @@
+ /* ADD Container: SftyParkLockActr                                   */
+ /* ADD Container Version: 1.0.0                                      */
+ /* ***************************************************************** */
+-/* Copyright (C) Valeo-Siemens eAutomotive GmbH 2021                 */
++/* Copyright (C) Valeo-Siemens eAutomotive GmbH 2022                 */
+ /* All Rights Reserved. Confidential                                 */
+ /* ***************************************************************** */
+ /*!
+@@ -42,7 +42,6 @@
+ 
+ extern VAR(boolean, SFTYPARKLOCKACTR_VAR) SftyParkLockActrChkPrimActrPwmCfgVld;
+ extern VAR(boolean, SFTYPARKLOCKACTR_VAR) SftyParkLockActrPosSnsrSts;
+-extern VAR(uint8, SFTYPARKLOCKACTR_VAR) SftyParkLockActrPrimActrCfgFltErrMonrSt;
+ extern VAR(boolean, SFTYPARKLOCKACTR_VAR) SftyParkLockActrPrimActrSts;
+ 
+ #define SFTYPARKLOCKACTR_STOP_SEC_VAR_AREA_2_FAST_INIT_8
+@@ -118,7 +117,7 @@ extern CONST(float32, SFTYPARKLOCKACTR_CALIB) SftyParkLockActrPrimEngTqSatnTbl[4
+ 
+ 
+ /* ***************************************************************** */
+-/* Copyright (C) Valeo-Siemens eAutomotive GmbH 2021                 */
++/* Copyright (C) Valeo-Siemens eAutomotive GmbH 2022                 */
+ /* All Rights Reserved. Confidential                                 */
+ /* ***************************************************************** */
+ /*==================[end of file]====================================*/
+diff --git a/src/fw_cu/Components/Safety/Sfty_Cmn/SftyParkLockActr/src/SftyParkLockActr.c b/src/fw_cu/Components/Safety/Sfty_Cmn/SftyParkLockActr/src/SftyParkLockActr.c
+index 0f09afd4f..277d60309 100644
+--- a/src/fw_cu/Components/Safety/Sfty_Cmn/SftyParkLockActr/src/SftyParkLockActr.c
++++ b/src/fw_cu/Components/Safety/Sfty_Cmn/SftyParkLockActr/src/SftyParkLockActr.c
+@@ -74,6 +74,25 @@ typedef struct PiCtrlrAuxInType_
+ 
+ /*================== [local data] ===========================================*/
+ 
++/* Begin: SFTYPARKLOCKACTR_START_SEC_VAR_AREA_2_FAST_INIT_8 (online) */
++#define SFTYPARKLOCKACTR_START_SEC_VAR_AREA_2_FAST_INIT_8
++#include "MemMap.h"
++/*
++@@ SYMBOL = SftyParkLockActrPrimActrCfgFltErrMonrSt
++@@ A2L_TYPE = MEASURE
++@@ DATA_TYPE = UBYTE [0 ... 2]
++@@ CONVERSION = TABLE 0 "INACTIVE" 1 "PASSED" 2 "FAILED"
++@@ DESCRIPTION = "ParkLock Actuator PWM Configuration error monitor; unit \'-\'"
++@@ GROUP = SftyParkLockActr
++@@ END
++*/
++STATIC VAR(uint8, SFTYPARKLOCKACTR_VAR) SftyParkLockActrPrimActrCfgFltErrMonrSt = 0U;  /* PRQA S 3229 #This variable is kept for software debugging purpose */
++
++#define SFTYPARKLOCKACTR_STOP_SEC_VAR_AREA_2_FAST_INIT_8
++#include "MemMap.h"
++/* End: SFTYPARKLOCKACTR_STOP_SEC_VAR_AREA_2_FAST_INIT_8 (online) */
++
++
+ /* Begin: SFTYPARKLOCKACTR_START_SEC_VAR_AREA_2_FAST_INIT_32 (online) */
+ #define SFTYPARKLOCKACTR_START_SEC_VAR_AREA_2_FAST_INIT_32
+ #include "MemMap.h"
+@@ -1307,8 +1326,8 @@ LOCAL_INLINE void SftyParkLockActr_PrimActrSlowDrvr(void)
+ /*****************************************************************************/
+ LOCAL_INLINE void SftyParkLockActr_PosnSnsrEn(void)
+ {
+-   /* Set the control pin to logical HIGH to enable power supply of the park lock position sensor */
+-   SFTY_N_P5V_PLC_SENS_EN_OUT_P = STD_HIGH;
++   /* Set the control pin to logical LOW to enable power supply of the park lock position sensor */
++   SFTY_N_P5V_PLC_SENS_EN_OUT_P = STD_LOW;
+    /* Set the status of position sensor */
+    SftyParkLockActrPosSnsrSts = TRUE;
+ 
+@@ -1336,8 +1355,8 @@ LOCAL_INLINE void SftyParkLockActr_PosnSnsrEn(void)
+ /*****************************************************************************/
+ FUNC(void, SFTYPARKLOCKACTR_CODE) SftyParkLockActr_PosSnsrDi(void)
+ {
+-   /* Set the control pin to logical LOW to disable the power supply of the park lock position sensor */
+-   SFTY_N_P5V_PLC_SENS_EN_OUT_P = STD_LOW;
++   /* Set the control pin to logical HIGH to disable the power supply of the park lock position sensor */
++   SFTY_N_P5V_PLC_SENS_EN_OUT_P = STD_HIGH;
+    /* Reset the status of position sensor */
+    SftyParkLockActrPosSnsrSts = FALSE;
+ 
+diff --git a/src/fw_cu/Components/Safety/Sfty_Cmn/SftyParkLockActr/src/SftyParkLockActr_data.c b/src/fw_cu/Components/Safety/Sfty_Cmn/SftyParkLockActr/src/SftyParkLockActr_data.c
+index a3af4b0a1..da1fda3d2 100644
+--- a/src/fw_cu/Components/Safety/Sfty_Cmn/SftyParkLockActr/src/SftyParkLockActr_data.c
++++ b/src/fw_cu/Components/Safety/Sfty_Cmn/SftyParkLockActr/src/SftyParkLockActr_data.c
+@@ -3,7 +3,7 @@
+ /* ADD Container: SftyParkLockActr                                   */
+ /* ADD Container Version: 1.0.0                                      */
+ /* ***************************************************************** */
+-/* Copyright (C) Valeo-Siemens eAutomotive GmbH 2021                 */
++/* Copyright (C) Valeo-Siemens eAutomotive GmbH 2022                 */
+ /* All Rights Reserved. Confidential                                 */
+ /* ***************************************************************** */
+ 
+@@ -23,16 +23,6 @@
+ /* Begin: SFTYPARKLOCKACTR_START_SEC_VAR_AREA_2_FAST_INIT_8 (online) */
+ #define SFTYPARKLOCKACTR_START_SEC_VAR_AREA_2_FAST_INIT_8
+ #include "MemMap.h"
+-/*
+-@@ SYMBOL = SftyParkLockActrPrimActrCfgFltErrMonrSt
+-@@ A2L_TYPE = MEASURE
+-@@ DATA_TYPE = UBYTE [0 ... 2]
+-@@ CONVERSION = TABLE 0 "INACTIVE" 1 "PASSED" 2 "FAILED"
+-@@ DESCRIPTION = "ParkLock Actuator PWM Configuration error monitor; unit \'-\'"
+-@@ GROUP = SftyParkLockActr
+-@@ END
+-*/
+-VAR(uint8, SFTYPARKLOCKACTR_VAR) SftyParkLockActrPrimActrCfgFltErrMonrSt = 0U;
+ 
+ /*
+ @@ SYMBOL = SftyParkLockActrChkPrimActrPwmCfgVld
+@@ -384,7 +374,7 @@ CONST(uint32, SFTYPARKLOCKACTR_CALIB) SftyParkLockActrDisengStopDetnTmrThd = 100
+ /************************* CALIBRATION PARAMETERS - END *****************************/
+ 
+ /* ***************************************************************** */
+-/* Copyright (C) Valeo-Siemens eAutomotive GmbH 2021                 */
++/* Copyright (C) Valeo-Siemens eAutomotive GmbH 2022                 */
+ /* All Rights Reserved. Confidential                                 */
+ /* ***************************************************************** */
+ /*==================[end of file]====================================*/
+diff --git a/src/fw_cu/Components/Safety/Sfty_Cmn/SftyParkLockEvln/include/SftyParkLockEvln_data.h b/src/fw_cu/Components/Safety/Sfty_Cmn/SftyParkLockEvln/include/SftyParkLockEvln_data.h
+index aff25cb0d..e7f8e3a20 100644
+--- a/src/fw_cu/Components/Safety/Sfty_Cmn/SftyParkLockEvln/include/SftyParkLockEvln_data.h
++++ b/src/fw_cu/Components/Safety/Sfty_Cmn/SftyParkLockEvln/include/SftyParkLockEvln_data.h
+@@ -3,7 +3,7 @@
+ /* ADD Container: SftyParkLockEvln                                   */
+ /* ADD Container Version: 1.0.0                                      */
+ /* ***************************************************************** */
+-/* Copyright (C) Valeo Siemens eAutomotive Germany GmbH 2021         */
++/* Copyright (C) Valeo Siemens eAutomotive Germany GmbH 2022         */
+ /* All Rights Reserved. Confidential                                 */
+ /* ***************************************************************** */
+ 
+@@ -23,10 +23,6 @@
+ #define SFTYPARKLOCKEVLN_START_SEC_VAR_AREA_2_FAST_INIT_8
+ #include "MemMap.h"
+ 
+-extern VAR(uint8, SFTYPARKLOCKEVLN_VAR) SftyParkLockEvlnSnrDataElecLoErrMonrSt;
+-
+-extern VAR(uint8, SFTYPARKLOCKEVLN_VAR) SftyParkLockEvlnSnrDataElecHiErrMonrSt;
+-
+ extern VAR(uint8, SFTYPARKLOCKEVLN_VAR) SftyParkLockEvlnPrkgPosSnsrErrMonrSt;
+ 
+ #define SFTYPARKLOCKEVLN_STOP_SEC_VAR_AREA_2_FAST_INIT_8
+@@ -109,7 +105,7 @@ extern CONST(uint16, SFTYPARKLOCKEVLN_CALIB) SftyParkLockEvlnPosnAcqnMaxRawVal;
+ /*================== [closure] ==============================================*/
+ #endif
+ /* ***************************************************************** */
+-/* Copyright (C) Valeo Siemens eAutomotive Germany GmbH 2021         */
++/* Copyright (C) Valeo Siemens eAutomotive Germany GmbH 2022         */
+ /* All Rights Reserved. Confidential                                 */
+ /* ***************************************************************** */
+ /*==================[end of file]====================================*/
+diff --git a/src/fw_cu/Components/Safety/Sfty_Cmn/SftyParkLockEvln/src/SftyParkLockEvln.c b/src/fw_cu/Components/Safety/Sfty_Cmn/SftyParkLockEvln/src/SftyParkLockEvln.c
+index 355f1452b..d9129e388 100644
+--- a/src/fw_cu/Components/Safety/Sfty_Cmn/SftyParkLockEvln/src/SftyParkLockEvln.c
++++ b/src/fw_cu/Components/Safety/Sfty_Cmn/SftyParkLockEvln/src/SftyParkLockEvln.c
+@@ -7,7 +7,7 @@
+ /* Department: Valeo Siemens eAutomotive                                  */
+ /* I DT EC R&D                                                            */
+ /* ********************************************************************** */
+-/* Copyright (C) Valeo Siemens eAutomotive Germany GmbH 2021              */
++/* Copyright (C) Valeo Siemens eAutomotive Germany GmbH 2022              */
+ /* All Rights Reserved. Confidential                                      */
+ /* ********************************************************************** */
+ 
+@@ -60,7 +60,19 @@
+ #define SFTYPARKLOCKEVLN_MSG_ID_LOWER_NIBBLE_DATA_MASK            0x0FU
+ /* \\brief: Data mask to get lower nibble of 8-bit message id */
+ #define SFTYPARKLOCKEVLN_MSG_ID_HIGHER_NIBBLE_DATA_MASK           0xF0U
+-
++/* Right shift by 2 */
++#define SFTYPARKLOCKEVLN_RIGHT_SHIFT_BY_TWO 2U
++/* Data mask to get lower nibble of 8-bit data */
++#define SFTYPARKLOCKEVLN_LOWER_NIBBLE_DATA_MASK 0x0FU
++/* shift by 4 */
++#define SFTYPARKLOCKEVLN_SHIFT_BY_FOUR 4U
++
++/* Look up table for 8 bit reversal; unit \'-\' */
++STATIC CONST(uint8, SFTYPARKLOCKEVLN_VAR) SftyParkLockEvlnBitRvsLookUpTbl[16] =
++{
++  0x0U, 0x8U, 0x4U, 0xCU, 0x2U, 0xAU, 0x6U, 0xEU,
++  0x1U, 0x9U, 0x5U, 0xDU, 0x3U, 0xBU, 0x7U, 0xFU,
++};
+ /*================== [type definitions] =====================================*/
+ 
+ /* \\brief Structure definition of park lock position sensor data */
+@@ -237,6 +249,50 @@ STATIC VAR(uint32, SFTYPARKLOCKEVLN_VAR) SftyParkLockEvlnPrimActrILstTiStamp;
+ #define SFTYPARKLOCKEVLN_ASIL_2_START_SEC_VAR_FAST_CLEARED
+ #include "MemMap.h"
+ 
++/*
++@@ SYMBOL = SftyParkLockEvlnSnrDataElecLoErrMonrSt
++@@ A2L_TYPE = MEASURE
++@@ DATA_TYPE = UBYTE [0 ... 2]
++@@ CONVERSION = TABLE 0 "INACTIVE" 1 "PASSED" 2 "FAILED"
++@@ DESCRIPTION = "Park lock position sensor raw data validity electric low status; unit \'-\'"
++@@ GROUP = SftyParkLockEvln
++@@ END
++*/
++STATIC VAR(uint8, SFTYPARKLOCKEVLN_VAR) SftyParkLockEvlnSnrDataElecLoErrMonrSt;
++
++/*
++@@ SYMBOL = SftyParkLockEvlnSnrDataElecHiErrMonrSt
++@@ A2L_TYPE = MEASURE
++@@ DATA_TYPE = UBYTE [0 ... 2]
++@@ CONVERSION = TABLE 0 "INACTIVE" 1 "PASSED" 2 "FAILED"
++@@ DESCRIPTION = "Park lock position sensor raw data validity electric high status; unit \'-\'"
++@@ GROUP = SftyParkLockEvln
++@@ END
++*/
++STATIC VAR(uint8, SFTYPARKLOCKEVLN_VAR) SftyParkLockEvlnSnrDataElecHiErrMonrSt;
++
++/*
++@@ SYMBOL = SftyParkLockEvlnSerlDataEvlnRes
++@@ A2L_TYPE = MEASURE
++@@ DATA_TYPE = UBYTE [1 ... 2]
++@@ CONVERSION = TABLE 1 "PASSED" 2 "FAILED"
++@@ DESCRIPTION = "Park lock position sensor serial data evaluation result; unit \'-\'"
++@@ GROUP = SftyParkLockEvln
++@@ END
++*/
++STATIC VAR(uint8, SFTYPARKLOCKEVLN_VAR) SftyParkLockEvlnSerlDataEvlnRes;
++
++/*
++@@ SYMBOL = SftyParkLockEvlnSerlDataTiStampChkRes
++@@ A2L_TYPE = MEASURE
++@@ DATA_TYPE = UBYTE [1 ... 2]
++@@ CONVERSION = TABLE 1 "PASSED" 2 "FAILED"
++@@ DESCRIPTION = "Park lock position sensor serial data time stamp check result; unit \'-\'"
++@@ GROUP = SftyParkLockEvln
++@@ END
++*/
++STATIC VAR(uint8, SFTYPARKLOCKEVLN_VAR) SftyParkLockEvlnSerlDataTiStampChkRes;
++
+ /*
+ @@ SYMBOL = SftyParkLockEvlnIntCalcCrcVal
+ @@ A2L_TYPE = MEASURE
+@@ -1141,6 +1197,53 @@ LOCAL_INLINE void SftyParkLockEvln_Form24BitCrcFrame(void)
+    return;
+ }
+ 
++/************************************************************************************/
++/*!
++ * \\fn        : uint8 SftyParkLockEvln_Reverse8Bit(uint8 num)
++ * \\brief     : This function reverse 8 bit number
++ * \\param     : [in] num - 8bit number
++ * \\return    : retRevNum - Reversed 8bit number
++ * \\Parent_DD : SftyParkLockEvln_SlowFunctionArea2
++ */
++/************************************************************************************/
++LOCAL_INLINE uint8 SftyParkLockEvln_Reverse8Bit(uint8 num)
++{
++   /* ******** Variables declaration *********** */
++   uint8 retRevNum;
++
++   /* ************* Source code **************** */
++
++   /* Using Lookup table reverse 8-bit data */
++   retRevNum = (uint8)(SftyParkLockEvlnBitRvsLookUpTbl[(num & SFTYPARKLOCKEVLN_LOWER_NIBBLE_DATA_MASK)] << SFTYPARKLOCKEVLN_SHIFT_BY_FOUR) |
++                SftyParkLockEvlnBitRvsLookUpTbl[num >> SFTYPARKLOCKEVLN_SHIFT_BY_FOUR];
++
++   /* Return reversed 8bit number */
++   return retRevNum;
++}
++
++/************************************************************************************/
++/*!
++ * \\fn        : void SftyParkLockEvln_UpdCrcBuffer(void)
++ * \\brief     : This function shall convert 24-bit frame into 8-bit CRC buffers
++ * \\Parent_DD : SftyParkLockEvln_SlowFunctionArea2
++ * \\return    : None
++ */
++/************************************************************************************/
++LOCAL_INLINE void SftyParkLockEvln_UpdCrcBuffer(void)
++{
++   /* ******** Variables declaration *********** */
++
++   /* ************* Source code **************** */
++
++   /* Update CRC buffer with 6 bit data group */
++   SftyParkLockEvlnCrcCalcBuff[0] = SftyParkLockEvln_Reverse8Bit((uint8)SftyParkLockEvln24BitCrcFrame.byte.data0) >> SFTYPARKLOCKEVLN_RIGHT_SHIFT_BY_TWO;
++   SftyParkLockEvlnCrcCalcBuff[1] = SftyParkLockEvln_Reverse8Bit((uint8)SftyParkLockEvln24BitCrcFrame.byte.data1) >> SFTYPARKLOCKEVLN_RIGHT_SHIFT_BY_TWO;
++   SftyParkLockEvlnCrcCalcBuff[2] = SftyParkLockEvln_Reverse8Bit((uint8)SftyParkLockEvln24BitCrcFrame.byte.data2) >> SFTYPARKLOCKEVLN_RIGHT_SHIFT_BY_TWO;
++   SftyParkLockEvlnCrcCalcBuff[3] = SftyParkLockEvln_Reverse8Bit((uint8)SftyParkLockEvln24BitCrcFrame.byte.data3) >> SFTYPARKLOCKEVLN_RIGHT_SHIFT_BY_TWO;
++
++   return;
++}
++
+ /*****************************************************************************/
+ /*!
+  * \\fn        : void SftyParkLockEvln_EvlPosnSnrSerlData(void)
+@@ -1155,7 +1258,6 @@ LOCAL_INLINE void SftyParkLockEvln_Form24BitCrcFrame(void)
+ LOCAL_INLINE uint8 SftyParkLockEvln_EvlPosnSnrSerlData(void)
+ {
+    /* ******** Variables declaration *********** */
+-   uint8 posnSnrSerlDataTiStampErr;
+    uint8 retErrVal;
+ 
+    /* ************* Source code **************** */
+@@ -1164,10 +1266,10 @@ LOCAL_INLINE uint8 SftyParkLockEvln_EvlPosnSnrSerlData(void)
+    SftyParkLockEvln_GetPosnSnrSerlDataFromDma();
+ 
+    /* Checks that the time stamp is renewed for a park lock sensor serial data */
+-   posnSnrSerlDataTiStampErr = SftyUtils_ChkTiStamp(&SftyParkLockEvlnSerlDataLstTiStamp, &SftyParkLockEvlnSerlDataCurTiStamp);
++   SftyParkLockEvlnSerlDataTiStampChkRes = SftyUtils_ChkTiStamp(&SftyParkLockEvlnSerlDataLstTiStamp, &SftyParkLockEvlnSerlDataCurTiStamp);
+ 
+    /* Check if time stamp is valid */
+-   if(posnSnrSerlDataTiStampErr == ERR_DEB_MONR_STS_PASSED)
++   if(SftyParkLockEvlnSerlDataTiStampChkRes == ERR_DEB_MONR_STS_PASSED)
+    {
+       /* Validate serial CRC data received from DMA */
+ 
+@@ -1193,10 +1295,7 @@ LOCAL_INLINE uint8 SftyParkLockEvln_EvlPosnSnrSerlData(void)
+       SftyParkLockEvln_Form24BitCrcFrame();
+ 
+       /* Update CRC buffer with 6 bit data group */
+-      SftyParkLockEvlnCrcCalcBuff[0] = (uint8)SftyParkLockEvln24BitCrcFrame.byte.data0;
+-      SftyParkLockEvlnCrcCalcBuff[1] = (uint8)SftyParkLockEvln24BitCrcFrame.byte.data1;
+-      SftyParkLockEvlnCrcCalcBuff[2] = (uint8)SftyParkLockEvln24BitCrcFrame.byte.data2;
+-      SftyParkLockEvlnCrcCalcBuff[3] = (uint8)SftyParkLockEvln24BitCrcFrame.byte.data3;
++      SftyParkLockEvln_UpdCrcBuffer();
+ 
+       /* Calculate 6-Bit CRC value */
+       SftyParkLockEvlnIntCalcCrcVal = SftyCrc_CalcCRC6((const uint8 *)SftyParkLockEvlnCrcCalcBuff, SFTYPARKLOCKEVLN_CRC_CALCN_BUF_SIZE,
+@@ -1399,7 +1498,6 @@ FUNC(void, SFTYPARKLOCKEVLN_CODE) SftyParkLockEvln_Init(void)
+ FUNC(void, SFTYPARKLOCKEVLN_CODE) SftyParkLockEvln_SlowFunctionArea2(void)
+ {
+    /* ******** Variables declaration *********** */
+-   uint8 retSerlDataEvlnResult;
+ 
+    /* ************* Source code **************** */
+ 
+@@ -1410,9 +1508,9 @@ FUNC(void, SFTYPARKLOCKEVLN_CODE) SftyParkLockEvln_SlowFunctionArea2(void)
+    if(SftyParkLockActrPosSnsrSts == TRUE)
+    {
+       /* Evaluate park lock position sensor\'s slow channel SENT serial message data */
+-      retSerlDataEvlnResult = SftyParkLockEvln_EvlPosnSnrSerlData();
++      SftyParkLockEvlnSerlDataEvlnRes = SftyParkLockEvln_EvlPosnSnrSerlData();
+ 
+-      if(retSerlDataEvlnResult == ERR_DEB_MONR_STS_PASSED)
++      if(SftyParkLockEvlnSerlDataEvlnRes == ERR_DEB_MONR_STS_PASSED)
+       {
+          /* Slow channel serial data is valid. Now check for position sensor faults */
+          SftyParkLockEvln_ChkPosnSnrFaults();
+@@ -1505,7 +1603,7 @@ FUNC(void, SFTYPARKLOCKEVLN_CODE) SftyParkLockEvln_MainFastArea0(void)
+ 
+ /*================== [closure] ==============================================*/
+ /* ********************************************************************** */
+-/* Copyright (C) Valeo Siemens eAutomotive Germany GmbH 2021              */
++/* Copyright (C) Valeo Siemens eAutomotive Germany GmbH 2022              */
+ /* All Rights Reserved. Confidential                                      */
+ /* ********************************************************************** */
+ /*==================[end of file]============================================*/
+diff --git a/src/fw_cu/Components/Safety/Sfty_Cmn/SftyParkLockEvln/src/SftyParkLockEvln_data.c b/src/fw_cu/Components/Safety/Sfty_Cmn/SftyParkLockEvln/src/SftyParkLockEvln_data.c
+index 06ff7c0d4..bfc0e2387 100644
+--- a/src/fw_cu/Components/Safety/Sfty_Cmn/SftyParkLockEvln/src/SftyParkLockEvln_data.c
++++ b/src/fw_cu/Components/Safety/Sfty_Cmn/SftyParkLockEvln/src/SftyParkLockEvln_data.c
+@@ -3,7 +3,7 @@
+ /* ADD Container: SftyParkLockEvln                                   */
+ /* ADD Container Version: 1.0.0                                      */
+ /* ***************************************************************** */
+-/* Copyright (C) Valeo Siemens eAutomotive Germany GmbH 2021         */
++/* Copyright (C) Valeo Siemens eAutomotive Germany GmbH 2022         */
+ /* All Rights Reserved. Confidential                                 */
+ /* ***************************************************************** */
+ 
+@@ -21,28 +21,6 @@
+ #define SFTYPARKLOCKEVLN_START_SEC_VAR_AREA_2_FAST_INIT_8
+ #include "MemMap.h"
+ 
+-/*
+-@@ SYMBOL = SftyParkLockEvlnSnrDataElecLoErrMonrSt
+-@@ A2L_TYPE = MEASURE
+-@@ DATA_TYPE = UBYTE [0 ... 2]
+-@@ CONVERSION = TABLE 0 "INACTIVE" 1 "PASSED" 2 "FAILED"
+-@@ DESCRIPTION = "Park lock position sensor raw data validity electric low status; unit \'-\'"
+-@@ GROUP = SftyParkLockEvln
+-@@ END
+-*/
+-VAR(uint8, SFTYPARKLOCKEVLN_VAR) SftyParkLockEvlnSnrDataElecLoErrMonrSt = 0U;
+-
+-/*
+-@@ SYMBOL = SftyParkLockEvlnSnrDataElecHiErrMonrSt
+-@@ A2L_TYPE = MEASURE
+-@@ DATA_TYPE = UBYTE [0 ... 2]
+-@@ CONVERSION = TABLE 0 "INACTIVE" 1 "PASSED" 2 "FAILED"
+-@@ DESCRIPTION = "Park lock position sensor raw data validity electric high status; unit \'-\'"
+-@@ GROUP = SftyParkLockEvln
+-@@ END
+-*/
+-VAR(uint8, SFTYPARKLOCKEVLN_VAR) SftyParkLockEvlnSnrDataElecHiErrMonrSt = 0U;
+-
+ /*
+ @@ SYMBOL = SftyParkLockEvlnPrkgPosSnsrErrMonrSt
+ @@ A2L_TYPE = MEASURE
+@@ -265,7 +243,7 @@ CONST(uint16, SFTYPARKLOCKEVLN_CALIB) SftyParkLockEvlnPosnAcqnMaxRawVal = 4094U;
+ /************************* CALIBRATION PARAMETERS - END *****************************/
+ 
+ /* ***************************************************************** */
+-/* Copyright (C) Valeo Siemens eAutomotive Germany GmbH 2021         */
++/* Copyright (C) Valeo Siemens eAutomotive Germany GmbH 2022         */
+ /* All Rights Reserved. Confidential                                 */
+ /* ***************************************************************** */
+ /*==================[end of file]====================================*/
+diff --git a/src/fw_cu/Components/Safety/Sfty_Cmn/SftyParkLockMgr/include/SftyParkLockMgr_data.h b/src/fw_cu/Components/Safety/Sfty_Cmn/SftyParkLockMgr/include/SftyParkLockMgr_data.h
+index acae95932..a647b5261 100644
+--- a/src/fw_cu/Components/Safety/Sfty_Cmn/SftyParkLockMgr/include/SftyParkLockMgr_data.h
++++ b/src/fw_cu/Components/Safety/Sfty_Cmn/SftyParkLockMgr/include/SftyParkLockMgr_data.h
+@@ -3,7 +3,7 @@
+ /* ADD Container: SftyParkLockMgr                                      */
+ /* ADD Container Version: 1.0.0                                      */
+ /* ***************************************************************** */
+-/* Copyright (C) Valeo-Siemens eAutomotive GmbH 2021                 */
++/* Copyright (C) Valeo-Siemens eAutomotive GmbH 2022                 */
+ /* All Rights Reserved. Confidential                                 */
+ /* ***************************************************************** */
+ #ifndef\tSFTYPARKLOCKMGR_DATA_H
+@@ -31,15 +31,6 @@ extern VAR (boolean, SFTYPARKLOCKMGR_VAR) SftyParkLockMgrFailrSts;
+ #define SFTYPARKLOCKMGR_START_SEC_VAR_AREA_1_FAST_INIT_8
+ #include "MemMap.h"
+ 
+-extern VAR (uint8, SFTYPARKLOCKMGR_VAR) SftyParkLockMgrPluErrMonrSt;
+-#define SFTYPARKLOCKMGR_STOP_SEC_VAR_AREA_1_FAST_INIT_8
+-#include "MemMap.h"
+-/* End: SFTYPARKLOCKMGR_STOP_SEC_VAR_AREA_1_FAST_INIT_8 (online) */
+-
+-/* Begin: SFTYPARKLOCKMGR_START_SEC_VAR_AREA_1_FAST_INIT_8 (online) */
+-#define SFTYPARKLOCKMGR_START_SEC_VAR_AREA_1_FAST_INIT_8
+-#include "MemMap.h"
+-
+ extern VAR (uint8, SFTYPARKLOCKMGR_VAR) SftyParkLockMgrDisengEngCRCErrMonrSt;
+ #define SFTYPARKLOCKMGR_STOP_SEC_VAR_AREA_1_FAST_INIT_8
+ #include "MemMap.h"
+@@ -49,25 +40,7 @@ extern VAR (uint8, SFTYPARKLOCKMGR_VAR) SftyParkLockMgrDisengEngCRCErrMonrSt;
+ #define SFTYPARKLOCKMGR_START_SEC_VAR_AREA_1_FAST_INIT_8
+ #include "MemMap.h"
+ 
+-extern VAR (uint8, SFTYPARKLOCKMGR_VAR) SftyParkLockMgrPrimActrEngTiOutErrMonrSt;
+-#define SFTYPARKLOCKMGR_STOP_SEC_VAR_AREA_1_FAST_INIT_8
+-#include "MemMap.h"
+-/* End: SFTYPARKLOCKMGR_STOP_SEC_VAR_AREA_1_FAST_INIT_8 (online) */
+-
+-/* Begin: SFTYPARKLOCKMGR_START_SEC_VAR_AREA_1_FAST_INIT_8 (online) */
+-#define SFTYPARKLOCKMGR_START_SEC_VAR_AREA_1_FAST_INIT_8
+-#include "MemMap.h"
+-
+-extern VAR (uint8, SFTYPARKLOCKMGR_VAR) SftyParkLockMgrPrimActrDisEngTiOutErrMonrSt;
+-#define SFTYPARKLOCKMGR_STOP_SEC_VAR_AREA_1_FAST_INIT_8
+-#include "MemMap.h"
+-/* End: SFTYPARKLOCKMGR_STOP_SEC_VAR_AREA_1_FAST_INIT_8 (online) */
+-
+-/* Begin: SFTYPARKLOCKMGR_START_SEC_VAR_AREA_1_FAST_INIT_8 (online) */
+-#define SFTYPARKLOCKMGR_START_SEC_VAR_AREA_1_FAST_INIT_8
+-#include "MemMap.h"
+-
+-extern VAR (uint8, SFTYPARKLOCKMGR_VAR) SftyParkLockMgrEngRangErrMonrSt;
++extern VAR (uint8, SFTYPARKLOCKMGR_VAR) SftyParkLockMgrPrimActrTiOutErrMonrSt;
+ #define SFTYPARKLOCKMGR_STOP_SEC_VAR_AREA_1_FAST_INIT_8
+ #include "MemMap.h"
+ /* End: SFTYPARKLOCKMGR_STOP_SEC_VAR_AREA_1_FAST_INIT_8 (online) */
+@@ -76,7 +49,7 @@ extern VAR (uint8, SFTYPARKLOCKMGR_VAR) SftyParkLockMgrEngRangErrMonrSt;
+ #define SFTYPARKLOCKMGR_START_SEC_VAR_AREA_1_FAST_INIT_8
+ #include "MemMap.h"
+ 
+-extern VAR (uint8, SFTYPARKLOCKMGR_VAR) SftyParkLockMgrDisEngRangErrMonrSt;
++extern VAR (uint8, SFTYPARKLOCKMGR_VAR) SftyParkLockMgrDisengEngRangErrMonrSt;
+ #define SFTYPARKLOCKMGR_STOP_SEC_VAR_AREA_1_FAST_INIT_8
+ #include "MemMap.h"
+ /* End: SFTYPARKLOCKMGR_STOP_SEC_VAR_AREA_1_FAST_INIT_8 (online) */
+@@ -612,7 +585,7 @@ extern CONST(float32, SFTYPARKLOCKMGR_CALIB) SftyParkLockMgrPrimActrEngmtIMeasTh
+ /*================== [closure] ==============================================*/
+ #endif
+ /* ***************************************************************** */
+-/* Copyright (C) Valeo-Siemens eAutomotive GmbH 2021                 */
++/* Copyright (C) Valeo-Siemens eAutomotive GmbH 2022                 */
+ /* All Rights Reserved. Confidential                                 */
+ /* ***************************************************************** */
+ /*==================[end of file]====================================*/
+diff --git a/src/fw_cu/Components/Safety/Sfty_Cmn/SftyParkLockMgr/src/SftyParkLockMgr.c b/src/fw_cu/Components/Safety/Sfty_Cmn/SftyParkLockMgr/src/SftyParkLockMgr.c
+index f8d1e537c..4e416b06b 100644
+--- a/src/fw_cu/Components/Safety/Sfty_Cmn/SftyParkLockMgr/src/SftyParkLockMgr.c
++++ b/src/fw_cu/Components/Safety/Sfty_Cmn/SftyParkLockMgr/src/SftyParkLockMgr.c
+@@ -7,7 +7,7 @@
+ /* Department: Valeo Siemens eAutomotive                                  */
+ /*             I DT EC R&D                                                */
+ /* ********************************************************************** */
+-/* Copyright (C) Valeo Siemens eAutomotive Germany GmbH 2021              */
++/* Copyright (C) Valeo Siemens eAutomotive Germany GmbH 2022              */
+ /* All Rights Reserved. Confidential                                      */
+ /* ********************************************************************** */
+ 
+@@ -166,6 +166,17 @@ STATIC CONST(SftyParkLockMgr_StateType, SFTYPARKLOCKMGR_CONST) SftyParkLockMgrSt
+ #define SFTYPARKLOCKMGR_START_SEC_VAR_AREA_1_FAST_CLEARED_8
+ #include "MemMap.h"
+ 
++/*
++@@ SYMBOL = SftyParkLockMgrPluErrMonrSt
++@@ A2L_TYPE = MEASURE
++@@ DATA_TYPE = UBYTE
++@@ CONVERSION = TABLE 0 "INACTIVE" 1 "PASSED" 2 "FAILED"
++@@ DESCRIPTION = " Parklock mode plausibility check error monitor status "
++@@ GROUP = SftyParkLockMgr
++@@ END
++*/
++STATIC VAR (uint8, SFTYPARKLOCKMGR_VAR) SftyParkLockMgrPluErrMonrSt; /* PRQA S 3229 #This variable is kept for software debugging purpose */
++
+ /*
+ @@ SYMBOL = SftyParkLockMgrEngmtDisengmtRetryCnt
+ @@ A2L_TYPE = MEASURE
+@@ -625,30 +636,19 @@ LOCAL_INLINE void SftyParkLockMgr_CalibTestIni(void)
+ /***********************************************************************************/
+ LOCAL_INLINE void SftyParkLockMgr_EngmtDisengmtAgRngChk(void)
+ {
+-   /* Target engagement angle read from Nvm is in range */
+-   if ((SftyParkLockMgrTarEngmtAgNvm > SftyParkLockMgrTarEngmtAgLoRng) &&
+-       (SftyParkLockMgrTarEngmtAgNvm < SftyParkLockMgrTarEngmtAgHiRng))
++   /* Target engagement & disengagment angle read from Nvm are in range */
++   if (((SftyParkLockMgrTarEngmtAgNvm > SftyParkLockMgrTarEngmtAgLoRng) &&
++        (SftyParkLockMgrTarEngmtAgNvm < SftyParkLockMgrTarEngmtAgHiRng)) &&
++       ((SftyParkLockMgrTarDisengmtAgNvm > SftyParkLockMgrTarDisengmtAgLoRng) &&
++        (SftyParkLockMgrTarDisengmtAgNvm < SftyParkLockMgrTarDisengmtAgHiRng)))
+    {
+-      /* No range error in engagement angle */
+-      SftyParkLockMgrEngRangErrMonrSt = ERR_DEB_MONR_STS_PASSED;
++      /* No range error in engagement and disengagment  angle */
++      SftyParkLockMgrDisengEngRangErrMonrSt  = ERR_DEB_MONR_STS_PASSED;
+    }
+    else
+    {
+-      /* Engagement angle range error */
+-      SftyParkLockMgrEngRangErrMonrSt = ERR_DEB_MONR_STS_FAILED;
+-   }
+-
+-   /* Target disengagement angle read from Nvm is in range */
+-   if ((SftyParkLockMgrTarDisengmtAgNvm > SftyParkLockMgrTarDisengmtAgLoRng) &&
+-       (SftyParkLockMgrTarDisengmtAgNvm < SftyParkLockMgrTarDisengmtAgHiRng))
+-   {
+-      /* No range error in disengagement angle */
+-      SftyParkLockMgrDisEngRangErrMonrSt  = ERR_DEB_MONR_STS_PASSED;
+-   }
+-   else
+-   {
+-      /* Disengagement angle range error */
+-      SftyParkLockMgrDisEngRangErrMonrSt  = ERR_DEB_MONR_STS_FAILED;
++      /* Report Engagement/Disengagement angle out of range error  */
++      SftyParkLockMgrDisengEngRangErrMonrSt = ERR_DEB_MONR_STS_FAILED;
+    }
+ 
+    return;
+@@ -929,8 +929,7 @@ LOCAL_INLINE void SftyParkLockMgr_IniPosnAgStrtUpTest(void)
+ 
+    /* Overall startup test status */
+    if( (SftyParkLockMgrDisengEngCRCErrMonrSt == ERR_DEB_MONR_STS_PASSED) &&
+-       (SftyParkLockMgrEngRangErrMonrSt == ERR_DEB_MONR_STS_PASSED) &&
+-       (SftyParkLockMgrDisEngRangErrMonrSt  == ERR_DEB_MONR_STS_PASSED) )
++       (SftyParkLockMgrDisengEngRangErrMonrSt == ERR_DEB_MONR_STS_PASSED))
+    {
+       /* Overall startup test is passed */
+       SftyParkLockMgrPrimActrOverAllStrtUpTestSts = SFTYPARKLOCKMGR_TEST_STS_PASS;
+@@ -1036,12 +1035,8 @@ STATIC FUNC(void, SFTY_PARKLOCKMGR_CODE) SftyParkLockMgr_DummyFunction(void)
+ /***********************************************************************************/
+ STATIC FUNC(void, SFTY_PARKLOCKMGR_CODE) SftyParkLockMgr_FailRun(void)
+ {
+-   /* Disable half bridges of parklock actuator */
+-   /* Disable HB1 */
+-   SFTY_HB1_EN_OUT_P = STD_LOW;
+-
+-   /* Disable HB2 */
+-   SFTY_HB2_EN_OUT_P = STD_LOW;
++   /* Stop parklock actuator */
++   SftyParkLockActr_PrimActrStop();
+ 
+    return;
+ }
+@@ -1246,6 +1241,13 @@ STATIC FUNC(void, SFTY_PARKLOCKMGR_CODE) SftyParkLockMgr_CalibTestOnEntry(void)
+    /* Initialize the state of calibration test */
+    SftyParkLockMgrCalibTestSt = SFTYPARKLOCKMGR_CALIBTST_INIT;
+ 
++   /* Enable half bridges of parklock actuator */
++   /* Enable HB1 */
++   SFTY_HB1_EN_OUT_P = STD_HIGH;
++
++   /* Enable HB2 */
++   SFTY_HB2_EN_OUT_P = STD_HIGH;
++
+    return;
+ }
+ 
+@@ -1354,7 +1356,7 @@ STATIC FUNC(void, SFTY_PARKLOCKMGR_CODE) SftyParkLockMgr_PrimActrDisengRun(void)
+             }
+ 
+             /* No parklock disengagement timeout error */
+-            SftyParkLockMgrPrimActrDisEngTiOutErrMonrSt = ERR_DEB_MONR_STS_PASSED;
++            SftyParkLockMgrPrimActrTiOutErrMonrSt = ERR_DEB_MONR_STS_PASSED;
+ 
+             /* Disengagement operation is finished */
+             SftyParkLockMgrDisengmtFinshd = SFTYPARKLOCKMGR_TEST_STS_DONE;
+@@ -1382,7 +1384,7 @@ STATIC FUNC(void, SFTY_PARKLOCKMGR_CODE) SftyParkLockMgr_PrimActrDisengRun(void)
+             SftyParkLockActr_PrimActrStop();
+ 
+             /* Parklock engagement timeout error */
+-            SftyParkLockMgrPrimActrDisEngTiOutErrMonrSt = ERR_DEB_MONR_STS_FAILED;
++            SftyParkLockMgrPrimActrTiOutErrMonrSt = ERR_DEB_MONR_STS_FAILED;
+          }
+          else
+          {
+@@ -1422,7 +1424,7 @@ STATIC FUNC(void, SFTY_PARKLOCKMGR_CODE) SftyParkLockMgr_PrimActrDisengOnEntry(v
+    SftyParkLockMgrDisengmtFinshd = SFTYPARKLOCKMGR_TEST_STS_NOTRUN;
+ 
+    /* Initialize disengagement timeout error monitor */
+-   SftyParkLockMgrPrimActrDisEngTiOutErrMonrSt = ERR_DEB_MONR_STS_INACTIVE;
++   SftyParkLockMgrPrimActrTiOutErrMonrSt = ERR_DEB_MONR_STS_INACTIVE;
+ 
+    /* Enable parklock actuator by setting the disengagement target angle*/
+    SftyParkLockActr_SetPrimActrTarAg(SftyParkLockMgrTarDisengmtAgNvm, SFTYPARKLOCK_DIR_DISENGAGE);
+@@ -1536,7 +1538,7 @@ STATIC FUNC(void, SFTY_PARKLOCKMGR_CODE) SftyParkLockMgr_PrimActrEngRun(void)
+             }
+ 
+             /* No parklock engagement timeout error */
+-            SftyParkLockMgrPrimActrEngTiOutErrMonrSt = ERR_DEB_MONR_STS_PASSED;
++            SftyParkLockMgrPrimActrTiOutErrMonrSt = ERR_DEB_MONR_STS_PASSED;
+ 
+             /* Engagement operation is finished */
+             SftyParkLockMgrEngmtFinshd = SFTYPARKLOCKMGR_TEST_STS_DONE;
+@@ -1564,7 +1566,7 @@ STATIC FUNC(void, SFTY_PARKLOCKMGR_CODE) SftyParkLockMgr_PrimActrEngRun(void)
+             SftyParkLockActr_PrimActrStop();
+ 
+             /* Parklock engagement timeout error */
+-            SftyParkLockMgrPrimActrEngTiOutErrMonrSt = ERR_DEB_MONR_STS_FAILED;
++            SftyParkLockMgrPrimActrTiOutErrMonrSt = ERR_DEB_MONR_STS_FAILED;
+          }
+          else
+          {
+@@ -1603,7 +1605,7 @@ STATIC FUNC(void, SFTY_PARKLOCKMGR_CODE) SftyParkLockMgr_PrimActrEngOnEntry(void
+    SftyParkLockMgrEngmtFinshd = SFTYPARKLOCKMGR_TEST_STS_NOTRUN;
+ 
+    /* Initialize engagement timeout error monitor */
+-   SftyParkLockMgrPrimActrEngTiOutErrMonrSt = ERR_DEB_MONR_STS_INACTIVE;
++   SftyParkLockMgrPrimActrTiOutErrMonrSt = ERR_DEB_MONR_STS_INACTIVE;
+ 
+    /* Enable parklock actuator by setting the engagement target angle*/
+    SftyParkLockActr_SetPrimActrTarAg(SftyParkLockMgrTarEngmtAgNvm, SFTYPARKLOCK_DIR_ENGAGE);
+@@ -1835,8 +1837,7 @@ STATIC FUNC(void, SFTY_PARKLOCKMGR_CODE) SftyParkLockMgr_PrimActrStrtupTstOnEntr
+    /* Initialize the parklock startup test error monitors */
+    SftyParkLockMgrPrimActrStrtUpTstErrMonrSt = ERR_DEB_MONR_STS_INACTIVE;
+    SftyParkLockMgrDisengEngCRCErrMonrSt = ERR_DEB_MONR_STS_INACTIVE;
+-   SftyParkLockMgrEngRangErrMonrSt = ERR_DEB_MONR_STS_INACTIVE;
+-   SftyParkLockMgrDisEngRangErrMonrSt = ERR_DEB_MONR_STS_INACTIVE;
++   SftyParkLockMgrDisengEngRangErrMonrSt = ERR_DEB_MONR_STS_INACTIVE;
+ 
+    /* Initialize the overall start up test result status */
+    SftyParkLockMgrPrimActrOverAllStrtUpTestSts = SFTYPARKLOCKMGR_TEST_STS_NOTRUN;
+@@ -2000,7 +2001,7 @@ FUNC(void,SFTY_PARKLOCK_MGR_CODE) SftyParkLockMgr_MainFunction(void)
+ #endif /* SERIES_PRODUCTION */
+    {
+       /* Get the parklock internal fault status from ErrDeb */
+-      SftyParkLockMgrPlkIntFlt = SftyErrDebFctInhbnSts.B.FctIdParkLockFault;
++      /* SftyParkLockMgrPlkIntFlt = SftyErrDebFctInhbnSts.B.FctIdDisablePLK; */ /* Intentionally commented out. BSW input needed */
+    }
+ 
+    /* Shutdown is requested from BSW */
+@@ -2038,12 +2039,10 @@ FUNC(void,SFTY_PARKLOCK_MGR_CODE) SftyParkLockMgr_Init(void)
+ 
+    /* Initialize all error monitor status */
+    SftyParkLockMgrPluErrMonrSt = ERR_DEB_MONR_STS_INACTIVE;
+-   SftyParkLockMgrEngRangErrMonrSt = ERR_DEB_MONR_STS_INACTIVE;
++   SftyParkLockMgrDisengEngRangErrMonrSt = ERR_DEB_MONR_STS_INACTIVE;
+    SftyParkLockMgrPrimActrStrtUpTstErrMonrSt = ERR_DEB_MONR_STS_INACTIVE;
+-   SftyParkLockMgrPrimActrEngTiOutErrMonrSt = ERR_DEB_MONR_STS_INACTIVE;
+-   SftyParkLockMgrPrimActrDisEngTiOutErrMonrSt = ERR_DEB_MONR_STS_INACTIVE;
++   SftyParkLockMgrPrimActrTiOutErrMonrSt = ERR_DEB_MONR_STS_INACTIVE;
+    SftyParkLockMgrDisengEngCRCErrMonrSt = ERR_DEB_MONR_STS_INACTIVE;
+-   SftyParkLockMgrDisEngRangErrMonrSt = ERR_DEB_MONR_STS_INACTIVE;
+ 
+    /* Set pause time = 0us for 1st actuation after power on  */
+    SftyParkLockMgrPauseTi = 0UL;
+@@ -2064,7 +2063,7 @@ FUNC(void,SFTY_PARKLOCK_MGR_CODE) SftyParkLockMgr_Init(void)
+ #include "MemMap.h"
+ /*================== [closure] ==============================================*/
+ /* ********************************************************************** */
+-/* Copyright (C) Valeo Siemens eAutomotive Germany GmbH 2021              */
++/* Copyright (C) Valeo Siemens eAutomotive Germany GmbH 2022              */
+ /* All Rights Reserved. Confidential                                      */
+ /* ********************************************************************** */
+ /*==================[end of file]============================================*/
+diff --git a/src/fw_cu/Components/Safety/Sfty_Cmn/SftyParkLockMgr/src/SftyParkLockMgr_data.c b/src/fw_cu/Components/Safety/Sfty_Cmn/SftyParkLockMgr/src/SftyParkLockMgr_data.c
+index 887961076..9a07e197d 100644
+--- a/src/fw_cu/Components/Safety/Sfty_Cmn/SftyParkLockMgr/src/SftyParkLockMgr_data.c
++++ b/src/fw_cu/Components/Safety/Sfty_Cmn/SftyParkLockMgr/src/SftyParkLockMgr_data.c
+@@ -4,7 +4,7 @@
+ /* ADD Container Version: 1.0.0                                      */
+ /* ***************************************************************** */
+ /* ***************************************************************** */
+-/* Copyright (C) Valeo-Siemens eAutomotive GmbH 2021                 */
++/* Copyright (C) Valeo-Siemens eAutomotive GmbH 2022                 */
+ /* All Rights Reserved. Confidential                                 */
+ /* ***************************************************************** */
+ 
+@@ -269,24 +269,6 @@ VAR (uint8, SFTYPARKLOCKMGR_VAR) SftyParkLockMgrPauseTiTmrElpd = FALSE;
+ /* End: SFTYPARKLOCKMGR_STOP_SEC_VAR_AREA_1_FAST_INIT_8 (online) */
+ 
+ 
+-/* Begin: SFTYPARKLOCKMGR_START_SEC_VAR_AREA_1_FAST_INIT_8 (online) */
+-#define SFTYPARKLOCKMGR_START_SEC_VAR_AREA_1_FAST_INIT_8
+-#include "MemMap.h"
+-/*
+-@@ SYMBOL = SftyParkLockMgrPluErrMonrSt
+-@@ A2L_TYPE = MEASURE
+-@@ DATA_TYPE = UBYTE
+-@@ CONVERSION = TABLE 0 "INACTIVE" 1 "PASSED" 2 "FAILED"
+-@@ DESCRIPTION = " Parklock mode plausibility check error monitor "
+-@@ GROUP = SftyParkLockMgr
+-@@ END
+-*/
+-/* Parklock mode plausibility check error monitor status */
+-VAR (uint8, SFTYPARKLOCKMGR_VAR) SftyParkLockMgrPluErrMonrSt  = ERR_DEB_MONR_STS_INACTIVE;
+-#define SFTYPARKLOCKMGR_STOP_SEC_VAR_AREA_1_FAST_INIT_8
+-#include "MemMap.h"
+-/* End: SFTYPARKLOCKMGR_STOP_SEC_VAR_AREA_1_FAST_INIT_8 (online) */
+-
+ /* Begin: SFTYPARKLOCKMGR_START_SEC_VAR_AREA_1_FAST_INIT_8 (online) */
+ #define SFTYPARKLOCKMGR_START_SEC_VAR_AREA_1_FAST_INIT_8
+ #include "MemMap.h"
+@@ -311,38 +293,20 @@ VAR (uint8, SFTYPARKLOCKMGR_VAR) SftyParkLockMgrPrimActrStrtUpTstErrMonrSt = ERR
+ #include "MemMap.h"
+ 
+ /*
+-@@ SYMBOL = SftyParkLockMgrPrimActrEngTiOutErrMonrSt
++@@ SYMBOL = SftyParkLockMgrPrimActrTiOutErrMonrSt
+ @@ A2L_TYPE = MEASURE
+ @@ DATA_TYPE = UBYTE
+ @@ CONVERSION = TABLE 0 "INACTIVE" 1 "PASSED" 2 "FAILED"
+-@@ DESCRIPTION = " Time out error monitor for parklock actuator engagement operation "
++@@ DESCRIPTION = " Time out error monitor for parklock actuator engagement/disengagement operation "
+ @@ GROUP = SftyParkLockMgr
+ @@ END
+ */
+-/* Time out error monitor for parklock actuator engagement operation */
+-VAR (uint8, SFTYPARKLOCKMGR_VAR) SftyParkLockMgrPrimActrEngTiOutErrMonrSt = ERR_DEB_MONR_STS_INACTIVE;
++/* Time out error monitor for parklock actuator engagement/disengagement operation */
++VAR (uint8, SFTYPARKLOCKMGR_VAR) SftyParkLockMgrPrimActrTiOutErrMonrSt = ERR_DEB_MONR_STS_INACTIVE;
+ #define SFTYPARKLOCKMGR_STOP_SEC_VAR_AREA_1_FAST_INIT_8
+ #include "MemMap.h"
+ /* End: SFTYPARKLOCKMGR_STOP_SEC_VAR_AREA_1_FAST_INIT_8 (online) */
+ 
+-/* Begin: SFTYPARKLOCKMGR_START_SEC_VAR_AREA_1_FAST_INIT_8 (online) */
+-#define SFTYPARKLOCKMGR_START_SEC_VAR_AREA_1_FAST_INIT_8
+-#include "MemMap.h"
+-
+-/*
+-@@ SYMBOL = SftyParkLockMgrPrimActrDisEngTiOutErrMonrSt
+-@@ A2L_TYPE = MEASURE
+-@@ DATA_TYPE = UBYTE
+-@@ CONVERSION = TABLE 0 "INACTIVE" 1 "PASSED" 2 "FAILED"
+-@@ DESCRIPTION = " Time out error monitor for parklock actuator disengagement operation "
+-@@ GROUP = SftyParkLockMgr
+-@@ END
+-*/
+-/* Time out error monitor for parklock actuator disengagement operation */
+-VAR (uint8, SFTYPARKLOCKMGR_VAR) SftyParkLockMgrPrimActrDisEngTiOutErrMonrSt = ERR_DEB_MONR_STS_INACTIVE;
+-#define SFTYPARKLOCKMGR_STOP_SEC_VAR_AREA_1_FAST_INIT_8
+-#include "MemMap.h"
+-/* End: SFTYPARKLOCKMGR_STOP_SEC_VAR_AREA_1_FAST_INIT_8 (online) */
+ 
+ /* Begin: SFTYPARKLOCKMGR_START_SEC_VAR_AREA_1_FAST_INIT_8 (online) */
+ #define SFTYPARKLOCKMGR_START_SEC_VAR_AREA_1_FAST_INIT_8
+@@ -362,38 +326,21 @@ VAR (uint8, SFTYPARKLOCKMGR_VAR) SftyParkLockMgrDisengEngCRCErrMonrSt = ERR_DEB_
+ #include "MemMap.h"
+ /* End: SFTYPARKLOCKMGR_STOP_SEC_VAR_AREA_1_FAST_INIT_8 (online) */
+ 
+-/* Begin: SFTYPARKLOCKMGR_START_SEC_VAR_AREA_1_FAST_INIT_8 (online) */
+-#define SFTYPARKLOCKMGR_START_SEC_VAR_AREA_1_FAST_INIT_8
+-#include "MemMap.h"
+-/*
+-@@ SYMBOL = SftyParkLockMgrEngRangErrMonrSt
+-@@ A2L_TYPE = MEASURE
+-@@ DATA_TYPE = UBYTE
+-@@ CONVERSION = TABLE 0 "INACTIVE" 1 "PASSED" 2 "FAILED"
+-@@ DESCRIPTION = " Engagement angle range check error monitor "
+-@@ GROUP = SftyParkLockMgr
+-@@ END
+-*/
+-/* Engagement angle range check error monitor status */
+-VAR (uint8, SFTYPARKLOCKMGR_VAR) SftyParkLockMgrEngRangErrMonrSt = ERR_DEB_MONR_STS_INACTIVE;
+-#define SFTYPARKLOCKMGR_STOP_SEC_VAR_AREA_1_FAST_INIT_8
+-#include "MemMap.h"
+-/* End: SFTYPARKLOCKMGR_STOP_SEC_VAR_AREA_1_FAST_INIT_8 (online) */
+ 
+ /* Begin: SFTYPARKLOCKMGR_START_SEC_VAR_AREA_1_FAST_INIT_8 (online) */
+ #define SFTYPARKLOCKMGR_START_SEC_VAR_AREA_1_FAST_INIT_8
+ #include "MemMap.h"
+ /*
+-@@ SYMBOL = SftyParkLockMgrDisEngRangErrMonrSt
++@@ SYMBOL = SftyParkLockMgrDisengEngRangErrMonrSt
+ @@ A2L_TYPE = MEASURE
+ @@ DATA_TYPE = UBYTE
+ @@ CONVERSION = TABLE 0 "INACTIVE" 1 "PASSED" 2 "FAILED"
+-@@ DESCRIPTION = " Disengagement angle range check error monitor "
++@@ DESCRIPTION = " Engagement/Disengagement angle range check error monitor "
+ @@ GROUP = SftyParkLockMgr
+ @@ END
+ */
+ /* Disengagement angle range check error monitor status */
+-VAR (uint8, SFTYPARKLOCKMGR_VAR) SftyParkLockMgrDisEngRangErrMonrSt = ERR_DEB_MONR_STS_INACTIVE;
++VAR (uint8, SFTYPARKLOCKMGR_VAR) SftyParkLockMgrDisengEngRangErrMonrSt = ERR_DEB_MONR_STS_INACTIVE;
+ #define SFTYPARKLOCKMGR_STOP_SEC_VAR_AREA_1_FAST_INIT_8
+ #include "MemMap.h"
+ /* End: SFTYPARKLOCKMGR_STOP_SEC_VAR_AREA_1_FAST_INIT_8 (online) */
+@@ -1146,7 +1093,7 @@ CONST(float32, SFTYPARKLOCKMGR_CALIB) SftyParkLockMgrPrimActrEngmtIMeasThd = 15.
+ /*================== [closure] ==============================================*/
+ 
+ /* ***************************************************************** */
+-/* Copyright (C) Valeo-Siemens eAutomotive GmbH 2021                 */
++/* Copyright (C) Valeo-Siemens eAutomotive GmbH 2022                 */
+ /* All Rights Reserved. Confidential                                 */
+ /* ***************************************************************** */
+ /*==================[end of file]====================================*/
+diff --git a/src/fw_cu/Components/Safety/Sfty_Cmn/SftyParkLockPosnAcqn/include/SftyParkLockPosnAcqn.h b/src/fw_cu/Components/Safety/Sfty_Cmn/SftyParkLockPosnAcqn/include/SftyParkLockPosnAcqn.h
+index 8faf5a832..95ce9b605 100644
+--- a/src/fw_cu/Components/Safety/Sfty_Cmn/SftyParkLockPosnAcqn/include/SftyParkLockPosnAcqn.h
++++ b/src/fw_cu/Components/Safety/Sfty_Cmn/SftyParkLockPosnAcqn/include/SftyParkLockPosnAcqn.h
+@@ -7,7 +7,7 @@
+ /* Department: Valeo Siemens eAutomotive                                  */
+ /* I DT EC R&D                                                            */
+ /* ********************************************************************** */
+-/* Copyright (C) Valeo Siemens eAutomotive Germany GmbH 2021              */
++/* Copyright (C) Valeo Siemens eAutomotive Germany GmbH 2022              */
+ /* All Rights Reserved. Confidential                                      */
+ /* ********************************************************************** */
+ 
+@@ -30,7 +30,7 @@
+ 
+ /*================== [macros] ===============================================*/
+ /* Clear WDI Flag */
+-#define SENT_WDI_FLG_CLR  MODULE_SENT.CH[0].INTCLR.B.WDI
++#define SFTYPARKLOCKPOSNACQN_SENT_WDI_FLG_CLR  MODULE_SENT.CH[9].INTCLR.B.WDI
+ 
+ /* Parklock CRC buffer*/
+ #define SFTYPARKLOCKPOSNACQN_CRC_CALCN_BUF_SIZE  6U
+@@ -434,7 +434,7 @@ extern FUNC(void, SFTYPARKLOCKPOSNACQN_CODE) SftyParkLockPosnAcqn_MainFunctionAr
+  /*! @} doxygen end of group definition */
+ #endif
+  /* ********************************************************************** */
+- /* Copyright (C) Valeo Siemens eAutomotive Germany GmbH 2021\t\t\t   */
++ /* Copyright (C) Valeo Siemens eAutomotive Germany GmbH 2022\t\t\t   */
+  /* All Rights Reserved. Confidential\t\t\t\t\t\t\t\t\t   */
+  /* ********************************************************************** */
+  /*==================[end of file]============================================*/
+diff --git a/src/fw_cu/Components/Safety/Sfty_Cmn/SftyParkLockPosnAcqn/include/SftyParkLockPosnAcqn_data.h b/src/fw_cu/Components/Safety/Sfty_Cmn/SftyParkLockPosnAcqn/include/SftyParkLockPosnAcqn_data.h
+index 14bd35f58..8c04ada5d 100644
+--- a/src/fw_cu/Components/Safety/Sfty_Cmn/SftyParkLockPosnAcqn/include/SftyParkLockPosnAcqn_data.h
++++ b/src/fw_cu/Components/Safety/Sfty_Cmn/SftyParkLockPosnAcqn/include/SftyParkLockPosnAcqn_data.h
+@@ -3,7 +3,7 @@
+ /* ADD Container: SftyParkLockPosnAcqn                               */
+ /* ADD Container Version: 01.00                                      */
+ /* ***************************************************************** */
+-/* Copyright (C) Valeo-Siemens eAutomotive GmbH 2021                 */
++/* Copyright (C) Valeo-Siemens eAutomotive GmbH 2022                 */
+ /* All Rights Reserved. Confidential                                 */
+ /* ***************************************************************** */
+ /*!
+@@ -56,17 +56,30 @@ extern VAR(uint32, SFTYPARKLOCKPOSNACQN_VAR) SftyParkLockPosnAcqnRawVal;
+ #define SFTYPARKLOCKPOSNACQN_START_SEC_CALIB_32
+ #include "MemMap.h"
+ 
+-extern CONST(uint32, SFTYPARKLOCKPOSNACQN_VAR) SftyParkLockPosnAcqnDeltaRtsTiStampThd;
++extern CONST(uint32, SFTYPARKLOCKPOSNACQN_CALIB) SftyParkLockPosnAcqnDeltaRtsTiStampThd;
+ 
+ #define SFTYPARKLOCKPOSNACQN_STOP_SEC_CALIB_32
+ #include "MemMap.h"
+ /* Stop: SFTYPARKLOCKPOSNACQN_STOP_SEC_CALIB_32 (online) */
+ 
++/* Begin: SFTYPARKLOCKPOSNACQN_START_SEC_CALIB_8 (online) */
++#define SFTYPARKLOCKPOSNACQN_START_SEC_CALIB_8
++#include "MemMap.h"
++
++extern CONST(uint8, SFTYPARKLOCKPOSNACQN_CALIB) SftyParkLockPosnAcqnTiOutErrCntMin;
++extern CONST(uint8, SFTYPARKLOCKPOSNACQN_CALIB) SftyParkLockPosnAcqnTiOutErrCntMax; /* PRQA S 0777 #All external variables are created with unique names */
++extern CONST(uint8, SFTYPARKLOCKPOSNACQN_CALIB) SftyParkLockPosnAcqnCrcErrCntMin;
++extern CONST(uint8, SFTYPARKLOCKPOSNACQN_CALIB) SftyParkLockPosnAcqnCrcErrCntMax;
++
++#define SFTYPARKLOCKPOSNACQN_STOP_SEC_CALIB_8
++#include "MemMap.h"
++/* Stop: SFTYPARKLOCKPOSNACQN_STOP_SEC_CALIB_8 (online) */
++
+ /*================== [closure] ==============================================*/
+ /*! @} doxygen end of group definition */
+ #endif  /* SFTYPARKLOCKPOSNACQN_DATA_H */
+ /* ***************************************************************** */
+-/* Copyright (C) Valeo-Siemens eAutomotive GmbH 2021                 */
++/* Copyright (C) Valeo-Siemens eAutomotive GmbH 2022                 */
+ /* All Rights Reserved. Confidential                                 */
+ /* ***************************************************************** */
+ /*==================[end of file]====================================*/
+diff --git a/src/fw_cu/Components/Safety/Sfty_Cmn/SftyParkLockPosnAcqn/src/SftyParkLockPosnAcqn.c b/src/fw_cu/Components/Safety/Sfty_Cmn/SftyParkLockPosnAcqn/src/SftyParkLockPosnAcqn.c
+index a5328dfa0..2e784cb87 100644
+--- a/src/fw_cu/Components/Safety/Sfty_Cmn/SftyParkLockPosnAcqn/src/SftyParkLockPosnAcqn.c
++++ b/src/fw_cu/Components/Safety/Sfty_Cmn/SftyParkLockPosnAcqn/src/SftyParkLockPosnAcqn.c
+@@ -43,7 +43,6 @@
+ #include "SftyReplcmt_data.h"
+ #include "SftyParkLockActr_data.h"
+ /*================== [defines] ==============================================*/
+-
+ /*================== [type definitions] =====================================*/
+ 
+ /*================== [local data] ===========================================*/
+@@ -51,6 +50,29 @@
+ /* Begin: SFTYPARKLOCKPOSNACQN_AREA_2_START_SEC_VAR_FAST_CLEARED (online) */
+ #define SFTYPARKLOCKPOSNACQN_AREA_2_START_SEC_VAR_FAST_CLEARED
+ #include "MemMap.h"
++
++/*
++@@ SYMBOL = SftyParkLockPosnAcqnDmaTiOutChkRes
++@@ A2L_TYPE = MEASURE
++@@ DATA_TYPE = UBYTE [1 ... 2]
++@@ CONVERSION = TABLE 1 "PASSED" 2 "FAILED"
++@@ DESCRIPTION = " Parklock position sensor fast channel DMA time stamp check result "
++@@ GROUP = SftyParkLockPosnAcqn
++@@ END
++*/
++STATIC VAR(uint8, SFTYPARKLOCKPOSNACQN_VAR) SftyParkLockPosnAcqnDmaTiOutChkRes;
++
++/*
++@@ SYMBOL = SftyParkLockPosnAcqnRtsTiOutChkRes
++@@ A2L_TYPE = MEASURE
++@@ DATA_TYPE = UBYTE [0 ... 1]
++@@ CONVERSION = TABLE 0 "E_OK" 1 "E_NOT_OK"
++@@ DESCRIPTION = " Parklock position sensor fast channel RTS time stamp check result "
++@@ GROUP = SftyParkLockPosnAcqn
++@@ END
++*/
++STATIC VAR(uint8, SFTYPARKLOCKPOSNACQN_VAR) SftyParkLockPosnAcqnRtsTiOutChkRes;
++
+ /*
+ @@ SYMBOL = SftyParkLockPosnAcqnLstRtsTiStamp
+ @@ A2L_TYPE = MEASURE
+@@ -136,6 +158,25 @@ STATIC VAR(uint8, SFTYPARKLOCKPOSNACQN_VAR) SftyParkLockPosnAcqnSnsrSts;
+ */
+ STATIC VAR(uint8, SFTYPARKLOCKPOSNACQN_VAR) SftyParkLockPosnAcqnSnsrWdiFlg;
+ 
++/*
++@@ SYMBOL = SftyParkLockPosnAcqnCrcErrCntr
++@@ A2L_TYPE = MEASURE
++@@ DATA_TYPE = UBYTE
++@@ DESCRIPTION = " Parklock position SENT message CRC error counter "
++@@ GROUP = SftyParkLockPosnAcqn
++@@ END
++*/
++STATIC VAR(uint8, SFTYPARKLOCKPOSNACQN_VAR) SftyParkLockPosnAcqnCrcErrCntr;
++
++/*
++@@ SYMBOL = SftyParkLockPosnAcqnTiOutErrCntr
++@@ A2L_TYPE = MEASURE
++@@ DATA_TYPE = UBYTE
++@@ DESCRIPTION = " Parklock position SENT message timeout error counter "
++@@ GROUP = SftyParkLockPosnAcqn
++@@ END
++*/
++STATIC VAR(uint8, SFTYPARKLOCKPOSNACQN_VAR) SftyParkLockPosnAcqnTiOutErrCntr;
+ 
+ /*
+ @@ INSTANCE = SftyParkLockPosnAcqnSENTSnrDataRx
+@@ -222,6 +263,7 @@ LOCAL_INLINE void SftyParkLockPosnAcqn_GetParkLockVal(void)
+  * \\param[in]  : lstTiStamp - Last time stamp
+  * \\param[out] : curTiStamp - Current time stamp
+  * \\return     : retVal
++ * \\Parent DD  : SftyParkLockPosnAcqn_MainFunctionArea2
+  * \\return     : Result of operation.
+  *               E_NOT_OK - time stamp not OK
+  *               E_OK - time stamp OK
+@@ -250,51 +292,56 @@ LOCAL_INLINE uint8 SftyParkLockPosnAcqn_ChkTiStamp(const uint32* lstTiStamp, con
+ 
+ /******************************************************************/
+ /*!
+- * \\fn      uint8 SftyParkLockPosnAcqn_ChkRtsTiStamp
+- * \\brief   This function checks timestamp of the frame
+- * \\Parent_DD  SftyParkLockPosnAcqn_MainFunctionArea2
+- * \\return  uint8 - RTS timestamp check status
+- * \\retVal  ERR_DEB_MONR_STS_PASSED - Return timestamp check as passed
+- * \\retVal  ERR_DEB_MONR_STS_FAILED - Return timestamp check as failed
++ * \\fn        : void SftyParkLockPosnAcqn_ChkRtsTiStamp
++ * \\brief     : This function checks timestamp of the frame
++ * \\Parent_DD : SftyParkLockPosnAcqn_MainFunctionArea2
++ * \\return    : None
+  */
+ /******************************************************************/
+-LOCAL_INLINE uint8 SftyParkLockPosnAcqn_ChkRtsTiStamp(void)
++LOCAL_INLINE void SftyParkLockPosnAcqn_ChkRtsTiStamp(void)
+ {
+-   uint8 retVal;
+-
+-   /* Get current timestamp */
++   /* Get current RTS timestamp */
+    SftyParkLockPosnAcqnCurrRtsTiStamp = SftyParkLockPosnAcqnSENTSnrDataRx.TiStampRts;
+ 
+-   /* Compare with current time stamp and last time stamp to confirm if the time stamp is updated*/
+-   retVal = SftyParkLockPosnAcqn_ChkTiStamp(&SftyParkLockPosnAcqnLstRtsTiStamp, &SftyParkLockPosnAcqnCurrRtsTiStamp);
++   /* Compare current RTS time stamp with last RTS time stamp to confirm if RTS time stamp is updated */
++   SftyParkLockPosnAcqnRtsTiOutChkRes = SftyParkLockPosnAcqn_ChkTiStamp(&SftyParkLockPosnAcqnLstRtsTiStamp, &SftyParkLockPosnAcqnCurrRtsTiStamp);
+ 
+-   if(retVal == E_OK)
++   /* Timestamp updated */
++   if(SftyParkLockPosnAcqnRtsTiOutChkRes == E_OK)
+    {
+-      /*if time updated, check if delta time is less than 1ms */
++      /* if time updated, calculate delta RTS time stamp */
+       SftyParkLockPosnAcqnDeltaRtsTiStamp = SftyUtils_CalcTiStampDif(SftyParkLockPosnAcqnCurrRtsTiStamp,SftyParkLockPosnAcqnLstRtsTiStamp);
+ 
++      /* Check if RTS delta time is less than 1ms */
+       if((SftyParkLockPosnAcqnDeltaRtsTiStamp < SftyParkLockPosnAcqnDeltaRtsTiStampThd))
+       {
+-         /* if the delta time stamp is less than 1ms, set the timeout monitor to PASSED*/
+-         retVal = ERR_DEB_MONR_STS_PASSED;
++         /* To avoid over flow */
++         if (SftyParkLockPosnAcqnTiOutErrCntr!= 0U)
++         {
++           /* Decrement timeout error counter */
++           SftyParkLockPosnAcqnTiOutErrCntr--;
++         }
++         else
++         {
++            /* Do nothing */
++         }
+       }
+       else
+       {
+-         /* if the delta time stamp is over than 1ms, set the timeout monitor to FAILED*/
+-         retVal = ERR_DEB_MONR_STS_FAILED;
++         /* Increment timeout error counter */
++         SftyParkLockPosnAcqnTiOutErrCntr++;
+       }
+-
+    }
+    else
+    {
+-      /* if the time stamp is updated, set the timeout monitor to FAILED*/
+-      retVal = ERR_DEB_MONR_STS_FAILED;
++      /* Increment timeout error counter */
++      SftyParkLockPosnAcqnTiOutErrCntr++;
+    }
+ 
+    /* Update the last timestamp */
+    SftyParkLockPosnAcqnLstRtsTiStamp = SftyParkLockPosnAcqnCurrRtsTiStamp;
+ 
+-   return retVal;
++   return;
+ 
+ }
+ 
+@@ -309,46 +356,62 @@ LOCAL_INLINE uint8 SftyParkLockPosnAcqn_ChkRtsTiStamp(void)
+ 
+ LOCAL_INLINE void SftyParkLockPosnAcqn_TimeoutCheck(void)
+ {
+-   uint8 errMonSts;
+    /************** Source code *****************/
+    /* Check if the parklock sensor power supply is normal */
+    if(SftyParkLockPosnAcqnSnsrSts == TRUE)
+    {
+-      /* Get the SftyParkLockPosnAcqn WDI timestamp*/
++      /* Get DMA timestamp*/
+       SftyParkLockPosnAcqnCurrDmaTiStamp = SftyParkLockPosnAcqnSENTSnrDataRx.TiStampDma;
+ 
+-      /* Check if the WDI timestamp updated normally*/
+-      errMonSts = SftyUtils_ChkTiStamp(&SftyParkLockPosnAcqnLstDmaTiStamp, &SftyParkLockPosnAcqnCurrDmaTiStamp);
++      /* Check if DMA timestamp is updated */
++      SftyParkLockPosnAcqnDmaTiOutChkRes = SftyUtils_ChkTiStamp(&SftyParkLockPosnAcqnLstDmaTiStamp, &SftyParkLockPosnAcqnCurrDmaTiStamp);
+ 
+-      /*If the WDI timestamp update normally*/
+-      if(errMonSts == ERR_DEB_MONR_STS_PASSED)
++      /* DMA timestamp is updated */
++      if(SftyParkLockPosnAcqnDmaTiOutChkRes == ERR_DEB_MONR_STS_PASSED)
+       {
+-         /* Get the SftyParkLockSnsrWdi flag*/
++         /* Get the SENT_WDI flag*/
+          SftyParkLockPosnAcqnSnsrWdiFlg = SftyParkLockPosnAcqnSENTSnrDataRx.RxIntStat.B.bit13;
+ 
+          /* Check if the WDI flag is triggered */
+          if(SftyParkLockPosnAcqnSnsrWdiFlg == FALSE)
+          {
+-            /* Check parklock time stamp and update to the tim out monitor status*/
+-            SftyParkLockPosnAcqnSnrToutErrMonrSt = SftyParkLockPosnAcqn_ChkRtsTiStamp();
+-
++            /* Check parklock RTS time stamp and update the timeout monitor status*/
++            SftyParkLockPosnAcqn_ChkRtsTiStamp();
+          }
+          else
+          {
+-            /* Set the time out monitor status to FAILED*/
+-            SftyParkLockPosnAcqnSnrToutErrMonrSt = ERR_DEB_MONR_STS_FAILED;
++            /* Increment timeout error counter */
++            SftyParkLockPosnAcqnTiOutErrCntr++;
+ 
+             /* If WDI flag is triggered, clear the WDI flag */
+-            SENT_WDI_FLG_CLR = 1U;
++            SFTYPARKLOCKPOSNACQN_SENT_WDI_FLG_CLR = 1U;
+          }
+-
+       }
+       else
+       {
+-         /* Set the time out monitor status to FAILED*/
+-         SftyParkLockPosnAcqnSnrToutErrMonrSt = ERR_DEB_MONR_STS_FAILED;
++         /* Increment timeout error counter */
++         SftyParkLockPosnAcqnTiOutErrCntr++;
+       }
+ 
++      /* Timeout error counter is above upper limit */
++      if (SftyParkLockPosnAcqnTiOutErrCntr > SftyParkLockPosnAcqnTiOutErrCntMax)
++      {
++         /* Report Timeout error */
++         SftyParkLockPosnAcqnSnrToutErrMonrSt = ERR_DEB_MONR_STS_FAILED;
++
++         /* Reset the counter to maximum count */
++         SftyParkLockPosnAcqnTiOutErrCntr = SftyParkLockPosnAcqnTiOutErrCntMax;
++      }
++      /* CRC error counter is below lower limit */
++      else if (SftyParkLockPosnAcqnTiOutErrCntr < SftyParkLockPosnAcqnTiOutErrCntMin)
++      {
++         /* No Timeout error */
++         SftyParkLockPosnAcqnSnrToutErrMonrSt = ERR_DEB_MONR_STS_PASSED;
++      }
++      else
++      {
++         /* Do nothing */
++      }
+    }
+    else
+    {
+@@ -358,7 +421,38 @@ LOCAL_INLINE void SftyParkLockPosnAcqn_TimeoutCheck(void)
+    return;
+ }
+ 
++/***********************************************************************************/
++/*
++ * \\fn      void SftyParkLockPosnAcqn_ChkAndUpdCrcErrMonrSts(void)
++ * \\brief   This Function checks the CRC error counter and update error monitor
++ * Parent DD SftyParkLockPosnAcqn_MainFunctionArea2
++ * \\return : None
++ */
++/***********************************************************************************/
++LOCAL_INLINE void SftyParkLockPosnAcqn_ChkAndUpdCrcErrMonrSts(void)
++{
++   /* CRC error counter is above upper limit */
++   if (SftyParkLockPosnAcqnCrcErrCntr > SftyParkLockPosnAcqnCrcErrCntMax)
++   {
++      /* Report CRC error */
++      SftyParkLockPosnAcqnSnrDataRxCrcErrMonrSt = ERR_DEB_MONR_STS_FAILED;
+ 
++      /* Reset the counter to maximum count */
++      SftyParkLockPosnAcqnCrcErrCntr = SftyParkLockPosnAcqnCrcErrCntMax;
++   }
++   /* CRC error counter is below lower limit */
++   else if (SftyParkLockPosnAcqnCrcErrCntr < SftyParkLockPosnAcqnCrcErrCntMin)
++   {
++      /* No CRC error */
++      SftyParkLockPosnAcqnSnrDataRxCrcErrMonrSt = ERR_DEB_MONR_STS_PASSED;
++   }
++   else
++   {
++      /* Do nothing */
++   }
++
++   return;
++}
+ /***********************************************************************************/
+ /*
+  * \\fn      void SftyParkLockPosnAcqn_CrcCheck(void)
+@@ -370,41 +464,52 @@ LOCAL_INLINE void SftyParkLockPosnAcqn_TimeoutCheck(void)
+ 
+ LOCAL_INLINE void SftyParkLockPosnAcqn_CrcCheck(void)
+ {
+-     uint8 crcBuffer[6];
+-\t/* ************* Source code **************** */
+-\t/* If the timeout check passed, check the crc value*/ 
+-\tif(SftyParkLockPosnAcqnSnrToutErrMonrSt == ERR_DEB_MONR_STS_PASSED)
+-\t{
+-\t   /* Get the nibble data value */
+-\t   crcBuffer[0] = (uint8)SftyParkLockPosnAcqnSENTSnrDataRx.SnsrData.Nibble.data0;
+-\t   crcBuffer[1] = (uint8)SftyParkLockPosnAcqnSENTSnrDataRx.SnsrData.Nibble.data1;
+-\t   crcBuffer[2] = (uint8)SftyParkLockPosnAcqnSENTSnrDataRx.SnsrData.Nibble.data2;
+-\t   crcBuffer[3] = (uint8)SftyParkLockPosnAcqnSENTSnrDataRx.SnsrData.Nibble.data3;
+-\t   crcBuffer[4] = (uint8)SftyParkLockPosnAcqnSENTSnrDataRx.SnsrData.Nibble.data4;
+-\t   crcBuffer[5] = (uint8)SftyParkLockPosnAcqnSENTSnrDataRx.SnsrData.Nibble.data5;
+-
+-\t   /* Calculate the CRC value from the nibble data input */
+-       SftyParkLockPosnAcqnCrcVal = SftyCrc_CalcCRC4((const uint8*)crcBuffer,SFTYPARKLOCKPOSNACQN_CRC_CALCN_BUF_SIZE,
+-\t   \t                                             SFTYPARKLOCKPOSNACQN_4BIT_CRC_INIT_SEED_VALUE,TRUE);
+-       /* check the crc value  */
+-\t   if(SftyParkLockPosnAcqnCrcVal == SftyParkLockPosnAcqnSENTSnrDataRx.CrcData.Nibble.data0)
+-\t   {
+-\t       /* If calculated CRC is equal to niblle data crc value, set the crc monitor status to passed*/
+-\t       SftyParkLockPosnAcqnSnrDataRxCrcErrMonrSt = ERR_DEB_MONR_STS_PASSED;
+-\t   }
+-\t   else
+-\t   {
+-\t       /* If calculated CRC is not equal to niblle data crc value, set the crc monitor status to failed*/
+-\t       SftyParkLockPosnAcqnSnrDataRxCrcErrMonrSt = ERR_DEB_MONR_STS_FAILED;
+-\t\t   
+-\t   }
+-\t}
+-\telse
+-\t{
+-         /* Do nohting*/
+-\t}
++   uint8 crcBuffer[6];
++   /* ************* Source code **************** */
++   /* If the timeout check passed, check the crc value*/
++   if(SftyParkLockPosnAcqnSnrToutErrMonrSt == ERR_DEB_MONR_STS_PASSED)
++   {
++      /* Get the nibble data value */
++      crcBuffer[0] = (uint8)SftyParkLockPosnAcqnSENTSnrDataRx.SnsrData.Nibble.data0;
++      crcBuffer[1] = (uint8)SftyParkLockPosnAcqnSENTSnrDataRx.SnsrData.Nibble.data1;
++      crcBuffer[2] = (uint8)SftyParkLockPosnAcqnSENTSnrDataRx.SnsrData.Nibble.data2;
++      crcBuffer[3] = (uint8)SftyParkLockPosnAcqnSENTSnrDataRx.SnsrData.Nibble.data3;
++      crcBuffer[4] = (uint8)SftyParkLockPosnAcqnSENTSnrDataRx.SnsrData.Nibble.data4;
++      crcBuffer[5] = (uint8)SftyParkLockPosnAcqnSENTSnrDataRx.SnsrData.Nibble.data5;
++
++      /* Calculate the CRC value from the nibble data input */
++      SftyParkLockPosnAcqnCrcVal = SftyCrc_CalcCRC4((const uint8*)crcBuffer,SFTYPARKLOCKPOSNACQN_CRC_CALCN_BUF_SIZE,
++               SFTYPARKLOCKPOSNACQN_4BIT_CRC_INIT_SEED_VALUE,TRUE);
++      /* check the crc value  */
++      if(SftyParkLockPosnAcqnCrcVal == SftyParkLockPosnAcqnSENTSnrDataRx.CrcData.Nibble.data0)
++      {
++         /* To avoid over flow */
++         if(SftyParkLockPosnAcqnCrcErrCntr != 0U)
++         {
++            /* If calculated CRC is equal to nibble data crc value, decrement CRC error counter */
++            SftyParkLockPosnAcqnCrcErrCntr--;
++         }
++         else
++         {
++            /* Do nothing */
++         }
+ 
+-\treturn;
++      }
++      else
++      {
++         /* If calculated CRC is not equal to nibble data crc value, increment CRC error counter */
++         SftyParkLockPosnAcqnCrcErrCntr++;
++      }
++
++      /* Check the CRC error counter and update error monitor */
++      SftyParkLockPosnAcqn_ChkAndUpdCrcErrMonrSts();
++   }
++   else
++   {
++      /* Do nothing*/
++   }
++
++   return;
+ }
+ 
+ 
+@@ -480,6 +585,8 @@ FUNC(void, SFTYPARKLOCKPOSNACQN_CODE) SftyParkLockPosnAcqn_InitArea2(void)
+    SftyParkLockPosnAcqnRawVal = 0U;
+    SftyParkLockPosnAcqnSnrToutErrMonrSt = ERR_DEB_MONR_STS_INACTIVE;
+    SftyParkLockPosnAcqnSnrDataRxCrcErrMonrSt = ERR_DEB_MONR_STS_INACTIVE;
++   SftyParkLockPosnAcqnCrcErrCntr = 0U;
++   SftyParkLockPosnAcqnTiOutErrCntr = 0U;
+    
+    return;
+ }
+diff --git a/src/fw_cu/Components/Safety/Sfty_Cmn/SftyParkLockPosnAcqn/src/SftyParkLockPosnAcqn_data.c b/src/fw_cu/Components/Safety/Sfty_Cmn/SftyParkLockPosnAcqn/src/SftyParkLockPosnAcqn_data.c
+index 8e04a4345..08e32bf78 100644
+--- a/src/fw_cu/Components/Safety/Sfty_Cmn/SftyParkLockPosnAcqn/src/SftyParkLockPosnAcqn_data.c
++++ b/src/fw_cu/Components/Safety/Sfty_Cmn/SftyParkLockPosnAcqn/src/SftyParkLockPosnAcqn_data.c
+@@ -96,6 +96,57 @@ CONST(uint32, SFTYPARKLOCKPOSNACQN_VAR) SftyParkLockPosnAcqnDeltaRtsTiStampThd =
+ /* Stop: SFTYPARKLOCKPOSNACQN_STOP_SEC_CALIB_32 (online) */
+ 
+ 
++/* Begin: SFTYPARKLOCKPOSNACQN_START_SEC_CALIB_8 (online) */
++#define SFTYPARKLOCKPOSNACQN_START_SEC_CALIB_8
++#include "MemMap.h"
++/*
++@@ SYMBOL = SftyParkLockPosnAcqnTiOutErrCntMin
++@@ A2L_TYPE = PARAMETER
++@@ DATA_TYPE = UBYTE
++@@ DESCRIPTION = " Parklock position SENT message timeout error counter lower limit "
++@@ GROUP = SftyParkLockPosnAcqn
++@@ END
++*/
++
++CONST(uint8, SFTYPARKLOCKPOSNACQN_VAR) SftyParkLockPosnAcqnTiOutErrCntMin = 2U;
++
++/*
++@@ SYMBOL = SftyParkLockPosnAcqnTiOutErrCntMax
++@@ A2L_TYPE = PARAMETER
++@@ DATA_TYPE = UBYTE
++@@ DESCRIPTION = " Parklock position SENT message timeout error counter upper limit "
++@@ GROUP = SftyParkLockPosnAcqn
++@@ END
++*/
++
++CONST(uint8, SFTYPARKLOCKPOSNACQN_VAR) SftyParkLockPosnAcqnTiOutErrCntMax = 10U;
++
++/*
++@@ SYMBOL = SftyParkLockPosnAcqnCrcErrCntMin
++@@ A2L_TYPE = PARAMETER
++@@ DATA_TYPE = UBYTE
++@@ DESCRIPTION = " Parklock position SENT message CRC error counter lower limit "
++@@ GROUP = SftyParkLockPosnAcqn
++@@ END
++*/
++
++CONST(uint8, SFTYPARKLOCKPOSNACQN_VAR) SftyParkLockPosnAcqnCrcErrCntMin = 2U;
++
++/*
++@@ SYMBOL = SftyParkLockPosnAcqnCrcErrCntMax
++@@ A2L_TYPE = PARAMETER
++@@ DATA_TYPE = UBYTE
++@@ DESCRIPTION = " Parklock position SENT message CRC error counter upper limit "
++@@ GROUP = SftyParkLockPosnAcqn
++@@ END
++*/
++
++CONST(uint8, SFTYPARKLOCKPOSNACQN_VAR) SftyParkLockPosnAcqnCrcErrCntMax = 10U;
++
++#define SFTYPARKLOCKPOSNACQN_STOP_SEC_CALIB_8
++#include "MemMap.h"
++/* Stop: SFTYPARKLOCKPOSNACQN_STOP_SEC_CALIB_8 (online) */
++
+ 
+ /** @} doxygen end group definition */
+ /* ***************************************************************** */
+diff --git a/src/fw_cu/Components/Safety/Sfty_Cmn/SftySdl/src/SftySdl_cfg.c b/src/fw_cu/Components/Safety/Sfty_Cmn/SftySdl/src/SftySdl_cfg.c
+index 6bdb6fcaf..e965e952d 100644
+--- a/src/fw_cu/Components/Safety/Sfty_Cmn/SftySdl/src/SftySdl_cfg.c
++++ b/src/fw_cu/Components/Safety/Sfty_Cmn/SftySdl/src/SftySdl_cfg.c
+@@ -565,10 +565,10 @@ CONST(SftySdl_TaskTblType, SFTYSDL) SftySdlNormRunTaskTbl[]=
+    ,{ SFTYSDL_AREA_1,   &SftyCrashSigMon_MainFunction,            10u,           0u}
+    ,{ SFTYSDL_AREA_2,   &SftyHvInterlock_MainFunction,            10u,           0u}
+    ,{ SFTYSDL_AREA_2,   &SftyLvSplyEvln_MainFunctionArea2,        50u,           0u}
+-   ,{ SFTYSDL_AREA_2,\t&SftyParkLockPosnAcqn_MainFunctionArea2,  10u,           0u}
++   ,{ SFTYSDL_AREA_2,\t&SftyParkLockPosnAcqn_MainFunctionArea2,  20u,           0u} /* Note:temporary fix - Position sensor KMZ80: 1ms for 3us tick length(As per SW Arch). 2ms(frame length ~1700us) is for 5.7us tick length(HW) as temporary fix */
+    ,{ SFTYSDL_AREA_0,   &SftyParkLockEvln_MainFastArea0,           2u,           0u}
+    ,{ SFTYSDL_AREA_2,   &SftyParkLockEvln_MainFunctionArea2,      10u,           0u}
+-   ,{ SFTYSDL_AREA_2,   &SftyParkLockEvln_SlowFunctionArea2,     100u,           0u}
++   ,{ SFTYSDL_AREA_2,   &SftyParkLockEvln_SlowFunctionArea2,     300u,           0u} /* Note:temporary fix - Position sensor KMZ80: 10ms for 3us tick length(As per SW Arch). 30ms(frame length 1700us*18 fast frames) is for 5.7us tick length(HW) as temporary fix */
+    ,{ SFTYSDL_AREA_2,   &SftyParkLockActr_MainSlow,               10u,           0u}   
+    ,{ SFTYSDL_AREA_2,   &SftyParkLockActr_MainFast,                2u,           0u} 
+    ,{ SFTYSDL_AREA_1,   &SftyParkLockMgr_MainFunction,            10u,           0u}
+diff --git a/src/fw_cu/Components/Safety/Sfty_Cmn/Sfty_Common/include/SftyReplcmt_data.h b/src/fw_cu/Components/Safety/Sfty_Cmn/Sfty_Common/include/SftyReplcmt_data.h
+index 70b6fec1a..c506ef951 100644
+--- a/src/fw_cu/Components/Safety/Sfty_Cmn/Sfty_Common/include/SftyReplcmt_data.h
++++ b/src/fw_cu/Components/Safety/Sfty_Cmn/Sfty_Common/include/SftyReplcmt_data.h
+@@ -2852,7 +2852,7 @@ extern CONST(boolean, SFTYDCEVLN_CALIB) SftyReplcmtE2eFpgaOverVoltVBatFltSts;
+ #define SFTYREPLCMT_START_SEC_CALIB_8
+ #include "MemMap.h"
+ 
+-extern CONST(uint8, SFTYPARKLOCKPOSNACQN_VAR) SftyReplcmParkLockPosnAcqnEnaFlg;
++extern CONST(uint8, SFTYPARKLOCKPOSNACQN_CALIB) SftyReplcmParkLockPosnAcqnEnaFlg;
+ #define SFTYREPLCMT_STOP_SEC_CALIB_8
+ #include "MemMap.h"
+ /* Stop: SFTYREPLCMT_STOP_SEC_CALIB_8 (calib) */
+@@ -2861,7 +2861,7 @@ extern CONST(uint8, SFTYPARKLOCKPOSNACQN_VAR) SftyReplcmParkLockPosnAcqnEnaFlg;
+ #define SFTYREPLCMT_START_SEC_CALIB_8
+ #include "MemMap.h"
+ 
+-extern CONST(uint8, SFTYPARKLOCKPOSNACQN_VAR) SftyReplcmParkLockActrPosSnsrSts;
++extern CONST(uint8, SFTYPARKLOCKPOSNACQN_CALIB) SftyReplcmParkLockActrPosSnsrSts;
+ #define SFTYREPLCMT_STOP_SEC_CALIB_8
+ #include "MemMap.h"
+ /* Stop: SFTYREPLCMT_STOP_SEC_CALIB_8 (calib) */
+@@ -2870,7 +2870,7 @@ extern CONST(uint8, SFTYPARKLOCKPOSNACQN_VAR) SftyReplcmParkLockActrPosSnsrSts;
+ #define SFTYREPLCMT_START_SEC_CALIB_32
+ #include "MemMap.h"
+ 
+-extern CONST(uint32, SFTYPARKLOCKPOSNACQN_VAR) SftyReplcmParkLockPosnAcqnSENTSnrDataRxCrcVal;
++extern CONST(uint32, SFTYPARKLOCKPOSNACQN_CALIB) SftyReplcmParkLockPosnAcqnSENTSnrDataRxCrcVal;
+ #define SFTYREPLCMT_STOP_SEC_CALIB_32
+ #include "MemMap.h"
+ /* Stop: SFTYREPLCMT_STOP_SEC_CALIB_32 (calib) */
+@@ -2879,7 +2879,7 @@ extern CONST(uint32, SFTYPARKLOCKPOSNACQN_VAR) SftyReplcmParkLockPosnAcqnSENTSnr
+ #define SFTYREPLCMT_START_SEC_CALIB_32
+ #include "MemMap.h"
+ 
+-extern CONST(uint32, SFTYPARKLOCKPOSNACQN_VAR) SftyReplcmParkLockPosnAcqnSENTSnrDataRxSnsrDataVal;
++extern CONST(uint32, SFTYPARKLOCKPOSNACQN_CALIB) SftyReplcmParkLockPosnAcqnSENTSnrDataRxSnsrDataVal;
+ 
+ #define SFTYREPLCMT_STOP_SEC_CALIB_32
+ #include "MemMap.h"
+@@ -2889,7 +2889,7 @@ extern CONST(uint32, SFTYPARKLOCKPOSNACQN_VAR) SftyReplcmParkLockPosnAcqnSENTSnr
+ #define SFTYREPLCMT_START_SEC_CALIB_32
+ #include "MemMap.h"
+ 
+-extern CONST(uint32, SFTYPARKLOCKPOSNACQN_VAR) SftyReplcmParkLockPosnAcqnSENTSnrDataRxTiStampDmaVal;
++extern CONST(uint32, SFTYPARKLOCKPOSNACQN_CALIB) SftyReplcmParkLockPosnAcqnSENTSnrDataRxTiStampDmaVal;
+ #define SFTYREPLCMT_STOP_SEC_CALIB_32
+ #include "MemMap.h"
+ /* Stop: SFTYREPLCMT_STOP_SEC_CALIB_32 (calib) */
+@@ -2898,7 +2898,7 @@ extern CONST(uint32, SFTYPARKLOCKPOSNACQN_VAR) SftyReplcmParkLockPosnAcqnSENTSnr
+ #define SFTYREPLCMT_START_SEC_CALIB_32
+ #include "MemMap.h"
+ 
+-extern CONST(uint32, SFTYPARKLOCKPOSNACQN_VAR) SftyReplcmParkLockPosnAcqnSENTSnrDataRxTiStampRtsSVal;
++extern CONST(uint32, SFTYPARKLOCKPOSNACQN_CALIB) SftyReplcmParkLockPosnAcqnSENTSnrDataRxTiStampRtsSVal;
+ 
+ #define SFTYREPLCMT_STOP_SEC_CALIB_32
+ #include "MemMap.h"
+@@ -2909,7 +2909,7 @@ extern CONST(uint32, SFTYPARKLOCKPOSNACQN_VAR) SftyReplcmParkLockPosnAcqnSENTSnr
+ #include "MemMap.h"
+ 
+ 
+-extern CONST(uint32, SFTYPARKLOCKPOSNACQN_VAR) SftyReplcmParkLockPosnAcqnSENTSnrDataRxIntStatVal;
++extern CONST(uint32, SFTYPARKLOCKPOSNACQN_CALIB) SftyReplcmParkLockPosnAcqnSENTSnrDataRxIntStatVal;
+ #define SFTYREPLCMT_STOP_SEC_CALIB_32
+ #include "MemMap.h"
+ /* Stop: SFTYREPLCMT_STOP_SEC_CALIB_32 (calib) */
+diff --git a/src/fw_cu/Components/Safety/Sfty_Cmn/Sfty_Common/src/SftyReplcmt_data.c b/src/fw_cu/Components/Safety/Sfty_Cmn/Sfty_Common/src/SftyReplcmt_data.c
+index dd13b259a..d2730076a 100644
+--- a/src/fw_cu/Components/Safety/Sfty_Cmn/Sfty_Common/src/SftyReplcmt_data.c
++++ b/src/fw_cu/Components/Safety/Sfty_Cmn/Sfty_Common/src/SftyReplcmt_data.c
+@@ -2480,7 +2480,7 @@ CONST(uint32, SFTYREPLCMT_CALIB) SftyReplcmtGtmRslvrExctTiStampVal = 0UL;
+ @@ GROUP = SftyParkLockMgr
+ @@ END
+ */
+-CONST(uint8, SFTYREPLCMT_CALIB) SftyReplcmtParkLockMgrPlkIntFltStiEna = 1U;
++CONST(uint8, SFTYREPLCMT_CALIB) SftyReplcmtParkLockMgrPlkIntFltStiEna = 0U;
+ #define SFTYREPLCMT_STOP_SEC_CALIB_8
+ #include "MemMap.h"
+ /* End: SFTYREPLCMT_STOP_SEC_CALIB_8 (calib) */
+@@ -3163,7 +3163,7 @@ CONST(boolean, SFTYDCEVLN_CALIB) SftyReplcmtE2eFpgaOverVoltVBatFltSts = FALSE;
+ @@ END
+ */
+ 
+-CONST(uint8, SFTYPARKLOCKPOSNACQN_VAR)SftyReplcmParkLockPosnAcqnEnaFlg = 0U;
++CONST(uint8, SFTYPARKLOCKPOSNACQN_CALIB) SftyReplcmParkLockPosnAcqnEnaFlg = 0U;
+ 
+ #define SFTYREPLCMT_STOP_SEC_CALIB_8
+ #include "MemMap.h"
+@@ -3180,7 +3180,7 @@ CONST(uint8, SFTYPARKLOCKPOSNACQN_VAR)SftyReplcmParkLockPosnAcqnEnaFlg = 0U;
+ @@ END
+ */
+ 
+-CONST(uint8, SFTYPARKLOCKPOSNACQN_VAR)SftyReplcmParkLockActrPosSnsrSts = 0U;
++CONST(uint8, SFTYPARKLOCKPOSNACQN_CALIB) SftyReplcmParkLockActrPosSnsrSts = 0U;
+ 
+ #define SFTYREPLCMT_STOP_SEC_CALIB_8
+ #include "MemMap.h"
+@@ -3198,7 +3198,7 @@ CONST(uint8, SFTYPARKLOCKPOSNACQN_VAR)SftyReplcmParkLockActrPosSnsrSts = 0U;
+ @@ END
+ */
+ 
+-CONST(uint32, SFTYPARKLOCKPOSNACQN_VAR)SftyReplcmParkLockPosnAcqnSENTSnrDataRxCrcVal = 0U;
++CONST(uint32, SFTYPARKLOCKPOSNACQN_CALIB) SftyReplcmParkLockPosnAcqnSENTSnrDataRxCrcVal = 0U;
+ 
+ #define SFTYREPLCMT_STOP_SEC_CALIB_32
+ #include "MemMap.h"
+@@ -3216,7 +3216,7 @@ CONST(uint32, SFTYPARKLOCKPOSNACQN_VAR)SftyReplcmParkLockPosnAcqnSENTSnrDataRxCr
+ @@ END
+ */
+ 
+-CONST(uint32, SFTYPARKLOCKPOSNACQN_VAR)SftyReplcmParkLockPosnAcqnSENTSnrDataRxSnsrDataVal = 0U;
++CONST(uint32, SFTYPARKLOCKPOSNACQN_CALIB) SftyReplcmParkLockPosnAcqnSENTSnrDataRxSnsrDataVal = 0U;
+ 
+ #define SFTYREPLCMT_STOP_SEC_CALIB_32
+ #include "MemMap.h"
+@@ -3234,7 +3234,7 @@ CONST(uint32, SFTYPARKLOCKPOSNACQN_VAR)SftyReplcmParkLockPosnAcqnSENTSnrDataRxSn
+ @@ END
+ */
+ 
+-CONST(uint32, SFTYPARKLOCKPOSNACQN_VAR)SftyReplcmParkLockPosnAcqnSENTSnrDataRxTiStampDmaVal = 0U;
++CONST(uint32, SFTYPARKLOCKPOSNACQN_CALIB) SftyReplcmParkLockPosnAcqnSENTSnrDataRxTiStampDmaVal = 0U;
+ 
+ #define SFTYREPLCMT_STOP_SEC_CALIB_32
+ #include "MemMap.h"
+@@ -3252,7 +3252,7 @@ CONST(uint32, SFTYPARKLOCKPOSNACQN_VAR)SftyReplcmParkLockPosnAcqnSENTSnrDataRxTi
+ @@ END
+ */
+ 
+-CONST(uint32, SFTYPARKLOCKPOSNACQN_VAR) SftyReplcmParkLockPosnAcqnSENTSnrDataRxTiStampRtsSVal = 0U;
++CONST(uint32, SFTYPARKLOCKPOSNACQN_CALIB) SftyReplcmParkLockPosnAcqnSENTSnrDataRxTiStampRtsSVal = 0U;
+ 
+ #define SFTYREPLCMT_STOP_SEC_CALIB_32
+ #include "MemMap.h"
+@@ -3270,7 +3270,7 @@ CONST(uint32, SFTYPARKLOCKPOSNACQN_VAR) SftyReplcmParkLockPosnAcqnSENTSnrDataRxT
+ @@ END
+ */
+ 
+-CONST(uint32, SFTYPARKLOCKPOSNACQN_VAR)SftyReplcmParkLockPosnAcqnSENTSnrDataRxIntStatVal = 0U;
++CONST(uint32, SFTYPARKLOCKPOSNACQN_CALIB) SftyReplcmParkLockPosnAcqnSENTSnrDataRxIntStatVal = 0U;
+ 
+ #define SFTYREPLCMT_STOP_SEC_CALIB_32
+ #include "MemMap.h"
+diff --git a/src/fw_cu/build/a2l/Measurements-to-Timeslices-Mapping.csv b/src/fw_cu/build/a2l/Measurements-to-Timeslices-Mapping.csv
+index 31453dbb6..1ca72b769 100644
+--- a/src/fw_cu/build/a2l/Measurements-to-Timeslices-Mapping.csv
++++ b/src/fw_cu/build/a2l/Measurements-to-Timeslices-Mapping.csv
+@@ -6698,7 +6698,9 @@ SftyParkLockEvlnSerlData.msgId,Core_1,Core_1_200us,0.2,,,SSW
+ SftyParkLockEvlnSerlData.serlCrc,Core_1,Core_1_200us,0.2,,,SSW
+ SftyParkLockEvlnSerlData.serlData,Core_1,Core_1_200us,0.2,,,SSW
+ SftyParkLockEvlnSerlDataCurTiStamp,Core_1,Core_1_200us,0.2,,,SSW
++SftyParkLockEvlnSerlDataEvlnRes,Core_1,Core_1_200us,0.2,,,SSW
+ SftyParkLockEvlnSerlDataLstTiStamp,Core_1,Core_1_200us,0.2,,,SSW
++SftyParkLockEvlnSerlDataTiStampChkRes,Core_1,Core_1_200us,0.2,,,SSW
+ SftyParkLockEvlnSnrDataElecHiErrMonrSt,Core_1,Core_1_200us,0.2,,,SSW
+ SftyParkLockEvlnSnrDataElecLoErrMonrSt,Core_1,Core_1_200us,0.2,,,SSW
+ SftyParkLockMgrCalibTestDisengAg,Core_1,Core_1_200us,0.2,,,SSW
+@@ -6714,15 +6716,14 @@ SftyParkLockMgrCalibTestTarDisengmtAg,Core_1,Core_1_200us,0.2,,,SSW
+ SftyParkLockMgrCalibTestTarEngmtAg,Core_1,Core_1_200us,0.2,,,SSW
+ SftyParkLockMgrCalibTestTiOutTmrVar,Core_1,Core_1_200us,0.2,,,SSW
+ SftyParkLockMgrDisengEngCRCErrMonrSt,Core_1,Core_1_200us,0.2,,,SSW
++SftyParkLockMgrDisengEngRangErrMonrSt,Core_1,Core_1_200us,0.2,,,SSW
+ SftyParkLockMgrDisengmtAgCrcNvm,Core_1,Core_1_200us,0.2,,,SSW
+ SftyParkLockMgrDisengmtFinshd,Core_1,Core_1_200us,0.2,,,SSW
+ SftyParkLockMgrDisengmtTiOutTmrVar,Core_1,Core_1_200us,0.2,,,SSW
+-SftyParkLockMgrDisEngRangErrMonrSt,Core_1,Core_1_200us,0.2,,,SSW
+ SftyParkLockMgrEngmtAgCrcNvm,Core_1,Core_1_200us,0.2,,,SSW
+ SftyParkLockMgrEngmtDisengmtRetryCnt,Core_1,Core_1_200us,0.2,,,SSW
+ SftyParkLockMgrEngmtFinshd,Core_1,Core_1_200us,0.2,,,SSW
+ SftyParkLockMgrEngmtTiOutTmrVar,Core_1,Core_1_200us,0.2,,,SSW
+-SftyParkLockMgrEngRangErrMonrSt,Core_1,Core_1_200us,0.2,,,SSW
+ SftyParkLockMgrFailrSts,Core_1,Core_1_200us,0.2,,,SSW
+ SftyParkLockMgrOperMod,Core_1,Core_1_200us,0.2,,,SSW
+ SftyParkLockMgrPauseTi,Core_1,Core_1_200us,0.2,,,SSW
+@@ -6732,8 +6733,6 @@ SftyParkLockMgrPauseTiTmrVar,Core_1,Core_1_200us,0.2,,,SSW
+ SftyParkLockMgrPlkCanReq,Core_1,Core_1_200us,0.2,,,SSW
+ SftyParkLockMgrPlkIntFlt,Core_1,Core_1_200us,0.2,,,SSW
+ SftyParkLockMgrPluErrMonrSt,Core_1,Core_1_200us,0.2,,,SSW
+-SftyParkLockMgrPrimActrDisEngTiOutErrMonrSt,Core_1,Core_1_200us,0.2,,,SSW
+-SftyParkLockMgrPrimActrEngTiOutErrMonrSt,Core_1,Core_1_200us,0.2,,,SSW
+ SftyParkLockMgrPrimActrOverAllStrtUpTestFinshd,Core_1,Core_1_200us,0.2,,,SSW
+ SftyParkLockMgrPrimActrOverAllStrtUpTestSts,Core_1,Core_1_200us,0.2,,,SSW
+ SftyParkLockMgrPrimActrStrtUpTestFinshd,Core_1,Core_1_200us,0.2,,,SSW
+@@ -6741,17 +6740,21 @@ SftyParkLockMgrPrimActrStrtUpTestSt,Core_1,Core_1_200us,0.2,,,SSW
+ SftyParkLockMgrPrimActrStrtUpTestSts,Core_1,Core_1_200us,0.2,,,SSW
+ SftyParkLockMgrPrimActrStrtUpTestTiOutTmrVar,Core_1,Core_1_200us,0.2,,,SSW
+ SftyParkLockMgrPrimActrStrtUpTstErrMonrSt,Core_1,Core_1_200us,0.2,,,SSW
++SftyParkLockMgrPrimActrTiOutErrMonrSt,Core_1,Core_1_200us,0.2,,,SSW
+ SftyParkLockMgrPrkgPosnReq,Core_1,Core_1_200us,0.2,,,SSW
+ SftyParkLockMgrPrkgPosnReqVld,Core_1,Core_1_200us,0.2,,,SSW
+ SftyParkLockMgrTarDisengmtAgNvm,Core_1,Core_1_200us,0.2,,,SSW
+ SftyParkLockMgrTarEngmtAgNvm,Core_1,Core_1_200us,0.2,,,SSW
++SftyParkLockPosnAcqnCrcErrCntr,Core_1,Core_1_200us,0.2,,,SSW
+ SftyParkLockPosnAcqnCrcVal,Core_1,Core_1_200us,0.2,,,SSW
+ SftyParkLockPosnAcqnCurrDmaTiStamp,Core_1,Core_1_200us,0.2,,,SSW
+ SftyParkLockPosnAcqnCurrRtsTiStamp,Core_1,Core_1_200us,0.2,,,SSW
+ SftyParkLockPosnAcqnDeltaRtsTiStamp,Core_1,Core_1_200us,0.2,,,SSW
++SftyParkLockPosnAcqnDmaTiOutChkRes,Core_1,Core_1_200us,0.2,,,SSW
+ SftyParkLockPosnAcqnLstDmaTiStamp,Core_1,Core_1_200us,0.2,,,SSW
+ SftyParkLockPosnAcqnLstRtsTiStamp,Core_1,Core_1_200us,0.2,,,SSW
+ SftyParkLockPosnAcqnRawVal,Core_1,Core_1_200us,0.2,,,SSW
++SftyParkLockPosnAcqnRtsTiOutChkRes,Core_1,Core_1_200us,0.2,,,SSW
+ SftyParkLockPosnAcqnSENTSnrDataRx.CrcData.all,Core_1,Core_1_200us,0.2,,,SSW
+ SftyParkLockPosnAcqnSENTSnrDataRx.CrcData.B.bit0,Core_1,Core_1_200us,0.2,,,SSW
+ SftyParkLockPosnAcqnSENTSnrDataRx.CrcData.B.bit1,Core_1,Core_1_200us,0.2,,,SSW
+@@ -6839,6 +6842,7 @@ SftyParkLockPosnAcqnSnrDataRxCrcErrMonrSt,Core_1,Core_1_200us,0.2,,,SSW
+ SftyParkLockPosnAcqnSnrToutErrMonrSt,Core_1,Core_1_200us,0.2,,,SSW
+ SftyParkLockPosnAcqnSnsrSts,Core_1,Core_1_200us,0.2,,,SSW
+ SftyParkLockPosnAcqnSnsrWdiFlg,Core_1,Core_1_200us,0.2,,,SSW
++SftyParkLockPosnAcqnTiOutErrCntr,Core_1,Core_1_200us,0.2,,,SSW
+ SftyInvActrMotorSpdFild,Core_1,Core_1_200us,0.2,,,SSW
+ SftyInvActrSafeStCompErrMonrSt,Core_1,Core_1_200us,0.2,,,SSW
+ SftyInvActrHSGateDrvrErrMonrSt,Core_1,Core_1_200us,0.2,,,SSW
+'

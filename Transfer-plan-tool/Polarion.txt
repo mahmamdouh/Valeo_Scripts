@@ -1,0 +1,7 @@
+User name:melmohta
+Password:Aliya$1994
+Project:VW_MEB_Inverter
+ReqPlan:24_11_1_19_p330
+ReqBaLine:27_05_18_p330_and_q330
+variant:NOT variant.KEY:base\+
+

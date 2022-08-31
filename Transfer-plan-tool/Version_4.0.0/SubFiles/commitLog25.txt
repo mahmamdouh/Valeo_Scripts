@@ -1,0 +1,84 @@
+b'commit f5ec270f5b8bb8615c6a61696b70d01150ca9fb2
+Author: Karthik CHIDAMBARAM (JV) <karthik.chidambaram.jv@valeo.com>
+Date:   Tue Mar 22 17:32:49 2022 +0100
+
+    Revert "$100kW-53525$ Fix Resolver offset UDS issue for BSW part"
+    
+    This reverts commit f973f04001d288ea825bc3181afe9c7aa75c9351.
+    
+    Change-Id: I903995d8c4403087adb32b37fd67adc042931b82
+
+diff --git a/src/fw_cu/Components/Cmn/Diagc/include/Idp.h b/src/fw_cu/Components/Cmn/Diagc/include/Idp.h
+index f5d5e718f..09da01c3e 100644
+--- a/src/fw_cu/Components/Cmn/Diagc/include/Idp.h
++++ b/src/fw_cu/Components/Cmn/Diagc/include/Idp.h
+@@ -82,10 +82,10 @@
+ #define DID_C161_HVACVoltageCalibrationOffset_FAC     0.00001F
+ #define DID_C161_HVACVoltageCalibrationOffset_OFF     -24.000F
+ 
+-#define DID_C162_ResolverOffsetCalibration_MAX     327.67F
+-#define DID_C162_ResolverOffsetCalibration_MIN     -327.68F
+-#define DID_C162_ResolverOffsetCalibration_FAC     0.01F
+-#define DID_C162_ResolverOffsetCalibration_OFF     -327.68F
++#define DID_C162_ResolverOffsetCalibration_MAX     180.0F
++#define DID_C162_ResolverOffsetCalibration_MIN     -180.0F
++#define DID_C162_ResolverOffsetCalibration_FAC     1.0F
++#define DID_C162_ResolverOffsetCalibration_OFF     0.0F
+ 
+ #define NUMBER_OF_SOFTWARE_BLOCKS                                       8u  /* Anzahl der logischen Softwareblocke */
+ 
+diff --git a/src/fw_cu/Components/Cmn/Diagc/include/Tdp.h b/src/fw_cu/Components/Cmn/Diagc/include/Tdp.h
+index ca865a935..af13f4ac7 100644
+--- a/src/fw_cu/Components/Cmn/Diagc/include/Tdp.h
++++ b/src/fw_cu/Components/Cmn/Diagc/include/Tdp.h
+@@ -91,10 +91,10 @@
+ \t\t\t#define Inverter_Coolant_Temperature_FAC \t            (float32)      (1.0)
+ \t\t\t#define Inverter_Coolant_Temperature_OFF\t            (float32)      (-40.0)  
+ 
+-\t\t\t#define Resolver_Offset_MAX\t                  (327.67F)
+-\t\t\t#define Resolver_Offset_MIN\t                  (-327.68F)
+-\t\t\t#define Resolver_Offset_FAC \t              (0.01F)
+-\t\t\t#define Resolver_Offset_OFF\t                  (-327.68F)  
++\t\t\t#define Resolver_Offset_MAX\t            (float32)      (180.0)
++\t\t\t#define Resolver_Offset_MIN\t            (float32)      (-180.0)
++\t\t\t#define Resolver_Offset_FAC \t            (float32)      (1.0)
++\t\t\t#define Resolver_Offset_OFF\t            (float32)      (0.0)  
+ 
+ \t\t\t#define Available_Torque_Maximum_MAX\t            (float32)      (3000.0)
+ \t\t\t#define Available_Torque_Maximum_MIN\t            (float32)      (-3000.0)
+diff --git a/src/fw_cu/Components/Cmn/Diagc/src/Idp.c b/src/fw_cu/Components/Cmn/Diagc/src/Idp.c
+index e2d4277f0..0e8daf40a 100644
+--- a/src/fw_cu/Components/Cmn/Diagc/src/Idp.c
++++ b/src/fw_cu/Components/Cmn/Diagc/src/Idp.c
+@@ -588,21 +588,20 @@ FUNC(Std_ReturnType, RTE_CODE) Idp_xC162_RslvrOffsCal_WriteData (P2CONST(uint8,
+ #endif
+ {
+    uint8 ResolverOffsetCalibration[DID_C162_ResolverOffsetCalibration_SIZE];
+-   float32 DID_C162_ResolverOffsetCalibration_PHY;
+-   uint16 DID_C162_ResolverOffsetCalibration_RAW = 0U;
+ 
+    Std_ReturnType retStatus = DCM_E_OK;
+       if (NULL_PTR != Data)
+       {
+          TS_MemCpy(&(ResolverOffsetCalibration),Data,DID_C162_ResolverOffsetCalibration_SIZE);/* PRQA S 4471 */ /* PRQA S 0315 *//*The TS_MemCpy can handle this conversion*/
+-         DID_C162_ResolverOffsetCalibration_RAW = ((uint16)ResolverOffsetCalibration[0U] << 8U)  |
+-                                                  ((uint16)ResolverOffsetCalibration[1U]);
+-
+-         DID_C162_ResolverOffsetCalibration_PHY = (float32)Idp_RAW_TO_PHY_CONV(DID_C162_ResolverOffsetCalibration_RAW,DID_C162_ResolverOffsetCalibration_FAC,DID_C162_ResolverOffsetCalibration_OFF);
+-         DID_C162_ResolverOffsetCalibration_PHY = Idp_SIG_LIMIT_CHECKING(DID_C162_ResolverOffsetCalibration_PHY, DID_C162_ResolverOffsetCalibration_MAX,DID_C162_ResolverOffsetCalibration_MIN);                                                
+-
+-         (void)Rte_Write_RslvrOffsValReqUds_RslvrOffsValReqUds(DID_C162_ResolverOffsetCalibration_PHY);
+-         
++         if( (ResolverOffsetCalibration[0] > 0U) || (ResolverOffsetCalibration[1] > DID_C162_ResolverOffsetCalibration_MAX ) )
++         {
++            *ErrorCode=DCM_E_REQUESTOUTOFRANGE;
++            retStatus=E_NOT_OK;
++         }
++         else
++         {
++            (void)Rte_Write_RslvrOffsValReqUds_RslvrOffsValReqUds((float32)ResolverOffsetCalibration[1]);
++         }
+       }    
+       else
+       {
+'

@@ -1,0 +1,228 @@
+b'commit 6333e168234ffb2b3f95868214d392d961fa0a7e
+Author: Sapthagiri GUDIHALLI (JV) <sapthagiri.gudihalli.jv@valeo.com>
+Date:   Wed Mar 23 19:31:07 2022 +0100
+
+    $100kW-34518$ - [SWIT][Control Stage LV] A04: Sequence in dynamic view is not implemented in the code.
+    
+    Change-Id: I5e461126423719bddf870ec261b229d1ec4b6e46
+
+diff --git a/src/fw_cu/Components/Inv/RtEnv/DrvCtrlSdl/src/DrvCtrlSdl.c b/src/fw_cu/Components/Inv/RtEnv/DrvCtrlSdl/src/DrvCtrlSdl.c
+index ac20b46e8..06c31fe44 100644
+--- a/src/fw_cu/Components/Inv/RtEnv/DrvCtrlSdl/src/DrvCtrlSdl.c
++++ b/src/fw_cu/Components/Inv/RtEnv/DrvCtrlSdl/src/DrvCtrlSdl.c
+@@ -133,8 +133,6 @@
+ #include "LlswQSpi.h"
+ #include "LlswFpgaIf.h"
+ #include "BswFpgaIf.h"
+-#include "VsiSrv.h"
+-
+ 
+ 
+ #ifdef SWIT_Active
+@@ -1481,7 +1479,7 @@ static DrvCtrlSdlRblCfgType DrvCtrlSdlRblCfgPwmSngSample[] =
+    { &PwmSpMgr_RunA, &DrvCtrlSdlRblPwmPwmSpMgr },
+    { &Mod3Pha_RunA, &DrvCtrlSdlRblPwmMod3Pha },
+    { &PwmSpMux_RunA, &DrvCtrlSdlRblPwmPwmSpMux },
+-   { &VSISRV_vidSetFrameTx, &DrvCtrlSdlRblPwmFpgaSetTx },     /* DRCO FPGA IFACE send */
++   { &BswFpgaIf_SetTxFrm, &DrvCtrlSdlRblPwmFpgaSetTx },     /* DRCO FPGA IFACE send */
+    { &DrvCtrlSdl_RblPwmCntrEnd, &DrvCtrlSdlRblPwmCntrEnd },
+ #ifndef SERIES_PRODUCTION
+    { &HvAcIMeasEolCal_Run, &DrvCtrlSdlRblPwmHvAcIMeasEolCal },
+@@ -1526,7 +1524,7 @@ static DrvCtrlSdlRblCfgType DrvCtrlSdlRblCfg1ms[] =
+ #endif /* SYSCON_FTR_PSM == 1  USE_IPMCTRL_CONTROL */
+    { &DrvCtrlErrDeb_Run1ms, &DrvCtrlSdlRbl1msDrvCtrlErrDeb },
+    { &DrvCtrlC2c_Send1ms, &DrvCtrlSdlRbl1msC2cSend },
+-   { &BswFpgaIf_TxRx1ms, &DrvCtrlSdlRbl1msFpgaSetTx },
++   { &BswFpgaIf_SetTxFrm1ms, &DrvCtrlSdlRbl1msFpgaSetTx },
+    { &DrvCtrlSdl_RblDataAcqn1ms, &DrvCtrlSdlRbl1msDataAcqn },
+    { NULL_PTR, NULL_PTR }
+ };
+@@ -2027,7 +2025,7 @@ FUNC(void, DRVCTRLSDL_CODE) DrvCtrlSdl_Init(void) /*PRQA S 1503*/
+ 
+    LlswFpgaIf_Init();
+    
+-   VSISRV_vidInit();
++   BswFpgaIf_Init();
+ 
+    /*********************
+     * ENABLE TIMESLICES *
+diff --git a/src/fw_cu/Components/Inv/ValMeasAndProc/BswFpgaIf/include/BswFpgaIf.h b/src/fw_cu/Components/Inv/ValMeasAndProc/BswFpgaIf/include/BswFpgaIf.h
+index 31024a45e..5b1d7ac41 100644
+--- a/src/fw_cu/Components/Inv/ValMeasAndProc/BswFpgaIf/include/BswFpgaIf.h
++++ b/src/fw_cu/Components/Inv/ValMeasAndProc/BswFpgaIf/include/BswFpgaIf.h
+@@ -107,10 +107,11 @@ extern uint16 BswFpgaIf_UdcRawVal;
+ extern void BswFpgaIf_SetTxSyncData(void);
+ extern uint8 BswFpgaIf_SetTxAsyncData(void);
+ extern void BswFpgaIf_DrcvRxSignals (void);
+-extern void BswFpgaIf_TxRx1ms(void);
++extern void BswFpgaIf_SetTxFrm1ms(void);
+ extern void BswFpgaIf_Init(void);
+ extern void BswFpgaIf_ReadIgbtTemp(void);
+-
++extern void BswFpgaIf_SetTxFrm(void);
++extern void BswFpgaIf_UpdRxFrm(void);
+ #define BSWFPGAIF_STOP_SEC_CODE_SLOW
+ #include "NextGen_MemMap.h"
+ 
+diff --git a/src/fw_cu/Components/Inv/ValMeasAndProc/BswFpgaIf/src/BswFpgaIf.c b/src/fw_cu/Components/Inv/ValMeasAndProc/BswFpgaIf/src/BswFpgaIf.c
+index d6b8fa7b2..9ef4fdb0c 100644
+--- a/src/fw_cu/Components/Inv/ValMeasAndProc/BswFpgaIf/src/BswFpgaIf.c
++++ b/src/fw_cu/Components/Inv/ValMeasAndProc/BswFpgaIf/src/BswFpgaIf.c
+@@ -21,7 +21,6 @@
+ *******************************************************************************/
+ 
+ #include "BswFpgaIf.h"
+-
+ #include "ErrDeb.h"
+ #include "DrvCtrlSdl.h"
+ #include "emm.h"
+@@ -33,7 +32,7 @@
+ #include "SWIT_Sfty.h"
+ #endif
+ #include "VsiSrv_e.h"
+-
++#include "VsiSrv.h"
+ 
+ /*******************************************************************************
+ **                            General Notes                                   **
+@@ -529,6 +528,7 @@ static void BswFpgaIf_MeasDataCopy(void);
+ 
+ void BswFpgaIf_Init(void)
+ {
++#if 0
+    /*----------------------------------------------------------------------------*/
+    /* BswFpgaIf IPDU Tx Default value                                                  */
+    /*----------------------------------------------------------------------------*/
+@@ -628,8 +628,8 @@ void BswFpgaIf_Init(void)
+    /*--------------------*/
+       BswFpgaIfIpduTxDef.Data.TxA.Id.Mx0.Signal.M2PwmFreq_MSB8                   = (2000 >> 4);       /* Param Val = 2000 :10 KHz  */
+       BswFpgaIfIpduTxDef.Data.TxA.Id.Mx0.Signal.M2PwmFreq_LSB4                   = (2000 & 0x000F);   /* Param Val = 2000 :10 KHz  */
+-      BswFpgaIfIpduTxDef.Data.TxA.Id.Mx0.Signal.M3PwmDeadtime_MSB4               = (48 >> 8);         /* Param Val = 48   :1.2 \xb5s  */
+-      BswFpgaIfIpduTxDef.Data.TxA.Id.Mx0.Signal.M3PwmDeadtime_LSB8               = (48 & 0x00FF);     /* Param Val = 48   :1.2 \xb5s  */
++      BswFpgaIfIpduTxDef.Data.TxA.Id.Mx0.Signal.M3PwmDeadtime_MSB4               = (48 >> 8);         /* Param Val = 48   :1.2 \xc2\xb5s  */
++      BswFpgaIfIpduTxDef.Data.TxA.Id.Mx0.Signal.M3PwmDeadtime_LSB8               = (48 & 0x00FF);     /* Param Val = 48   :1.2 \xc2\xb5s  */
+       BswFpgaIfIpduTxDef.Data.TxA.Id.Mx0.Signal.M4Id0Spare_MSB8                  = (2000 >> 4);       /* Param Val = 2000 :5 KHz   */
+       BswFpgaIfIpduTxDef.Data.TxA.Id.Mx0.Signal.M4Id0Spare_LSB4                  = (2000 & 0x000F);   /* Param Val = 2000 :5 KHz   */
+       BswFpgaIfIpduTxDef.Data.TxA.Id.Mx0.Signal.M5PwmInitValUl_MSB4              = 0;                 /* Param Val = 0             */
+@@ -821,10 +821,10 @@ void BswFpgaIf_Init(void)
+    /*--------------------*/
+       BswFpgaIfIpduTxDef.Data.TxA.Id.Mx3.Signal.M2OverCurThMot_MSB8              = 0;                 /* Param Val = ???  :300A    */
+       BswFpgaIfIpduTxDef.Data.TxA.Id.Mx3.Signal.M2OverCurThMot_LSB4              = 0;                 /* Param Val = ???  :300A    */
+-      BswFpgaIfIpduTxDef.Data.TxA.Id.Mx3.Signal.M3ActiveDisDur_MSB4              = (2442 >> 8);       /* Param Val = 2442 :4000\xb5s  */
+-      BswFpgaIfIpduTxDef.Data.TxA.Id.Mx3.Signal.M3ActiveDisDur_LSB8              = (2442 & 0x00FF);   /* Param Val = 2442 :4000\xb5s  */
+-      BswFpgaIfIpduTxDef.Data.TxA.Id.Mx3.Signal.M4SynchroDelay_MSB8              = (436 >> 4);        /* Param Val = 436  :10.900\xb5s*/
+-      BswFpgaIfIpduTxDef.Data.TxA.Id.Mx3.Signal.M4SynchroDelay_LSB4              = (436 & 0x000F);    /* Param Val = 436  :10.900\xb5s*/
++      BswFpgaIfIpduTxDef.Data.TxA.Id.Mx3.Signal.M3ActiveDisDur_MSB4              = (2442 >> 8);       /* Param Val = 2442 :4000\xc2\xb5s  */
++      BswFpgaIfIpduTxDef.Data.TxA.Id.Mx3.Signal.M3ActiveDisDur_LSB8              = (2442 & 0x00FF);   /* Param Val = 2442 :4000\xc2\xb5s  */
++      BswFpgaIfIpduTxDef.Data.TxA.Id.Mx3.Signal.M4SynchroDelay_MSB8              = (436 >> 4);        /* Param Val = 436  :10.900\xc2\xb5s*/
++      BswFpgaIfIpduTxDef.Data.TxA.Id.Mx3.Signal.M4SynchroDelay_LSB4              = (436 & 0x000F);    /* Param Val = 436  :10.900\xc2\xb5s*/
+       BswFpgaIfIpduTxDef.Data.TxA.Id.Mx3.Signal.M5Id3Spare_MSB4                  = 0;                 /* Param Val = 0             */
+       BswFpgaIfIpduTxDef.Data.TxA.Id.Mx3.Signal.M5Id3Spare_LSB8                  = 0;                 /* Param Val = 0             */
+       BswFpgaIfIpduTxDef.Data.TxA.Id.Mx3.Signal.M6Id3Spare_MSB8                  = 0;                 /* Param Val = 0             */
+@@ -1219,7 +1219,9 @@ void BswFpgaIf_Init(void)
+       BswFpgaIfIpduTxDef.Data.TxS.Signal.PWM_Wr_LSB8    = 0xE8u;
+       VSISRV_SetSignalPWM_UVW_ON(1u);
+       VSISRV_SetSignalPWM_RatioFreq(0u);
+-
++\t
++#endif
++\tVSISRV_vidInit();
+ }
+ 
+ 
+@@ -1289,8 +1291,6 @@ void BswFpgaIf_SetTxSyncData(void)
+     VsisrvIpduTx.Data.TxS.Signal.PWM_Vr_LSB8    = ((Pwm3PhaMuxDutyCycPha_V) & 0xFFu);
+     VsisrvIpduTx.Data.TxS.Signal.PWM_Wr_MSB4    = ((Pwm3PhaMuxDutyCycPha_W >> 8) & 0xFu);
+     VsisrvIpduTx.Data.TxS.Signal.PWM_Wr_LSB8    = ((Pwm3PhaMuxDutyCycPha_W) & 0xFFu);
+-    
+-
+ \t
+     if(BswFpgaIfTxPwmCtrlStgOnOffOvrdEna == BSWFPGAIF_FALSE)
+ \t{
+@@ -1310,6 +1310,7 @@ void BswFpgaIf_SetTxSyncData(void)
+        Freq = BswFpgaIfTxPwmSwtFreqOvrdVal;
+     }
+     VSISRV_SetSignalPwmFreqDyn(Freq);
++
+     VSISRV_SetSignalPWM_RatioFreq(0u);
+ }
+ 
+@@ -1336,7 +1337,7 @@ uint8 BswFpgaIf_SetTxAsyncData(void)
+ 
+ /******************************************************************/
+ /*!
+- * \\fn      void BswFpgaIf_TxRx1ms(void)
++ * \\fn      void BswFpgaIf_SetTxFrm1ms(void)
+  * \\brief   The function shall update Rx signals and set Tx frame data for Fpga
+  * \\param   [in]  index to data which shall be provided
+  * \\param   [out] PtrData Pointer to the provided data
+@@ -1345,7 +1346,7 @@ uint8 BswFpgaIf_SetTxAsyncData(void)
+  * \\retval  NOK   provided data is not valid
+  */
+ /******************************************************************/
+-void BswFpgaIf_TxRx1ms(void)
++void BswFpgaIf_SetTxFrm1ms(void)
+ {
+    uint16 Pwm3PhaMuxDutyCycPha_U = 0u;
+    uint16 Pwm3PhaMuxDutyCycPha_V = 0u;
+@@ -1428,6 +1429,38 @@ void BswFpgaIf_TxRx1ms(void)
+    BswFpgaIf_MeasDataCopy();
+ }
+ 
++/******************************************************************/
++/*!
++ * \\fn      void BswFpgaIf_SetTxFrm(void)
++ * \\brief   The function shall set Tx frame data for Fpga
++ * \\param   [in]  index to data which shall be provided
++ * \\param   [out] PtrData Pointer to the provided data
++ * \\return  status of provided data
++ * \\retval  OK    provided data is valid
++ * \\retval  NOK   provided data is not valid
++ */
++/******************************************************************/
++void BswFpgaIf_SetTxFrm(void)
++{
++   VSISRV_vidSetFrameTx();
++}
++
++/******************************************************************/
++/*!
++ * \\fn      BswFpgaIf_UpdRxFrm
++ * \\brief   This function shall read the Rx data from Fpga and update in RxBuffer
++ * \\param   [in]
++ * \\param   [out]
++ * \\return
++ * \\retval  OK
++ * \\retval  NOK
++ */
++/******************************************************************/
++void BswFpgaIf_UpdRxFrm(void)
++{
++   VSISRV_vidGetFrameRx();
++}
++
+ /******************************************************************/
+ /*!
+  * \\fn      BswFpgaIf_MeasDataCopy
+diff --git a/src/fw_cu/Components/Inv/ValMeasAndProc/LlswFpgaIf/src/LlswFpgaIf.c b/src/fw_cu/Components/Inv/ValMeasAndProc/LlswFpgaIf/src/LlswFpgaIf.c
+index edc48a82c..500246d2c 100644
+--- a/src/fw_cu/Components/Inv/ValMeasAndProc/LlswFpgaIf/src/LlswFpgaIf.c
++++ b/src/fw_cu/Components/Inv/ValMeasAndProc/LlswFpgaIf/src/LlswFpgaIf.c
+@@ -41,7 +41,6 @@
+ #include "DrvCtrlErrDeb.h"
+ #include "DrvCtrlSeqr.h"
+ #include "PwmSpMux_Wrpr.h"
+-#include "VsiSrv.h"
+ 
+ #ifdef SWIT_Active
+ \t#include "SWIT_BSW.h"
+@@ -392,7 +391,7 @@ void LlswFpgaIf_RxNotif(void)   /* PRQA S 1503 */ /* function used in LlswQSpi_c
+ 
+    /* TODO: Call the DrcoIf Receive notification function here */
+ 
+-   VSISRV_vidGetFrameRx();
++   BswFpgaIf_UpdRxFrm();
+ }
+ 
+ FUNC(void, FPGA_CODE) LlswFpgaIf_Main(void) /* PRQA S 1503 */ /* Function is used */
+'

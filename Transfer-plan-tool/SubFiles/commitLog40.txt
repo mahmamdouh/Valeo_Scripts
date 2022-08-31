@@ -1,0 +1,69 @@
+b'commit 146445c3251b989e76cc0d2bb55c33ae55435d73
+Author: Mohammed ANDALOUSSI (JV) <mohammed.andaloussi.jv@valeo.com>
+Date:   Wed Feb 23 22:17:23 2022 +0100
+
+    $100kW-52558$ - P32.2 M_KEY_ON : No pull up configuration needed
+    
+    Change-Id: Ie09eee50cd82625ae8372ba3dc26ac9b6131bce3
+
+diff --git a/src/fw_cu/Components/Safety/Sfty_Cmn/SftySysInit/include/SftySysInit.h b/src/fw_cu/Components/Safety/Sfty_Cmn/SftySysInit/include/SftySysInit.h
+index 2e90cc875..a004977fc 100644
+--- a/src/fw_cu/Components/Safety/Sfty_Cmn/SftySysInit/include/SftySysInit.h
++++ b/src/fw_cu/Components/Safety/Sfty_Cmn/SftySysInit/include/SftySysInit.h
+@@ -36,23 +36,23 @@
+ #define SFTYSYSINIT_INV_HW_B2
+ 
+ /* IOCR values to select pin functionality, valid for all PWM-pins */
+-#define SFTY_GPO_IOCR_VAL               0x10U
+-#define SFTY_GPI_IOCR_VAL               0x02U
+-#define SFTY_GPI_PLLDWN_IOCR_VAL        0x01U
+-#define SFTY_GTM_OUT_IOCR_VAL           0x11U
+-
++#define SFTY_GPO_IOCR_VAL               (0x10U)
++#define SFTY_GPI_IOCR_VAL               (0x02U)
++#define SFTY_GPI_PLLDWN_IOCR_VAL        (0x01U)
++#define SFTY_GTM_OUT_IOCR_VAL           (0x11U)
++#define SFTY_GPI_IOCR_NO_PULL           (0x00U)
+ /* IOCR values for Excitation PWM */
+-#define SFTY_DSADC_OUT_IOCR_VAL         0x16U
++#define SFTY_DSADC_OUT_IOCR_VAL         (0x16U)
+ 
+-#define SFTY_QSPI_MTSR_VAL              0x14U
+-#define SFTY_QSPI_MRST_VAL              0x00U
+-#define SFTY_QSPI_CLK_VAL               0x14U
+-#define SFTY_QSPI_CS_VAL                0x13U
++#define SFTY_QSPI_MTSR_VAL              (0x14U)
++#define SFTY_QSPI_MRST_VAL              (0x00U)
++#define SFTY_QSPI_CLK_VAL               (0x14U)
++#define SFTY_QSPI_CS_VAL                (0x13U)
+ 
+-#define SFTY_ASCLINSPI_MTSR_VAL         0x12U
+-#define SFTY_ASCLINSPI_MRST_VAL         0x00U
+-#define SFTY_ASCLINSPI_CLK_VAL          0x12U
+-#define SFTY_ASCLINSPI_CS_VAL           0x12U
++#define SFTY_ASCLINSPI_MTSR_VAL         (0x12U)
++#define SFTY_ASCLINSPI_MRST_VAL         (0x00U)
++#define SFTY_ASCLINSPI_CLK_VAL          (0x12U)
++#define SFTY_ASCLINSPI_CS_VAL           (0x12U)
+ 
+ 
+ /* *************************** Read back pins for IGBTs ***************************** */
+diff --git a/src/fw_cu/Components/Safety/Sfty_Cmn/SftySysInit/src/SftySysInit.c b/src/fw_cu/Components/Safety/Sfty_Cmn/SftySysInit/src/SftySysInit.c
+index 5344680a1..65b1ca61c 100644
+--- a/src/fw_cu/Components/Safety/Sfty_Cmn/SftySysInit/src/SftySysInit.c
++++ b/src/fw_cu/Components/Safety/Sfty_Cmn/SftySysInit/src/SftySysInit.c
+@@ -571,10 +571,9 @@ LOCAL_INLINE void SftySysInit_PortInit(void)
+    SFTYSYSINIT_MODULE_PX_IOCR4.U =   MODULE_P32.IOCR4.U;
+    
+    /*---------------------------------KL15 ----------------------------------------*/
+-   SFTYSYSINIT_MODULE_PX_PDR0.B.PD2 = SFTY_IO_PORT_PDR_CMOS_SPD_GRD_1;
+-   SFTYSYSINIT_MODULE_PX_PDR0.B.PL2 = SFTY_IO_PORT_PDR_CMOS_AUTOMOTIVE_LVL;
+-   SFTYSYSINIT_MODULE_PX_IOCR0.B.PC2 = SFTY_GPI_IOCR_VAL;
+-
++   SFTYSYSINIT_MODULE_PX_PDR0.B.PD2  = SFTY_IO_PORT_PDR_CMOS_SPD_GRD_1;
++   SFTYSYSINIT_MODULE_PX_PDR0.B.PL2  = SFTY_IO_PORT_PDR_CMOS_AUTOMOTIVE_LVL;
++   SFTYSYSINIT_MODULE_PX_IOCR0.B.PC2 = SFTY_GPI_IOCR_NO_PULL;
+    /*---------------------------------SPI SYNCHRO ----------------------------------------*/
+    SFTYSYSINIT_MODULE_PX_PDR0.B.PD4 = SFTY_IO_PORT_PDR_CMOS_SPD_GRD_1;
+    SFTYSYSINIT_MODULE_PX_PDR0.B.PL4 = SFTY_IO_PORT_PDR_CMOS_AUTOMOTIVE_LVL;
+'

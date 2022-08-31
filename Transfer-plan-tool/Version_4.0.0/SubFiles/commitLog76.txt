@@ -1,0 +1,787 @@
+b'commit f7ea9f2a365886613646739a13b4788d352589e2
+Author: Vipin-Kumar VISWANATHA-PILLAI (JV) <vipin-kumar.viswanatha-pillai.jv@valeo.com>
+Date:   Thu Jan 13 15:17:36 2022 +0100
+
+    $100kW-50648$ - FCT_CtrlParkPos - SW Unit SftyParkLockActr changes after review
+    
+    Change-Id: Ia2be7af6388f8d358730aa61736e2ca645525b93
+
+diff --git a/src/fw_cu/Components/Cmn/Shared/SysDef/include/AddEnumTypes.h b/src/fw_cu/Components/Cmn/Shared/SysDef/include/AddEnumTypes.h
+index 9a1d4838a..3c82c10e4 100644
+--- a/src/fw_cu/Components/Cmn/Shared/SysDef/include/AddEnumTypes.h
++++ b/src/fw_cu/Components/Cmn/Shared/SysDef/include/AddEnumTypes.h
+@@ -54,7 +54,7 @@ typedef enum  {SFTYPARKLOCKMGR_CALIBTST_INIT = 0, SFTYPARKLOCKMGR_CALIBTST_ENGAG
+ typedef enum  {SFTYPARKLOCKMGR_PRIMACTRSTRTUPTST_INIT = 0, SFTYPARKLOCKMGR_PRIMACTRSTRTUPTST_HB1_ENTST = 1, SFTYPARKLOCKMGR_PRIMACTRSTRTUPTST_HB1_DITST = 2, SFTYPARKLOCKMGR_PRIMACTRSTRTUPTST_HB2_ENTST = 3, SFTYPARKLOCKMGR_PRIMACTRSTRTUPTST_HB2_DITST = 4, SFTYPARKLOCKMGR_PRIMACTRSTRTUPTST_PASS = 5, SFTYPARKLOCKMGR_PRIMACTRSTRTUPTST_FAIL = 6, SFTYPARKLOCKMGR_PRIMACTRSTRTUPTST_ANGLE_TST = 7, SFTYPARKLOCKMGR_PRIMACTRSTRTUPTST_OVERALL_TST_FAIL = 8 } SftyParkLockMgr_PrimActrStrtUpTestStType;
+ typedef enum  {SFTYPARKLOCK_POSN_SIGNAL_NOT_AVAILABLE = 0, SFTYPARKLOCK_POSN_ENGAGED = 1, SFTYPARKLOCK_POSN_UNDETERMINED = 2, SFTYPARKLOCK_POSN_DISENGAGED = 3} SftyParkLockEvln_AbsPosnType;
+ typedef enum  {SFTYPARKLOCK_DIR_STOP = 0, SFTYPARKLOCK_DIR_DISENGAGE = 1, SFTYPARKLOCK_DIR_ENGAGE = 2} SftyParkLockActr_DirType;
+-typedef enum  {SFTYPARKLOCKACTR_PRIMACTR_DISABLE = 0, SFTYPARKLOCKACTR_PRIMACTR_SLOWENG = 1, SFTYPARKLOCKACTR_PRIMACTR_FASTENG = 2, SFTYPARKLOCKACTR_PRIMACTR_SLOWDISENG = 3, SFTYPARKLOCKACTR_PRIMACTR_FASTDISENG = 4, SFTYPARKLOCKACTR_PRIMACTR_CLSD_LOOP_CTRL = 5} SftyParkLockActr_PrimActrCtrlStType;
++typedef enum  {SFTYPARKLOCKACTR_PRIMACTR_DISABLE = 0, SFTYPARKLOCKACTR_PRIMACTR_CLSD_LOOP_CTRL = 1} SftyParkLockActr_PrimActrCtrlStType;
+ typedef enum  {SFTYPARKLOCK_FAULT = 0, SFTYPARKLOCK_NO_FAULT = 1} SftyParkLockMgr_FaultType;
+ 
+ #endif
+diff --git a/src/fw_cu/Components/Safety/Sfty_Cmn/SftyParkLockActr/include/SftyParkLockActr.h b/src/fw_cu/Components/Safety/Sfty_Cmn/SftyParkLockActr/include/SftyParkLockActr.h
+index b6dd92b96..ca012b4be 100644
+--- a/src/fw_cu/Components/Safety/Sfty_Cmn/SftyParkLockActr/include/SftyParkLockActr.h
++++ b/src/fw_cu/Components/Safety/Sfty_Cmn/SftyParkLockActr/include/SftyParkLockActr.h
+@@ -1,13 +1,11 @@
+-
+ /* ********************************************************************** */
+-/* Sourcefile: SftyParkLockActr.h                                         */
++/* Sourcefile:    SftyParkLockActr.h                                      */
+ /*                                                                        */
+-/* Project: 100kw                                                        */
+-/* Aurix                                                                  */
++/* Project:       100kw                                                   */
++/* TriCore                                                                */
+ /*                                                                        */
+ /* Department: Valeo Siemens eAutomotive                                  */
+-/*                                                                        */
+-/* First author: Vipin Kumar Viswanatha Pillai                            */
++/* I DT EC R&D                                                            */
+ /* ********************************************************************** */
+ /* Copyright (C) Valeo Siemens eAutomotive Germany GmbH 2021              */
+ /* All Rights Reserved. Confidential                                      */
+@@ -88,7 +86,6 @@ typedef struct SftyParkLockActrPiCtrlrAuxStType_
+ #include "MemMap.h"
+ 
+ extern FUNC(void, SFTYPARKLOCKACTR_CODE) SftyParkLockActr_Init(void);
+-extern FUNC(void, SFTYPARKLOCKACTR_CODE) SftyParkLockActr_PosnSnsrEn(void);
+ extern FUNC(void, SFTYPARKLOCKACTR_CODE) SftyParkLockActr_PosSnsrDi(void);
+ 
+ extern FUNC(void, SFTYPARKLOCKACTR_CODE) SftyParkLockActr_Hb1EnTst(void);
+@@ -107,7 +104,7 @@ extern FUNC(void, SFTYPARKLOCKACTR_CODE) SftyParkLockActr_PrimActrStop(void);
+ #define SFTYPARKLOCKACTR_AREA_2_START_SEC_CODE_FAST
+ #include "MemMap.h"
+ 
+-extern FUNC(void, SFTY_MOD_MGR_CODE) SftyParkLockActr_MainFast(void);
++extern FUNC(void, SFTYPARKLOCKACTR_CODE) SftyParkLockActr_MainFast(void);
+ 
+ #define SFTYPARKLOCKACTR_AREA_2_STOP_SEC_CODE_FAST
+ #include "MemMap.h"
+diff --git a/src/fw_cu/Components/Safety/Sfty_Cmn/SftyParkLockActr/include/SftyParkLockActr_cfg.h b/src/fw_cu/Components/Safety/Sfty_Cmn/SftyParkLockActr/include/SftyParkLockActr_cfg.h
+index 8de5af6dd..a9e98ae91 100644
+--- a/src/fw_cu/Components/Safety/Sfty_Cmn/SftyParkLockActr/include/SftyParkLockActr_cfg.h
++++ b/src/fw_cu/Components/Safety/Sfty_Cmn/SftyParkLockActr/include/SftyParkLockActr_cfg.h
+@@ -1,13 +1,11 @@
+ /* ********************************************************************** */
+-/* Sourcefile: SftyParkLockActr_cfg.h                                     */
++/* Sourcefile:    SftyParkLockActr_cfg.h                                  */
+ /*                                                                        */
+-/* Project: 100kw                                                         */
++/* Project:       100kw                                                   */
+ /* TriCore                                                                */
+ /*                                                                        */
+ /* Department: Valeo Siemens eAutomotive                                  */
+-/*                                                                        */
+-/* First author: Vipin Kumar Viswanatha Pillai                            */
+-/* Other authors: -                                                       */
++/* I DT EC R&D                                                            */
+ /* ********************************************************************** */
+ /* Copyright (C) Valeo Siemens eAutomotive Germany GmbH 2021              */
+ /* All Rights Reserved. Confidential                                      */
+diff --git a/src/fw_cu/Components/Safety/Sfty_Cmn/SftyParkLockActr/include/SftyParkLockActr_data.h b/src/fw_cu/Components/Safety/Sfty_Cmn/SftyParkLockActr/include/SftyParkLockActr_data.h
+index 3f49b1050..f4b7dd37d 100644
+--- a/src/fw_cu/Components/Safety/Sfty_Cmn/SftyParkLockActr/include/SftyParkLockActr_data.h
++++ b/src/fw_cu/Components/Safety/Sfty_Cmn/SftyParkLockActr/include/SftyParkLockActr_data.h
+@@ -1,7 +1,7 @@
+ /* ***************************************************************** */
+-/* Sourcefile: SftyParkLockActr_data.h                                  */
+-/* ADD Container: SftyParkLockActr                                      */
+-/* ADD Container Version: 1.7.0                                      */
++/* Sourcefile: SftyParkLockActr_data.h                               */
++/* ADD Container: SftyParkLockActr                                   */
++/* ADD Container Version: 1.0.0                                      */
+ /* ***************************************************************** */
+ /* Copyright (C) Valeo-Siemens eAutomotive GmbH 2021                 */
+ /* All Rights Reserved. Confidential                                 */
+@@ -33,63 +33,6 @@
+ #define\t_map
+ #endif
+ 
+-/***************** External labels ****************************/
+-
+-/* Begin: SFTYPARKLOCKEVLN_START_SEC_VAR_AREA_2_FAST_INIT_32 (online) */
+-#define SFTYPARKLOCKEVLN_START_SEC_VAR_AREA_2_FAST_INIT_32
+-#include "MemMap.h"
+-
+-extern VAR(SftyParkLockEvln_AbsPosnType, SFTYPARKLOCKEVLN_VAR) SftyParkLockEvlnActrAbsPosn;
+-extern VAR(float32, SFTYPARKLOCKEVLN_VAR) SftyParkLockEvlnActrAg;
+-extern VAR(float32, SFTYPARKLOCKEVLN_VAR) SftyParkLockEvlnActrAgSpd;
+-
+-#define SFTYPARKLOCKEVLN_STOP_SEC_VAR_AREA_2_FAST_INIT_32
+-#include "MemMap.h"
+-/* End: SFTYPARKLOCKEVLN_STOP_SEC_VAR_AREA_2_FAST_INIT_32 (online) */
+-
+-
+-/* Begin: SFTYPARKLOCKEVLN_AREA_0_START_SEC_VAR_FAST_INIT_32 (online) */
+-#define SFTYPARKLOCKEVLN_AREA_0_START_SEC_VAR_FAST_INIT_32
+-#include "MemMap.h"
+-
+-extern VAR(float32, SFTYPARKLOCKEVLN_VAR) SftyParkLockEvlnPrimActrIMeas;
+-#define SFTYPARKLOCKEVLN_AREA_0_STOP_SEC_VAR_FAST_INIT_32
+-#include "MemMap.h"
+-/* End: SFTYPARKLOCKEVLN_AREA_0_STOP_SEC_VAR_FAST_INIT_32 (online) */
+-
+-/* Begin: SFTYLVSPLYEVLN_START_SEC_VAR_AREA_2_SLOW_INIT_32 */
+-#define SFTYLVSPLYEVLN_START_SEC_VAR_AREA_2_SLOW_INIT_32
+-#include "MemMap.h"
+-
+-extern VAR (float32, SFTYPARKLOCKEVLN_VAR) SftyLvSplyEvlnKl30UMeas;
+-#define SFTYLVSPLYEVLN_STOP_SEC_VAR_AREA_2_SLOW_INIT_32
+-#include "MemMap.h"
+-/* End: SFTYLVSPLYEVLN_STOP_SEC_VAR_AREA_2_SLOW_INIT_32 */
+-
+-   /* Begin: SFTYREPLCMT_START_SEC_CALIB_8 (calib) */
+-#define SFTYREPLCMT_START_SEC_CALIB_8
+-#include "MemMap.h"
+-
+-extern CONST(uint8, SFTYREPLCMT_CALIB) SftyReplcmtParkLockActrPrimActrSpdSpEna;
+-extern CONST(uint8, SFTYREPLCMT_CALIB) SftyReplcmtParkLockActrPrimActrTqSpEna;
+-extern CONST(uint8, SFTYREPLCMT_CALIB) SftyReplcmtParkLockActrPrimActrUSpEna;
+-
+-#define SFTYREPLCMT_STOP_SEC_CALIB_8
+-#include "MemMap.h"
+-/* End: SFTYREPLCMT_STOP_SEC_CALIB_8 (calib) */
+-
+-   /* Begin: SFTYREPLCMT_START_SEC_CALIB_32 (calib) */
+-#define SFTYREPLCMT_START_SEC_CALIB_32
+-#include "MemMap.h"
+-
+-extern CONST(float32, SFTYREPLCMT_CALIB) SftyReplcmtParkLockActrPrimActrSpdSpVal;
+-extern CONST(float32, SFTYREPLCMT_CALIB) SftyReplcmtParkLockActrPrimActrTqSpVal;
+-extern CONST(float32, SFTYREPLCMT_CALIB) SftyReplcmtParkLockActrPrimActrUSpVal;
+-
+-#define SFTYREPLCMT_STOP_SEC_CALIB_32
+-#include "MemMap.h"
+-/* End: SFTYREPLCMT_STOP_SEC_CALIB_32 (calib) */
+-
+ 
+ /***************** SftyParkLockActr labels ****************************/
+ 
+@@ -159,8 +102,8 @@ extern CONST(uint32, SFTYPARKLOCKACTR_CALIB) SftyParkLockActrEngStopDetnTmrThd;
+ extern CONST(uint32, SFTYPARKLOCKACTR_CALIB) SftyParkLockActrDisengStopDetnTmrThd;
+ extern CONST(float32, SFTYPARKLOCKACTR_CALIB) SftyParkLockActrPrimActrMotDisTqLim;
+ extern CONST(float32, SFTYPARKLOCKACTR_CALIB) SftyParkLockActrPrimActrMotEngTqLim;
+-extern CONST(float32, SFTYPARKLOCKACTR_CALIB) SftyParkLockActrPrimActrMotGain;
+-extern CONST(float32, SFTYPARKLOCKACTR_CALIB) SftyParkLockActrPrimActrMotKprim;
++extern CONST(float32, SFTYPARKLOCKACTR_CALIB) SftyParkLockActrPrimActrMotINoLoad;
++extern CONST(float32, SFTYPARKLOCKACTR_CALIB) SftyParkLockActrPrimActrMotTqCon;
+ extern CONST(float32, SFTYPARKLOCKACTR_CALIB) SftyParkLockActrPrimDisSpdSatnTbl[4];
+ extern CONST(float32, SFTYPARKLOCKACTR_CALIB) SftyParkLockActrPrimDisTqSatnTbl[4];
+ extern CONST(float32, SFTYPARKLOCKACTR_CALIB) SftyParkLockActrPrimEngSpdSatnTbl[4];
+diff --git a/src/fw_cu/Components/Safety/Sfty_Cmn/SftyParkLockActr/src/SftyParkLockActr.c b/src/fw_cu/Components/Safety/Sfty_Cmn/SftyParkLockActr/src/SftyParkLockActr.c
+index 49e0f8633..fcd6f5e02 100644
+--- a/src/fw_cu/Components/Safety/Sfty_Cmn/SftyParkLockActr/src/SftyParkLockActr.c
++++ b/src/fw_cu/Components/Safety/Sfty_Cmn/SftyParkLockActr/src/SftyParkLockActr.c
+@@ -1,16 +1,19 @@
+ /* ********************************************************************** */
+-/* Sourcefile:      SftyParkLockActr.c                                    */
++/* Sourcefile:    SftyParkLockActr.c                                      */
+ /*                                                                        */
+-/* Department:      VSeA R&D SWENG OPS 1 OP                               */
++/* Project:       100kw                                                   */
++/* TriCore                                                                */
+ /*                                                                        */
++/* Department: Valeo Siemens eAutomotive                                  */
++/* I DT EC R&D                                                            */
+ /* ********************************************************************** */
+ /* Copyright (C) Valeo Siemens eAutomotive Germany GmbH 2021              */
+-/* All Rights Reserved.  Confidential                                     */
++/* All Rights Reserved. Confidential                                      */
+ /* ********************************************************************** */
+ 
+ /*!
+ * \\defgroup SftyParkLockActr SftyParkLockActr - Control ParkLock Actuators
+-*           This module shall control primary actuator and secondary actuator of park lock.
++*           This module shall control primary actuator of park lock.
+ */
+ 
+ /*!
+@@ -38,8 +41,9 @@
+ #include "SftySysInit.h"
+ #include "SftyErrDeb.h"
+ #include "SftyUtils.h"
+-
+-//#include "C2cComSftyData.h"
++#include "SftyParkLockEvln_data.h"
++#include "SftyLvSplyEvln_data.h"
++#include "SftyReplcmt_data.h"
+ 
+ /*================== [defines] ==============================================*/
+ #define SFTYPARKLOCKACTR_DC_100PERC (1.0f)
+@@ -48,7 +52,7 @@
+ #define SPEED_SAT_TABLE_LENGTH      (4U)
+ #define VOLTAGE_SCL                 (50U)
+ #define TORQUE_SAT_TABLE_LENGTH     (4U)
+-#define MAI_FAST_FCT_CYC            (200U)
++#define MAIN_FAST_FCT_CYC           (200U)
+ 
+ /*================== [type definitions] =====================================*/
+ /* Configuration parameters type for look-up tables*/
+@@ -152,7 +156,7 @@ STATIC VAR(float32, SFTYPARKLOCKACTR_VAR) SftyParkLockActrPrimActrAgSp = 0.0f;
+ STATIC VAR(float32, SFTYPARKLOCKACTR_VAR) SftyParkLockActrPosCntrfeedfwdSpd = 0.0f;
+ 
+ 
+-/* PRQA S 1053 ++ */ /* Designators have been used in this initialization list for better readability */
++/* PRQA S 1053 #Designators have been used in this initialization list for better readability */
+ STATIC VAR(SftyParkLockActrPiCtrlrCfgType, SFTYPARKLOCKACTR_VAR) SftyParkLockActrPosCntrPiCtrlrCfg = {
+    .CoeffKp = 0.0f,
+    .CoeffKi = 0.0f,
+@@ -161,7 +165,7 @@ STATIC VAR(SftyParkLockActrPiCtrlrCfgType, SFTYPARKLOCKACTR_VAR) SftyParkLockAct
+    .OutpMinLim = 0.0f
+ };
+ 
+-/* PRQA S 1053 ++ */ /* Designators have been used in this initialization list for better readability */
++/* PRQA S 1053 #Designators have been used in this initialization list for better readability */
+ STATIC VAR(SftyParkLockActrPiCtrlrCfgType, SFTYPARKLOCKACTR_VAR) SftyParkLockActrSpeedCntrPiCtrlrCfg = {
+    .CoeffKp = 0.0f,
+    .CoeffKi = 0.0f,
+@@ -178,7 +182,7 @@ STATIC VAR(PtrToConstFloat_, SFTYPARKLOCKACTR_VAR)  SftyParkLockActrSpdTblMap =
+ 
+ STATIC VAR(PtrToConstInt_, SFTYPARKLOCKACTR_VAR)    SftyParkLockActrSpdTblBkp = SftyParkLockActrPrimEngSpdSatnBkp;
+ 
+-/* PRQA S 1053 ++ */ /* Designators have been used in this initialization list for better readability */
++/* PRQA S 1053 #Designators have been used in this initialization list for better readability */
+ /*
+ @@ INSTANCE = SftyParkLockActrPrimActrTqCtrlrSt
+ @@ STRUCTURE = SftyParkLockActrPiCtrlrAuxStType
+@@ -202,7 +206,7 @@ STATIC VAR(SftyParkLockActrPiCtrlrAuxStType, SFTYPARKLOCKACTR_VAR) SftyParkLockA
+ */
+ STATIC VAR(float32, SFTYPARKLOCKACTR_VAR) SftyParkLockActrPrimActrTqEstimdMotMdl = 0.0f;
+ 
+-/* PRQA S 1053 ++ */ /* Designators have been used in this initialization list for better readability */
++/* PRQA S 1053 #Designators have been used in this initialization list for better readability */
+ STATIC VAR(SftyParkLockActrPiCtrlrCfgType, SFTYPARKLOCKACTR_VAR) SftyParkLockActrTorqCntrPiCtrlrCfg = {
+    .CoeffKp = 0.0f,
+    .CoeffKi = 0.0f,
+@@ -212,24 +216,24 @@ STATIC VAR(SftyParkLockActrPiCtrlrCfgType, SFTYPARKLOCKACTR_VAR) SftyParkLockAct
+ };
+ 
+ /*
+-@@ SYMBOL = disengStopDetnCycCntr
++@@ SYMBOL = SftyParkLockActrDisengStopDetnCycCntr
+ @@ A2L_TYPE = MEASURE
+ @@ DATA_TYPE = ULONG
+ @@ DESCRIPTION = "Debounce Counter for stop position confirmtion in disengage direction (1 cycle is 200us)"
+ @@ GROUP = SftyParkLockActr
+ @@ END
+ */
+-STATIC VAR(uint32, SFTYPARKLOCKACTR_VAR) disengStopDetnCycCntr = 0u;
++STATIC VAR(uint32, SFTYPARKLOCKACTR_VAR) SftyParkLockActrDisengStopDetnCycCntr = 0u;
+ 
+ /*
+-@@ SYMBOL = engStopDetnCycCntr
++@@ SYMBOL = SftyParkLockActrEngStopDetnCycCntr
+ @@ A2L_TYPE = MEASURE
+ @@ DATA_TYPE = ULONG
+ @@ DESCRIPTION = "Debounce Counter for stop position confirmtion in engaged direction (1 cycle is 200us)"
+ @@ GROUP = SftyParkLockActr
+ @@ END
+ */
+-STATIC VAR(uint32, SFTYPARKLOCKACTR_VAR) engStopDetnCycCntr = 0u;
++STATIC VAR(uint32, SFTYPARKLOCKACTR_VAR) SftyParkLockActrEngStopDetnCycCntr = 0u;
+ 
+ STATIC VAR(uint32, SFTYPARKLOCKACTR_VAR) SftyParkLockActrPrimActrMaxPwmTmrVar = 0u;
+ 
+@@ -264,7 +268,7 @@ STATIC VAR(boolean, SFTYPARKLOCKACTR_VAR) SftyParkLockActrPrimFlgPwmMax = 0U;
+ 
+ /*****************************************************************************/
+ /*!
+- * \\fn         : void SftyParkLockActr_PrimActrChkTomCfg(void)
++ * \\fn         : boolean SftyParkLockActr_PrimActrChkTomCfg(void)
+  * \\brief      : This API-Function checks the TOM configuration of HB1_CTRL
+  * \\param[in]  : None
+  * \\param[out] : None
+@@ -315,7 +319,7 @@ LOCAL_INLINE FUNC(void, SFTYPARKLOCKACTR_CODE) SftyParkLockActr_PrimActrChkPwmGe
+        /* Set GTM configuration validity flag*/
+        SftyParkLockActrChkPrimActrPwmCfgVld = TRUE;
+        /* Set monitoring status to No error*/
+-       SftyParkLockActrPrimActrCfgFltErrMonrSt = ERR_DEB_MONR_STS_INACTIVE;
++       SftyParkLockActrPrimActrCfgFltErrMonrSt = ERR_DEB_MONR_STS_PASSED;
+    }
+    else
+    {
+@@ -559,19 +563,18 @@ LOCAL_INLINE float32 SftyParkLockActr_1DLookUpTable(uint16 uTblSize, const float
+    /* estimate pointer to element of current index */
+    if (IpolReq != FALSE)
+    {
+-      /* - do interpolation if requested */
+-
+-      /* Estimate pointer to element of preceded index */
+-      /* In case of interpolation request (IpolReq == TRUE), index Ix is always equal/bigger than 1" */
+-      /* Apparent: Implicit conversion to a signed integer type of insufficient size. */
+-      /* Apparent: Wraparound in unsigned arithmetic operation. */
+-      // SftyParkLockActr_Intrpn (CurAct, CurPrv, XAxAct, XAxPrv, xAx)
+-      retVal = SftyParkLockActr_Intrpn (pCurve[Ix], pCurve[Ix-1u], pAx[Ix], pAx[Ix-1u], xAx);  /* PRQA S 2852,2912 */
++      /* do interpolation if requested
++         Estimate pointer to element of preceded index
++         In case of interpolation request (IpolReq == TRUE), index Ix is always equal/bigger than 1"
++         Apparent: Implicit conversion to a signed integer type of insufficient size.
++         Apparent: Wraparound in unsigned arithmetic operation.
++         SftyParkLockActr_Intrpn (CurAct, CurPrv, XAxAct, XAxPrv, xAx)  */
++      retVal = SftyParkLockActr_Intrpn (pCurve[Ix], pCurve[Ix-1u], pAx[Ix], pAx[Ix-1u], xAx);  /* PRQA S 2852,2912 #warnings have no functional impact */
+    }
+    else
+    {
+       /* - else return Curve value without interpolation */
+-      retVal = pCurve[Ix]; //CurAct;
++      retVal = pCurve[Ix]; /* CurAct */
+    }
+ 
+    return retVal;
+@@ -583,9 +586,14 @@ LOCAL_INLINE float32 SftyParkLockActr_1DLookUpTable(uint16 uTblSize, const float
+  * \\fn         : void SftyParkLockActr_PiCtrlrAux()
+  * \\brief      : Aux implementation of PI controller, using Tustin integrator and different inputs for I and P parts
+  * \\param[in]  : piCtrlrAuxIn - structure having PI controller inputs for I and P parts
++ *               piCtrlrAuxIn.sp - target value for PI controller
++ *               piCtrlrAuxIn.actValIntgl - actual value to control for integral part of PI controller
++ *               piCtrlrAuxIn.actValProp - actual value to control for proportional part of PI controller
++ *               piCtrlrAuxIn.offsProp - offset value for proportional part of PI controller
+  * \\param[in]  : cfg - configuration parameter for PI controller
+  * \\param[out] : state - structure of PI controller states
+  * \\return     : None
++ * \\Parent_DD  : SftyParkLockActr_MainSlow, SftyParkLockActr_MainFast
+  */
+ /******************************************************************/
+ LOCAL_INLINE void SftyParkLockActr_PiCtrlrAux(const PiCtrlrAuxInType* piCtrlrAuxIn, SftyParkLockActrPiCtrlrAuxStType* state,  const SftyParkLockActrPiCtrlrCfgType* cfg)
+@@ -600,13 +608,14 @@ LOCAL_INLINE void SftyParkLockActr_PiCtrlrAux(const PiCtrlrAuxInType* piCtrlrAux
+         state->value_prop_init = piCtrlrAuxIn->actValProp;
+         state->init_flag = TRUE;
+     }
+-
++    /* Calculation for  integral part of controller */
+     fIntegPart  = (piCtrlrAuxIn->sp - piCtrlrAuxIn->actValIntgl)*cfg->CoeffKi;
++    /* Calculation for  proportional part of controller */
+     fProporPart = ((piCtrlrAuxIn->actValProp - state->value_prop_init)* cfg->CoeffKp) + piCtrlrAuxIn->offsProp;
+ 
+-    /* y[n] = (x[n] + x[n-1])*ki/2 + (x[n] - x[n-1])*kp + y[n-1] -> Tustin integral formula*/
++    /* PI Controller output y[n] = (x[n] + x[n-1])*ki/2 + (x[n] - x[n-1])*kp + y[n-1] -> Tustin integral formula*/
+     fOutput = ((fIntegPart + state->integ_old) * 0.5f) + (fProporPart - state->propor_old) + state->output;
+-
++    /* Store the PI controller values for next iteration */
+     state->output = ((fOutput > cfg->OutpMaxLim) ? cfg->OutpMaxLim : ((fOutput < cfg->OutpMinLim) ? cfg->OutpMinLim : fOutput));
+     state->propor_old = fProporPart;
+     state->integ_old = fIntegPart;
+@@ -835,7 +844,8 @@ LOCAL_INLINE float32 SftyParkLockActr_PrimActrMotMdl(void)
+        /* Do nothing */
+    }
+    /* Return estimated motor torque */
+-   return  (SftyParkLockEvlnPrimActrIMeas * SftyParkLockActrPrimActrMotGain * SftyParkLockActrPrimActrMotKprim);
++   /* Estimated torque formula: Torque=(Motor Current - No Load current) * Torque constant */
++   return  ((SftyParkLockEvlnPrimActrIMeas - SftyParkLockActrPrimActrMotINoLoad) * SftyParkLockActrPrimActrMotTqCon);
+ }
+ 
+ 
+@@ -953,7 +963,7 @@ LOCAL_INLINE void SftySftyParkLockActr_PrimActrDisengmtConfig(void)
+  * \\param[in]  : None
+  * \\param[out] : None
+  * \\return     : None
+- * \\Parent_DD  : SftyParkLockActr_MainFast
++ * \\Parent_DD  : SftyParkLockActr_SetPrimActrTarAg
+  */
+ /* *************************************************************************** */
+ LOCAL_INLINE void SftySftyParkLockActr_PrimActrConfig(void)
+@@ -996,36 +1006,36 @@ LOCAL_INLINE void SftyParkLockActr_PrimActrEngmtFinshCdn(void)
+ /* The function deal with the conditions to finish engagement movement */
+ {
+ /* The piece of code below is intentionally commented out and kept for possible future use in PLK calibration test */
+-//   if (SftyParkLockMgrOperMod == SFTYPARKLOCKMGR_OPERMOD_CALIBRATETEST)
+-//   {
++/*   if (SftyParkLockMgrOperMod == SFTYPARKLOCKMGR_OPERMOD_CALIBRATETEST) */
++/*   { */
+        /* Do nothing in case of end stopper calibration test */
+        /* Actuation shall be stopped by SftyParkLockMgr calibration test upon 
+        - end stopper detection by increase in current OR
+        - timeout of calibration test 
+        */
+-//  }
+-//   else
++/*  } 
++   else */
+    {
+        /* If actual park lock position is greater then engagement target position */
+        if(SftyParkLockEvlnActrAbsPosn == SFTYPARKLOCK_POSN_ENGAGED)
+        {
+            /* Wait for a calibratable time delay to confirm the engagement */
+-           if (engStopDetnCycCntr >= (uint32)(SftyParkLockActrEngStopDetnTmrThd / MAI_FAST_FCT_CYC))
++           if (SftyParkLockActrEngStopDetnCycCntr >= (uint32)(SftyParkLockActrEngStopDetnTmrThd / MAIN_FAST_FCT_CYC))
+            {
+                /* Stop primary actuator */
+                SftyParkLockActr_PrimActrStop();
+-               engStopDetnCycCntr = 0u;   
++               SftyParkLockActrEngStopDetnCycCntr = 0u;
+            }  
+            else
+            {
+                 /* Increment the counter */
+-                engStopDetnCycCntr++;  
++                SftyParkLockActrEngStopDetnCycCntr++;
+            }
+        }
+        else
+        {
+             /* Reset the counter */
+-            engStopDetnCycCntr = 0u;               
++            SftyParkLockActrEngStopDetnCycCntr = 0u;
+        }   
+    } 
+    return;
+@@ -1046,36 +1056,36 @@ LOCAL_INLINE void SftyParkLockActr_PrimActrDisengmtFinshCdn(void)
+ /* The function deal with the conditions to finish disengagement movement */
+ {
+ /* The piece of code below is intentionally commented out and kept for possible future use in PLK calibration test */
+-//   if (SftyParkLockMgrOperMod == SFTYPARKLOCKMGR_OPERMOD_CALIBRATETEST)
+-//   {
++/*   if (SftyParkLockMgrOperMod == SFTYPARKLOCKMGR_OPERMOD_CALIBRATETEST)
++   { */
+        /* Do nothing in case of end stopper calibration test */
+        /* Actuation shall be stopped by SftyParkLockMgr calibration test upon 
+        - end stopper detection by increase in current OR
+        - timeout of calibration test 
+        */
+-//   }
+-//   else
++/*   }
++   else */
+    {
+        /* If actual park lock position is greater then engagement target position */
+        if(SftyParkLockEvlnActrAbsPosn == SFTYPARKLOCK_POSN_DISENGAGED)
+        {
+            /* Wait for a calibratable time delay to confirm the engagement */
+-           if (disengStopDetnCycCntr >= (uint32)(SftyParkLockActrDisengStopDetnTmrThd / MAI_FAST_FCT_CYC))
++           if (SftyParkLockActrDisengStopDetnCycCntr >= (uint32)(SftyParkLockActrDisengStopDetnTmrThd / MAIN_FAST_FCT_CYC))
+            {
+                /* Stop primary actuator */
+                SftyParkLockActr_PrimActrStop();
+-               disengStopDetnCycCntr = 0u;   
++               SftyParkLockActrDisengStopDetnCycCntr = 0u;
+            }  
+            else
+            {
+                 /* Increment the counter */
+-                disengStopDetnCycCntr++;  
++                SftyParkLockActrDisengStopDetnCycCntr++;
+            }
+        }
+        else
+        {
+             /* Reset the counter */
+-            disengStopDetnCycCntr = 0u;               
++            SftyParkLockActrDisengStopDetnCycCntr = 0u;
+        }   
+    } 
+    return;
+@@ -1114,6 +1124,7 @@ LOCAL_INLINE void SftyParkLockActr_PrimActrCntrEndPosn(void)
+            break;
+        }
+    }
++   return;
+ }
+ 
+ 
+@@ -1143,7 +1154,7 @@ LOCAL_INLINE void SftyParkLockActr_PrimActrFastCascadeCtrlr(void)
+    if((SftyParkLockActrPrimActrMaxPwmEna == TRUE) &&
+       (SftyParkLockActrPrimFlgPwmMax == FALSE))
+    {
+-\t   /* Check the limitation timer */
++       /* Check the limitation timer */
+       /* The sftyUtil function name to be corrected in future .. IsTrmElpd -> IsTmrElpd */
+        SftyParkLockActrPrimFlgPwmMax = SftyUtils_IsTrmElpd(&SftyParkLockActrPrimActrMaxPwmTmrVar);
+ 
+@@ -1173,11 +1184,11 @@ LOCAL_INLINE void SftyParkLockActr_PrimActrFastCascadeCtrlr(void)
+ /*****************************************************************************/
+ /*!
+  * \\fn         : void SftyParkLockActr_PrimActrSlowCascadeCtrlr(void)
+- * \\brief      : Fast cascade controller of park lock
++ * \\brief      : Slow cascade controller of park lock
+  * \\param[in]  : None
+  * \\param[out] : None
+  * \\return     : None
+- * \\Parent_DD  : SftyParkLockActr_PrimActrSlowDrvr
++ * \\Parent_DD  : SftyParkLockActr_MainSlow
+  */
+ /*****************************************************************************/
+ LOCAL_INLINE void SftyParkLockActr_PrimActrSlowCascadeCtrlr(void)
+@@ -1272,7 +1283,7 @@ LOCAL_INLINE void SftyParkLockActr_PrimActrFastDrvr(void)
+  * \\brief      : Primary actuator slow task driver
+  * \\param[in]  : None
+  * \\param[out] : None
+- * \\Parent_DD  : SftyParkLockActr_PrimActrSlowtDrvr
++ * \\Parent_DD  : SftyParkLockActr_MainSlow
+  * \\return     : None
+  */
+ /*****************************************************************************/
+@@ -1291,35 +1302,34 @@ LOCAL_INLINE void SftyParkLockActr_PrimActrSlowDrvr(void)
+   return;
+ }
+ 
+-
+-/*================== [definition of global functions] =======================*/
+-
+-/******************************** AREA2 ************************************ */
+-/******************************** SLOW   *********************************** */
+-
+-#define SFTYPARKLOCKACTR_AREA_2_START_SEC_CODE_SLOW
+-#include "MemMap.h"
+-
+ /*****************************************************************************/
+ /*!
+  * \\fn         : void SftyParkLockActr_PosnSnsrEn(void)
+  * \\brief      : This function enables the position sensor.
+  * \\param[in]  : None
+  * \\param[out] : None
+- * \\Parent_DD  : SftyParkLockActr_PosnSnsrEn
++ * \\Parent_DD  : SftyParkLockActr_Init
+  * \\return     : None
+  */
+ /*****************************************************************************/
+-FUNC(void, SFTYPARKLOCKACTR_CODE) SftyParkLockActr_PosnSnsrEn(void)   /* PRQA S 1503 #Called from sftyparklockmgr. Suppression can be removed after its integration */
++LOCAL_INLINE void SftyParkLockActr_PosnSnsrEn(void)
+ {
+-   /* Set the sensor enable control pin to logical LOW */
+-   SFTY_N_P5V_PLC_SENS_EN_OUT_P = STD_LOW;
++   /* Set the control pin to logical HIGH to enable power supply of the park lock position sensor */
++   SFTY_N_P5V_PLC_SENS_EN_OUT_P = STD_HIGH;
+    /* Set the status of position sensor */
+    SftyParkLockActrPosSnsrSts = TRUE;
+ 
+    return;
+ }
+ 
++/*================== [definition of global functions] =======================*/
++
++/******************************** AREA2 ************************************ */
++/******************************** SLOW   *********************************** */
++
++#define SFTYPARKLOCKACTR_AREA_2_START_SEC_CODE_SLOW
++#include "MemMap.h"
++
+ 
+ /*****************************************************************************/
+ /*!
+@@ -1331,10 +1341,10 @@ FUNC(void, SFTYPARKLOCKACTR_CODE) SftyParkLockActr_PosnSnsrEn(void)   /* PRQA S
+  * \\return     : void
+  */
+ /*****************************************************************************/
+-FUNC(void, SFTYPARKLOCKACTR_CODE) SftyParkLockActr_PosSnsrDi(void) /* PRQA S 1503 #Called from sftyparklockmgr. Suppression can be removed after its integration */
++FUNC(void, SFTYPARKLOCKACTR_CODE) SftyParkLockActr_PosSnsrDi(void)
+ {
+-   /* Set the sensor enable control pin to logical HIGH */
+-   SFTY_N_P5V_PLC_SENS_EN_OUT_P = STD_HIGH;
++   /* Set the control pin to logical LOW to disable the power supply of the park lock position sensor */
++   SFTY_N_P5V_PLC_SENS_EN_OUT_P = STD_LOW;
+    /* Reset the status of position sensor */
+    SftyParkLockActrPosSnsrSts = FALSE;
+ 
+@@ -1352,7 +1362,7 @@ FUNC(void, SFTYPARKLOCKACTR_CODE) SftyParkLockActr_PosSnsrDi(void) /* PRQA S 150
+  * \\return     : void
+  */
+ /*****************************************************************************/
+-FUNC(void, SFTYPARKLOCKACTR_CODE) SftyParkLockActr_Hb1EnTst(void)   /* PRQA S 1503 #Called from sftyparklockmgr. Suppression can be removed after its integration */
++FUNC(void, SFTYPARKLOCKACTR_CODE) SftyParkLockActr_Hb1EnTst(void)
+ {
+    /* Set duty cycle of HB1 to 100 percent (update SR1 with CM1 before writing to CM1) */
+    SFTYPARKLOCKACTR_PRIMACTR_GTOM_SR1 = SFTYPARKLOCKACTR_PRIMACTR_PERIOD_COUNT_VAL;
+@@ -1374,7 +1384,7 @@ FUNC(void, SFTYPARKLOCKACTR_CODE) SftyParkLockActr_Hb1EnTst(void)   /* PRQA S 15
+  * \\return     : void
+  */
+ /*****************************************************************************/
+-FUNC(void, SFTYPARKLOCKACTR_CODE) SftyParkLockActr_Hb1DiTst(void)   /* PRQA S 1503 #Called from sftyparklockmgr. Suppression can be removed after its integration */
++FUNC(void, SFTYPARKLOCKACTR_CODE) SftyParkLockActr_Hb1DiTst(void)
+ {
+    /* Set duty cycle of HB1 to 100 percent (update SR1 with CM1 before writing to CM1) */
+    SFTYPARKLOCKACTR_PRIMACTR_GTOM_SR1 = SFTYPARKLOCKACTR_PRIMACTR_PERIOD_COUNT_VAL;
+@@ -1396,7 +1406,7 @@ FUNC(void, SFTYPARKLOCKACTR_CODE) SftyParkLockActr_Hb1DiTst(void)   /* PRQA S 15
+  * \\return     : void
+  */
+ /*****************************************************************************/
+-FUNC(void, SFTYPARKLOCKACTR_CODE) SftyParkLockActr_Hb2EnTst(void)   /* PRQA S 1503 #Called from sftyparklockmgr. Suppression can be removed after its integration */
++FUNC(void, SFTYPARKLOCKACTR_CODE) SftyParkLockActr_Hb2EnTst(void)
+ {
+    SFTY_HB2_CTRL_OUT_P = STD_HIGH;
+    SFTY_HB2_EN_OUT_P = STD_HIGH;
+@@ -1415,7 +1425,7 @@ FUNC(void, SFTYPARKLOCKACTR_CODE) SftyParkLockActr_Hb2EnTst(void)   /* PRQA S 15
+  * \\return     : void
+  */
+ /*****************************************************************************/
+-FUNC(void, SFTYPARKLOCKACTR_CODE) SftyParkLockActr_Hb2DiTst(void)   /* PRQA S 1503 #Called from sftyparklockmgr. Suppression can be removed after its integration */
++FUNC(void, SFTYPARKLOCKACTR_CODE) SftyParkLockActr_Hb2DiTst(void)
+ {
+    SFTY_HB2_CTRL_OUT_P = STD_HIGH;
+    SFTY_HB2_EN_OUT_P = STD_LOW;
+@@ -1434,13 +1444,13 @@ FUNC(void, SFTYPARKLOCKACTR_CODE) SftyParkLockActr_Hb2DiTst(void)   /* PRQA S 15
+  * \\return     : void
+  */
+ /*****************************************************************************/
+-FUNC(void, SFTYPARKLOCKACTR_CODE) SftyParkLockActr_DiTst(void)   /* PRQA S 1503 #Called from sftyparklockmgr. Suppression can be removed after its integration */
++FUNC(void, SFTYPARKLOCKACTR_CODE) SftyParkLockActr_DiTst(void)
+ {
+    /* Call function to disables the primary actuator */
+    SftyParkLockActr_PrimActrDi();
+    return;
+ }
+-/* @MRTZ_endBlock */
++
+ 
+ /*****************************************************************************/
+ /*!
+@@ -1453,7 +1463,7 @@ FUNC(void, SFTYPARKLOCKACTR_CODE) SftyParkLockActr_DiTst(void)   /* PRQA S 1503
+  * \\Parent_DD  : SftyParkLockActr_SetPrimActrTarAg
+  */
+ /*****************************************************************************/
+-FUNC(void, SFTYPARKLOCKACTR_CODE) SftyParkLockActr_SetPrimActrTarAg(float32 targetAngSp, SftyParkLockActr_DirType dirReq)   /* PRQA S 1503 #Called from sftyparklockmgr. Suppression can be removed after its integration */
++FUNC(void, SFTYPARKLOCKACTR_CODE) SftyParkLockActr_SetPrimActrTarAg(float32 targetAngSp, SftyParkLockActr_DirType dirReq)
+ {
+    
+    /* Set the status of primary actuator to closed loop control */
+@@ -1513,7 +1523,8 @@ FUNC(void, SFTYPARKLOCKACTR_CODE) SftyParkLockActr_SetPrimActrTarAg(float32 targ
+  * \\Parent_DD  : SftyParkLockActr_PrimActrStop
+  */
+ /*****************************************************************************/
+-FUNC(void, SFTYPARKLOCKACTR_CODE) SftyParkLockActr_PrimActrStop(void)    /* PRQA S 1505 #Called from sftyparklockmgr. Suppression can be removed after its integration */
++/* PRQA S 4700 1 #Justification for STM29. SftyParkLockActr_PrimActrStop function is supposed to be widely used in SftyPArkLockMgr and SftyPArkLockActr SW-Components */
++FUNC(void, SFTYPARKLOCKACTR_CODE) SftyParkLockActr_PrimActrStop(void)
+ {
+     /* Stop actuator*/
+     SftyParkLockActr_PrimActrDi();
+@@ -1572,13 +1583,16 @@ FUNC(void, SFTYPARKLOCKACTR_CODE) SftyParkLockActr_Init(void)
+ {
+     /* Configure ports */
+     SftyParkLockActr_PortConfg();
+-    #ifndef SFTYPARKLOCKACTR_PRIMACTR_INIT_IN_GTMDRV
++    /* Enable the position sensor */
++    SftyParkLockActr_PosnSnsrEn();
++     #ifndef SFTYPARKLOCKACTR_PRIMACTR_INIT_IN_GTMDRV
+     /* Initialize TOM2 output module CH1 */
+     SftyParkLockActr_GtmDrvTOMInit();   /* PRQA S 2987 #Content of function can be reactivated for other purposes */
+     #endif
+     /* Monitor GTM configuration */
+     SftyParkLockActr_PrimActrChkPwmGenrCfg();
+     /* Initialise C2C variables */
++    return;
+ }
+ 
+ 
+@@ -1596,6 +1610,8 @@ FUNC(void, SFTYPARKLOCKACTR_CODE) SftyParkLockActr_MainSlow(void)
+ {
+    /* configure primary actuator slow task driver */
+    SftyParkLockActr_PrimActrSlowDrvr();
++
++   return;
+ }
+ 
+ #define SFTYPARKLOCKACTR_AREA_2_STOP_SEC_CODE_SLOW
+@@ -1618,12 +1634,13 @@ FUNC(void, SFTYPARKLOCKACTR_CODE) SftyParkLockActr_MainFast(void)
+ {
+    /* Configure primary actuator fast task driver */
+    SftyParkLockActr_PrimActrFastDrvr();
++
++   return;
+ }
+ 
+ #define SFTYPARKLOCKACTR_AREA_2_STOP_SEC_CODE_FAST
+ #include "MemMap.h"
+ 
+-//test
+ 
+ /*================== [closure] ==============================================*/
+ /* ********************************************************************** */
+diff --git a/src/fw_cu/Components/Safety/Sfty_Cmn/SftyParkLockActr/src/SftyParkLockActr_data.c b/src/fw_cu/Components/Safety/Sfty_Cmn/SftyParkLockActr/src/SftyParkLockActr_data.c
+index 3c96b395c..a3af4b0a1 100644
+--- a/src/fw_cu/Components/Safety/Sfty_Cmn/SftyParkLockActr/src/SftyParkLockActr_data.c
++++ b/src/fw_cu/Components/Safety/Sfty_Cmn/SftyParkLockActr/src/SftyParkLockActr_data.c
+@@ -1,12 +1,11 @@
+-/* ********************************************************************** */
+-/* Sourcefile:      SftyParkLockActr_data.c                               */
+-/*                                                                        */
+-/* Department:      VSeA R&D SWENG OPS 1 OP                               */
+-/*                                                                        */
+-/* ********************************************************************** */
+-/* Copyright (C) Valeo Siemens eAutomotive Germany GmbH 2021              */
+-/* All Rights Reserved.  Confidential                                     */
+-/* ********************************************************************** */
++/* ***************************************************************** */
++/* Sourcefile: SftyParkLockActr_data.c                               */
++/* ADD Container: SftyParkLockActr                                   */
++/* ADD Container Version: 1.0.0                                      */
++/* ***************************************************************** */
++/* Copyright (C) Valeo-Siemens eAutomotive GmbH 2021                 */
++/* All Rights Reserved. Confidential                                 */
++/* ***************************************************************** */
+ 
+ /*!
+  * \\defgroup      SftyParkLockActr_data   SftyParkLockActr_data -  SftyParkLockActr\'s calibration data
+@@ -91,7 +90,7 @@ VAR(boolean, SFTYPARKLOCKACTR_VAR) SftyParkLockActrPrimActrSts = 0U;
+ @@ SYMBOL = SftyParkLockActrPrimActrCtrlSt
+ @@ A2L_TYPE = MEASURE
+ @@ DATA_TYPE = SLONG
+-@@ CONVERSION = TABLE 0 "SFTYPARKLOCKACTR_PRIMACTR_DISABLE" 1 "SFTYPARKLOCKACTR_PRIMACTR_SLOWENG" 2 "SFTYPARKLOCKACTR_PRIMACTR_FASTENG" 3 "SFTYPARKLOCKACTR_PRIMACTR_SLOWDISENG" 4 "SFTYPARKLOCKACTR_PRIMACTR_FASTDISENG" 5 "SFTYPARKLOCKACTR_PRIMACTR_CLSD_LOOP_CTRL"
++@@ CONVERSION = TABLE 0 "SFTYPARKLOCKACTR_PRIMACTR_DISABLE" 1 "SFTYPARKLOCKACTR_PRIMACTR_CLSD_LOOP_CTRL"
+ @@ DESCRIPTION = "Parklock Actuator Control State; unit \'-\'"
+ @@ GROUP = SftyParkLockActr
+ @@ END
+@@ -130,7 +129,7 @@ VAR(float32, SFTYPARKLOCKACTR_VAR) SftyParkLockActrPrimActrCurDutyCycle = 0.f;
+ @@ GROUP = SftyParkLockActr
+ @@ END
+ */
+-CONST(boolean, SFTYPARKLOCKACTR_CALIB) SftyParkLockActrPrimActrSpdDynSatnEna = 1U;
++CONST(boolean, SFTYPARKLOCKACTR_CALIB) SftyParkLockActrPrimActrSpdDynSatnEna = 0U;
+ 
+ /*
+ @@ SYMBOL = SftyParkLockActrPrimActrMaxPwmEna
+@@ -150,7 +149,7 @@ CONST(boolean, SFTYPARKLOCKACTR_CALIB) SftyParkLockActrPrimActrMaxPwmEna = 0U;
+ @@ GROUP = SftyParkLockActr
+ @@ END
+ */
+-CONST(boolean, SFTYPARKLOCKACTR_CALIB) SftyParkLockActrPrimActrTqDynSatnEna = 1U;
++CONST(boolean, SFTYPARKLOCKACTR_CALIB) SftyParkLockActrPrimActrTqDynSatnEna = 0U;
+ 
+ #define SFTYPARKLOCKACTR_STOP_SEC_CALIB_8
+ #include "MemMap.h"
+@@ -290,24 +289,24 @@ CONST(float32, SFTYPARKLOCKACTR_CALIB) SftyParkLockActrPrimActrMotDisTqLim = 0.2
+ CONST(float32, SFTYPARKLOCKACTR_CALIB) SftyParkLockActrPrimActrMotEngTqLim = 0.25f;
+ 
+ /*
+-@@ SYMBOL = SftyParkLockActrPrimActrMotGain
++@@ SYMBOL = SftyParkLockActrPrimActrMotINoLoad
+ @@ A2L_TYPE = PARAMETER
+ @@ DATA_TYPE = FLOAT
+-@@ DESCRIPTION = "Gain paramater of parklock motor model for torque estimation; unit \'-\'"
++@@ DESCRIPTION = "No load current for torque estimation in Parklock motor model; unit \'A\'"
+ @@ GROUP = SftyParkLockActr
+ @@ END
+ */
+-CONST(float32, SFTYPARKLOCKACTR_CALIB) SftyParkLockActrPrimActrMotGain = 1.f;
++CONST(float32, SFTYPARKLOCKACTR_CALIB) SftyParkLockActrPrimActrMotINoLoad = 0.379f;
+ 
+ /*
+-@@ SYMBOL = SftyParkLockActrPrimActrMotKprim
++@@ SYMBOL = SftyParkLockActrPrimActrMotTqCon
+ @@ A2L_TYPE = PARAMETER
+ @@ DATA_TYPE = FLOAT
+-@@ DESCRIPTION = "Kprim paramater of parklock motor model for torque estimation; unit \'-\'"
++@@ DESCRIPTION = "Torque constant for torque estimation in Parklock motor model; unit \'Nm/A\'"
+ @@ GROUP = SftyParkLockActr
+ @@ END
+ */
+-CONST(float32, SFTYPARKLOCKACTR_CALIB) SftyParkLockActrPrimActrMotKprim = 0.01894f;
++CONST(float32, SFTYPARKLOCKACTR_CALIB) SftyParkLockActrPrimActrMotTqCon = 0.016383f;
+ 
+ /*
+ @@ SYMBOL = SftyParkLockActrPrimDisTqSatnTbl
+diff --git a/src/fw_cu/build/a2l/Measurements-to-Timeslices-Mapping.csv b/src/fw_cu/build/a2l/Measurements-to-Timeslices-Mapping.csv
+index 7c64081b8..ebb284c93 100644
+--- a/src/fw_cu/build/a2l/Measurements-to-Timeslices-Mapping.csv
++++ b/src/fw_cu/build/a2l/Measurements-to-Timeslices-Mapping.csv
+@@ -8834,8 +8834,8 @@ SftySdlRunTiNormRun_SftyParkLockActr_MainFast.TickStart,Core_1,Core_1_200us,0.2,
+ SftySdlRunTiNormRun_SftyParkLockActr_MainSlow.CycTi,Core_1,Core_1_200us,0.2,,,SSW
+ SftySdlRunTiNormRun_SftyParkLockActr_MainSlow.RunTi,Core_1,Core_1_200us,0.2,,,SSW
+ SftySdlRunTiNormRun_SftyParkLockActr_MainSlow.TickStart,Core_1,Core_1_200us,0.2,,,SSW
+-disengStopDetnCycCntr,Core_1,Core_1_200us,0.2,,,SSW
+-engStopDetnCycCntr,Core_1,Core_1_200us,0.2,,,SSW
++SftyParkLockActrDisengStopDetnCycCntr,Core_1,Core_1_200us,0.2,,,SSW
++SftyParkLockActrEngStopDetnCycCntr,Core_1,Core_1_200us,0.2,,,SSW
+ LlswFpgaIfCalcTxProdSpi,Core_0,C0_1ms_TimeTask,10,,,LLSW
+ LlswFpgaIfCalcRxProdSpi,Core_0,C0_1ms_TimeTask,10,,,LLSW
+ LlswFpgaIfTxStsSpi,Core_0,C0_1ms_TimeTask,10,,,LLSW
+'

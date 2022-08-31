@@ -1,0 +1,2345 @@
+b'commit 6d43ef9cba576bfc682fd539d2bd258f68acd64d
+Author: Mohammed ANDALOUSSI (JV) <mohammed.andaloussi.jv@valeo.com>
+Date:   Mon Jan 10 02:15:13 2022 +0100
+
+    $100kW-50147$ - [CR]-FCT_IvtrCom - SftyE2eFpga - Release Unit Construction
+    
+    Change-Id: Ib6612c33d0cb44c3ab3f19d03cb6df303a70cb86
+
+diff --git a/src/fw_cu/Components/Safety/Sfty_Cmn/SftyE2eFpga/include/SftyE2eFpga_Type.h b/src/fw_cu/Components/Safety/Sfty_Cmn/SftyE2eFpga/include/SftyE2eFpga_Type.h
+index 207bb3ee0..ce235f705 100644
+--- a/src/fw_cu/Components/Safety/Sfty_Cmn/SftyE2eFpga/include/SftyE2eFpga_Type.h
++++ b/src/fw_cu/Components/Safety/Sfty_Cmn/SftyE2eFpga/include/SftyE2eFpga_Type.h
+@@ -23,6 +23,7 @@
+ /*******************************************************************************
+ **                      Types                                                 **
+ *******************************************************************************/
++/* PRQA S 0750, 0635 ++ # union and bitfield type are needed to get access to every signals of the message data */
+ 
+ 
+ typedef struct SftyE2eFpgaRxASigType_
+@@ -2430,4 +2431,6 @@ typedef union SftyE2eFpgaIpduRxType_
+    
+ }SftyE2eFpgaIpduRxType;
+ 
++/* PRQA S 0750, 0635 -- */
++
+ #endif /* SFTYE2EFPGA_TYPE_H*/
+diff --git a/src/fw_cu/Components/Safety/Sfty_Cmn/SftyE2eFpga/include/SftyE2eFpga_data.h b/src/fw_cu/Components/Safety/Sfty_Cmn/SftyE2eFpga/include/SftyE2eFpga_data.h
+index 804a84fdd..089c98040 100644
+--- a/src/fw_cu/Components/Safety/Sfty_Cmn/SftyE2eFpga/include/SftyE2eFpga_data.h
++++ b/src/fw_cu/Components/Safety/Sfty_Cmn/SftyE2eFpga/include/SftyE2eFpga_data.h
+@@ -14,20 +14,6 @@
+ #include "Platform_Types.h"
+ #include "Compiler.h"
+ 
+-#ifndef  _online
+-#define  _online
+-#endif
+-#ifndef  _param
+-#define  _param
+-#endif
+-#ifndef  _axis
+-#define  _axis
+-#endif
+-#ifndef  _map
+-#define  _map
+-#endif
+-
+-
+ #include "AddEnumTypes.h"
+ #include "SftyE2eFpga_Type.h"
+ 
+@@ -68,9 +54,6 @@ extern VAR(boolean, SFTYE2EFPGA_VAR) SftyE2eFpgaHsGateDrvrFltSts;
+ extern VAR(boolean, SFTYE2EFPGA_VAR) SftyE2eFpgaLoGateDrvrFltSts;
+ extern VAR(boolean, SFTYE2EFPGA_VAR) SftyE2eFpgaMidPointPhaFltSts[SYSDEF_EM_PHA_CNT_MAX];
+ 
+-
+-//extern VAR(boolean,   SFTYE2EFPGA_VAR) SftyActvDchaCtrlActvDchaReqViaR;
+-
+ #define SFTYE2EFPGA_STOP_SEC_VAR_AREA_CMN_FAST_CLEARED
+ #include "MemMap.h"
+ 
+@@ -118,9 +101,10 @@ extern CONST(uint8, SFTYREPLCMT_CALIB)   SftyE2eFpgaStateReqEmgySwOvrdEna;
+ extern CONST(uint8, SFTYREPLCMT_CALIB)   SftyE2eFpgaStateReqSCSpdReadyOvrdEna;
+ extern CONST(uint8, SFTYREPLCMT_CALIB)   SftyE2eFpgaActvDchaReqOvrdEna;
+ extern CONST(uint8, SFTYREPLCMT_CALIB)   SftyE2eFpgaStateReqEmgySwOvrdVal;
+-extern CONST(uint8, SFTYREPLCMT_CALIB)   SftyE2eFpgaStateReqSCSpdReadyOvrdVal;
++extern CONST(uint8, SFTYREPLCMT_CALIB)   SftyE2eFpgaStateReqSCSpdReadyOvrdVal; /* PRQA S 0777 # following Arch interface long naming; External identifier does not differ from other identifier is here wrong */
+ extern CONST(boolean, SFTYREPLCMT_CALIB) SftyE2eFpgaActvDchaReqValOvrdVal;
+ 
++
+ #define SFTYREPLCMT_STOP_SEC_CALIB_8
+ #include "MemMap.h"
+ 
+diff --git a/src/fw_cu/Components/Safety/Sfty_Cmn/SftyE2eFpga/src/SftyE2eFpga.c b/src/fw_cu/Components/Safety/Sfty_Cmn/SftyE2eFpga/src/SftyE2eFpga.c
+index 21678418e..db1d4f012 100644
+--- a/src/fw_cu/Components/Safety/Sfty_Cmn/SftyE2eFpga/src/SftyE2eFpga.c
++++ b/src/fw_cu/Components/Safety/Sfty_Cmn/SftyE2eFpga/src/SftyE2eFpga.c
+@@ -29,14 +29,13 @@
+ */
+ 
+ /*================== [includes] =============================================*/
+-/*! \\misra Warning No 0380 " [L] Number of macro definitions exceeds 4095 - program does not conform strictly to ISO:C99." */
+ 
+ #include "Std_Types.h"
+ #include "Sfty_Types.h"
+ #include "Mcal.h"
+ #include "AddEnumTypes.h"
+ #include "SftyUtils.h"
+-#include "SftyDmaDrvr_cfg.h" /* PRQA S 0380 */
++#include "SftyDmaDrvr_cfg.h" /* PRQA S 0380 # header file necessary; inclusion of macros unavoidable */
+ #include "SftyE2eFpga_Type.h"
+ #include "SftyE2eFpga_data.h"
+ #include "SftyE2eFpga.h"
+@@ -45,6 +44,7 @@
+ #include "SftyInvActr_data.h"
+ #include "SftyHvDcUEvln_data.h"
+ #include "SftyAcEvln_data.h"
++#include "SftyActvDchaCtrl_data.h"
+ #if defined(SWIT_IT_Active)
+ #include "SWIT_Sfty.h"
+ #endif
+@@ -70,13 +70,12 @@
+ #define SFTYE2EFPGA_START_SEC_VAR_AREA_CMN_FAST_CLEARED
+ #include "MemMap.h"
+ 
+-/*! \\misra Warning  Msg(4:0759) union is needed to get access to every signals of the message data " */
+ /*
+ @@ INSTANCE = SftyE2eFpgaIpduRx
+ @@ STRUCTURE = SftyE2eFpgaIpduRxType
+ @@ END
+ */
+-STATIC VAR(SftyE2eFpgaIpduRxType, SFTYE2EFPGA_VAR) SftyE2eFpgaIpduRx;/* PRQA S 0759 */
++STATIC VAR(SftyE2eFpgaIpduRxType, SFTYE2EFPGA_VAR) SftyE2eFpgaIpduRx;/* PRQA S 0759 # union is needed to get access to every signals of the message data */
+ 
+ /*
+ @@ SYMBOL = SftyE2eFpgaFirstRunDone
+@@ -447,17 +446,11 @@ LOCAL_INLINE uint8 SftyE2eFpga_GetCurrIdx(Dma_ChannelType dmaCh, const SftyDmaE2
+ 
+    /* Get pointer to last written data */
+ 
+-   /*! \\misra Warning No C2004:11.3 "Cast between a pointer to object and an integral type.
+-    *                                No other way to cast register value to a pointer. Behaviour is correct" */
+-   lstPtr = ((SftyDmaE2eFpgaFrameRxType*)(MODULE_DMA.CH[(uint16)dmaCh].DADR.U)); /* PRQA S 0306 */
++   lstPtr = ((SftyDmaE2eFpgaFrameRxType*)(MODULE_DMA.CH[(uint16)dmaCh].DADR.U));
+ 
+-   /*! \\misra MISRA-C:2004 Rule 11.3 Warning No C0488:4 "Cast between a pointer to object and an integral type. Behavior is OK" */
+-   /* Calculate memory offset */
+-   memDif = (uint32)lstPtr - (uint32)(dataPtr); /* PRQA S 0306 */
++   memDif = (uint32)lstPtr - (uint32)(dataPtr);
+ 
+-   /*! \\misra MISRA-C:2004 Rule 17.4 Warning No C0488:4 "Performing pointer arithmetic. Calculating Index. Behavior is OK" */
+-   /* Calculate indexes of current destination data */
+-   idx = (uint8)(memDif / sizeof(SftyDmaE2eFpgaFrameRxType)); /* PRQA S 0488 */
++   idx = (uint8)(memDif / sizeof(SftyDmaE2eFpgaFrameRxType));
+ 
+    /* Decrement index, to be sure that this data is not being written right now */
+    idx = SftyE2eFpga_DecIdx(idx, (bufLen - 1U));
+@@ -650,33 +643,125 @@ LOCAL_INLINE Std_ReturnType SftyE2eFpga_AlvCntrChk(uint8 alvCntr)
+ 
+ /******************************************************************/
+ /*!
+- * \\fn      uint16 SftyE2eFpga_CalcCrc(const uint8 Crc_Data[])
+- * \\brief   This function calculates CRC of 182 bits FPAG frame
++ * \\fn      uint16 SftyE2eFpga_CalcCrcFirstPart(const uint8 crc_Data[], uint16 crcVal, uint8 byteIdx)
++ * \\brief   This function calculates CRC of first half 182 bits FPAG frame
+  * \\Parent_DD : SftyE2eFpga_E2eFrameHndlr
+- * \\param   Crc_Data[]: passed data
++ * \\param   crc_Data[]: passed data
++ * \\param   crcStartVal: Start value to calculate CRC
++ * \\param   crcStartVal: byte index
++ * \\return  uint16: calculates CRC
++ */
++/******************************************************************/
++LOCAL_INLINE uint16 SftyE2eFpga_CalcCrcOfByte(const uint8 crc_Data[], uint16 crcVal, uint8 byteIdx)
++{
++   return (uint16)(((uint16)(crcVal << 8u)) ^ MLIB_U16U32(SftyE2eFpga_Tbl16Pol5643[(crcVal >> 8u) ^ (uint16)(crc_Data[byteIdx])]));
++}
++/******************************************************************/
++/*!
++ * \\fn      uint16 SftyE2eFpga_CalcCrc1Part(const uint8 crc_Data[], uint16 crcStartVal)
++ * \\brief   This function calculates first part CRC of FPAG frame
++ * \\Parent_DD : SftyE2eFpga_E2eFrameHndlr
++ * \\param   crc_Data[]: passed data
++ * \\param   crcStartVal: Start value to calculate CRC
++ * \\return  uint16: calculates CRC
++ */
++/******************************************************************/
++LOCAL_INLINE uint16 SftyE2eFpga_CalcCrc1Part(const uint8 crc_Data[], uint16 crcStartVal)
++{
++
++   uint16 retVal;
++
++   retVal = SftyE2eFpga_CalcCrcOfByte(crc_Data,crcStartVal,3u);
++   retVal = SftyE2eFpga_CalcCrcOfByte(crc_Data,retVal,2u);
++   retVal = SftyE2eFpga_CalcCrcOfByte(crc_Data,retVal,1u);
++   retVal = SftyE2eFpga_CalcCrcOfByte(crc_Data,retVal,0u);
++
++
++   return retVal;
++}
++
++/******************************************************************/
++/*!
++ * \\fn      uint16 SftyE2eFpga_CalcCrc2Part(const uint8 crc_Data[], uint16 crcVal)
++ * \\brief   This function calculates second part CRC of FPAG frame
++ * \\Parent_DD : SftyE2eFpga_E2eFrameHndlr
++ * \\param   crc_Data[]: passed data
++ * \\param   crcVal: CRC value of previous calculation
++ * \\return  uint16: calculates CRC
++ */
++/******************************************************************/
++LOCAL_INLINE uint16 SftyE2eFpga_CalcCrc2Part(const uint8 crc_Data[], uint16 crcVal)
++{
++   uint16 retVal;
++
++   retVal = SftyE2eFpga_CalcCrcOfByte(crc_Data,crcVal,7u);
++   retVal = SftyE2eFpga_CalcCrcOfByte(crc_Data,retVal,6u);
++   retVal = SftyE2eFpga_CalcCrcOfByte(crc_Data,retVal,5u);
++   retVal = SftyE2eFpga_CalcCrcOfByte(crc_Data,retVal,4u);
++
++   return retVal;
++}
++
++/******************************************************************/
++/*!
++ * \\fn      uint16 SftyE2eFpga_CalcCrc3Part(const uint8 crc_Data[], uint16 crcVal)
++ * \\brief   This function calculates third part CRC of FPAG frame
++ * \\Parent_DD : SftyE2eFpga_E2eFrameHndlr
++ * \\param   crc_Data[]: passed data
++ * \\param   crcVal: CRC value of previous calculation
++ * \\return  uint16: calculates CRC
++ */
++/******************************************************************/
++LOCAL_INLINE uint16 SftyE2eFpga_CalcCrc3Part(const uint8 crc_Data[], uint16 crcVal)
++{
++   uint16 retVal;
++
++   retVal = SftyE2eFpga_CalcCrcOfByte(crc_Data,crcVal,11u);
++   retVal = SftyE2eFpga_CalcCrcOfByte(crc_Data,retVal,10u);
++   retVal = SftyE2eFpga_CalcCrcOfByte(crc_Data,retVal,9u);
++   retVal = SftyE2eFpga_CalcCrcOfByte(crc_Data,retVal,8u);
++
++   return retVal;
++}
++
++/******************************************************************/
++/*!
++ * \\fn      uint16 SftyE2eFpga_CalcCrc4Part(const uint8 crc_Data[], uint16 crcVal)
++ * \\brief   This function calculates forth part CRC of FPAG frame
++ * \\Parent_DD : SftyE2eFpga_E2eFrameHndlr
++ * \\param   crc_Data[]: passed data
++ * \\param   crcVal: CRC value of previous calculation
+  * \\return  uint16: calculates CRC
+  */
+ /******************************************************************/
+-LOCAL_INLINE uint16 SftyE2eFpga_CalcCrc(const uint8 Crc_Data[])
++LOCAL_INLINE uint16 SftyE2eFpga_CalcCrc4Part(const uint8 crc_Data[], uint16 crcVal)
+ {
+-   uint16 retVal = 0xFFFFu;
++   uint16 retVal;
++
++   retVal = SftyE2eFpga_CalcCrcOfByte(crc_Data,crcVal,15u);
++   retVal = SftyE2eFpga_CalcCrcOfByte(crc_Data,retVal,14u);
++
++   return retVal;
++}
+ 
+-   /*! \\misra Warning  Msg(2984) This operation seems for misra check to be redundant, this is not the case " */
++/******************************************************************/
++/*!
++ * \\fn      uint16 SftyE2eFpga_CalcCrc(const uint8 crc_Data[])
++ * \\brief   This function calculates CRC of 182 bits FPAG frame
++ * \\Parent_DD : SftyE2eFpga_E2eFrameHndlr
++ * \\param   crc_Data[]: passed data
++ * \\return  uint16: calculates CRC
++ */
++/******************************************************************/
++LOCAL_INLINE uint16 SftyE2eFpga_CalcCrc(const uint8 crc_Data[])
++{
++   uint16 crcStartVal = 0xFFFFu;
++   uint16 retVal;
+ 
+-   retVal = (uint16)(((uint16)(retVal << 8u)) ^ MLIB_U16U32(SftyE2eFpga_Tbl16Pol5643[(retVal >> 8u) ^ (uint16)(Crc_Data[3u])]));/* PRQA S 2984 */
+-   retVal = (uint16)(((uint16)(retVal << 8u)) ^ MLIB_U16U32(SftyE2eFpga_Tbl16Pol5643[(retVal >> 8u) ^ (uint16)(Crc_Data[2u])]));
+-   retVal = (uint16)(((uint16)(retVal << 8u)) ^ MLIB_U16U32(SftyE2eFpga_Tbl16Pol5643[(retVal >> 8u) ^ (uint16)(Crc_Data[1u])]));
+-   retVal = (uint16)(((uint16)(retVal << 8u)) ^ MLIB_U16U32(SftyE2eFpga_Tbl16Pol5643[(retVal >> 8u) ^ (uint16)(Crc_Data[0u])]));
+-   retVal = (uint16)(((uint16)(retVal << 8u)) ^ MLIB_U16U32(SftyE2eFpga_Tbl16Pol5643[(retVal >> 8u) ^ (uint16)(Crc_Data[7u])]));
+-   retVal = (uint16)(((uint16)(retVal << 8u)) ^ MLIB_U16U32(SftyE2eFpga_Tbl16Pol5643[(retVal >> 8u) ^ (uint16)(Crc_Data[6u])]));
+-   retVal = (uint16)(((uint16)(retVal << 8u)) ^ MLIB_U16U32(SftyE2eFpga_Tbl16Pol5643[(retVal >> 8u) ^ (uint16)(Crc_Data[5u])]));
+-   retVal = (uint16)(((uint16)(retVal << 8u)) ^ MLIB_U16U32(SftyE2eFpga_Tbl16Pol5643[(retVal >> 8u) ^ (uint16)(Crc_Data[4u])]));
+-   retVal = (uint16)(((uint16)(retVal << 8u)) ^ MLIB_U16U32(SftyE2eFpga_Tbl16Pol5643[(retVal >> 8u) ^ (uint16)(Crc_Data[11u])]));
+-   retVal = (uint16)(((uint16)(retVal << 8u)) ^ MLIB_U16U32(SftyE2eFpga_Tbl16Pol5643[(retVal >> 8u) ^ (uint16)(Crc_Data[10u])]));
+-   retVal = (uint16)(((uint16)(retVal << 8u)) ^ MLIB_U16U32(SftyE2eFpga_Tbl16Pol5643[(retVal >> 8u) ^ (uint16)(Crc_Data[9u])]));
+-   retVal = (uint16)(((uint16)(retVal << 8u)) ^ MLIB_U16U32(SftyE2eFpga_Tbl16Pol5643[(retVal >> 8u) ^ (uint16)(Crc_Data[8u])]));
+-   retVal = (uint16)(((uint16)(retVal << 8u)) ^ MLIB_U16U32(SftyE2eFpga_Tbl16Pol5643[(retVal >> 8u) ^ (uint16)(Crc_Data[15u])]));
+-   retVal = (uint16)(((uint16)(retVal << 8u)) ^ MLIB_U16U32(SftyE2eFpga_Tbl16Pol5643[(retVal >> 8u) ^ (uint16)(Crc_Data[14u])]));
++   retVal = SftyE2eFpga_CalcCrc1Part(crc_Data, crcStartVal);
++   retVal = SftyE2eFpga_CalcCrc2Part(crc_Data, retVal);
++   retVal = SftyE2eFpga_CalcCrc3Part(crc_Data, retVal);
++   retVal = SftyE2eFpga_CalcCrc4Part(crc_Data, retVal);
+ 
+    return retVal;
+ }
+@@ -713,248 +798,188 @@ LOCAL_INLINE Std_ReturnType SftyE2eFpga_CrcEval(const uint8 crcData[], uint16 re
+ 
+ /******************************************************************/
+ /*!
+- * \\fn      void SftyE2eFpga_CopyARxDataFrameToIpdu(uint8 idx, uint8 alvCntr)
+- * \\brief   This function copies ARx Data from frame to IPDU according
+- *          to the alive counter of the passed index
++ * \\fn      void SftyE2eFpga_CopyARxDataFrame0ToIpduMxA0(uint8 idx)
++ * \\brief   This function copies ARx Data from frame to IPDU
+  * \\Parent_DD : SftyE2eFpga_E2eFrameHndlr
+  * \\param   idx: index of passed data
+- * \\param   alvCntr: alive counter of the frame
+  * \\return  -
+  */
+ /******************************************************************/
+-LOCAL_INLINE void SftyE2eFpga_CopyARxDataFrameToIpdu(uint8 idx, uint8 alvCntr)
++LOCAL_INLINE void SftyE2eFpga_CopyARxDataFrame0ToIpduMxA0(uint8 idx)
+ {
+    SftyE2eFpgaIpduRx.Data.RxA.Id.MxA.Data32[0] = SftyDmaE2eFpgaFrameRx[idx].Data.RxA.Data32[0];
+-   SftyE2eFpgaIpduRx.Data.RxA.Id.MxA.Data32[1] = SftyDmaE2eFpgaFrameRx[idx].Data.RxA.Data32[1];
+-   SftyE2eFpgaIpduRx.Data.RxA.Id.MxA.Data32[2] = SftyDmaE2eFpgaFrameRx[idx].Data.RxA.Data32[2];
+-   SftyE2eFpgaIpduRx.Data.RxA.Id.MxA.Data32[3] = SftyDmaE2eFpgaFrameRx[idx].Data.RxA.Data32[3];
+ 
+-   switch(alvCntr)
+-   {
+-      case 0x00:
+-      {
+-         SftyE2eFpgaIpduRx.Data.RxA.IdMx[0].Data32[2] = SftyDmaE2eFpgaFrameRx[idx].Data.RxA.Data32[2];
+-         SftyE2eFpgaIpduRx.Data.RxA.IdMx[0].Data32[3] = SftyDmaE2eFpgaFrameRx[idx].Data.RxA.Data32[3];
+-         break;
+-      }
+-      case 0x01:
+-      {
+-         SftyE2eFpgaIpduRx.Data.RxA.IdMx[1].Data32[2] = SftyDmaE2eFpgaFrameRx[idx].Data.RxA.Data32[2];
+-         SftyE2eFpgaIpduRx.Data.RxA.IdMx[1].Data32[3] = SftyDmaE2eFpgaFrameRx[idx].Data.RxA.Data32[3];
+-         break;
+-      }
+-      case 0x02:
+-      {
+-         SftyE2eFpgaIpduRx.Data.RxA.IdMx[2].Data32[2] = SftyDmaE2eFpgaFrameRx[idx].Data.RxA.Data32[2];
+-         SftyE2eFpgaIpduRx.Data.RxA.IdMx[2].Data32[3] = SftyDmaE2eFpgaFrameRx[idx].Data.RxA.Data32[3];
+-         break;
+-      }
+-      case 0x03:
+-      {
+-         SftyE2eFpgaIpduRx.Data.RxA.IdMx[3].Data32[2] = SftyDmaE2eFpgaFrameRx[idx].Data.RxA.Data32[2];
+-         SftyE2eFpgaIpduRx.Data.RxA.IdMx[3].Data32[3] = SftyDmaE2eFpgaFrameRx[idx].Data.RxA.Data32[3];
+-         break;
+-      }
+-      default:
+-      {
+-         /* Do nothing */
+-         break;
+-      }
+-   }
+    return;
+ }
+ 
+ /******************************************************************/
+ /*!
+- * \\fn      void SftyE2eFpga_CopySRxDataFrameToIpdu(uint8 idx)
+- * \\brief   This function copies SRx Data of the passed frame to IPDU
++ * \\fn      void SftyE2eFpga_CopyARxDataFrame1ToIpduMxA1(uint8 idx)
++ * \\brief   This function copies ARx Data from frame to IPDU
+  * \\Parent_DD : SftyE2eFpga_E2eFrameHndlr
+  * \\param   idx: index of passed data
+  * \\return  -
+  */
+ /******************************************************************/
+-LOCAL_INLINE void SftyE2eFpga_CopySRxDataFrameToIpdu(uint8 idx)
++LOCAL_INLINE void SftyE2eFpga_CopyARxDataFrame1ToIpduMxA1(uint8 idx)
+ {
+-   SftyE2eFpgaIpduRx.Data.RxS.Data32[0] = SftyDmaE2eFpgaFrameRx[idx].Data.RxS.Data32[0];
+-   SftyE2eFpgaIpduRx.Data.RxS.Data32[1] = SftyDmaE2eFpgaFrameRx[idx].Data.RxS.Data32[1];
+-   SftyE2eFpgaIpduRx.Data.RxS.Data32[2] = SftyDmaE2eFpgaFrameRx[idx].Data.RxS.Data32[2];
+-   SftyE2eFpgaIpduRx.Data.RxS.Data32[3] = SftyDmaE2eFpgaFrameRx[idx].Data.RxS.Data32[3];
++   SftyE2eFpgaIpduRx.Data.RxA.Id.MxA.Data32[1] = SftyDmaE2eFpgaFrameRx[idx].Data.RxA.Data32[1];
+ 
+    return;
+ }
+-
+-
+ /******************************************************************/
+ /*!
+- * \\fn      void SftyE2eFpga_ExtrCurrMod(void)
+- * \\brief   This function extracts current FPGA mode
++ * \\fn      void SftyE2eFpga_CopyARxDataFrame2ToIpduMxA2(uint8 idx)
++ * \\brief   This function copies ARx Data from frame to IPDU
+  * \\Parent_DD : SftyE2eFpga_E2eFrameHndlr
+- * \\param   -
++ * \\param   idx: index of passed data
+  * \\return  -
+  */
+ /******************************************************************/
+-LOCAL_INLINE void SftyE2eFpga_ExtrCurrMod(void)
++LOCAL_INLINE void SftyE2eFpga_CopyARxDataFrame2ToIpduMxA2(uint8 idx)
+ {
+-   /* Extract current mode */
+-   SftyE2eFpgaCurrMod    = (uint8)(SftyE2eFpgaIpduRx.Data.RxA.Id.MxA.Sig.StateRes.Field.ModeRes);
++   SftyE2eFpgaIpduRx.Data.RxA.Id.MxA.Data32[2] = SftyDmaE2eFpgaFrameRx[idx].Data.RxA.Data32[2];
+ 
+    return;
+ }
+-
+ /******************************************************************/
+ /*!
+- * \\fn      void SftyE2eFpga_ExtrFltSts(void)
+- * \\brief   This function extracts fault status from the IPDU
++ * \\fn      void SftyE2eFpga_CopyARxDataFrame3ToIpduMxA3(uint8 idx)
++ * \\brief   This function copies ARx Data from frame to IPDU
+  * \\Parent_DD : SftyE2eFpga_E2eFrameHndlr
+- * \\param   -
++ * \\param   idx: index of passed data
+  * \\return  -
+  */
+ /******************************************************************/
+-LOCAL_INLINE void SftyE2eFpga_ExtrFltSts(void)
++LOCAL_INLINE void SftyE2eFpga_CopyARxDataFrame3ToIpduMxA3(uint8 idx)
+ {
+-   /* Extract accumulated status of fault group A */
+-   SftyE2eFpgaMeasCohrncFltStsAcc     |= ((uint8)(~(SftyE2eFpgaIpduRx.Data.RxA.Id.MxA.Sig.FltA.Field.MeasCohernc)) & 0x01u);
+-   SftyE2eFpgaEmgySWFltStsAcc         |= ((uint8)(~(SftyE2eFpgaIpduRx.Data.RxA.Id.MxA.Sig.FltA.Field.EmergencyStop)) & 0x01u);
+-   SftyE2eFpgaLoGateDrvrFltStsAcc     |= ((uint8)(~(SftyE2eFpgaIpduRx.Data.RxA.Id.MxA.Sig.FltA.Field.IgbtL)) & 0x01u);
+-   SftyE2eFpgaHsGateDrvrFltStsAcc     |= ((uint8)(~(SftyE2eFpgaIpduRx.Data.RxA.Id.MxA.Sig.FltA.Field.IgbtH)) & 0x01u);
+-   SftyE2eFpgaActvDchaActvFltStsAcc   |= ((uint8)(~(SftyE2eFpgaIpduRx.Data.RxA.Id.MxA.Sig.FltA.Field.ActiveDisAc)) & 0x01u);
+-   SftyE2eFpgaActvDchaInactvFltStsAcc |= ((uint8)(~(SftyE2eFpgaIpduRx.Data.RxA.Id.MxA.Sig.FltA.Field.ActiveDisIn)) & 0x01u);
+-   SftyE2eFpgaLossComErrMonrStAcc     |= ((uint8)(~(SftyE2eFpgaIpduRx.Data.RxA.Id.MxA.Sig.FltA.Field.LossComSpi)) & 0x01u);
+-
+-   /* Extract accumulated status of fault group B */
+-   SftyE2eFpgaOverUnderCurUFltStsAcc |=  ((uint8)(~(SftyE2eFpgaIpduRx.Data.RxA.Id.MxA.Sig.FltB.Field.OverUnderCurU)) & 0x01u);
+-   SftyE2eFpgaOverUnderCurVFltStsAcc |=  ((uint8)(~(SftyE2eFpgaIpduRx.Data.RxA.Id.MxA.Sig.FltB.Field.OverUnderCurV)) & 0x01u);
+-   SftyE2eFpgaOverUnderCurWFltStsAcc |=  ((uint8)(~(SftyE2eFpgaIpduRx.Data.RxA.Id.MxA.Sig.FltB.Field.OverUnderCurW)) & 0x01u);
+-   SftyE2eFpgaOverVoltVBatFltStsAcc  |=  ((uint8)(~(SftyE2eFpgaIpduRx.Data.RxA.Id.MxA.Sig.FltB.Field.OverVoltVBat))  & 0x01u);
+-
+-   SftyE2eFpgaMidPointPhaFltStsAcc[SFTY_PHA_U] |= ((uint8)(~(SftyE2eFpgaIpduRx.Data.RxA.Id.MxA.Sig.FltB.Field.IgbtMidPointU)) & 0x01u);
+-   SftyE2eFpgaMidPointPhaFltStsAcc[SFTY_PHA_V] |= ((uint8)(~(SftyE2eFpgaIpduRx.Data.RxA.Id.MxA.Sig.FltB.Field.IgbtMidPointV)) & 0x01u);
+-   SftyE2eFpgaMidPointPhaFltStsAcc[SFTY_PHA_W] |= ((uint8)(~(SftyE2eFpgaIpduRx.Data.RxA.Id.MxA.Sig.FltB.Field.IgbtMidPointW)) & 0x01u);
+-
+-   /* Extract accumulated status of fault group C */
+-   SftyE2eFpgaScSpdReadyFltStsAcc    |= ((uint8)(~(SftyE2eFpgaIpduRx.Data.RxA.Id.MxA.Sig.FltC.Field.ScSpeedReady)) & 0x01u);
++   SftyE2eFpgaIpduRx.Data.RxA.Id.MxA.Data32[3] = SftyDmaE2eFpgaFrameRx[idx].Data.RxA.Data32[3];
+ 
+    return;
+ }
+ 
++/******************************************************************/
++/*!
++ * \\fn      void SftyE2eFpga_CopyARxDataFrameToIpduMxA(uint8 idx)
++ * \\brief   This function copies ARx Data from frame to IPDU
++ * \\Parent_DD : SftyE2eFpga_E2eFrameHndlr
++ * \\param   idx: index of passed data
++ * \\return  -
++ */
++/******************************************************************/
++LOCAL_INLINE void SftyE2eFpga_CopyARxDataFrameToIpduMxA(uint8 idx)
++{
++   SftyE2eFpga_CopyARxDataFrame0ToIpduMxA0(idx);
++   SftyE2eFpga_CopyARxDataFrame1ToIpduMxA1(idx);
++   SftyE2eFpga_CopyARxDataFrame2ToIpduMxA2(idx);
++   SftyE2eFpga_CopyARxDataFrame3ToIpduMxA3(idx);
+ 
++   return;
++}
+ 
+ /******************************************************************/
+ /*!
+- * \\fn      void SftyE2eFpga_CopySRxDataFrameToIpdu(uint8 idx)
+- * \\brief   This function extracts Mx0 data
++ * \\fn      void SftyE2eFpga_CopyARxDataFrameToIpduIdMx0(uint8 idx)
++ * \\brief   This function copies ARx Data from frame to IPDU
+  * \\Parent_DD : SftyE2eFpga_E2eFrameHndlr
+- * \\param   -
++ * \\param   idx: index of passed data
+  * \\return  -
+  */
+ /******************************************************************/
+-LOCAL_INLINE void SftyE2eFpga_ExtrMx0Data(void)
++LOCAL_INLINE void SftyE2eFpga_CopyARxDataFrameToIpduIdMx0(uint8 idx)
+ {
+-   SftyE2eFpgaTempIGBTRawVal[SYSDEF_PHA_U] = (((uint16)(SftyE2eFpgaIpduRx.Data.RxA.Id.Mx0.Sig.IgbtTempU_LSB8)) |
+-                                               (uint16)(((uint16)SftyE2eFpgaIpduRx.Data.RxA.Id.Mx0.Sig.IgbtTempU_MSB4) << 8U));
+-
+-   SftyE2eFpgaTempIGBTRawVal[SYSDEF_PHA_V] = (((uint16)(SftyE2eFpgaIpduRx.Data.RxA.Id.Mx0.Sig.IgbtTempV_LSB8)) |
+-                                               (uint16)(((uint16)SftyE2eFpgaIpduRx.Data.RxA.Id.Mx0.Sig.IgbtTempV_MSB4) << 8U));
++   SftyE2eFpgaIpduRx.Data.RxA.IdMx[0].Data32[2] = SftyDmaE2eFpgaFrameRx[idx].Data.RxA.Data32[2];
++   SftyE2eFpgaIpduRx.Data.RxA.IdMx[0].Data32[3] = SftyDmaE2eFpgaFrameRx[idx].Data.RxA.Data32[3];
+ 
+-   SftyE2eFpgaTempIGBTRawVal[SYSDEF_PHA_W] = (((uint16)SftyE2eFpgaIpduRx.Data.RxA.Id.Mx0.Sig.IgbtTempW_LSB4)   |
+-                                               (uint16)(((uint16)SftyE2eFpgaIpduRx.Data.RxA.Id.Mx0.Sig.IgbtTempW_MSB8) << 4U));
+    return;
+ }
+ 
+ /******************************************************************/
+ /*!
+- * \\fn      void SftyE2eFpga_CopySRxDataFrameToIpdu(uint8 idx)
+- * \\brief   This function extracts Mx1 data
++ * \\fn      void SftyE2eFpga_CopyARxDataFrameToIpduIdMx1(uint8 idx)
++ * \\brief   This function copies ARx Data from frame to IPDU
+  * \\Parent_DD : SftyE2eFpga_E2eFrameHndlr
+- * \\param   -
++ * \\param   idx: index of passed data
+  * \\return  -
+  */
+ /******************************************************************/
+-LOCAL_INLINE void SftyE2eFpga_ExtrMx1Data(void)
++LOCAL_INLINE void SftyE2eFpga_CopyARxDataFrameToIpduIdMx1(uint8 idx)
+ {
+-   SftyE2eFpgaCtrlBrdRawVal = (((uint16)(SftyE2eFpgaIpduRx.Data.RxA.Id.Mx1.Sig.DcLinkCtrlBd_LSB8)) |
+-                               (uint16)(((uint16)SftyE2eFpgaIpduRx.Data.RxA.Id.Mx1.Sig.DcLinkCtrlBd_MSB4) << 8U));
++   SftyE2eFpgaIpduRx.Data.RxA.IdMx[1].Data32[2] = SftyDmaE2eFpgaFrameRx[idx].Data.RxA.Data32[2];
++   SftyE2eFpgaIpduRx.Data.RxA.IdMx[1].Data32[3] = SftyDmaE2eFpgaFrameRx[idx].Data.RxA.Data32[3];
+ 
+-   SftyE2eFpgaDrvBrdRawVal = (((uint16)SftyE2eFpgaIpduRx.Data.RxA.Id.Mx1.Sig.DcLinkDrvBd_LSB4) |
+-                                (uint16)(((uint16)SftyE2eFpgaIpduRx.Data.RxA.Id.Mx1.Sig.DcLinkDrvBd_MSB8) << 4U));
+-#ifdef SWIT_IT_Active
+-   SWIT_SftyE2eFpga_ExtrMx1Data_EndHook();
+-#endif
+    return;
+ }
+ 
+ /******************************************************************/
+ /*!
+- * \\fn      void SftyE2eFpga_CopySRxDataFrameToIpdu(uint8 idx)
+- * \\brief   This function extracts Mx2 data
++ * \\fn      void SftyE2eFpga_CopyARxDataFrameToIpduIdMx2(uint8 idx)
++ * \\brief   This function copies ARx Data from frame to IPDU
+  * \\Parent_DD : SftyE2eFpga_E2eFrameHndlr
+- * \\param   -
++ * \\param   idx: index of passed data
+  * \\return  -
+  */
+ /******************************************************************/
+-LOCAL_INLINE void SftyE2eFpga_ExtrMx2Data(void)
++LOCAL_INLINE void SftyE2eFpga_CopyARxDataFrameToIpduIdMx2(uint8 idx)
+ {
+-   SftyE2eFpgaCuTSnsrRawVal = (((uint16)(SftyE2eFpgaIpduRx.Data.RxA.Id.Mx2.Sig.TempCtrlBd_LSB8)) |
+-                               (uint16)(((uint16)SftyE2eFpgaIpduRx.Data.RxA.Id.Mx2.Sig.TempCtrlBd_MSB4) << 8U));
++   SftyE2eFpgaIpduRx.Data.RxA.IdMx[2].Data32[2] = SftyDmaE2eFpgaFrameRx[idx].Data.RxA.Data32[2];
++   SftyE2eFpgaIpduRx.Data.RxA.IdMx[2].Data32[3] = SftyDmaE2eFpgaFrameRx[idx].Data.RxA.Data32[3];
+ 
+    return;
+ }
+ 
+ /******************************************************************/
+ /*!
+- * \\fn      void SftyE2eFpga_CopySRxDataFrameToIpdu(uint8 idx)
+- * \\brief   This function extracts Mx3 data
++ * \\fn      void SftyE2eFpga_CopyARxDataFrameToIpduIdMx3(uint8 idx)
++ * \\brief   This function copies ARx Data from frame to IPDU
+  * \\Parent_DD : SftyE2eFpga_E2eFrameHndlr
+- * \\param   -
++ * \\param   idx: index of passed data
+  * \\return  -
+  */
+ /******************************************************************/
+-LOCAL_INLINE void SftyE2eFpga_ExtrMx3Data(void)
++LOCAL_INLINE void SftyE2eFpga_CopyARxDataFrameToIpduIdMx3(uint8 idx)
+ {
+-   SftyE2eFpgaDrvTSnsrRawVal = (((uint16)(SftyE2eFpgaIpduRx.Data.RxA.Id.Mx3.Sig.TempDrvBd_LSB8)) |
+-                               (uint16)(((uint16)SftyE2eFpgaIpduRx.Data.RxA.Id.Mx3.Sig.TempDrvBd_MSB4) << 8U));
++   SftyE2eFpgaIpduRx.Data.RxA.IdMx[3].Data32[2] = SftyDmaE2eFpgaFrameRx[idx].Data.RxA.Data32[2];
++   SftyE2eFpgaIpduRx.Data.RxA.IdMx[3].Data32[3] = SftyDmaE2eFpgaFrameRx[idx].Data.RxA.Data32[3];
+ 
+    return;
+ }
+ 
+ /******************************************************************/
+ /*!
+- * \\fn      void SftyE2eFpga_ExtractARxDataFromIpdu(uint8 alvCntr)
+- * \\brief   This function extracts faults and data from IPDU according
+- *          to the alive counter of the frame
++ * \\fn      void SftyE2eFpga_CopyARxDataFrameToIpdu(uint8 idx, uint8 alvCntr)
++ * \\brief   This function copies ARx Data from frame to IPDU according
++ *          to the alive counter of the passed index
+  * \\Parent_DD : SftyE2eFpga_E2eFrameHndlr
++ * \\param   idx: index of passed data
+  * \\param   alvCntr: alive counter of the frame
+  * \\return  -
+  */
+ /******************************************************************/
+-LOCAL_INLINE void SftyE2eFpga_ExtractARxDataFromIpdu(uint8 alvCntr)
++LOCAL_INLINE void SftyE2eFpga_CopyARxDataFrameToIpdu(uint8 idx, uint8 alvCntr)
+ {
+-   SftyE2eFpga_ExtrCurrMod();
+-
+-   SftyE2eFpga_ExtrFltSts();
++   SftyE2eFpga_CopyARxDataFrameToIpduMxA(idx);
+ 
+    switch(alvCntr)
+    {
+-      case 0x00u:
++      case 0x00:
+       {
+-         SftyE2eFpga_ExtrMx0Data();
+-
++         SftyE2eFpga_CopyARxDataFrameToIpduIdMx0(idx);
+          break;
+       }
+-      case 0x01u:
++      case 0x01:
+       {
+-         SftyE2eFpga_ExtrMx1Data();
+-
++         SftyE2eFpga_CopyARxDataFrameToIpduIdMx1(idx);
+          break;
+       }
+-      case 0x02u:
++      case 0x02:
+       {
+-         SftyE2eFpga_ExtrMx2Data();
++         SftyE2eFpga_CopyARxDataFrameToIpduIdMx2(idx);
+          break;
+       }
+-      case 0x03u:
++      case 0x03:
+       {
+-         SftyE2eFpga_ExtrMx3Data();
++         SftyE2eFpga_CopyARxDataFrameToIpduIdMx3(idx);
+          break;
+       }
+       default:
+@@ -968,160 +993,1334 @@ LOCAL_INLINE void SftyE2eFpga_ExtractARxDataFromIpdu(uint8 alvCntr)
+ 
+ /******************************************************************/
+ /*!
+- * \\fn      void SftyE2eFpga_ExtractSRxDataFromIpdu(void)
+- * \\brief   This function extract data from SRx IPDU
++ * \\fn      void SftyE2eFpga_CopySRxDataFrame0ToIpduRxS0(uint8 idx)
++ * \\brief   This function copies ARx Data from frame to IPDU
+  * \\Parent_DD : SftyE2eFpga_E2eFrameHndlr
+- * \\param   -
++ * \\param   idx: index of passed data
+  * \\return  -
+  */
+ /******************************************************************/
+-LOCAL_INLINE void SftyE2eFpga_ExtractSRxDataFromIpdu(void)
++LOCAL_INLINE void SftyE2eFpga_CopySRxDataFrame0ToIpduRxS0(uint8 idx)
+ {
++   SftyE2eFpgaIpduRx.Data.RxS.Data32[0] = SftyDmaE2eFpgaFrameRx[idx].Data.RxS.Data32[0];
+ 
+-   SftyE2eFpgaIPhaRawVal[SYSDEF_PHA_SET_A][SYSDEF_PHA_U] = MLIB_S16U32( (uint32)((uint16)((uint16)SftyE2eFpgaIpduRx.Data.RxS.Sig.CurU_LSB4 |
+-                                                                        (uint16)(((uint16)SftyE2eFpgaIpduRx.Data.RxS.Sig.CurU_MSB8) << 4U))));
+-
+-   SftyE2eFpgaIPhaRawVal[SYSDEF_PHA_SET_A][SYSDEF_PHA_V] = MLIB_S16U32( (uint32)((uint16)((uint16)SftyE2eFpgaIpduRx.Data.RxS.Sig.CurV_LSB4 |
+-                                                                        (uint16)(((uint16)SftyE2eFpgaIpduRx.Data.RxS.Sig.CurV_MSB8) << 4U))));
++   return;
++}
+ 
+-   SftyE2eFpgaIPhaRawVal[SYSDEF_PHA_SET_A][SYSDEF_PHA_W] = MLIB_S16U32( (uint32)((uint16)((uint16)SftyE2eFpgaIpduRx.Data.RxS.Sig.CurW_LSB4 |
+-                                                                        (uint16)(((uint16)SftyE2eFpgaIpduRx.Data.RxS.Sig.CurW_MSB8) << 4U))));
++/******************************************************************/
++/*!
++ * \\fn      void SftyE2eFpga_CopySRxDataFrame1ToIpduRxS1(uint8 idx)
++ * \\brief   This function copies ARx Data from frame to IPDU
++ * \\Parent_DD : SftyE2eFpga_E2eFrameHndlr
++ * \\param   idx: index of passed data
++ * \\return  -
++ */
++/******************************************************************/
++LOCAL_INLINE void SftyE2eFpga_CopySRxDataFrame1ToIpduRxS1(uint8 idx)
++{
++   SftyE2eFpgaIpduRx.Data.RxS.Data32[1] = SftyDmaE2eFpgaFrameRx[idx].Data.RxS.Data32[1];
+ 
+-   SftyE2eFpgaPS16MultRawVal                             = MLIB_U16U32( (uint32)((uint16)((uint16)SftyE2eFpgaIpduRx.Data.RxS.Sig.PwrSpl16VM_LSB4 |
+-                                                                        (uint16)(((uint16)SftyE2eFpgaIpduRx.Data.RxS.Sig.PwrSpl16VM_MSB8) << 4U))));
++   return;
++}
+ 
+-   SftyE2eFpgaP5LSRawVal                                 = MLIB_U16U32( (uint32)((uint16)((uint16)SftyE2eFpgaIpduRx.Data.RxS.Sig.PwrSup5VLs_LSB8 |
+-                                                                        (uint16)(((uint16)SftyE2eFpgaIpduRx.Data.RxS.Sig.PwrSup5VLs_MSB4) << 8U))));
++/******************************************************************/
++/*!
++ * \\fn      void SftyE2eFpga_CopySRxDataFrame2ToIpduRxS2(uint8 idx)
++ * \\brief   This function copies ARx Data from frame to IPDU
++ * \\Parent_DD : SftyE2eFpga_E2eFrameHndlr
++ * \\param   idx: index of passed data
++ * \\return  -
++ */
++/******************************************************************/
++LOCAL_INLINE void SftyE2eFpga_CopySRxDataFrame2ToIpduRxS2(uint8 idx)
++{
++   SftyE2eFpgaIpduRx.Data.RxS.Data32[2] = SftyDmaE2eFpgaFrameRx[idx].Data.RxS.Data32[2];
+ 
+-   SftyE2eFpgaP5HSRawVal                                 = MLIB_U16U32( (uint32)((uint16)((uint16)SftyE2eFpgaIpduRx.Data.RxS.Sig.PwrSup5VHs_LSB4 |
+-                                                                        (uint16)(((uint16)SftyE2eFpgaIpduRx.Data.RxS.Sig.PwrSup5VHs_MSB8) << 4U))));
++   return;
++}
+ 
+-   SftyE2eFpgaSyncOutEarlyErrMonrStAcc                   |= ((uint8)(~(SftyE2eFpgaIpduRx.Data.RxS.Sig.FDSts_SOE)) & 0x01u);
++/******************************************************************/
++/*!
++ * \\fn      void SftyE2eFpga_CopySRxDataFrame3ToIpduRxS3(uint8 idx)
++ * \\brief   This function copies ARx Data from frame to IPDU
++ * \\Parent_DD : SftyE2eFpga_E2eFrameHndlr
++ * \\param   idx: index of passed data
++ * \\return  -
++ */
++/******************************************************************/
++LOCAL_INLINE void SftyE2eFpga_CopySRxDataFrame3ToIpduRxS3(uint8 idx)
++{
++   SftyE2eFpgaIpduRx.Data.RxS.Data32[3] = SftyDmaE2eFpgaFrameRx[idx].Data.RxS.Data32[3];
+ 
+-   SftyE2eFpgaSyncOutLateErrMonrStAcc                    |= ((uint8)(~(SftyE2eFpgaIpduRx.Data.RxS.Sig.FDSts_SOL)) & 0x01u);
++   return;
++}
++/******************************************************************/
++/*!
++ * \\fn      void SftyE2eFpga_CopySRxDataFrameToIpdu(uint8 idx)
++ * \\brief   This function copies SRx Data of the passed frame to IPDU
++ * \\Parent_DD : SftyE2eFpga_E2eFrameHndlr
++ * \\param   idx: index of passed data
++ * \\return  -
++ */
++/******************************************************************/
++LOCAL_INLINE void SftyE2eFpga_CopySRxDataFrameToIpdu(uint8 idx)
++{
++   SftyE2eFpga_CopySRxDataFrame0ToIpduRxS0(idx);
++   SftyE2eFpga_CopySRxDataFrame1ToIpduRxS1(idx);
++   SftyE2eFpga_CopySRxDataFrame2ToIpduRxS2(idx);
++   SftyE2eFpga_CopySRxDataFrame3ToIpduRxS3(idx);
++
++   return;
++}
++
++
++/******************************************************************/
++/*!
++ * \\fn      void SftyE2eFpga_ExtrCurrMod(void)
++ * \\brief   This function extracts current FPGA mode
++ * \\Parent_DD : SftyE2eFpga_E2eFrameHndlr
++ * \\param   -
++ * \\return  -
++ */
++/******************************************************************/
++LOCAL_INLINE void SftyE2eFpga_ExtrCurrMod(void)
++{
++   /* Extract current mode */
++   SftyE2eFpgaCurrMod    = (uint8)(SftyE2eFpgaIpduRx.Data.RxA.Id.MxA.Sig.StateRes.Field.ModeRes);
++
++   return;
++}
++
++/******************************************************************/
++/*!
++ * \\fn      void SftyE2eFpga_ExtractMeasCohrncFltSts(void)
++ * \\brief   This function extracts meas cohrnc fault status
++ * \\Parent_DD : SftyE2eFpga_E2eFrameHndlr
++ * \\param   -
++ * \\return  -
++ */
++/******************************************************************/
++LOCAL_INLINE void SftyE2eFpga_ExtractMeasCohrncFltSts(void)
++{
++   SftyE2eFpgaMeasCohrncFltStsAcc |= ((uint8)(~(SftyE2eFpgaIpduRx.Data.RxA.Id.MxA.Sig.FltA.Field.MeasCohernc)) & 0x01u);
++
++   return;
++}
++
++/******************************************************************/
++/*!
++ * \\fn      void SftyE2eFpga_ExtractEmgySWFltSts(void)
++ * \\brief   This function extracts Emgy SW fault status
++ * \\Parent_DD : SftyE2eFpga_E2eFrameHndlr
++ * \\param   -
++ * \\return  -
++ */
++/******************************************************************/
++LOCAL_INLINE void SftyE2eFpga_ExtractEmgySWFltSts(void)
++{
++   SftyE2eFpgaEmgySWFltStsAcc |= ((uint8)(~(SftyE2eFpgaIpduRx.Data.RxA.Id.MxA.Sig.FltA.Field.EmergencyStop)) & 0x01u);
++
++   return;
++}
++
++/******************************************************************/
++/*!
++ * \\fn      void SftyE2eFpga_ExtractLoGateDrvrFltSts(void)
++ * \\brief   This function extracts Lo Gate Drvr fault status
++ * \\Parent_DD : SftyE2eFpga_E2eFrameHndlr
++ * \\param   -
++ * \\return  -
++ */
++/******************************************************************/
++LOCAL_INLINE void SftyE2eFpga_ExtractLoGateDrvrFltSts(void)
++{
++   SftyE2eFpgaLoGateDrvrFltStsAcc |= ((uint8)(~(SftyE2eFpgaIpduRx.Data.RxA.Id.MxA.Sig.FltA.Field.IgbtL)) & 0x01u);
++
++   return;
++}
++
++/******************************************************************/
++/*!
++ * \\fn      void SftyE2eFpga_ExtractHsGateDrvrFltSts(void)
++ * \\brief   This function extracts Lo Gate Drvr fault status
++ * \\Parent_DD : SftyE2eFpga_E2eFrameHndlr
++ * \\param   -
++ * \\return  -
++ */
++/******************************************************************/
++LOCAL_INLINE void SftyE2eFpga_ExtractHsGateDrvrFltSts(void)
++{
++   SftyE2eFpgaHsGateDrvrFltStsAcc |= ((uint8)(~(SftyE2eFpgaIpduRx.Data.RxA.Id.MxA.Sig.FltA.Field.IgbtH)) & 0x01u);
++
++   return;
++}
++
++/******************************************************************/
++/*!
++ * \\fn      void SftyE2eFpga_ExtractActvDchaActvFltSts(void)
++ * \\brief   This function extracts active discharge active fault status
++ * \\Parent_DD : SftyE2eFpga_E2eFrameHndlr
++ * \\param   -
++ * \\return  -
++ */
++/******************************************************************/
++LOCAL_INLINE void SftyE2eFpga_ExtractActvDchaActvFltSts(void)
++{
++   SftyE2eFpgaActvDchaActvFltStsAcc |= ((uint8)(~(SftyE2eFpgaIpduRx.Data.RxA.Id.MxA.Sig.FltA.Field.ActiveDisAc)) & 0x01u);
++
++   return;
++}
++
++/******************************************************************/
++/*!
++ * \\fn      void SftyE2eFpga_ExtractActvDchaInactvFltSts(void)
++ * \\brief   This function extracts active discharge inactive fault status
++ * \\Parent_DD : SftyE2eFpga_E2eFrameHndlr
++ * \\param   -
++ * \\return  -
++ */
++/******************************************************************/
++LOCAL_INLINE void SftyE2eFpga_ExtractActvDchaInactvFltSts(void)
++{
++   SftyE2eFpgaActvDchaInactvFltStsAcc |= ((uint8)(~(SftyE2eFpgaIpduRx.Data.RxA.Id.MxA.Sig.FltA.Field.ActiveDisIn)) & 0x01u);
++
++   return;
++}
++
++/******************************************************************/
++/*!
++ * \\fn      void SftyE2eFpga_ExtractLossComErrMonrSt(void)
++ * \\brief   This function extracts Loss Communication error monitor status
++ * \\Parent_DD : SftyE2eFpga_E2eFrameHndlr
++ * \\param   -
++ * \\return  -
++ */
++/******************************************************************/
++LOCAL_INLINE void SftyE2eFpga_ExtractLossComErrMonrSt(void)
++{
++   SftyE2eFpgaLossComErrMonrStAcc     |= ((uint8)(~(SftyE2eFpgaIpduRx.Data.RxA.Id.MxA.Sig.FltA.Field.LossComSpi)) & 0x01u);
++
++   return;
++}
++/******************************************************************/
++/*!
++ * \\fn      void SftyE2eFpga_ExtrFltStsGrpA(void)
++ * \\brief   This function extracts fault status from the IPDU
++ * \\Parent_DD : SftyE2eFpga_E2eFrameHndlr
++ * \\param   -
++ * \\return  -
++ */
++/******************************************************************/
++LOCAL_INLINE void SftyE2eFpga_ExtrFltStsGrpA(void)
++{
++   SftyE2eFpga_ExtractMeasCohrncFltSts();
++   SftyE2eFpga_ExtractEmgySWFltSts();
++   SftyE2eFpga_ExtractLoGateDrvrFltSts();
++   SftyE2eFpga_ExtractHsGateDrvrFltSts();
++   SftyE2eFpga_ExtractActvDchaActvFltSts();
++   SftyE2eFpga_ExtractActvDchaInactvFltSts();
++   SftyE2eFpga_ExtractLossComErrMonrSt();
++
++   return;
++}
++
++/******************************************************************/
++/*!
++ * \\fn      void SftyE2eFpga_ExtractOverUnderCurUFltSts(void)
++ * \\brief   This function extracts over under current U fault status
++ * \\Parent_DD : SftyE2eFpga_E2eFrameHndlr
++ * \\param   -
++ * \\return  -
++ */
++/******************************************************************/
++LOCAL_INLINE void SftyE2eFpga_ExtractOverUnderCurUFltSts(void)
++{
++   SftyE2eFpgaOverUnderCurUFltStsAcc |=  ((uint8)(~(SftyE2eFpgaIpduRx.Data.RxA.Id.MxA.Sig.FltB.Field.OverUnderCurU)) & 0x01u);
++
++   return;
++}
++
++/******************************************************************/
++/*!
++ * \\fn      void SftyE2eFpga_ExtractOverUnderCurVFltSts(void)
++ * \\brief   This function extracts over under current V fault status
++ * \\Parent_DD : SftyE2eFpga_E2eFrameHndlr
++ * \\param   -
++ * \\return  -
++ */
++/******************************************************************/
++LOCAL_INLINE void SftyE2eFpga_ExtractOverUnderCurVFltSts(void)
++{
++   SftyE2eFpgaOverUnderCurVFltStsAcc |=  ((uint8)(~(SftyE2eFpgaIpduRx.Data.RxA.Id.MxA.Sig.FltB.Field.OverUnderCurV)) & 0x01u);
++
++   return;
++}
++
++/******************************************************************/
++/*!
++ * \\fn      void SftyE2eFpga_ExtractOverUnderCurWFltSts(void)
++ * \\brief   This function extracts over under current W fault status
++ * \\Parent_DD : SftyE2eFpga_E2eFrameHndlr
++ * \\param   -
++ * \\return  -
++ */
++/******************************************************************/
++LOCAL_INLINE void SftyE2eFpga_ExtractOverUnderCurWFltSts(void)
++{
++   SftyE2eFpgaOverUnderCurWFltStsAcc |=  ((uint8)(~(SftyE2eFpgaIpduRx.Data.RxA.Id.MxA.Sig.FltB.Field.OverUnderCurW)) & 0x01u);
++
++   return;
++}
++
++/******************************************************************/
++/*!
++ * \\fn      void SftyE2eFpga_ExtractOverVoltVBatFltSts(void)
++ * \\brief   This function extracts over voltage battery fault status
++ * \\Parent_DD : SftyE2eFpga_E2eFrameHndlr
++ * \\param   -
++ * \\return  -
++ */
++/******************************************************************/
++LOCAL_INLINE void SftyE2eFpga_ExtractOverVoltVBatFltSts(void)
++{
++   SftyE2eFpgaOverVoltVBatFltStsAcc |=  ((uint8)(~(SftyE2eFpgaIpduRx.Data.RxA.Id.MxA.Sig.FltB.Field.OverVoltVBat))  & 0x01u);
++
++   return;
++}
++
++/******************************************************************/
++/*!
++ * \\fn      void SftyE2eFpga_ExtractMidPointPhaUFltSts(void)
++ * \\brief   This function extracts mid point phase U fault status
++ * \\Parent_DD : SftyE2eFpga_E2eFrameHndlr
++ * \\param   -
++ * \\return  -
++ */
++/******************************************************************/
++LOCAL_INLINE void SftyE2eFpga_ExtractMidPointPhaUFltSts(void)
++{
++   SftyE2eFpgaMidPointPhaFltStsAcc[SFTY_PHA_U] |= ((uint8)(~(SftyE2eFpgaIpduRx.Data.RxA.Id.MxA.Sig.FltB.Field.IgbtMidPointU)) & 0x01u);
++
++   return;
++}
++
++/******************************************************************/
++/*!
++ * \\fn      void SftyE2eFpga_ExtractMidPointPhaVFltSts(void)
++ * \\brief   This function extracts mid point phase V fault status
++ * \\Parent_DD : SftyE2eFpga_E2eFrameHndlr
++ * \\param   -
++ * \\return  -
++ */
++/******************************************************************/
++LOCAL_INLINE void SftyE2eFpga_ExtractMidPointPhaVFltSts(void)
++{
++   SftyE2eFpgaMidPointPhaFltStsAcc[SFTY_PHA_V] |= ((uint8)(~(SftyE2eFpgaIpduRx.Data.RxA.Id.MxA.Sig.FltB.Field.IgbtMidPointV)) & 0x01u);
++
++   return;
++}
++
++/******************************************************************/
++/*!
++ * \\fn      void SftyE2eFpga_ExtractMidPointPhaWFltSts(void)
++ * \\brief   This function extracts mid point phase W fault status
++ * \\Parent_DD : SftyE2eFpga_E2eFrameHndlr
++ * \\param   -
++ * \\return  -
++ */
++/******************************************************************/
++LOCAL_INLINE void SftyE2eFpga_ExtractMidPointPhaWFltSts(void)
++{
++   SftyE2eFpgaMidPointPhaFltStsAcc[SFTY_PHA_W] |= ((uint8)(~(SftyE2eFpgaIpduRx.Data.RxA.Id.MxA.Sig.FltB.Field.IgbtMidPointW)) & 0x01u);
++
++   return;
++}
++
++/******************************************************************/
++/*!
++ * \\fn      void SftyE2eFpga_ExtrFltStsGrpB(void)
++ * \\brief   This function extracts fault status from the IPDU
++ * \\Parent_DD : SftyE2eFpga_E2eFrameHndlr
++ * \\param   -
++ * \\return  -
++ */
++/******************************************************************/
++LOCAL_INLINE void SftyE2eFpga_ExtrFltStsGrpB(void)
++{
++   SftyE2eFpga_ExtractOverUnderCurUFltSts();
++   SftyE2eFpga_ExtractOverUnderCurVFltSts();
++   SftyE2eFpga_ExtractOverUnderCurWFltSts();
++   SftyE2eFpga_ExtractOverVoltVBatFltSts();
++   SftyE2eFpga_ExtractMidPointPhaUFltSts();
++   SftyE2eFpga_ExtractMidPointPhaVFltSts();
++   SftyE2eFpga_ExtractMidPointPhaWFltSts();
++
++   return;
++}
++
++/******************************************************************/
++/*!
++ * \\fn      void SftyE2eFpga_ExtrFltStsGrpC(void)
++ * \\brief   This function extracts fault status from the IPDU
++ * \\Parent_DD : SftyE2eFpga_E2eFrameHndlr
++ * \\param   -
++ * \\return  -
++ */
++/******************************************************************/
++LOCAL_INLINE void SftyE2eFpga_ExtrFltStsGrpC(void)
++{
++   SftyE2eFpgaScSpdReadyFltStsAcc |= ((uint8)(~(SftyE2eFpgaIpduRx.Data.RxA.Id.MxA.Sig.FltC.Field.ScSpeedReady)) & 0x01u);
++
++   return;
++}
++
++/******************************************************************/
++/*!
++ * \\fn      void SftyE2eFpga_ExtrFltSts(void)
++ * \\brief   This function extracts fault status from the IPDU
++ * \\Parent_DD : SftyE2eFpga_E2eFrameHndlr
++ * \\param   -
++ * \\return  -
++ */
++/******************************************************************/
++LOCAL_INLINE void SftyE2eFpga_ExtrFltSts(void)
++{
++   /* Extract accumulated status of fault group A */
++   SftyE2eFpga_ExtrFltStsGrpA();
++
++   /* Extract accumulated status of fault group B */
++   SftyE2eFpga_ExtrFltStsGrpB();
++
++   /* Extract accumulated status of fault group C */
++   SftyE2eFpga_ExtrFltStsGrpC();
++
++   return;
++}
++
++/******************************************************************/
++/*!
++ * \\fn      void SftyE2eFpga_ExtractTempIGBTU(void)
++ * \\brief   This function extracts IGBT temp U
++ * \\Parent_DD : SftyE2eFpga_E2eFrameHndlr
++ * \\param   -
++ * \\return  -
++ */
++/******************************************************************/
++LOCAL_INLINE void SftyE2eFpga_ExtractTempIGBTU(void)
++{
++   SftyE2eFpgaTempIGBTRawVal[SYSDEF_PHA_U] = (((uint16)(SftyE2eFpgaIpduRx.Data.RxA.Id.Mx0.Sig.IgbtTempU_LSB8)) |
++                                               (uint16)(((uint16)SftyE2eFpgaIpduRx.Data.RxA.Id.Mx0.Sig.IgbtTempU_MSB4) << 8U));
++   return;
++}
++
++/******************************************************************/
++/*!
++ * \\fn      void SftyE2eFpga_ExtractTempIGBTV(void)
++ * \\brief   This function extracts IGBT temp V
++ * \\Parent_DD : SftyE2eFpga_E2eFrameHndlr
++ * \\param   -
++ * \\return  -
++ */
++/******************************************************************/
++LOCAL_INLINE void SftyE2eFpga_ExtractTempIGBTV(void)
++{
++   SftyE2eFpgaTempIGBTRawVal[SYSDEF_PHA_V] = (((uint16)(SftyE2eFpgaIpduRx.Data.RxA.Id.Mx0.Sig.IgbtTempV_LSB8)) |
++                                               (uint16)(((uint16)SftyE2eFpgaIpduRx.Data.RxA.Id.Mx0.Sig.IgbtTempV_MSB4) << 8U));
++   return;
++}
++
++/******************************************************************/
++/*!
++ * \\fn      void SftyE2eFpga_ExtractTempIGBTW(void)
++ * \\brief   This function extracts IGBT temp W
++ * \\Parent_DD : SftyE2eFpga_E2eFrameHndlr
++ * \\param   -
++ * \\return  -
++ */
++/******************************************************************/
++LOCAL_INLINE void SftyE2eFpga_ExtractTempIGBTW(void)
++{
++   SftyE2eFpgaTempIGBTRawVal[SYSDEF_PHA_W] = (((uint16)SftyE2eFpgaIpduRx.Data.RxA.Id.Mx0.Sig.IgbtTempW_LSB4)   |
++                                               (uint16)(((uint16)SftyE2eFpgaIpduRx.Data.RxA.Id.Mx0.Sig.IgbtTempW_MSB8) << 4U));
++   return;
++}
++
++/******************************************************************/
++/*!
++ * \\fn      void SftyE2eFpga_ExtrMx0Data(void)
++ * \\brief   This function extracts Mx0 data
++ * \\Parent_DD : SftyE2eFpga_E2eFrameHndlr
++ * \\param   -
++ * \\return  -
++ */
++/******************************************************************/
++LOCAL_INLINE void SftyE2eFpga_ExtrMx0Data(void)
++{
++   SftyE2eFpga_ExtractTempIGBTU();
++   SftyE2eFpga_ExtractTempIGBTV();
++   SftyE2eFpga_ExtractTempIGBTW();
++
++   return;
++}
++
++/******************************************************************/
++/*!
++ * \\fn      void SftyE2eFpga_ExtractCtrlBrdVal(void)
++ * \\brief   This function extracts Ctrl Board value
++ * \\Parent_DD : SftyE2eFpga_E2eFrameHndlr
++ * \\param   -
++ * \\return  -
++ */
++/******************************************************************/
++LOCAL_INLINE void SftyE2eFpga_ExtractCtrlBrdVal(void)
++{
++   SftyE2eFpgaCtrlBrdRawVal = (((uint16)(SftyE2eFpgaIpduRx.Data.RxA.Id.Mx1.Sig.DcLinkCtrlBd_LSB8)) |
++                                (uint16)(((uint16)SftyE2eFpgaIpduRx.Data.RxA.Id.Mx1.Sig.DcLinkCtrlBd_MSB4) << 8U));
++   return;
++}
++
++/******************************************************************/
++/*!
++ * \\fn      void SftyE2eFpga_ExtractDrvBrdVal(void)
++ * \\brief   This function extracts driver Board value
++ * \\Parent_DD : SftyE2eFpga_E2eFrameHndlr
++ * \\param   -
++ * \\return  -
++ */
++/******************************************************************/
++LOCAL_INLINE void SftyE2eFpga_ExtractDrvBrdVal(void)
++{
++   SftyE2eFpgaDrvBrdRawVal = (((uint16)SftyE2eFpgaIpduRx.Data.RxA.Id.Mx1.Sig.DcLinkDrvBd_LSB4) |
++                               (uint16)(((uint16)SftyE2eFpgaIpduRx.Data.RxA.Id.Mx1.Sig.DcLinkDrvBd_MSB8) << 4U));
++   return;
++}
++
++/******************************************************************/
++/*!
++ * \\fn      void SftyE2eFpga_ExtrMx1Data(void)
++ * \\brief   This function extracts Mx1 data
++ * \\Parent_DD : SftyE2eFpga_E2eFrameHndlr
++ * \\param   -
++ * \\return  -
++ */
++/******************************************************************/
++LOCAL_INLINE void SftyE2eFpga_ExtrMx1Data(void)
++{
++   SftyE2eFpga_ExtractCtrlBrdVal();
++   SftyE2eFpga_ExtractDrvBrdVal();
++
++#ifdef SWIT_IT_Active
++   SWIT_SftyE2eFpga_ExtrMx1Data_EndHook();
++#endif
++   return;
++}
++
++/******************************************************************/
++/*!
++ * \\fn      void SftyE2eFpga_ExtrMx2Data(void)
++ * \\brief   This function extracts Mx2 data
++ * \\Parent_DD : SftyE2eFpga_E2eFrameHndlr
++ * \\param   -
++ * \\return  -
++ */
++/******************************************************************/
++LOCAL_INLINE void SftyE2eFpga_ExtrMx2Data(void)
++{
++   SftyE2eFpgaCuTSnsrRawVal = (((uint16)(SftyE2eFpgaIpduRx.Data.RxA.Id.Mx2.Sig.TempCtrlBd_LSB8)) |
++                               (uint16)(((uint16)SftyE2eFpgaIpduRx.Data.RxA.Id.Mx2.Sig.TempCtrlBd_MSB4) << 8U));
++
++   return;
++}
++
++/******************************************************************/
++/*!
++ * \\fn      void SftyE2eFpga_ExtrMx3Data(void)
++ * \\brief   This function extracts Mx3 data
++ * \\Parent_DD : SftyE2eFpga_E2eFrameHndlr
++ * \\param   -
++ * \\return  -
++ */
++/******************************************************************/
++LOCAL_INLINE void SftyE2eFpga_ExtrMx3Data(void)
++{
++   SftyE2eFpgaDrvTSnsrRawVal = (((uint16)(SftyE2eFpgaIpduRx.Data.RxA.Id.Mx3.Sig.TempDrvBd_LSB8)) |
++                               (uint16)(((uint16)SftyE2eFpgaIpduRx.Data.RxA.Id.Mx3.Sig.TempDrvBd_MSB4) << 8U));
++
++   return;
++}
++
++/******************************************************************/
++/*!
++ * \\fn      void SftyE2eFpga_ExtractARxDataFromIpdu(uint8 alvCntr)
++ * \\brief   This function extracts faults and data from IPDU according
++ *          to the alive counter of the frame
++ * \\Parent_DD : SftyE2eFpga_E2eFrameHndlr
++ * \\param   alvCntr: alive counter of the frame
++ * \\return  -
++ */
++/******************************************************************/
++LOCAL_INLINE void SftyE2eFpga_ExtractARxDataFromIpdu(uint8 alvCntr)
++{
++   SftyE2eFpga_ExtrCurrMod();
++
++   SftyE2eFpga_ExtrFltSts();
++
++   switch(alvCntr)
++   {
++      case 0x00u:
++      {
++         SftyE2eFpga_ExtrMx0Data();
++
++         break;
++      }
++      case 0x01u:
++      {
++         SftyE2eFpga_ExtrMx1Data();
++
++         break;
++      }
++      case 0x02u:
++      {
++         SftyE2eFpga_ExtrMx2Data();
++         break;
++      }
++      case 0x03u:
++      {
++         SftyE2eFpga_ExtrMx3Data();
++         break;
++      }
++      default:
++      {
++         /* Do nothing */
++         break;
++      }
++   }
++   return;
++}
++
++/******************************************************************/
++/*!
++ * \\fn      void SftyE2eFpga_ExtractIPhaUVal(void)
++ * \\brief   This function extracts phase current U
++ * \\Parent_DD : SftyE2eFpga_E2eFrameHndlr
++ * \\param   -
++ * \\return  -
++ */
++/******************************************************************/
++LOCAL_INLINE void SftyE2eFpga_ExtractIPhaUVal(void)
++{
++   SftyE2eFpgaIPhaRawVal[SYSDEF_PHA_SET_A][SYSDEF_PHA_U] = MLIB_S16U32( (uint32)((uint16)((uint16)SftyE2eFpgaIpduRx.Data.RxS.Sig.CurU_LSB4 |
++                                                                        (uint16)(((uint16)SftyE2eFpgaIpduRx.Data.RxS.Sig.CurU_MSB8) << 4U))));
++
++
++   return;
++}
++
++/******************************************************************/
++/*!
++ * \\fn      void SftyE2eFpga_ExtractIPhaVVal(void)
++ * \\brief   This function extracts phase current V
++ * \\Parent_DD : SftyE2eFpga_E2eFrameHndlr
++ * \\param   -
++ * \\return  -
++ */
++/******************************************************************/
++LOCAL_INLINE void SftyE2eFpga_ExtractIPhaVVal(void)
++{
++   SftyE2eFpgaIPhaRawVal[SYSDEF_PHA_SET_A][SYSDEF_PHA_V] = MLIB_S16U32( (uint32)((uint16)((uint16)SftyE2eFpgaIpduRx.Data.RxS.Sig.CurV_LSB4 |
++                                                                        (uint16)(((uint16)SftyE2eFpgaIpduRx.Data.RxS.Sig.CurV_MSB8) << 4U))));
++
++   return;
++}
++
++/******************************************************************/
++/*!
++ * \\fn      void SftyE2eFpga_ExtractIPhaWVal(void)
++ * \\brief   This function extracts phase current W
++ * \\Parent_DD : SftyE2eFpga_E2eFrameHndlr
++ * \\param   -
++ * \\return  -
++ */
++/******************************************************************/
++LOCAL_INLINE void SftyE2eFpga_ExtractIPhaWVal(void)
++{
++   SftyE2eFpgaIPhaRawVal[SYSDEF_PHA_SET_A][SYSDEF_PHA_W] = MLIB_S16U32( (uint32)((uint16)((uint16)SftyE2eFpgaIpduRx.Data.RxS.Sig.CurW_LSB4 |
++                                                                        (uint16)(((uint16)SftyE2eFpgaIpduRx.Data.RxS.Sig.CurW_MSB8) << 4U))));
++   return;
++}
++/******************************************************************/
++/*!
++ * \\fn      void SftyE2eFpga_ExtractDrvBrdVal(void)
++ * \\brief   This function extracts phase current
++ * \\Parent_DD : SftyE2eFpga_E2eFrameHndlr
++ * \\param   -
++ * \\return  -
++ */
++/******************************************************************/
++LOCAL_INLINE void SftyE2eFpga_ExtractIPhaVal(void)
++{
++   SftyE2eFpga_ExtractIPhaUVal();
++   SftyE2eFpga_ExtractIPhaVVal();
++   SftyE2eFpga_ExtractIPhaWVal();
++   return;
++}
++
++/******************************************************************/
++/*!
++ * \\fn      void SftyE2eFpga_ExtractIPhaWVal(void)
++ * \\brief   This function extracts PS16 multiple value
++ * \\Parent_DD : SftyE2eFpga_E2eFrameHndlr
++ * \\param   -
++ * \\return  -
++ */
++/******************************************************************/
++LOCAL_INLINE void SftyE2eFpga_ExtractPS16MultVal(void)
++{
++   SftyE2eFpgaPS16MultRawVal = MLIB_U16U32( (uint32)((uint16)((uint16)SftyE2eFpgaIpduRx.Data.RxS.Sig.PwrSpl16VM_LSB4 |
++                                                    (uint16)(((uint16)SftyE2eFpgaIpduRx.Data.RxS.Sig.PwrSpl16VM_MSB8) << 4U))));
++
++   return;
++}
++
++/******************************************************************/
++/*!
++ * \\fn      void SftyE2eFpga_ExtractIPhaWVal(void)
++ * \\brief   This function extracts P5 LS value
++ * \\Parent_DD : SftyE2eFpga_E2eFrameHndlr
++ * \\param   -
++ * \\return  -
++ */
++/******************************************************************/
++LOCAL_INLINE void SftyE2eFpga_ExtractP5LSVal(void)
++{
++   SftyE2eFpgaP5LSRawVal = MLIB_U16U32( (uint32)((uint16)((uint16)SftyE2eFpgaIpduRx.Data.RxS.Sig.PwrSup5VLs_LSB8 |
++                                                 (uint16)(((uint16)SftyE2eFpgaIpduRx.Data.RxS.Sig.PwrSup5VLs_MSB4) << 8U))));
++
++   return;
++}
++
++/******************************************************************/
++/*!
++ * \\fn      void SftyE2eFpga_ExtractIPhaWVal(void)
++ * \\brief   This function extracts P5 HS value
++ * \\Parent_DD : SftyE2eFpga_E2eFrameHndlr
++ * \\param   -
++ * \\return  -
++ */
++/******************************************************************/
++LOCAL_INLINE void SftyE2eFpga_ExtractP5HSVal(void)
++{
++   SftyE2eFpgaP5HSRawVal = MLIB_U16U32( (uint32)((uint16)((uint16)SftyE2eFpgaIpduRx.Data.RxS.Sig.PwrSup5VHs_LSB4 |
++                                                 (uint16)(((uint16)SftyE2eFpgaIpduRx.Data.RxS.Sig.PwrSup5VHs_MSB8) << 4U))));
++
++   return;
++}
++/******************************************************************/
++/*!
++ * \\fn      void SftyE2eFpga_ExtractVltgVal(void)
++ * \\brief   This function extracts voltage values
++ * \\Parent_DD : SftyE2eFpga_E2eFrameHndlr
++ * \\param   -
++ * \\return  -
++ */
++/******************************************************************/
++LOCAL_INLINE void SftyE2eFpga_ExtractVltgVal(void)
++{
++   SftyE2eFpga_ExtractPS16MultVal();
++   SftyE2eFpga_ExtractP5LSVal();
++   SftyE2eFpga_ExtractP5HSVal();
++
++   return;
++}
++
++/******************************************************************/
++/*!
++ * \\fn      void SftyE2eFpga_ExtractErrMonrSt(void)
++ * \\brief   This function extracts monitors status
++ * \\Parent_DD : SftyE2eFpga_E2eFrameHndlr
++ * \\param   -
++ * \\return  -
++ */
++/******************************************************************/
++LOCAL_INLINE void SftyE2eFpga_ExtractErrMonrSt(void)
++{
++   SftyE2eFpgaSyncOutEarlyErrMonrStAcc                   |= ((uint8)(~(SftyE2eFpgaIpduRx.Data.RxS.Sig.FDSts_SOE)) & 0x01u);
++
++   SftyE2eFpgaSyncOutLateErrMonrStAcc                    |= ((uint8)(~(SftyE2eFpgaIpduRx.Data.RxS.Sig.FDSts_SOL)) & 0x01u);
++
++   SftyE2eFpgaTxCrcCtrlAErrMonrStAcc                     |= ((uint8)(~(SftyE2eFpgaIpduRx.Data.RxS.Sig.FDSts_TxA)) & 0x01u);
++
++   SftyE2eFpgaTxCrcCtrlSErrMonrStAcc                     |= ((uint8)(~(SftyE2eFpgaIpduRx.Data.RxS.Sig.FDSts_TxS)) & 0x01u);
++
++   return;
++}
++/******************************************************************/
++/*!
++ * \\fn      void SftyE2eFpga_ExtractSRxDataFromIpdu(void)
++ * \\brief   This function extract data from SRx IPDU
++ * \\Parent_DD : SftyE2eFpga_E2eFrameHndlr
++ * \\param   -
++ * \\return  -
++ */
++/******************************************************************/
++LOCAL_INLINE void SftyE2eFpga_ExtractSRxDataFromIpdu(void)
++{
++   SftyE2eFpga_ExtractIPhaVal();
++
++   SftyE2eFpga_ExtractVltgVal();
++
++   SftyE2eFpga_ExtractErrMonrSt();
++
++   return;
++}
++
++/******************************************************************/
++/*!
++ * \\fn      uint8 SftyE2eFpga_ChkTiStamp(uint8 frameIdx)
++ * \\brief   This function checks timestamp of the passed frame
++ * \\Parent_DD : SftyE2eFpga_E2eFrameHndlr
++ * \\param   frameIdx: index of the passed frame
++ * \\return  uint8 - timestamp check status
++ */
++/******************************************************************/
++LOCAL_INLINE uint8 SftyE2eFpga_ChkTiStamp(uint8 frameIdx)
++{
++   uint8 retVal;
++
++   /* Get current timestamp */
++   SftyE2eFpgaCurrTiStamp = SftyDmaE2eFpgaFrameRx[frameIdx].Data.tiStamp;
++
++   if(SftyE2eFpgaTiStampChkFirstRun == TRUE)
++   {
++      retVal = (uint8)SftyUtils_ChkTiStamp(&SftyE2eFpgaLstTiStamp, &SftyE2eFpgaCurrTiStamp);
++   }
++   else
++   {
++      SftyE2eFpgaLstTiStamp = SftyE2eFpgaCurrTiStamp;
++      retVal = (uint8)ERR_DEB_MONR_STS_PASSED;
++      SftyE2eFpgaTiStampChkFirstRun = TRUE;
++   }
++
++   return retVal;
++
++}
++
++/******************************************************************/
++/*!
++ * \\fn      void SftyE2eFpga_UpdtC2cData(void)
++ * \\brief   This function updates C2C data
++ * \\Parent_DD : SftyE2eFpga_MainFunction
++ * \\param   -
++ * \\return  void
++ */
++/******************************************************************/
++LOCAL_INLINE void SftyE2eFpga_UpdtC2cData(void)
++{
++
++#ifdef SWIT_IT_Active
++   SWIT_SftyE2eFpga_UpdtC2cData_BgnHook();
++#endif
++
++   SftyC2cData.FpgaTxDataFltBReinitSt.B.OverUndCurU    = SftyAcEvlnSetOverCurrPhaReinitSt[SYSDEF_PHA_U];
++   SftyC2cData.FpgaTxDataFltBReinitSt.B.OverUndCurV    = SftyAcEvlnSetOverCurrPhaReinitSt[SYSDEF_PHA_V];
++   SftyC2cData.FpgaTxDataFltBReinitSt.B.OverUndCurW    = SftyAcEvlnSetOverCurrPhaReinitSt[SYSDEF_PHA_W];
++
++   SftyC2cData.FpgaTxDataFltAReinitSt.B.MeasCohernc    = SftyAcEvlnSetPlausReinitSt | SftyHvDcUEvlnSetPlausReinitSt;
++   SftyC2cData.FpgaTxDataFltBReinitSt.B.OvVbat         = SftyHvDcUEvlnSetOverVoltReinitSt;
++
++   SftyC2cData.FpgaTxDataFltBReinitSt.B.IgbtMidPointW  = SftyInvActrSetMidPointPhaWReinitSt;
++   SftyC2cData.FpgaTxDataFltBReinitSt.B.IgbtMidPointV  = SftyInvActrSetMidPointPhaVReinitSt;
++   SftyC2cData.FpgaTxDataFltBReinitSt.B.IgbtMidPointU  = SftyInvActrSetMidPointPhaUReinitSt;
++
++   SftyC2cData.FpgaTxDataFltAReinitSt.B.IgbtH          = SftyInvActrSetHsGateDrvrReinitSt;
++   SftyC2cData.FpgaTxDataFltAReinitSt.B.IgbtL          = SftyInvActrSetLoGateDrvrReinitSt;
++
++   if(SftyE2eFpgaStateReqEmgySwOvrdEna == FALSE)
++   {
++      SftyE2eFpgaNoEmgySwReq = SftyInvActrStateReqEmgySw;
++   }
++   else
++   {
++      SftyE2eFpgaNoEmgySwReq = SftyE2eFpgaStateReqEmgySwOvrdVal;
++   }
++
++   if(SftyE2eFpgaStateReqSCSpdReadyOvrdEna == FALSE)
++   {
++      SftyE2eFpgaSCspdReady = SftyInvActrStateReqSCSpdReady;
++   }
++   else
++   {
++      SftyE2eFpgaSCspdReady = SftyE2eFpgaStateReqSCSpdReadyOvrdVal;
++   }
++
++   SftyC2cData.FpgaStateReq.B.NoEmgySw    = SftyE2eFpgaNoEmgySwReq;
++
++   SftyC2cData.FpgaStateReq.B.SCspdReady  = SftyE2eFpgaSCspdReady;
++
++   if(SftyE2eFpgaActvDchaReqOvrdEna == FALSE)
++   {
++      SftyE2eFpgaActvDchaReq = SftyActvDchaCtrlActvDchaReqViaR;
++   }
++   else
++   {
++      SftyE2eFpgaActvDchaReq = SftyE2eFpgaActvDchaReqValOvrdVal;
++   }
++
++   SftyC2cData.FpgaActvDchaReq = SftyE2eFpgaActvDchaReq;
++
++   return;
++}
++
++/******************************************************************/
++/*!
++ * \\fn      void SftyE2eFpga_AccModPlausChk(void)
++ * \\brief   This function performs accumulated mode plausibility check
++ * \\Parent_DD : SftyE2eFpga_MainFunction
++ * \\param   -
++ * \\return  void
++ */
++/******************************************************************/
++LOCAL_INLINE void SftyE2eFpga_AccModPlausChk(void)
++{
++   if( SftyInvActrStateReqMod == SftyE2eFpgaCurrMod )
++   {
++      SftyE2eFpgaModPlausErrMonrStAcc |= ERR_DEB_MONR_STS_PASSED;
++   }
++   else
++   {
++      SftyE2eFpgaModPlausErrMonrStAcc |= ERR_DEB_MONR_STS_FAILED;
++   }
++
++   return;
++}
++
++/******************************************************************/
++/*!
++ * \\fn      void SftyE2eFpga_CopyAndExtractARxData(uint8 idx, uint8 alvCntr)
++ * \\brief   This function copies ARx Data from frame to IPDU according
++ *          to the alive counter of the passed index and extracts data
++ * \\Parent_DD : SftyE2eFpga_E2eFrameHndlr
++ * \\param   idx: index of passed data
++ * \\param   alvCntr: alive counter of the frame
++ * \\return  -
++ */
++/******************************************************************/
++LOCAL_INLINE void SftyE2eFpga_CopyAndExtractARxData(uint8 idx, uint8 alvCntr)
++{
++   /* Copy Data frame  to Ipdu deponding on the alive counter */
++   SftyE2eFpga_CopyARxDataFrameToIpdu(idx, alvCntr);
++
++   /* Extract Data from Ipdu */
++   SftyE2eFpga_ExtractARxDataFromIpdu(alvCntr);
++
++   return;
++}
++
++/******************************************************************/
++/*!
++ * \\fn      void SftyE2eFpga_CopyAndExtractSRxData(uint8 idx)
++ * \\brief   This function copies SRx Data from frame to IPDU according
++ *          the passed index and extracts data
++ * \\Parent_DD : SftyE2eFpga_E2eFrameHndlr
++ * \\param   idx: index of passed data
++ * \\return  -
++ */
++/******************************************************************/
++LOCAL_INLINE void SftyE2eFpga_CopyAndExtractSRxData(uint8 idx)
++{
++   /* Copy Data frame  to Ipdu  */
++   SftyE2eFpga_CopySRxDataFrameToIpdu(idx);
++
++   /* Extract Data from Ipdu */
++   SftyE2eFpga_ExtractSRxDataFromIpdu();
++
++   return;
++}
++
++
++/******************************************************************/
++/*!
++ * \\fn      void SftyE2eFpga_RstFltSts(void)
++ * \\brief   This function resets all faults status for next 200 us cycle
++ * \\Parent_DD : SftyE2eFpga_MainFunction
++ * \\param   -
++ * \\return  void
++ */
++/******************************************************************/
++LOCAL_INLINE void SftyE2eFpga_RstFltSts(void)
++{
++   /* Reset status for next 200 us cycle */
++   SftyE2eFpgaMeasCohrncFltStsAcc              = SFTY_E2E_FPGA_ACC_MONR_STS_PASSED;
++   SftyE2eFpgaEmgySWFltStsAcc                  = SFTY_E2E_FPGA_ACC_MONR_STS_PASSED;
++   SftyE2eFpgaOverUnderCurUFltStsAcc           = SFTY_E2E_FPGA_ACC_MONR_STS_PASSED;
++   SftyE2eFpgaOverUnderCurVFltStsAcc           = SFTY_E2E_FPGA_ACC_MONR_STS_PASSED;
++   SftyE2eFpgaOverUnderCurWFltStsAcc           = SFTY_E2E_FPGA_ACC_MONR_STS_PASSED;
++   SftyE2eFpgaOverVoltVBatFltStsAcc            = SFTY_E2E_FPGA_ACC_MONR_STS_PASSED;
++   SftyE2eFpgaScSpdReadyFltStsAcc              = SFTY_E2E_FPGA_ACC_MONR_STS_PASSED;
++   SftyE2eFpgaLoGateDrvrFltStsAcc              = SFTY_E2E_FPGA_ACC_MONR_STS_PASSED;
++   SftyE2eFpgaHsGateDrvrFltStsAcc              = SFTY_E2E_FPGA_ACC_MONR_STS_PASSED;
++   SftyE2eFpgaActvDchaActvFltStsAcc            = SFTY_E2E_FPGA_ACC_MONR_STS_PASSED;
++   SftyE2eFpgaActvDchaInactvFltStsAcc          = SFTY_E2E_FPGA_ACC_MONR_STS_PASSED;
++   SftyE2eFpgaLossComErrMonrStAcc              = SFTY_E2E_FPGA_ACC_MONR_STS_PASSED;
++   SftyE2eFpgaSyncOutEarlyErrMonrStAcc         = SFTY_E2E_FPGA_ACC_MONR_STS_PASSED;
++   SftyE2eFpgaSyncOutLateErrMonrStAcc          = SFTY_E2E_FPGA_ACC_MONR_STS_PASSED;
++   SftyE2eFpgaTxCrcCtrlAErrMonrStAcc           = SFTY_E2E_FPGA_ACC_MONR_STS_PASSED;
++   SftyE2eFpgaTxCrcCtrlSErrMonrStAcc           = SFTY_E2E_FPGA_ACC_MONR_STS_PASSED;
++   SftyE2eFpgaMidPointPhaFltStsAcc[SFTY_PHA_U] = SFTY_E2E_FPGA_ACC_MONR_STS_PASSED;
++   SftyE2eFpgaMidPointPhaFltStsAcc[SFTY_PHA_V] = SFTY_E2E_FPGA_ACC_MONR_STS_PASSED;
++   SftyE2eFpgaMidPointPhaFltStsAcc[SFTY_PHA_W] = SFTY_E2E_FPGA_ACC_MONR_STS_PASSED;
++   SftyE2eFpgaModPlausErrMonrStAcc             = SFTY_E2E_FPGA_ACC_MONR_STS_PASSED;
++
++   return;
++}
++
++/******************************************************************/
++/*!
++ * \\fn      void SftyE2eFpga_InitFltStsAcc(void)
++ * \\brief   This function initializes all accumulates faults status
++ * \\Parent_DD : SftyE2eFpga_Init
++ * \\param   -
++ * \\return  void
++ */
++/******************************************************************/
++LOCAL_INLINE void SftyE2eFpga_InitFltStsAcc(void)
++{
++   SftyE2eFpgaOverVoltVBatFltStsAcc              = SFTY_E2E_FPGA_ACC_MONR_STS_PASSED;
++   SftyE2eFpgaMeasCohrncFltStsAcc                = SFTY_E2E_FPGA_ACC_MONR_STS_PASSED;
++   SftyE2eFpgaEmgySWFltStsAcc                    = SFTY_E2E_FPGA_ACC_MONR_STS_PASSED;
++   SftyE2eFpgaOverUnderCurUFltStsAcc             = SFTY_E2E_FPGA_ACC_MONR_STS_PASSED;
++   SftyE2eFpgaOverUnderCurVFltStsAcc             = SFTY_E2E_FPGA_ACC_MONR_STS_PASSED;
++   SftyE2eFpgaOverUnderCurWFltStsAcc             = SFTY_E2E_FPGA_ACC_MONR_STS_PASSED;
++   SftyE2eFpgaScSpdReadyFltStsAcc                = SFTY_E2E_FPGA_ACC_MONR_STS_PASSED;
++   SftyE2eFpgaMidPointPhaFltStsAcc[SFTY_PHA_U]   = SFTY_E2E_FPGA_ACC_MONR_STS_PASSED;
++   SftyE2eFpgaMidPointPhaFltStsAcc[SFTY_PHA_V]   = SFTY_E2E_FPGA_ACC_MONR_STS_PASSED;
++   SftyE2eFpgaMidPointPhaFltStsAcc[SFTY_PHA_W]   = SFTY_E2E_FPGA_ACC_MONR_STS_PASSED;
++   SftyE2eFpgaLoGateDrvrFltStsAcc                = SFTY_E2E_FPGA_ACC_MONR_STS_PASSED;
++   SftyE2eFpgaHsGateDrvrFltStsAcc                = SFTY_E2E_FPGA_ACC_MONR_STS_PASSED;
++   SftyE2eFpgaActvDchaActvFltStsAcc              = SFTY_E2E_FPGA_ACC_MONR_STS_PASSED;
++   SftyE2eFpgaActvDchaInactvFltStsAcc            = SFTY_E2E_FPGA_ACC_MONR_STS_PASSED;
++   SftyE2eFpgaLossComErrMonrStAcc                = SFTY_E2E_FPGA_ACC_MONR_STS_PASSED;
++   SftyE2eFpgaSyncOutEarlyErrMonrStAcc           = SFTY_E2E_FPGA_ACC_MONR_STS_PASSED;
++   SftyE2eFpgaSyncOutLateErrMonrStAcc            = SFTY_E2E_FPGA_ACC_MONR_STS_PASSED;
++   SftyE2eFpgaTxCrcCtrlAErrMonrStAcc             = SFTY_E2E_FPGA_ACC_MONR_STS_PASSED;
++   SftyE2eFpgaTxCrcCtrlSErrMonrStAcc             = SFTY_E2E_FPGA_ACC_MONR_STS_PASSED;
++   SftyE2eFpgaModPlausErrMonrStAcc               = SFTY_E2E_FPGA_ACC_MONR_STS_PASSED;
++
++   return;
++}
++
++/******************************************************************/
++/*!
++ * \\fn      void SftyE2eFpga_InitFltSts(void)
++ * \\brief   This function initializes all faults status
++ * \\Parent_DD : SftyE2eFpga_Init
++ * \\param   -
++ * \\return  void
++ */
++/******************************************************************/
++LOCAL_INLINE void SftyE2eFpga_InitFltSts(void)
++{
++   SftyE2eFpgaMeasCohrncFltSts                           = TRUE;
++   SftyE2eFpgaEmgySWFltSts                               = TRUE;
++   SftyE2eFpgaActvDchaActvFltSts                         = TRUE;
++   SftyE2eFpgaActvDchaInactvFltSts                       = TRUE;
++   SftyE2eFpgaOverUnderCurUFltSts                        = TRUE;
++   SftyE2eFpgaOverUnderCurVFltSts                        = TRUE;
++   SftyE2eFpgaOverUnderCurWFltSts                        = TRUE;
++   SftyE2eFpgaOverVoltVBatFltSts                         = TRUE;
++   SftyE2eFpgaScSpdReadyFltSts                           = TRUE;
++   SftyE2eFpgaLoGateDrvrFltSts                           = TRUE;
++   SftyE2eFpgaHsGateDrvrFltSts                           = TRUE;
++   SftyE2eFpgaMidPointPhaFltSts[SFTY_PHA_U]              = TRUE;
++   SftyE2eFpgaMidPointPhaFltSts[SFTY_PHA_U]              = TRUE;
++   SftyE2eFpgaMidPointPhaFltSts[SFTY_PHA_U]              = TRUE;
++
++   return;
++}
++
++/******************************************************************/
++/*!
++ * \\fn      void SftyE2eFpga_InitErrMonrSt(void)
++ * \\brief   This function initializes all error monitors status
++ * \\Parent_DD : SftyE2eFpga_Init
++ * \\param   -
++ * \\return  void
++ */
++/******************************************************************/
++LOCAL_INLINE void SftyE2eFpga_InitErrMonrSt(void)
++{
++   SftyE2eFpgaDmaTiStampErrMonrSt                        = ERR_DEB_MONR_STS_INACTIVE;
++   SftyE2eFpgaRxMuxSeqErrMonrSt                          = ERR_DEB_MONR_STS_INACTIVE;
++   SftyE2eFpgaRxACrcErrMonrSt                            = ERR_DEB_MONR_STS_INACTIVE;
++   SftyE2eFpgaRxSCrcErrMonrSt                            = ERR_DEB_MONR_STS_INACTIVE;
++   SftyE2eFpgaLossComErrMonrSt                           = ERR_DEB_MONR_STS_INACTIVE;
++   SftyE2eFpgaSyncOutEarlyErrMonrSt                      = ERR_DEB_MONR_STS_INACTIVE;
++   SftyE2eFpgaSyncOutLateErrMonrSt                       = ERR_DEB_MONR_STS_INACTIVE;
++   SftyE2eFpgaTxCrcCtrlAErrMonrSt                        = ERR_DEB_MONR_STS_INACTIVE;
++   SftyE2eFpgaTxCrcCtrlSErrMonrSt                        = ERR_DEB_MONR_STS_INACTIVE;
++   SftyE2eFpgaModPlausErrMonrSt                          = ERR_DEB_MONR_STS_INACTIVE;
++   SftyE2eFpgaPrmDlErrMonrSt                             = ERR_DEB_MONR_STS_INACTIVE;
++
++   return;
++}
++
++/******************************************************************/
++/*!
++ * \\fn      void SftyE2eFpga_InitC2cData(void)
++ * \\brief   This function initializes all module related c2c data
++ * \\Parent_DD : SftyE2eFpga_Init
++ * \\param   -
++ * \\return  void
++ */
++/******************************************************************/
++LOCAL_INLINE void SftyE2eFpga_InitC2cData(void)
++{
++   SftyC2cData.FpgaStateReq.B.NoEmgySw    = SFTY_E2E_FPGA_NO_REQ;
++   SftyC2cData.FpgaStateReq.B.SCspdReady  = SFTY_E2E_FPGA_NO_REQ;
++   SftyC2cData.FpgaStateReq.B.Operate     = SFTY_E2E_FPGA_TRACTION;
++   SftyC2cData.FpgaStateReq.B.Switchtype  = SFTY_E2E_FPGA_MLI_TRACTION;
++   SftyC2cData.FpgaStateReq.B.Mode        = SFTY_E2E_FPGA_DFLT_MODE;
++   SftyC2cData.FpgaTxDataFltBReinitSt.U   = SFTY_E2E_FPGA_FLT_ST_DFLT;
++   SftyC2cData.FpgaTxDataFltAReinitSt.U   = SFTY_E2E_FPGA_FLT_ST_DFLT;
++   SftyC2cData.FpgaActvDchaReq            = FALSE;
++
++   return;
++}
++
++/******************************************************************/
++/*!
++ * \\fn      Std_ReturnType SftyE2eFpga_ARxCrcChk(uint8 idx)
++ * \\brief   This function checks CRC for ARx frame
++ * \\Parent_DD : SftyE2eFpga_E2eFrameHndlr
++ * \\param   idx: index of passed data
++ * \\return  Std_ReturnType - result of the check
++ */
++/******************************************************************/
++LOCAL_INLINE Std_ReturnType SftyE2eFpga_ARxCrcChk(uint8 idx)
++{
++   uint16 recCrc;
++   Std_ReturnType retVal;
++
++   /* Get received CRC */
++   recCrc = SftyE2eFpga_GetARxCrc(idx);
++
++   retVal = SftyE2eFpga_CrcEval(SftyDmaE2eFpgaFrameRx[idx].Data.RxA.Data8, recCrc);
++
++   return retVal;
++}
++
++/******************************************************************/
++/*!
++ * \\fn      Std_ReturnType SftyE2eFpga_SRxCrcChk(uint8 idx)
++ * \\brief   This function checks CRC for SRx frame
++ * \\Parent_DD : SftyE2eFpga_E2eFrameHndlr
++ * \\param   idx: index of passed data
++ * \\return  Std_ReturnType - result of the check
++ */
++/******************************************************************/
++LOCAL_INLINE Std_ReturnType SftyE2eFpga_SRxCrcChk(uint8 idx)
++{
++   uint16 recCrc;
++   Std_ReturnType retVal;
+ 
+-   SftyE2eFpgaTxCrcCtrlAErrMonrStAcc                     |= ((uint8)(~(SftyE2eFpgaIpduRx.Data.RxS.Sig.FDSts_TxA)) & 0x01u);
++   /* Get received CRC */
++   recCrc = SftyE2eFpga_GetSRxCrc(idx);
+ 
+-   SftyE2eFpgaTxCrcCtrlSErrMonrStAcc                     |= ((uint8)(~(SftyE2eFpgaIpduRx.Data.RxS.Sig.FDSts_TxS)) & 0x01u);
++   retVal = SftyE2eFpga_CrcEval(SftyDmaE2eFpgaFrameRx[idx].Data.RxS.Data8, recCrc);
+ 
+-   return;
++   return retVal;
+ }
+ 
+ /******************************************************************/
+ /*!
+- * \\fn      uint8 SftyE2eFpga_ChkTiStamp(uint8 frameIdx)
+- * \\brief   This function checks timestamp of the passed frame
++ * \\fn      uint8 SftyE2eFpga_AlvCntrChkHandlr(uint8 idx, uint8* alvCntr)
++ * \\brief   This function handles check of alive counter of the passed message.
+  * \\Parent_DD : SftyE2eFpga_E2eFrameHndlr
+- * \\param   frameIdx: index of the passed frame
+- * \\return  uint8 - timestamp check status
++ * \\param   [in]  idx - index of the message
++ * \\param   [inout]  alvCntr - alive counter value
++ * \\return  Std_ReturnType - check result
+  */
+ /******************************************************************/
+-LOCAL_INLINE uint8 SftyE2eFpga_ChkTiStamp(uint8 frameIdx)
++LOCAL_INLINE Std_ReturnType SftyE2eFpga_AlvCntrChkHandlr(uint8 idx, uint8* alvCntr)
+ {
+-   uint8 retVal;
++   Std_ReturnType retVal;
+ 
+-   /* Get current timestamp */
+-   SftyE2eFpgaCurrTiStamp = SftyDmaE2eFpgaFrameRx[frameIdx].Data.tiStamp;
+ 
+-   if(SftyE2eFpgaTiStampChkFirstRun == TRUE)
+-   {
+-      retVal = (uint8)SftyUtils_ChkTiStamp(&SftyE2eFpgaLstTiStamp, &SftyE2eFpgaCurrTiStamp);
+-   }
+-   else
+-   {
+-      SftyE2eFpgaLstTiStamp = SftyE2eFpgaCurrTiStamp;
+-      retVal = (uint8)ERR_DEB_MONR_STS_PASSED;
+-      SftyE2eFpgaTiStampChkFirstRun = TRUE;
+-   }
++   /* Get the recieved alive counter (Data index ) */
++   *alvCntr = SftyE2eFpga_GetAlvCntr(idx);
+ 
+-   return retVal;
++   /* Handle Alive Counter */
++   retVal = SftyE2eFpga_AlvCntrChk((*alvCntr));
+ 
++   return retVal;
+ }
+ 
+ /******************************************************************/
+ /*!
+- * \\fn      void SftyE2eFpga_UpdtC2cData(void)
+- * \\brief   This function updates C2C data
++ * \\fn      void SftyE2eFpga_UpdAGrpFltSts(void)
++ * \\brief   This function updates fault status according
++            to the accumulated fault status of group A
+  * \\Parent_DD : SftyE2eFpga_MainFunction
+  * \\param   -
+  * \\return  void
+  */
+ /******************************************************************/
+-LOCAL_INLINE void SftyE2eFpga_UpdtC2cData(void)
++LOCAL_INLINE void SftyE2eFpga_UpdAGrpFltSts(void)
+ {
++   /* Update fault status according to the accumulated fault status of group A */
++      SftyE2eFpgaMeasCohrncFltSts    = ((uint8)(~SftyE2eFpgaMeasCohrncFltStsAcc) & 0x01u);
++      SftyE2eFpgaEmgySWFltSts         = ((uint8)(~SftyE2eFpgaEmgySWFltStsAcc) & 0x01u);
++      SftyE2eFpgaLoGateDrvrFltSts     = ((uint8)(~SftyE2eFpgaLoGateDrvrFltStsAcc) & 0x01u);
++      SftyE2eFpgaHsGateDrvrFltSts     = ((uint8)(~SftyE2eFpgaHsGateDrvrFltStsAcc) & 0x01u);
++      SftyE2eFpgaActvDchaActvFltSts   = ((uint8)(~SftyE2eFpgaActvDchaActvFltStsAcc) & 0x01u);
++      SftyE2eFpgaActvDchaInactvFltSts = ((uint8)(~SftyE2eFpgaActvDchaInactvFltStsAcc) & 0x01u);
+ 
+-#ifdef SWIT_IT_Active
+-   SWIT_SftyE2eFpga_UpdtC2cData_BgnHook();
+-#endif
+-
+-   SftyC2cData.FpgaTxDataFltBReinitSt.B.OverUndCurU    = SftyAcEvlnSetOverCurrPhaReinitSt[SYSDEF_PHA_U];
+-   SftyC2cData.FpgaTxDataFltBReinitSt.B.OverUndCurV    = SftyAcEvlnSetOverCurrPhaReinitSt[SYSDEF_PHA_V];
+-   SftyC2cData.FpgaTxDataFltBReinitSt.B.OverUndCurW    = SftyAcEvlnSetOverCurrPhaReinitSt[SYSDEF_PHA_W];
++   return;
++}
+ 
+-   SftyC2cData.FpgaTxDataFltAReinitSt.B.MeasCohernc    = SftyAcEvlnSetPlausReinitSt | SftyHvDcUEvlnSetPlausReinitSt;
+-   SftyC2cData.FpgaTxDataFltBReinitSt.B.OvVbat         = SftyHvDcUEvlnSetOverVoltReinitSt;
++/******************************************************************/
++/*!
++ * \\fn      void SftyE2eFpga_UpdBGrpFltSts(void)
++ * \\brief   This function updates fault status according
++            to the accumulated fault status of group B
++ * \\Parent_DD : SftyE2eFpga_MainFunction
++ * \\param   -
++ * \\return  void
++ */
++/******************************************************************/
++LOCAL_INLINE void SftyE2eFpga_UpdBGrpFltSts(void)
++{
++   /* Update fault status according to the accumulated fault status of group B */
++   SftyE2eFpgaOverUnderCurUFltSts = ((uint8)(~SftyE2eFpgaOverUnderCurUFltStsAcc) & 0x01u);
++   SftyE2eFpgaOverUnderCurVFltSts = ((uint8)(~SftyE2eFpgaOverUnderCurVFltStsAcc) & 0x01u);
++   SftyE2eFpgaOverUnderCurWFltSts = ((uint8)(~SftyE2eFpgaOverUnderCurWFltStsAcc) & 0x01u);
++   SftyE2eFpgaOverVoltVBatFltSts  = ((uint8)(~SftyE2eFpgaOverVoltVBatFltStsAcc)  & 0x01u);
+ 
+-   SftyC2cData.FpgaTxDataFltBReinitSt.B.IgbtMidPointW  = SftyInvActrSetMidPointPhaWReinitSt;
+-   SftyC2cData.FpgaTxDataFltBReinitSt.B.IgbtMidPointV  = SftyInvActrSetMidPointPhaVReinitSt;
+-   SftyC2cData.FpgaTxDataFltBReinitSt.B.IgbtMidPointU  = SftyInvActrSetMidPointPhaUReinitSt;
++   SftyE2eFpgaMidPointPhaFltSts[SFTY_PHA_U] = ((uint8)(~SftyE2eFpgaMidPointPhaFltStsAcc[SFTY_PHA_U]) & 0x01u);
++   SftyE2eFpgaMidPointPhaFltSts[SFTY_PHA_V] = ((uint8)(~SftyE2eFpgaMidPointPhaFltStsAcc[SFTY_PHA_V]) & 0x01u);
++   SftyE2eFpgaMidPointPhaFltSts[SFTY_PHA_W] = ((uint8)(~SftyE2eFpgaMidPointPhaFltStsAcc[SFTY_PHA_W]) & 0x01u);
+ 
+-   SftyC2cData.FpgaTxDataFltAReinitSt.B.IgbtH          = SftyInvActrSetHsGateDrvrReinitSt;
+-   SftyC2cData.FpgaTxDataFltAReinitSt.B.IgbtL          = SftyInvActrSetLoGateDrvrReinitSt;
++   return;
++}
+ 
+-   if(SftyE2eFpgaStateReqEmgySwOvrdEna == FALSE)
++/******************************************************************/
++/*!
++ * \\fn      void SftyE2eFpga_UpdDGrpFltSts(void)
++ * \\brief   This function updates fault status according
++            to the accumulated fault status of group D
++ * \\Parent_DD : SftyE2eFpga_MainFunction
++ * \\param   -
++ * \\return  void
++ */
++/******************************************************************/
++LOCAL_INLINE void SftyE2eFpga_UpdDGrpFltSts(void)
++{
++   /* Update fault status according to the accumulated fault status of group D */
++   if(SftyE2eFpgaSyncOutEarlyErrMonrStAcc == SFTY_E2E_FPGA_ACC_MONR_STS_PASSED)
+    {
+-      SftyE2eFpgaNoEmgySwReq = SftyInvActrStateReqEmgySw;
++      SftyE2eFpgaSyncOutEarlyErrMonrSt = ERR_DEB_MONR_STS_PASSED;
+    }
+    else
+    {
+-      SftyE2eFpgaNoEmgySwReq = SftyE2eFpgaStateReqEmgySwOvrdVal;
++      SftyE2eFpgaSyncOutEarlyErrMonrSt = ERR_DEB_MONR_STS_FAILED;
+    }
+ 
+-   if(SftyE2eFpgaStateReqSCSpdReadyOvrdEna == FALSE)
++   if(SftyE2eFpgaSyncOutLateErrMonrStAcc == SFTY_E2E_FPGA_ACC_MONR_STS_PASSED)
+    {
+-      SftyE2eFpgaSCspdReady = SftyInvActrStateReqSCSpdReady;
++      SftyE2eFpgaSyncOutLateErrMonrSt = ERR_DEB_MONR_STS_PASSED;
+    }
+    else
+    {
+-      SftyE2eFpgaSCspdReady = SftyE2eFpgaStateReqSCSpdReadyOvrdVal;
++      SftyE2eFpgaSyncOutLateErrMonrSt = ERR_DEB_MONR_STS_FAILED;
+    }
+ 
+-   SftyC2cData.FpgaStateReq.B.NoEmgySw    = SftyE2eFpgaNoEmgySwReq;
+-
+-   SftyC2cData.FpgaStateReq.B.SCspdReady  = SftyE2eFpgaSCspdReady;
+-
+-   if(SftyE2eFpgaActvDchaReqOvrdEna == FALSE)
++   if(SftyE2eFpgaTxCrcCtrlAErrMonrStAcc == SFTY_E2E_FPGA_ACC_MONR_STS_PASSED)
+    {
+-      /* TODO remove comment SftyE2eFpgaActvDchaReq = SftyActvDchaCtrlActvDchaReqViaR; */
++      SftyE2eFpgaTxCrcCtrlAErrMonrSt  = ERR_DEB_MONR_STS_PASSED;
+    }
+    else
+    {
+-      SftyE2eFpgaActvDchaReq = SftyE2eFpgaActvDchaReqValOvrdVal;
++      SftyE2eFpgaTxCrcCtrlAErrMonrSt  = ERR_DEB_MONR_STS_FAILED;
+    }
+ 
+-   SftyC2cData.FpgaActvDchaReq = SftyE2eFpgaActvDchaReq;
++   if(SftyE2eFpgaTxCrcCtrlSErrMonrStAcc == SFTY_E2E_FPGA_ACC_MONR_STS_PASSED)
++   {
++      SftyE2eFpgaTxCrcCtrlSErrMonrSt  = ERR_DEB_MONR_STS_PASSED;
++   }
++   else
++   {
++      SftyE2eFpgaTxCrcCtrlSErrMonrSt  = ERR_DEB_MONR_STS_FAILED;
++   }
+ 
+    return;
+ }
+ 
+ /******************************************************************/
+ /*!
+- * \\fn      void SftyE2eFpga_AccModPlausChk(void)
+- * \\brief   This function performs accumulated mode plausibility check
++ * \\fn      void SftyE2eFpga_FirstRunMain(void)
++ * \\brief   This function handels first run of main function
+  * \\Parent_DD : SftyE2eFpga_MainFunction
+  * \\param   -
+  * \\return  void
+  */
+ /******************************************************************/
+-LOCAL_INLINE void SftyE2eFpga_AccModPlausChk(void)
++LOCAL_INLINE void SftyE2eFpga_FirstRunMain(void)
+ {
+-   if( SftyInvActrStateReqMod == SftyE2eFpgaCurrMod )
++   /* Check whether DMA transfer is done. The buffer index should move forwards*/
++   if(SftyE2eFpgaDmaDataCurrIdx != (SFTY_E2E_FPGA_SPI_RX_BUF_LEN - 1U))
+    {
+-      SftyE2eFpgaModPlausErrMonrStAcc |= ERR_DEB_MONR_STS_PASSED;
++      /* Set Dma error to passed */
++      SftyE2eFpgaDmaTiStampErrMonrSt = ERR_DEB_MONR_STS_PASSED;
++
++      /* Perform E2E check on the current receive frame */
++      SftyE2eFpga_E2eFrameHndlr(SftyE2eFpgaDmaDataCurrIdx);
++
++      /* Update fault status received from FPGA*/
++      SftyE2eFpga_UpdFltSts();
+    }
+    else
+    {
+-      SftyE2eFpgaModPlausErrMonrStAcc |= ERR_DEB_MONR_STS_FAILED;
++      /* No Dma Transfer happened */
++      /* Set Dma error */
++      SftyE2eFpgaDmaTiStampErrMonrSt = ERR_DEB_MONR_STS_FAILED;
++   }
++
++   /* Update last ring buffer index to the current written index */
++   SftyE2eFpgaDmaDataLstIdx = SftyE2eFpgaDmaDataCurrIdx;
++
++   /* Set first run flag to TRUE */
++   SftyE2eFpgaFirstRunDone = TRUE;
++
++   return;
++}
++
++/******************************************************************/
++/*!
++ * \\fn      void SftyE2eFpga_SRxFrameHandlr(uint8 idx)
++ * \\brief   This function handles SRx frame
++ * \\Parent_DD : SftyE2eFpga_E2eFrameHndlr
++ * \\param   idx: index of passed data
++ * \\return  -
++ */
++/******************************************************************/
++LOCAL_INLINE void SftyE2eFpga_SRxFrameHandlr(uint8 idx)
++{
++   Std_ReturnType res;
++
++   /* Check CRC of SRx frame */
++   res = SftyE2eFpga_SRxCrcChk(idx);
++
++   if(res == E_OK)
++   {
++      SftyE2eFpgaRxSCrcErrMonrSt = ERR_DEB_MONR_STS_PASSED;
++
++      /* Copy SRx Data frame  to Ipdu deponding on the alive counter and extracts data */
++      SftyE2eFpga_CopyAndExtractSRxData(idx);
++   }
++   else
++   {
++      /* CRC error */
++      SftyE2eFpgaRxSCrcErrMonrSt = ERR_DEB_MONR_STS_FAILED;
+    }
+ 
+    return;
+@@ -1134,7 +2333,7 @@ LOCAL_INLINE void SftyE2eFpga_AccModPlausChk(void)
+ 
+ /******************************************************************/
+ /*!
+- * \\fn      void SftyE2eFpga_CopySRxDataFrameToIpdu(uint8 idx)
++ * \\fn      void SftyE2eFpga_UpdFltSts(void)
+  * \\brief   This function updates fault status of all IPDU
+  *          under processing.
+  * \\Parent_DD : SftyE2eFpga_MainFunction
+@@ -1145,12 +2344,7 @@ LOCAL_INLINE void SftyE2eFpga_AccModPlausChk(void)
+ STATIC FUNC(void, SFTYE2E_CODE) SftyE2eFpga_UpdFltSts(void)
+ {
+    /* Update fault status according to the accumulated fault status of group A */
+-   SftyE2eFpgaMeasCohrncFltSts    = ((uint8)(~SftyE2eFpgaMeasCohrncFltStsAcc) & 0x01u);
+-   SftyE2eFpgaEmgySWFltSts         = ((uint8)(~SftyE2eFpgaEmgySWFltStsAcc) & 0x01u);
+-   SftyE2eFpgaLoGateDrvrFltSts     = ((uint8)(~SftyE2eFpgaLoGateDrvrFltStsAcc) & 0x01u);
+-   SftyE2eFpgaHsGateDrvrFltSts     = ((uint8)(~SftyE2eFpgaHsGateDrvrFltStsAcc) & 0x01u);
+-   SftyE2eFpgaActvDchaActvFltSts   = ((uint8)(~SftyE2eFpgaActvDchaActvFltStsAcc) & 0x01u);
+-   SftyE2eFpgaActvDchaInactvFltSts = ((uint8)(~SftyE2eFpgaActvDchaInactvFltStsAcc) & 0x01u);
++   SftyE2eFpga_UpdAGrpFltSts();
+ 
+    if(SftyE2eFpgaLossComErrMonrStAcc == 0u)
+    {
+@@ -1162,55 +2356,13 @@ STATIC FUNC(void, SFTYE2E_CODE) SftyE2eFpga_UpdFltSts(void)
+    }
+ 
+    /* Update fault status according to the accumulated fault status of group B */
+-   SftyE2eFpgaOverUnderCurUFltSts = ((uint8)(~SftyE2eFpgaOverUnderCurUFltStsAcc) & 0x01u);
+-   SftyE2eFpgaOverUnderCurVFltSts = ((uint8)(~SftyE2eFpgaOverUnderCurVFltStsAcc) & 0x01u);
+-   SftyE2eFpgaOverUnderCurWFltSts = ((uint8)(~SftyE2eFpgaOverUnderCurWFltStsAcc) & 0x01u);
+-   SftyE2eFpgaOverVoltVBatFltSts  = ((uint8)(~SftyE2eFpgaOverVoltVBatFltStsAcc)  & 0x01u);
+-
+-   SftyE2eFpgaMidPointPhaFltSts[SFTY_PHA_U] = ((uint8)(~SftyE2eFpgaMidPointPhaFltStsAcc[SFTY_PHA_U]) & 0x01u);
+-   SftyE2eFpgaMidPointPhaFltSts[SFTY_PHA_V] = ((uint8)(~SftyE2eFpgaMidPointPhaFltStsAcc[SFTY_PHA_V]) & 0x01u);
+-   SftyE2eFpgaMidPointPhaFltSts[SFTY_PHA_W] = ((uint8)(~SftyE2eFpgaMidPointPhaFltStsAcc[SFTY_PHA_W]) & 0x01u);
++   SftyE2eFpga_UpdBGrpFltSts();
+ 
+    /* Update fault status according to the accumulated fault status of group C */
+    SftyE2eFpgaScSpdReadyFltSts    = ((uint8)(~SftyE2eFpgaScSpdReadyFltStsAcc)  & 0x01u);
+ 
+    /* Update fault status according to the accumulated fault status of group D */
+-
+-   if(SftyE2eFpgaSyncOutEarlyErrMonrStAcc == SFTY_E2E_FPGA_ACC_MONR_STS_PASSED)
+-   {
+-      SftyE2eFpgaSyncOutEarlyErrMonrSt = ERR_DEB_MONR_STS_PASSED;
+-   }
+-   else
+-   {
+-      SftyE2eFpgaSyncOutEarlyErrMonrSt = ERR_DEB_MONR_STS_FAILED;
+-   }
+-
+-   if(SftyE2eFpgaSyncOutLateErrMonrStAcc == SFTY_E2E_FPGA_ACC_MONR_STS_PASSED)
+-   {
+-      SftyE2eFpgaSyncOutLateErrMonrSt = ERR_DEB_MONR_STS_PASSED;
+-   }
+-   else
+-   {
+-      SftyE2eFpgaSyncOutLateErrMonrSt = ERR_DEB_MONR_STS_FAILED;
+-   }
+-
+-   if(SftyE2eFpgaTxCrcCtrlAErrMonrStAcc == SFTY_E2E_FPGA_ACC_MONR_STS_PASSED)
+-   {
+-      SftyE2eFpgaTxCrcCtrlAErrMonrSt  = ERR_DEB_MONR_STS_PASSED;
+-   }
+-   else
+-   {
+-      SftyE2eFpgaTxCrcCtrlAErrMonrSt  = ERR_DEB_MONR_STS_FAILED;
+-   }
+-
+-   if(SftyE2eFpgaTxCrcCtrlSErrMonrStAcc == SFTY_E2E_FPGA_ACC_MONR_STS_PASSED)
+-   {
+-      SftyE2eFpgaTxCrcCtrlSErrMonrSt  = ERR_DEB_MONR_STS_PASSED;
+-   }
+-   else
+-   {
+-      SftyE2eFpgaTxCrcCtrlSErrMonrSt  = ERR_DEB_MONR_STS_FAILED;
+-   }
++   SftyE2eFpga_UpdDGrpFltSts();
+ 
+    if(SftyE2eFpgaModPlausErrMonrStAcc == SFTY_E2E_FPGA_ACC_MONR_STS_PASSED)
+    {
+@@ -1235,26 +2387,7 @@ STATIC FUNC(void, SFTYE2E_CODE) SftyE2eFpga_UpdFltSts(void)
+    }
+ 
+    /* Reset status for next 200 us cycle */
+-   SftyE2eFpgaMeasCohrncFltStsAcc              = SFTY_E2E_FPGA_ACC_MONR_STS_PASSED;
+-   SftyE2eFpgaEmgySWFltStsAcc                  = SFTY_E2E_FPGA_ACC_MONR_STS_PASSED;
+-   SftyE2eFpgaOverUnderCurUFltStsAcc           = SFTY_E2E_FPGA_ACC_MONR_STS_PASSED;
+-   SftyE2eFpgaOverUnderCurVFltStsAcc           = SFTY_E2E_FPGA_ACC_MONR_STS_PASSED;
+-   SftyE2eFpgaOverUnderCurWFltStsAcc           = SFTY_E2E_FPGA_ACC_MONR_STS_PASSED;
+-   SftyE2eFpgaOverVoltVBatFltStsAcc            = SFTY_E2E_FPGA_ACC_MONR_STS_PASSED;
+-   SftyE2eFpgaScSpdReadyFltStsAcc              = SFTY_E2E_FPGA_ACC_MONR_STS_PASSED;
+-   SftyE2eFpgaLoGateDrvrFltStsAcc              = SFTY_E2E_FPGA_ACC_MONR_STS_PASSED;
+-   SftyE2eFpgaHsGateDrvrFltStsAcc              = SFTY_E2E_FPGA_ACC_MONR_STS_PASSED;
+-   SftyE2eFpgaActvDchaActvFltStsAcc            = SFTY_E2E_FPGA_ACC_MONR_STS_PASSED;
+-   SftyE2eFpgaActvDchaInactvFltStsAcc          = SFTY_E2E_FPGA_ACC_MONR_STS_PASSED;
+-   SftyE2eFpgaLossComErrMonrStAcc              = SFTY_E2E_FPGA_ACC_MONR_STS_PASSED;
+-   SftyE2eFpgaSyncOutEarlyErrMonrStAcc         = SFTY_E2E_FPGA_ACC_MONR_STS_PASSED;
+-   SftyE2eFpgaSyncOutLateErrMonrStAcc          = SFTY_E2E_FPGA_ACC_MONR_STS_PASSED;
+-   SftyE2eFpgaTxCrcCtrlAErrMonrStAcc           = SFTY_E2E_FPGA_ACC_MONR_STS_PASSED;
+-   SftyE2eFpgaTxCrcCtrlSErrMonrStAcc           = SFTY_E2E_FPGA_ACC_MONR_STS_PASSED;
+-   SftyE2eFpgaMidPointPhaFltStsAcc[SFTY_PHA_U] = SFTY_E2E_FPGA_ACC_MONR_STS_PASSED;
+-   SftyE2eFpgaMidPointPhaFltStsAcc[SFTY_PHA_V] = SFTY_E2E_FPGA_ACC_MONR_STS_PASSED;
+-   SftyE2eFpgaMidPointPhaFltStsAcc[SFTY_PHA_W] = SFTY_E2E_FPGA_ACC_MONR_STS_PASSED;
+-   SftyE2eFpgaModPlausErrMonrStAcc             = SFTY_E2E_FPGA_ACC_MONR_STS_PASSED;
++   SftyE2eFpga_RstFltSts();
+ 
+    return;
+ }
+@@ -1270,7 +2403,6 @@ STATIC FUNC(void, SFTYE2E_CODE) SftyE2eFpga_UpdFltSts(void)
+ STATIC FUNC(void, SFTYE2E_CODE) SftyE2eFpga_E2eFrameHndlr(uint8 frameIdx)
+ {
+    uint8  alvCntr;
+-   uint16 recCrc;
+    Std_ReturnType res;
+ 
+    SftyE2eFpgaRxMuxSeqErrMonrSt = ERR_DEB_MONR_STS_INACTIVE;
+@@ -1282,11 +2414,8 @@ STATIC FUNC(void, SFTYE2E_CODE) SftyE2eFpga_E2eFrameHndlr(uint8 frameIdx)
+ 
+    if(SftyE2eFpgaDmaTiStampErrMonrSt == (uint8)ERR_DEB_MONR_STS_PASSED)
+    {
+-      /* Get the recieved alive counter (Data index ) */
+-      alvCntr = SftyE2eFpga_GetAlvCntr(frameIdx);
+-
+-      /* Handle Alive Counter */
+-      res = SftyE2eFpga_AlvCntrChk(alvCntr);
++      /* Handle Alive Counter check */
++      res = SftyE2eFpga_AlvCntrChkHandlr(frameIdx, &alvCntr);
+ 
+       if(res == E_OK)
+       {
+@@ -1294,46 +2423,22 @@ STATIC FUNC(void, SFTYE2E_CODE) SftyE2eFpga_E2eFrameHndlr(uint8 frameIdx)
+ 
+          /*                        ARx Frame Handling                                 */
+ 
+-         /* Get received CRC */
+-         recCrc = SftyE2eFpga_GetARxCrc(frameIdx);
+-
+-         res = SftyE2eFpga_CrcEval(SftyDmaE2eFpgaFrameRx[frameIdx].Data.RxA.Data8, recCrc);
++         /* Check CRC of ARx frame */
++         res = SftyE2eFpga_ARxCrcChk(frameIdx);
+ 
+          if(res == E_OK)
+          {
+             SftyE2eFpgaRxACrcErrMonrSt = ERR_DEB_MONR_STS_PASSED;
+ 
+-            /* Copy Data frame  to Ipdu deponding on the alive counter */
+-            SftyE2eFpga_CopyARxDataFrameToIpdu(frameIdx, alvCntr);
+-
+-            /* Extract Data from Ipdu */
+-            SftyE2eFpga_ExtractARxDataFromIpdu(alvCntr);
++            /* Copy ARx Data frame  to Ipdu deponding on the alive counter and extracts data */
++            SftyE2eFpga_CopyAndExtractARxData(frameIdx, alvCntr);
+ 
+             /* Perform mode plausibility check */
+             SftyE2eFpga_AccModPlausChk();
+ 
+             /*                        SRx Frame Handling                                 */
+ 
+-            /* Get received CRC */
+-            recCrc = SftyE2eFpga_GetSRxCrc(frameIdx);
+-
+-            res = SftyE2eFpga_CrcEval(SftyDmaE2eFpgaFrameRx[frameIdx].Data.RxS.Data8, recCrc);
+-
+-            if(res == E_OK)
+-            {
+-               SftyE2eFpgaRxSCrcErrMonrSt = ERR_DEB_MONR_STS_PASSED;
+-
+-               /* Copy Data frame  to Ipdu  */
+-               SftyE2eFpga_CopySRxDataFrameToIpdu(frameIdx);
+-
+-               /* Extract Data from Ipdu */
+-               SftyE2eFpga_ExtractSRxDataFromIpdu();
+-            }
+-            else
+-            {
+-               /* CRC error */
+-               SftyE2eFpgaRxSCrcErrMonrSt = ERR_DEB_MONR_STS_FAILED;
+-            }
++            SftyE2eFpga_SRxFrameHandlr(frameIdx);
+          }
+          else
+          {
+@@ -1414,30 +2519,7 @@ FUNC(void, SFTYE2EFPGA_CODE) SftyE2eFpga_MainFunction(void)
+    }
+    else /* This is the first run */
+    {
+-      /* Check whether DMA transfer is done. The buffer index should move forwards*/
+-      if(SftyE2eFpgaDmaDataCurrIdx != (SFTY_E2E_FPGA_SPI_RX_BUF_LEN - 1U))
+-      {
+-         /* Set Dma error to passed */
+-         SftyE2eFpgaDmaTiStampErrMonrSt = ERR_DEB_MONR_STS_PASSED;
+-
+-         /* Perform E2E check on the current receive frame */
+-         SftyE2eFpga_E2eFrameHndlr(SftyE2eFpgaDmaDataCurrIdx);
+-
+-         /* Update fault status received from FPGA*/
+-         SftyE2eFpga_UpdFltSts();
+-      }
+-      else
+-      {
+-         /* No Dma Transfer happened */
+-         /* Set Dma error */
+-         SftyE2eFpgaDmaTiStampErrMonrSt = ERR_DEB_MONR_STS_FAILED;
+-      }
+-
+-      /* Update last ring buffer index to the current written index */
+-      SftyE2eFpgaDmaDataLstIdx = SftyE2eFpgaDmaDataCurrIdx;
+-
+-      /* Set first run flag to TRUE */
+-      SftyE2eFpgaFirstRunDone = TRUE;
++      SftyE2eFpga_FirstRunMain();
+    }
+ 
+    SftyE2eFpga_UpdtC2cData();
+@@ -1457,52 +2539,6 @@ FUNC(void, SFTYE2EFPGA_CODE) SftyE2eFpga_MainFunction(void)
+ FUNC(void, SFTYE2EFPGA_CODE) SftyE2eFpga_Init(void)
+ {
+    /* Initialization of data */
+-
+-   SftyE2eFpgaOverVoltVBatFltStsAcc                      = SFTY_E2E_FPGA_ACC_MONR_STS_PASSED;
+-   SftyE2eFpgaMeasCohrncFltStsAcc                        = SFTY_E2E_FPGA_ACC_MONR_STS_PASSED;
+-   SftyE2eFpgaEmgySWFltStsAcc                            = SFTY_E2E_FPGA_ACC_MONR_STS_PASSED;
+-   SftyE2eFpgaOverUnderCurUFltStsAcc                     = SFTY_E2E_FPGA_ACC_MONR_STS_PASSED;
+-   SftyE2eFpgaOverUnderCurVFltStsAcc                     = SFTY_E2E_FPGA_ACC_MONR_STS_PASSED;
+-   SftyE2eFpgaOverUnderCurWFltStsAcc                     = SFTY_E2E_FPGA_ACC_MONR_STS_PASSED;
+-   SftyE2eFpgaScSpdReadyFltStsAcc                        = SFTY_E2E_FPGA_ACC_MONR_STS_PASSED;
+-   SftyE2eFpgaMidPointPhaFltStsAcc[SFTY_PHA_U]           = SFTY_E2E_FPGA_ACC_MONR_STS_PASSED;
+-   SftyE2eFpgaMidPointPhaFltStsAcc[SFTY_PHA_V]           = SFTY_E2E_FPGA_ACC_MONR_STS_PASSED;
+-   SftyE2eFpgaMidPointPhaFltStsAcc[SFTY_PHA_W]           = SFTY_E2E_FPGA_ACC_MONR_STS_PASSED;
+-   SftyE2eFpgaLoGateDrvrFltStsAcc                        = SFTY_E2E_FPGA_ACC_MONR_STS_PASSED;
+-   SftyE2eFpgaHsGateDrvrFltStsAcc                        = SFTY_E2E_FPGA_ACC_MONR_STS_PASSED;
+-   SftyE2eFpgaActvDchaActvFltStsAcc                      = SFTY_E2E_FPGA_ACC_MONR_STS_PASSED;
+-   SftyE2eFpgaActvDchaInactvFltStsAcc                    = SFTY_E2E_FPGA_ACC_MONR_STS_PASSED;
+-   SftyE2eFpgaLossComErrMonrStAcc                        = SFTY_E2E_FPGA_ACC_MONR_STS_PASSED;
+-   SftyE2eFpgaSyncOutEarlyErrMonrStAcc                   = SFTY_E2E_FPGA_ACC_MONR_STS_PASSED;
+-   SftyE2eFpgaSyncOutLateErrMonrStAcc                    = SFTY_E2E_FPGA_ACC_MONR_STS_PASSED;
+-   SftyE2eFpgaTxCrcCtrlAErrMonrStAcc                     = SFTY_E2E_FPGA_ACC_MONR_STS_PASSED;
+-   SftyE2eFpgaTxCrcCtrlSErrMonrStAcc                     = SFTY_E2E_FPGA_ACC_MONR_STS_PASSED;
+-   SftyE2eFpgaModPlausErrMonrStAcc                       = SFTY_E2E_FPGA_ACC_MONR_STS_PASSED;
+-   SftyE2eFpgaMeasCohrncFltSts                           = TRUE;
+-   SftyE2eFpgaEmgySWFltSts                               = TRUE;
+-   SftyE2eFpgaActvDchaActvFltSts                         = TRUE;
+-   SftyE2eFpgaActvDchaInactvFltSts                       = TRUE;
+-   SftyE2eFpgaOverUnderCurUFltSts                        = TRUE;
+-   SftyE2eFpgaOverUnderCurVFltSts                        = TRUE;
+-   SftyE2eFpgaOverUnderCurWFltSts                        = TRUE;
+-   SftyE2eFpgaOverVoltVBatFltSts                         = TRUE;
+-   SftyE2eFpgaScSpdReadyFltSts                           = TRUE;
+-   SftyE2eFpgaLoGateDrvrFltSts                           = TRUE;
+-   SftyE2eFpgaHsGateDrvrFltSts                           = TRUE;
+-   SftyE2eFpgaMidPointPhaFltSts[SFTY_PHA_U]              = TRUE;
+-   SftyE2eFpgaMidPointPhaFltSts[SFTY_PHA_U]              = TRUE;
+-   SftyE2eFpgaMidPointPhaFltSts[SFTY_PHA_U]              = TRUE;
+-   SftyE2eFpgaDmaTiStampErrMonrSt                        = ERR_DEB_MONR_STS_INACTIVE;
+-   SftyE2eFpgaRxMuxSeqErrMonrSt                          = ERR_DEB_MONR_STS_INACTIVE;
+-   SftyE2eFpgaRxACrcErrMonrSt                            = ERR_DEB_MONR_STS_INACTIVE;
+-   SftyE2eFpgaRxSCrcErrMonrSt                            = ERR_DEB_MONR_STS_INACTIVE;
+-   SftyE2eFpgaLossComErrMonrSt                           = ERR_DEB_MONR_STS_INACTIVE;
+-   SftyE2eFpgaSyncOutEarlyErrMonrSt                      = ERR_DEB_MONR_STS_INACTIVE;
+-   SftyE2eFpgaSyncOutLateErrMonrSt                       = ERR_DEB_MONR_STS_INACTIVE;
+-   SftyE2eFpgaTxCrcCtrlAErrMonrSt                        = ERR_DEB_MONR_STS_INACTIVE;
+-   SftyE2eFpgaTxCrcCtrlSErrMonrSt                        = ERR_DEB_MONR_STS_INACTIVE;
+-   SftyE2eFpgaModPlausErrMonrSt                          = ERR_DEB_MONR_STS_INACTIVE;
+-   SftyE2eFpgaPrmDlErrMonrSt                             = ERR_DEB_MONR_STS_INACTIVE;
+    SftyE2eFpgaFirstRunDone                               = FALSE;
+    SftyE2eFpgaFirstRunCntrChkDone                        = FALSE;
+    SftyE2eFpgaTiStampChkFirstRun                         = FALSE;
+@@ -1524,17 +2560,12 @@ FUNC(void, SFTYE2EFPGA_CODE) SftyE2eFpga_Init(void)
+    SftyE2eFpgaP5HSRawVal                                 = 0u;
+    SftyE2eFpgaCuTSnsrRawVal                              = 0u;
+    SftyE2eFpgaDrvTSnsrRawVal                             = 0u;
+-   SftyC2cData.FpgaStateReq.B.NoEmgySw                   = SFTY_E2E_FPGA_NO_REQ;
+-   SftyC2cData.FpgaStateReq.B.SCspdReady                 = SFTY_E2E_FPGA_NO_REQ;
+-   SftyC2cData.FpgaStateReq.B.Operate                    = SFTY_E2E_FPGA_TRACTION;
+-   SftyC2cData.FpgaStateReq.B.Switchtype                 = SFTY_E2E_FPGA_MLI_TRACTION;
+-   SftyC2cData.FpgaStateReq.B.Mode                       = SFTY_E2E_FPGA_DFLT_MODE;
+-   SftyC2cData.FpgaTxDataFltBReinitSt.U                  = SFTY_E2E_FPGA_FLT_ST_DFLT;
+-   SftyC2cData.FpgaTxDataFltAReinitSt.U                  = SFTY_E2E_FPGA_FLT_ST_DFLT;
+-   SftyC2cData.FpgaActvDchaReq                           = FALSE;
+    SftyE2eFpgaNoEmgySwReq                                = SFTY_E2E_FPGA_NO_REQ;
+    SftyE2eFpgaSCspdReady                                 = SFTY_E2E_FPGA_NO_REQ;
+-
++   SftyE2eFpga_InitFltStsAcc();
++   SftyE2eFpga_InitFltSts();
++   SftyE2eFpga_InitErrMonrSt();
++   SftyE2eFpga_InitC2cData();
+    return;
+ }
+ 
+diff --git a/src/fw_cu/Components/Safety/Sfty_Cmn/SftyE2eFpga/src/SftyE2eFpga_data.c b/src/fw_cu/Components/Safety/Sfty_Cmn/SftyE2eFpga/src/SftyE2eFpga_data.c
+index bf9bf5324..b076d7036 100644
+--- a/src/fw_cu/Components/Safety/Sfty_Cmn/SftyE2eFpga/src/SftyE2eFpga_data.c
++++ b/src/fw_cu/Components/Safety/Sfty_Cmn/SftyE2eFpga/src/SftyE2eFpga_data.c
+@@ -449,7 +449,7 @@ CONST(uint8, SFTYREPLCMT_CALIB) SftyE2eFpgaStateReqSCSpdReadyOvrdEna = FALSE;
+ @@ GROUP = SftyHvDcUEvln
+ @@ END
+ */
+-CONST(uint8, SFTYREPLCMT_CALIB) SftyE2eFpgaActvDchaReqOvrdEna = TRUE;
++CONST(uint8, SFTYREPLCMT_CALIB) SftyE2eFpgaActvDchaReqOvrdEna = FALSE;
+ 
+ 
+ /*
+diff --git a/src/fw_cu/Components/Safety/Sfty_Inv/SftyAcEvln/include/SftyAcEvln_data.h b/src/fw_cu/Components/Safety/Sfty_Inv/SftyAcEvln/include/SftyAcEvln_data.h
+index f5f0b7946..431573404 100644
+--- a/src/fw_cu/Components/Safety/Sfty_Inv/SftyAcEvln/include/SftyAcEvln_data.h
++++ b/src/fw_cu/Components/Safety/Sfty_Inv/SftyAcEvln/include/SftyAcEvln_data.h
+@@ -118,18 +118,6 @@ extern VAR(uint8, SFTYACEVLN_VAR) SftyAcEvlnSumErrMonrSt[SYSDEF_EM_PHA_SET_CNT_M
+ #include "MemMap.h"
+ /* End: SFTYACEVLN_STOP_SEC_VAR_AREA_2_FAST_INIT_8 (online) */
+ 
+-/* ******** Declaration of SftyE2eFpga Variables ********* */
+-
+-/* Begin: SFTYE2EFPGA_START_SEC_VAR_AREA_CMN_FAST_CLEARED (online) */
+-#define SFTYE2EFPGA_START_SEC_VAR_AREA_CMN_FAST_CLEARED
+-#include "MemMap.h"
+-
+-extern VAR(sint16, SFTYE2EFPGA_VAR) SftyE2eFpgaIPhaRawVal[SYSDEF_EM_PHA_SET_CNT_MAX][SYSDEF_EM_PHA_CNT_MAX];
+-#define SFTYE2EFPGA_STOP_SEC_VAR_AREA_CMN_FAST_CLEARED
+-#include "MemMap.h"
+-/* End: SFTYE2EFPGA_STOP_SEC_VAR_AREA_CMN_FAST_CLEARED (online) */
+-
+-
+ /* ******** Declaration of SftyReplcmt calibration parameters ********* */
+ 
+ /* Begin: SFTYREPLCMT_START_SEC_CALIB_16 (calib) */
+'

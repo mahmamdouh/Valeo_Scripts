@@ -1,0 +1,663 @@
+b'commit d43c1af8da2cdc44e9e5202b7649c9067cb2198d
+Author: Yunpeng DONG (JV) <yunpeng.dong.jv@valeo.com>
+Date:   Fri Oct 22 18:00:13 2021 +0800
+
+    $100kW-43487$ - TC375 Migration - Update the SCU and Port init function.
+    
+    Change-Id: Ic7f4a677abd7227e35349505183802e780fd0c5d
+
+diff --git a/src/fw_cu/Components/Safety/Sfty_Cmn/SftySdl/src/SftySdl_cfg.c b/src/fw_cu/Components/Safety/Sfty_Cmn/SftySdl/src/SftySdl_cfg.c
+index 40ca32b85..6b958d0d2 100644
+--- a/src/fw_cu/Components/Safety/Sfty_Cmn/SftySdl/src/SftySdl_cfg.c
++++ b/src/fw_cu/Components/Safety/Sfty_Cmn/SftySdl/src/SftySdl_cfg.c
+@@ -575,8 +575,8 @@ CONST(SftySdl_InitTblType, SFTYSDL) SftySdlInitNormRunTbl[] =
+      /* Order of calls is relevant, think before changing!!! */
+      { SFTYSDL_AREA_0,   &SftySdl_FinishInit }
+     ,{ SFTYSDL_AREA_CMN, &SftyErrDeb_PreInit }
+-   // ,{ SFTYSDL_AREA_0,   &SftySysInit_PreInitArea0 } // Reads out RSSTAT register to determine PORST
+-   // ,{ SFTYSDL_AREA_CMN, &SftySysInit_PreInit } //Generates PORST-HW flag
++    ,{ SFTYSDL_AREA_0,   &SftySysInit_PreInitArea0 } // Reads out RSSTAT register to determine PORST
++    ,{ SFTYSDL_AREA_CMN, &SftySysInit_PreInit } //Generates PORST-HW flag
+     ,{ SFTYSDL_AREA_CMN, &SftyModMgr_Init }
+ //    ,{ SFTYSDL_AREA_0,   &SftyLibApp_PreInit }
+ //    ,{ SFTYSDL_AREA_0,   &SftyLibApp_PreRun} /* CSP_CORE0_INTERRUPTS_DISABLED, CSP_CORE0_INTERRUPTS_ENABLED */
+@@ -587,7 +587,7 @@ CONST(SftySdl_InitTblType, SFTYSDL) SftySdlInitNormRunTbl[] =
+     ,{ SFTYSDL_AREA_0,   (SftySdlCbkFuncType)(&LlswQSpi_InitArea0)}
+     ,{ SFTYSDL_AREA_CMN, (SftySdlCbkFuncType)(&LlswQSpi_Init)}
+ //    ,{ SFTYSDL_AREA_0,   &SftyAscLinSpi_InitArea0}
+-  //  ,{ SFTYSDL_AREA_CMN, &SftySysInit_PostInit } //Generates virtual PORST flag after TLF Digital sefltests are done
++    ,{ SFTYSDL_AREA_CMN, &SftySysInit_PostInit } //Generates virtual PORST flag after TLF Digital sefltests are done
+     ,{ SFTYSDL_AREA_2,   &SftySbcCtrl_Init}
+ //    ,{ SFTYSDL_AREA_0,   &SftySbcCtrl_InitArea0}
+     ,{ SFTYSDL_AREA_0,   &SftyCrc_InitArea0 }
+diff --git a/src/fw_cu/Components/Safety/Sfty_Cmn/SftySysInit/src/SftySysInit.c b/src/fw_cu/Components/Safety/Sfty_Cmn/SftySysInit/src/SftySysInit.c
+index e40763103..76a092f8b 100644
+--- a/src/fw_cu/Components/Safety/Sfty_Cmn/SftySysInit/src/SftySysInit.c
++++ b/src/fw_cu/Components/Safety/Sfty_Cmn/SftySysInit/src/SftySysInit.c
+@@ -401,27 +401,27 @@ LOCAL_INLINE void SftySysInit_SetAcsEna(uint32 AllwdTagId)
+    /* Port00 is open for all cores */
+ \tMcal_WriteSafetyEndInitProtReg(&MODULE_P00.ACCEN0.U, AllwdTagId);\t\t//SFTY_PORT00_ACCEN = AllwdTagId;
+ \t/* Port01 is open for all cores */
+-\tMcal_WriteSafetyEndInitProtReg(&MODULE_P01.ACCEN0.U,AllwdTagId);\t\t//SFTY_PORT01_ACCEN = AllwdTagId;
++\tMcal_WriteSafetyEndInitProtReg(&MODULE_P01.ACCEN0.U,SFTY_UTILS_ALL);\t\t
+ \t/* Port02 is safety protected */
+ \tMcal_WriteSafetyEndInitProtReg(&MODULE_P02.ACCEN0.U,AllwdTagId);\t\t//SFTY_PORT02_ACCEN = AllwdTagId;
+ \t/* Port10 is safety protected */
+-\tMcal_WriteSafetyEndInitProtReg(&MODULE_P10.ACCEN0.U,AllwdTagId);\t\t//SFTY_PORT10_ACCEN = AllwdTagId;
++\tMcal_WriteSafetyEndInitProtReg(&MODULE_P10.ACCEN0.U,SFTY_UTILS_ALL);\t
+ \t/* Port11 is open for all cores */
+ \tMcal_WriteSafetyEndInitProtReg(&MODULE_P11.ACCEN0.U,AllwdTagId);\t\t//SFTY_PORT11_ACCEN = AllwdTagId;
+ \t/* Port12 is open for all cores */
+-\tMcal_WriteSafetyEndInitProtReg(&MODULE_P12.ACCEN0.U,AllwdTagId);\t\t//SFTY_PORT12_ACCEN = SFTY_UTILS_ALL;
++\tMcal_WriteSafetyEndInitProtReg(&MODULE_P12.ACCEN0.U,SFTY_UTILS_ALL);\t\t
+ \t/* Port13 is open for all cores */
+ \tMcal_WriteSafetyEndInitProtReg(&MODULE_P13.ACCEN0.U,AllwdTagId);\t\t//SFTY_PORT13_ACCEN = SFTY_UTILS_ALL;
+ \t/* Port14 is open for all cores */
+-\tMcal_WriteSafetyEndInitProtReg(&MODULE_P14.ACCEN0.U,AllwdTagId);\t\t//SFTY_PORT14_ACCEN = SFTY_UTILS_ALL;
++\tMcal_WriteSafetyEndInitProtReg(&MODULE_P14.ACCEN0.U,SFTY_UTILS_ALL);\t\t
+ \t/* Port15 is safety protected */
+-\tMcal_WriteSafetyEndInitProtReg(&MODULE_P15.ACCEN0.U,AllwdTagId);\t\t//SFTY_PORT15_ACCEN = AllwdTagId;
++\tMcal_WriteSafetyEndInitProtReg(&MODULE_P15.ACCEN0.U,SFTY_UTILS_ALL);\t
+ \t/* Port20 is safety protected */
+ \tMcal_WriteSafetyEndInitProtReg(&MODULE_P20.ACCEN0.U,AllwdTagId);\t\t//SFTY_PORT20_ACCEN = AllwdTagId;
+ \t/* Port21 is open for all cores */
+-\tMcal_WriteSafetyEndInitProtReg(&MODULE_P21.ACCEN0.U,AllwdTagId);\t\t//SFTY_PORT21_ACCEN = SFTY_UTILS_ALL;
++\tMcal_WriteSafetyEndInitProtReg(&MODULE_P21.ACCEN0.U,SFTY_UTILS_ALL);\t\t
+ \t/* Port22 is safety protected */
+-\tMcal_WriteSafetyEndInitProtReg(&MODULE_P22.ACCEN0.U,AllwdTagId);\t\t //SFTY_PORT22_ACCEN = AllwdTagId;
++\tMcal_WriteSafetyEndInitProtReg(&MODULE_P22.ACCEN0.U,SFTY_UTILS_ALL);\t\t 
+ \t/* Port23 is safety protected */
+ \tMcal_WriteSafetyEndInitProtReg(&MODULE_P23.ACCEN0.U,AllwdTagId);\t\t //SFTY_PORT23_ACCEN = AllwdTagId;
+ \t/* Port32 is safety protected */
+@@ -429,9 +429,9 @@ LOCAL_INLINE void SftySysInit_SetAcsEna(uint32 AllwdTagId)
+ \t/* Port33 is safety protected */
+ \tMcal_WriteSafetyEndInitProtReg(&MODULE_P33.ACCEN0.U,AllwdTagId);\t\t //SFTY_PORT33_ACCEN = AllwdTagId;
+ \t/* Port34 is open for all cores */
+-\tMcal_WriteSafetyEndInitProtReg(&MODULE_P34.ACCEN0.U,AllwdTagId);\t\t //SFTY_PORT34_ACCEN = AllwdTagId;
++\tMcal_WriteSafetyEndInitProtReg(&MODULE_P34.ACCEN0.U,SFTY_UTILS_ALL);\t\t 
+ \t/* Port40 is open for all cores */
+-\tMcal_WriteSafetyEndInitProtReg(&MODULE_P40.ACCEN0.U,AllwdTagId);\t\t //SFTY_PORT40_ACCEN = AllwdTagId;
++\tMcal_WriteSafetyEndInitProtReg(&MODULE_P40.ACCEN0.U,SFTY_UTILS_ALL);\t\t 
+ 
+    return;
+ }
+@@ -452,409 +452,190 @@ LOCAL_INLINE void SftySysInit_PortInit(void)
+    Ifx_P_IOCR8   SFTYSYSINIT_MODULE_PX_IOCR8;
+    Ifx_P_IOCR12  SFTYSYSINIT_MODULE_PX_IOCR12;
+ 
+-   /*---------------------------------SBC Init----------------------------------------*/
+-   
+-\t SFTYSYSINIT_MODULE_PX_PDR0.U =    MODULE_P00.PDR0.U;
+-\t /* M_PW_DOWN_SBC_SW pin initialization */ /* Port 00, pin 1 */
+-\t SFTYSYSINIT_MODULE_PX_PDR0.B.PD1 = SFTY_IO_PORT_PDR_CMOS_SPD_GRD_1;\t\t  //SFTY_M_PW_DOWN_SBC_SW_PORT_PDR_PD_PIN  = SFTY_IO_PORT_PDR_CMOS_SPD_GRD_1;
+-\t SFTYSYSINIT_MODULE_PX_PDR0.B.PL1 = SFTY_IO_PORT_PDR_CMOS_AUTOMOTIVE_LVL;\t  //SFTY_M_PW_DOWN_SBC_SW_PORT_PDR_PL_PIN  = SFTY_IO_PORT_PDR_CMOS_AUTOMOTIVE_LVL;
+-\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t   
+-\t Mcal_WriteCpuEndInitProtReg(&MODULE_P00.PDR0.U,(uint32)SFTYSYSINIT_MODULE_PX_PDR0.U);
+-\t 
+-\t SFTYSYSINIT_MODULE_PX_PDR0.U =   MODULE_P32.PDR0.U;
+-\t 
+-\t /*KL15 SBC SW pin */\t   /*Port32, pin2*/
+-\t SFTYSYSINIT_MODULE_PX_PDR0.B.PD2 = SFTY_IO_PORT_PDR_CMOS_SPD_GRD_1;\t\t   //SFTY_KL15_SBC_SW_PORT_PDR_PD_PIN  = SFTY_IO_PORT_PDR_CMOS_SPD_GRD_1;
+-\t SFTYSYSINIT_MODULE_PX_PDR0.B.PL2 = SFTY_IO_PORT_PDR_CMOS_AUTOMOTIVE_LVL;\t   //SFTY_KL15_SBC_SW_PORT_PDR_PL_PIN  = SFTY_IO_PORT_PDR_CMOS_AUTOMOTIVE_LVL;
+-\t\t\t\t
+-\t Mcal_WriteCpuEndInitProtReg(&MODULE_P32.PDR0.U,(uint32)SFTYSYSINIT_MODULE_PX_PDR0.U);
+-\t\t  
+-\t SFTYSYSINIT_MODULE_PX_IOCR0.U =   MODULE_P00.IOCR0.U;
+-\t SFTYSYSINIT_MODULE_PX_IOCR0.B.PC1 = SFTY_GPO_IOCR_VAL;  //SFTY_M_PW_DOWN_SBC_SW_PORT_IOCR_PC_PIN = SFTY_GPO_IOCR_VAL;
+-\t 
+-\t  Mcal_WriteCpuEndInitProtReg(&MODULE_P00.IOCR0.U,(uint32)SFTYSYSINIT_MODULE_PX_IOCR0.U);
+-
+-   /*---------------------------------P00_PDR0 ----------------------------------------*/
+-#if 0
+-   SFTYSYSINIT_MODULE_PX_PDR0.U =    MODULE_P00.PDR0.U;
+-
+-   /* M_PW_DOWN_SBC_SW pin initialization */ /* Port 00, pin 1 */
+-   SFTYSYSINIT_MODULE_PX_PDR0.B.PD1 = SFTY_IO_PORT_PDR_CMOS_SPD_GRD_1;          //SFTY_M_PW_DOWN_SBC_SW_PORT_PDR_PD_PIN  = SFTY_IO_PORT_PDR_CMOS_SPD_GRD_1;
+-   SFTYSYSINIT_MODULE_PX_PDR0.B.PL1 = SFTY_IO_PORT_PDR_CMOS_AUTOMOTIVE_LVL;     //SFTY_M_PW_DOWN_SBC_SW_PORT_PDR_PL_PIN  = SFTY_IO_PORT_PDR_CMOS_AUTOMOTIVE_LVL;
+-                                                                     
+-   Mcal_WriteCpuEndInitProtReg(&MODULE_P00.PDR0.U,(uint32)SFTYSYSINIT_MODULE_PX_PDR0.U);
+-
+-   /*---------------------------------P01_PDR0 ----------------------------------------*/
+-
+-   SFTYSYSINIT_MODULE_PX_PDR0.U =    MODULE_P01.PDR0.U;
+-
+-   /* GD_RESET_U_TOP pin initialization */ /* Port 01, pin 6 */
+-   SFTYSYSINIT_MODULE_PX_PDR0.B.PD6 = SFTY_IO_PORT_PDR_CMOS_SPD_GRD_1;          //SFTY_GD_RESET_U_TOP_PORT_PDR_PD_PIN  = SFTY_IO_PORT_PDR_CMOS_SPD_GRD_1;
+-   SFTYSYSINIT_MODULE_PX_PDR0.B.PL6 = SFTY_IO_PORT_PDR_CMOS_AUTOMOTIVE_LVL;     //SFTY_GD_RESET_U_TOP_PORT_PDR_PL_PIN  = SFTY_IO_PORT_PDR_CMOS_AUTOMOTIVE_LVL;
+-
+-   /* N_ASC_TOP_CTRL_RST pin initialization */ /* Port 01, pin 4 */
+-   SFTYSYSINIT_MODULE_PX_PDR0.B.PD4 = SFTY_IO_PORT_PDR_CMOS_SPD_GRD_1;          //SFTY_N_ASC_TOP_CTRL_RST_PORT_PDR_PD_PIN  = SFTY_IO_PORT_PDR_CMOS_SPD_GRD_1;
+-   SFTYSYSINIT_MODULE_PX_PDR0.B.PL4 = SFTY_IO_PORT_PDR_CMOS_AUTOMOTIVE_LVL;     //SFTY_N_ASC_TOP_CTRL_RST_PORT_PDR_PL_PIN  = SFTY_IO_PORT_PDR_CMOS_AUTOMOTIVE_LVL;
+-
+-   Mcal_WriteCpuEndInitProtReg(&MODULE_P01.PDR0.U,(uint32)SFTYSYSINIT_MODULE_PX_PDR0.U);
+-
+-   /*-------------------------------P02_PDR0-------------------------------------------*/
+-
+-   SFTYSYSINIT_MODULE_PX_PDR0.U =   MODULE_P02.PDR0.U;
+-
+-   /* PS_OC_DIAG_U pin initialization */ /* Port 02, pin 0 */
+-   SFTYSYSINIT_MODULE_PX_PDR0.B.PD0 = SFTY_IO_PORT_PDR_CMOS_SPD_GRD_1;           //  SFTY_PS_OC_DIAG_U_PORT_PDR_PD_PIN  = SFTY_IO_PORT_PDR_CMOS_SPD_GRD_1;
+-   SFTYSYSINIT_MODULE_PX_PDR0.B.PL0 = SFTY_IO_PORT_PDR_CMOS_AUTOMOTIVE_LVL;      //SFTY_PS_OC_DIAG_U_PORT_PDR_PL_PIN  = SFTY_IO_PORT_PDR_CMOS_AUTOMOTIVE_LVL
+-
+-   /* PS_OC_DIAG_V pin initialization */ /* Port 02, pin 2 */
+-   SFTYSYSINIT_MODULE_PX_PDR0.B.PD2 = SFTY_IO_PORT_PDR_CMOS_SPD_GRD_1;           // SFTY_PS_OC_DIAG_V_PORT_PDR_PD_PIN  = SFTY_IO_PORT_PDR_CMOS_SPD_GRD_1;
+-   SFTYSYSINIT_MODULE_PX_PDR0.B.PL2 = SFTY_IO_PORT_PDR_CMOS_AUTOMOTIVE_LVL;      // SFTY_PS_OC_DIAG_V_PORT_PDR_PL_PIN  = SFTY_IO_PORT_PDR_CMOS_AUTOMOTIVE_LVL;
+-
+-   /* PS_OC_DIAG_W pin initialization */ /* Port 02, pin 5 */
+-   SFTYSYSINIT_MODULE_PX_PDR0.B.PD5 = SFTY_IO_PORT_PDR_CMOS_SPD_GRD_1;           //  SFTY_PS_OC_DIAG_W_PORT_PDR_PD_PIN  = SFTY_IO_PORT_PDR_CMOS_SPD_GRD_1;
+-   SFTYSYSINIT_MODULE_PX_PDR0.B.PL5 = SFTY_IO_PORT_PDR_CMOS_AUTOMOTIVE_LVL;      //  SFTY_PS_OC_DIAG_W_PORT_PDR_PL_PIN  = SFTY_IO_PORT_PDR_CMOS_AUTOMOTIVE_LVL;
+-
+-   Mcal_WriteCpuEndInitProtReg(&MODULE_P02.PDR0.U,(uint32)SFTYSYSINIT_MODULE_PX_PDR0.U);
+-
+-   /*-------------------------------P10_PDR0-------------------------------------------*/
+-
+-   SFTYSYSINIT_MODULE_PX_PDR0.U =   MODULE_P10.PDR0.U;
+-
+-   /* PS_OC_DIAG_RES pin initialization */ /* Port 10, pin 4 */
+-   SFTYSYSINIT_MODULE_PX_PDR0.B.PD4 = SFTY_IO_PORT_PDR_CMOS_SPD_GRD_1;           // SFTY_PS_OC_DIAG_RES_PORT_PDR_PD_PIN  = SFTY_IO_PORT_PDR_CMOS_SPD_GRD_1;
+-   SFTYSYSINIT_MODULE_PX_PDR0.B.PL4 = SFTY_IO_PORT_PDR_CMOS_AUTOMOTIVE_LVL;      // SFTY_PS_OC_DIAG_RES_PORT_PDR_PL_PIN  = SFTY_IO_PORT_PDR_CMOS_AUTOMOTIVE_LVL;
+-
+-   Mcal_WriteCpuEndInitProtReg(&MODULE_P10.PDR0.U,(uint32)SFTYSYSINIT_MODULE_PX_PDR0.U);
+-
+-  /*-------------------------------P15_PDR0-------------------------------------------*/
+-
+-   SFTYSYSINIT_MODULE_PX_PDR0.U =   MODULE_P15.PDR0.U;
+-
+-   /* PS_OC_EN_RES pin initialization */ /* Port 15, pin 2 */
+-   SFTYSYSINIT_MODULE_PX_PDR0.B.PD2 = SFTY_IO_PORT_PDR_CMOS_SPD_GRD_1;           //SFTY_PS_OC_EN_RES_PORT_PDR_PD_PIN  = SFTY_IO_PORT_PDR_CMOS_SPD_GRD_1;
+-   SFTYSYSINIT_MODULE_PX_PDR0.B.PL2 = SFTY_IO_PORT_PDR_CMOS_AUTOMOTIVE_LVL;      //SFTY_PS_OC_EN_RES_PORT_PDR_PL_PIN  = SFTY_IO_PORT_PDR_CMOS_AUTOMOTIVE_LVL;
+-
+-   /*GD_RESET_U_BOT pin initialization */ /* Port 15, pin 7 */
+-   SFTYSYSINIT_MODULE_PX_PDR0.B.PD7 = SFTY_IO_PORT_PDR_CMOS_SPD_GRD_1;           //SFTY_GD_RESET_U_BOT_PORT_PDR_PD_PIN  = SFTY_IO_PORT_PDR_CMOS_SPD_GRD_1;
+-   SFTYSYSINIT_MODULE_PX_PDR0.B.PD7 = SFTY_IO_PORT_PDR_CMOS_AUTOMOTIVE_LVL;      //SFTY_GD_RESET_U_BOT_PORT_PDR_PD_PIN  = SFTY_IO_PORT_PDR_CMOS_AUTOMOTIVE_LVL;
+-
+-   Mcal_WriteCpuEndInitProtReg(&MODULE_P15.PDR0.U,(uint32)SFTYSYSINIT_MODULE_PX_PDR0.U);
+-
+-   /*-------------------------------P20_PDR0-------------------------------------------*/
+-
+-   SFTYSYSINIT_MODULE_PX_PDR0.U =   MODULE_P20.PDR0.U;
+-
+-   /* GD_RESET_V_TOP pin initialization */ /* Port 20, pin 6 */
+-   SFTYSYSINIT_MODULE_PX_PDR0.B.PD6 = SFTY_IO_PORT_PDR_CMOS_SPD_GRD_1;           //SFTY_GD_RESET_V_TOP_PORT_PDR_PD_PIN  = SFTY_IO_PORT_PDR_CMOS_SPD_GRD_1;
+-   SFTYSYSINIT_MODULE_PX_PDR0.B.PL6 = SFTY_IO_PORT_PDR_CMOS_AUTOMOTIVE_LVL;      //SFTY_GD_RESET_V_TOP_PORT_PDR_PL_PIN  = SFTY_IO_PORT_PDR_CMOS_AUTOMOTIVE_LVL;
+-
+-   /* N_HV_FB pin initialization */  /* N_HV_FB, Port 20, pin 3 */
+-   SFTYSYSINIT_MODULE_PX_PDR0.B.PD3 = SFTY_IO_PORT_PDR_CMOS_SPD_GRD_1;           //SFTY_N_HV_FB_PORT_PDR_PD_PIN  = SFTY_IO_PORT_PDR_CMOS_SPD_GRD_1;
+-   SFTYSYSINIT_MODULE_PX_PDR0.B.PL3 = SFTY_IO_PORT_PDR_CMOS_AUTOMOTIVE_LVL;      //SFTY_N_HV_FB_PORT_PDR_PL_PIN  = SFTY_IO_PORT_PDR_CMOS_AUTOMOTIVE_LVL;
+-
+-   /* VOL_COMP_ASC_PIN initialization */ /* VOL_COMP_ASC, Port 20, pin 11 */
+-   SFTYSYSINIT_MODULE_PX_PDR0.B.PD3 = SFTY_IO_PORT_PDR_CMOS_SPD_GRD_1;           //SFTY_VOL_COMP_ASC_PORT_PDR_PD_PIN  = SFTY_IO_PORT_PDR_CMOS_SPD_GRD_1;
+-   SFTYSYSINIT_MODULE_PX_PDR0.B.PL3 = SFTY_IO_PORT_PDR_CMOS_AUTOMOTIVE_LVL;      //SFTY_VOL_COMP_ASC_PORT_PDR_PL_PIN  = SFTY_IO_PORT_PDR_CMOS_AUTOMOTIVE_LVL;
+-
+-   Mcal_WriteCpuEndInitProtReg(&MODULE_P20.PDR0.U,(uint32)SFTYSYSINIT_MODULE_PX_PDR0.U);
+-
+-   /*-------------------------------P22_PDR0-------------------------------------------*/
+-
+-   SFTYSYSINIT_MODULE_PX_PDR0.U =   MODULE_P22.PDR0.U;
+-
+-   /* GD_RESET_V_BOT pin initialization */ /* Port 22, pin 4 */
+-   SFTYSYSINIT_MODULE_PX_PDR0.B.PD4 = SFTY_IO_PORT_PDR_CMOS_SPD_GRD_1;           //SFTY_GD_RESET_V_BOT_PORT_PDR_PD_PIN  = SFTY_IO_PORT_PDR_CMOS_SPD_GRD_1;
+-   SFTYSYSINIT_MODULE_PX_PDR0.B.PD4 = SFTY_IO_PORT_PDR_CMOS_AUTOMOTIVE_LVL;      //SFTY_GD_RESET_V_BOT_PORT_PDR_PD_PIN  = SFTY_IO_PORT_PDR_CMOS_AUTOMOTIVE_LVL;
+-
+-   /* PS_OC_EN_V pin initialization */ /* Port 22, pin 5 */
+-   SFTYSYSINIT_MODULE_PX_PDR0.B.PD5 = SFTY_IO_PORT_PDR_CMOS_SPD_GRD_1;           //SFTY_PS_OC_EN_V_PORT_PDR_PD_PIN  = SFTY_IO_PORT_PDR_CMOS_SPD_GRD_1;
+-   SFTYSYSINIT_MODULE_PX_PDR0.B.PL5 = SFTY_IO_PORT_PDR_CMOS_AUTOMOTIVE_LVL;      //SFTY_PS_OC_EN_V_PORT_PDR_PL_PIN  = SFTY_IO_PORT_PDR_CMOS_AUTOMOTIVE_LVL;
+-
+-   /* CTRL_IGBT_TOP_U_FB pin initialization */ /* TOP U Port 22, pin 0 */
+-   SFTYSYSINIT_MODULE_PX_PDR0.B.PD0 = SFTY_IO_PORT_PDR_CMOS_SPD_GRD_1;           //SFTY_CTRL_IGBT_TOP_U_FB_PORT_PDR_PD_PIN  = SFTY_IO_PORT_PDR_CMOS_SPD_GRD_1;
+-   SFTYSYSINIT_MODULE_PX_PDR0.B.PL0 = SFTY_IO_PORT_PDR_CMOS_AUTOMOTIVE_LVL;      //SFTY_CTRL_IGBT_TOP_U_FB_PORT_PDR_PD_PIN  = SFTY_IO_PORT_PDR_CMOS_SPD_GRD_1;
+-
+-   /* CTRL_IGBT_BOT_U_FB pin initialization */ /* BOT U Port 22, pin 1 */
+-   SFTYSYSINIT_MODULE_PX_PDR0.B.PD1 = SFTY_IO_PORT_PDR_CMOS_SPD_GRD_1;           //SFTY_CTRL_IGBT_BOT_U_FB_PORT_PDR_PD_PIN  = SFTY_IO_PORT_PDR_CMOS_SPD_GRD_1;
+-   SFTYSYSINIT_MODULE_PX_PDR0.B.PL1 = SFTY_IO_PORT_PDR_CMOS_AUTOMOTIVE_LVL;      //SFTY_CTRL_IGBT_BOT_U_FB_PORT_PDR_PL_PIN  = SFTY_IO_PORT_PDR_CMOS_AUTOMOTIVE_LVL;
++  
+ 
+-   /* CTRL_IGBT_TOP_V_FB pin initialization */ /* TOP V Port 22, pin 2 */
+-   SFTYSYSINIT_MODULE_PX_PDR0.B.PD2 = SFTY_IO_PORT_PDR_CMOS_SPD_GRD_1;           //SFTY_CTRL_IGBT_TOP_V_FB_PORT_PDR_PD_PIN  = SFTY_IO_PORT_PDR_CMOS_SPD_GRD_1;
+-   SFTYSYSINIT_MODULE_PX_PDR0.B.PL2 = SFTY_IO_PORT_PDR_CMOS_AUTOMOTIVE_LVL;      //SFTY_CTRL_IGBT_TOP_V_FB_PORT_PDR_PL_PIN  = SFTY_IO_PORT_PDR_CMOS_AUTOMOTIVE_LVL;
+-
+-   /* CTRL_IGBT_BOT_V_FB pin initialization */ /* BOT V Port 22, pin 3 */
+-   SFTYSYSINIT_MODULE_PX_PDR0.B.PD3 = SFTY_IO_PORT_PDR_CMOS_SPD_GRD_1;           //SFTY_CTRL_IGBT_BOT_V_FB_PORT_PDR_PD_PIN  = SFTY_IO_PORT_PDR_CMOS_SPD_GRD_1;
+-   SFTYSYSINIT_MODULE_PX_PDR0.B.PL3 = SFTY_IO_PORT_PDR_CMOS_AUTOMOTIVE_LVL;      //SFTY_CTRL_IGBT_BOT_V_FB_PORT_PDR_PL_PIN  = SFTY_IO_PORT_PDR_CMOS_AUTOMOTIVE_LVL;
+-
+-   Mcal_WriteCpuEndInitProtReg(&MODULE_P22.PDR0.U,(uint32)SFTYSYSINIT_MODULE_PX_PDR0.U);
+-
+-   /*-------------------------------P23_PDR0-------------------------------------------*/
+-
+-   SFTYSYSINIT_MODULE_PX_PDR0.U =   MODULE_P23.PDR0.U;
+-
+-   /* N_ASC_CTRL_UC pin initialization */ /* Port 23, pin 4 */
+-   SFTYSYSINIT_MODULE_PX_PDR0.B.PD4 = SFTY_IO_PORT_PDR_CMOS_SPD_GRD_1;           //SFTY_N_ASC_CTRL_UC_PORT_PDR_PD_PIN  = SFTY_IO_PORT_PDR_CMOS_SPD_GRD_1;
+-   SFTYSYSINIT_MODULE_PX_PDR0.B.PL4 = SFTY_IO_PORT_PDR_CMOS_AUTOMOTIVE_LVL;      //SFTY_N_ASC_CTRL_UC_PORT_PDR_PL_PIN  = SFTY_IO_PORT_PDR_CMOS_AUTOMOTIVE_LVL;
+-
+-   /* CTRL_IGBT_TOP_W_FB pin initialization */ /* BOT W Port 23, pin 1 */
+-   SFTYSYSINIT_MODULE_PX_PDR0.B.PD0 = SFTY_IO_PORT_PDR_CMOS_SPD_GRD_1;           //SFTY_CTRL_IGBT_TOP_W_FB_PORT_PDR_PD_PIN  = SFTY_IO_PORT_PDR_CMOS_SPD_GRD_1;
+-   SFTYSYSINIT_MODULE_PX_PDR0.B.PL0 = SFTY_IO_PORT_PDR_CMOS_SPD_GRD_1;           //SFTY_CTRL_IGBT_TOP_W_FB_PORT_PDR_PL_PIN  = SFTY_IO_PORT_PDR_CMOS_AUTOMOTIVE_LVL;
+-
+-   /* CTRL_IGBT_BOT_W_FB pin initialization */ /* BOT W Port 23, pin 1 */
+-   SFTYSYSINIT_MODULE_PX_PDR0.B.PD1 = SFTY_IO_PORT_PDR_CMOS_SPD_GRD_1;           // SFTY_CTRL_IGBT_BOT_W_FB_PORT_PDR_PD_PIN  = SFTY_IO_PORT_PDR_CMOS_SPD_GRD_1;
+-   SFTYSYSINIT_MODULE_PX_PDR0.B.PL1 = SFTY_IO_PORT_PDR_CMOS_AUTOMOTIVE_LVL;      //SFTY_CTRL_IGBT_BOT_W_FB_PORT_PDR_PL_PIN  = SFTY_IO_PORT_PDR_CMOS_AUTOMOTIVE_LVL;
+-
+-   Mcal_WriteCpuEndInitProtReg(&MODULE_P23.PDR0.U,(uint32)SFTYSYSINIT_MODULE_PX_PDR0.U);
+-
+-   /*-------------------------------P32_PDR0-------------------------------------------*/
+-
+-   SFTYSYSINIT_MODULE_PX_PDR0.U =   MODULE_P32.PDR0.U;
++   /*---------------------------------------------------PORT 02----------------------------------------------------*/
++   
++   SFTYSYSINIT_MODULE_PX_IOCR4.U =\t MODULE_P02.IOCR4.U;
++   /*---------------------------------CAN FD SPI ----------------------------------------*/
++   SFTYSYSINIT_MODULE_PX_IOCR4.B.PC4 = SFTY_QSPI_CS_VAL;
++   SFTYSYSINIT_MODULE_PX_IOCR4.B.PC5 = SFTY_QSPI_MRST_VAL;
++   SFTYSYSINIT_MODULE_PX_IOCR4.B.PC6 = SFTY_QSPI_MTSR_VAL;
++   SFTYSYSINIT_MODULE_PX_IOCR4.B.PC7 = SFTY_QSPI_CLK_VAL;
+ 
+-   /* GD_RESET_W_TOP pin initialization */ /* Port 32, pin 5 */
+-   SFTYSYSINIT_MODULE_PX_PDR0.B.PD5 = SFTY_IO_PORT_PDR_CMOS_SPD_GRD_1;           //SFTY_GD_RESET_W_TOP_PORT_PDR_PD_PIN  = SFTY_IO_PORT_PDR_CMOS_SPD_GRD_1;
+-   SFTYSYSINIT_MODULE_PX_PDR0.B.PL5 = SFTY_IO_PORT_PDR_CMOS_AUTOMOTIVE_LVL;      //SFTY_GD_RESET_W_TOP_PORT_PDR_PL_PIN  = SFTY_IO_PORT_PDR_CMOS_AUTOMOTIVE_LVL;
++   Mcal_WriteCpuEndInitProtReg(&MODULE_P02.IOCR4.U,(uint32)SFTYSYSINIT_MODULE_PX_IOCR4.U);
+ 
+-   /* KL30_INV_SW pin initialization */ /* Port 34, pin 4 */
+-   SFTYSYSINIT_MODULE_PX_PDR0.B.PD4 = SFTY_IO_PORT_PDR_CMOS_SPD_GRD_1;           //SFTY_KL30_INV_SW_PORT_PDR_PD_PIN  = SFTY_IO_PORT_PDR_CMOS_SPD_GRD_1;
+-   SFTYSYSINIT_MODULE_PX_PDR0.B.PL4 = SFTY_IO_PORT_PDR_CMOS_AUTOMOTIVE_LVL;      //SFTY_KL30_INV_SW_PORT_PDR_PL_PIN  = SFTY_IO_PORT_PDR_CMOS_AUTOMOTIVE_LVL;
+ 
+-   /*KL15 SBC SW pin */   /*Port32, pin2*/
+-    SFTYSYSINIT_MODULE_PX_PDR0.B.PD2 = SFTY_IO_PORT_PDR_CMOS_SPD_GRD_1;\t\t\t  //SFTY_KL15_SBC_SW_PORT_PDR_PD_PIN  = SFTY_IO_PORT_PDR_CMOS_SPD_GRD_1;
+-    SFTYSYSINIT_MODULE_PX_PDR0.B.PL2 = SFTY_IO_PORT_PDR_CMOS_AUTOMOTIVE_LVL;      //SFTY_KL15_SBC_SW_PORT_PDR_PL_PIN  = SFTY_IO_PORT_PDR_CMOS_AUTOMOTIVE_LVL;
+-\t\t   
++   /*---------------------------------------------------PORT 00----------------------------------------------------*/
++   SFTYSYSINIT_MODULE_PX_IOCR0.U =\t MODULE_P00.IOCR0.U;
++   SFTYSYSINIT_MODULE_PX_IOCR8.U =\t MODULE_P00.IOCR8.U;
++   SFTYSYSINIT_MODULE_PX_PDR0.U  =   MODULE_P00.PDR0.U;
++   SFTYSYSINIT_MODULE_PX_PDR1.U =    MODULE_P00.PDR1.U;
+    
+-\t Mcal_WriteCpuEndInitProtReg(&MODULE_P32.PDR0.U,(uint32)SFTYSYSINIT_MODULE_PX_PDR0.U);
++   /*---------------------------------SPI----------------------------------------*/
++   SFTYSYSINIT_MODULE_PX_PDR0.B.PD0 = SFTY_IO_PORT_PDR_CMOS_SPD_GRD_1;\t\t  
++   SFTYSYSINIT_MODULE_PX_PDR0.B.PL0 = SFTY_IO_PORT_PDR_CMOS_AUTOMOTIVE_LVL;\t  
++   SFTYSYSINIT_MODULE_PX_IOCR0.B.PC0 = SFTY_GPI_IOCR_VAL;
+    
+-\t /*-------------------------------P02_PDR1-------------------------------------------*/
+-
+-   Mcal_WriteCpuEndInitProtReg(&MODULE_P32.PDR0.U,(uint32)SFTYSYSINIT_MODULE_PX_PDR0.U);
+-
+-   /*-------------------------------P02_PDR1-------------------------------------------*/
+-
+-   SFTYSYSINIT_MODULE_PX_PDR1.U =   MODULE_P02.PDR1.U;
+-
+-   /* PS_OC_EN_W pin initialization */ /* Port 02, pin 11 */
+-   SFTYSYSINIT_MODULE_PX_PDR1.B.PD11 = SFTY_IO_PORT_PDR_CMOS_SPD_GRD_1;          //SFTY_PS_OC_EN_W_PORT_PDR_PD_PIN  = SFTY_IO_PORT_PDR_CMOS_SPD_GRD_1;
+-   SFTYSYSINIT_MODULE_PX_PDR1.B.PL11 = SFTY_IO_PORT_PDR_CMOS_AUTOMOTIVE_LVL;     //SFTY_PS_OC_EN_W_PORT_PDR_PL_PIN  = SFTY_IO_PORT_PDR_CMOS_AUTOMOTIVE_LVL;
+-
+-   Mcal_WriteCpuEndInitProtReg(&MODULE_P02.PDR1.U,(uint32)SFTYSYSINIT_MODULE_PX_PDR1.U);
+-
+-      /*-------------------------------P14_PDR1-------------------------------------------*/
+-
+-#if SYSCON_FTR_PSM == 1 /* USE_IPMCTRL_CONTROL */
+-   SFTYSYSINIT_MODULE_PX_PDR1.U =   MODULE_P14.PDR1.U;
+-
+-   /* N_ASC_TOP_CTRL pin initialization */ /* Port 14, pin 10 */
+-   SFTYSYSINIT_MODULE_PX_PDR1.B.PD10 = SFTY_IO_PORT_PDR_CMOS_SPD_GRD_1;          //SFTY_N_ASC_TOP_CTRL_PORT_PDR_PD_PIN  = SFTY_IO_PORT_PDR_CMOS_SPD_GRD_1;
+-   SFTYSYSINIT_MODULE_PX_PDR1.B.PL10 = SFTY_IO_PORT_PDR_CMOS_AUTOMOTIVE_LVL;     //SFTY_N_ASC_TOP_CTRL_PORT_PDR_PL_PIN  = SFTY_IO_PORT_PDR_CMOS_AUTOMOTIVE_LVL;
+-
+-   Mcal_WriteCpuEndInitProtReg(&MODULE_P14.PDR1.U,(uint32)SFTYSYSINIT_MODULE_PX_PDR1.U);
+-#endif
+-
+-   /*-------------------------------P20_PDR1-------------------------------------------*/
+-
+-   SFTYSYSINIT_MODULE_PX_PDR1.U =   MODULE_P20.PDR1.U;
+-
+-   /* EN_EXC_P pin initialization */ /* Port 20, pin 9 */
+-   SFTYSYSINIT_MODULE_PX_PDR1.B.PD9 = SFTY_IO_PORT_PDR_CMOS_SPD_GRD_1;           //SFTY_EN_EXC_P_PORT_PDR_PD_PIN = SFTY_IO_PORT_PDR_CMOS_SPD_GRD_1;
+-   SFTYSYSINIT_MODULE_PX_PDR1.B.PL9 = SFTY_IO_PORT_PDR_CMOS_AUTOMOTIVE_LVL;      // SFTY_EN_EXC_P_PORT_PDR_PL_PIN = SFTY_IO_PORT_PDR_CMOS_AUTOMOTIVE_LVL;
+-
+-   /* EN_EXC_N pin initialization */ /* Port 20, pin 8 */
+-   SFTYSYSINIT_MODULE_PX_PDR1.B.PD8 = SFTY_IO_PORT_PDR_CMOS_SPD_GRD_1;           //SFTY_EN_EXC_N_PORT_PDR_PD_PIN = SFTY_IO_PORT_PDR_CMOS_SPD_GRD_1;
+-   SFTYSYSINIT_MODULE_PX_PDR1.B.PL8 = SFTY_IO_PORT_PDR_CMOS_AUTOMOTIVE_LVL;      //SFTY_EN_EXC_N_PORT_PDR_PL_PIN = SFTY_IO_PORT_PDR_CMOS_AUTOMOTIVE_LVL;
+-
+-   /* PS_OC_EN_U pin initialization */ /* Port 20, pin 10 */
+-   SFTYSYSINIT_MODULE_PX_PDR1.B.PD10 = SFTY_IO_PORT_PDR_CMOS_SPD_GRD_1;          // SFTY_PS_OC_EN_U_PORT_PDR_PD_PIN  = SFTY_IO_PORT_PDR_CMOS_SPD_GRD_1;
+-   SFTYSYSINIT_MODULE_PX_PDR1.B.PL10 = SFTY_IO_PORT_PDR_CMOS_AUTOMOTIVE_LVL;     //SFTY_PS_OC_EN_U_PORT_PDR_PL_PIN  = SFTY_IO_PORT_PDR_CMOS_AUTOMOTIVE_LVL;
+-
+-   Mcal_WriteCpuEndInitProtReg(&MODULE_P20.PDR1.U,(uint32)SFTYSYSINIT_MODULE_PX_PDR1.U);
+-
+-
+-   /*-------------------------------P33_PDR1-------------------------------------------*/
+-
+-   SFTYSYSINIT_MODULE_PX_PDR1.U =   MODULE_P33.PDR1.U;
+-
+-   /* GD_RESET_W_BOT pin initialization */ /* Port 33, pin 10 */
+-   SFTYSYSINIT_MODULE_PX_PDR1.B.PD10 = SFTY_IO_PORT_PDR_CMOS_SPD_GRD_1;          //SFTY_GD_RESET_W_BOT_PORT_PDR_PD_PIN  = SFTY_IO_PORT_PDR_CMOS_SPD_GRD_1;
+-   SFTYSYSINIT_MODULE_PX_PDR1.B.PD10 = SFTY_IO_PORT_PDR_CMOS_AUTOMOTIVE_LVL;     //SFTY_GD_RESET_W_BOT_PORT_PDR_PD_PIN  = SFTY_IO_PORT_PDR_CMOS_AUTOMOTIVE_LVL;
++   /*---------------------------------KL15 PW DOWN----------------------------------------*/
++   SFTYSYSINIT_MODULE_PX_PDR0.B.PD1 = SFTY_IO_PORT_PDR_CMOS_SPD_GRD_1;\t\t  
++   SFTYSYSINIT_MODULE_PX_PDR0.B.PL1 = SFTY_IO_PORT_PDR_CMOS_AUTOMOTIVE_LVL;\t  
++   SFTYSYSINIT_MODULE_PX_IOCR0.B.PC1 = SFTY_GPO_IOCR_VAL;
++
++   /*-------------------------------- IGBT DRIVER HIGH BRIDGE----------------------------------------*/
++   SFTYSYSINIT_MODULE_PX_PDR0.B.PD2 = SFTY_IO_PORT_PDR_CMOS_SPD_GRD_1;
++   SFTYSYSINIT_MODULE_PX_PDR0.B.PL2 = SFTY_IO_PORT_PDR_CMOS_AUTOMOTIVE_LVL;\t
++   SFTYSYSINIT_MODULE_PX_IOCR0.B.PC2 = SFTY_GPO_IOCR_VAL;
++   
++   /*---------------------------------IGBT DRIVER LOW BRIDGE----------------------------------------*/
++   SFTYSYSINIT_MODULE_PX_PDR0.B.PD3 = SFTY_IO_PORT_PDR_CMOS_SPD_GRD_1;
++   SFTYSYSINIT_MODULE_PX_PDR0.B.PL3 = SFTY_IO_PORT_PDR_CMOS_AUTOMOTIVE_LVL;\t
++   SFTYSYSINIT_MODULE_PX_IOCR0.B.PC3 = SFTY_GPO_IOCR_VAL;
++   
++   /*---------------------------------PWM DRIVER----------------------------------------*/
++   SFTYSYSINIT_MODULE_PX_PDR1.B.PD9 = SFTY_IO_PORT_PDR_CMOS_SPD_GRD_1;
++   SFTYSYSINIT_MODULE_PX_PDR1.B.PL9 = SFTY_IO_PORT_PDR_CMOS_AUTOMOTIVE_LVL;
++   SFTYSYSINIT_MODULE_PX_IOCR8.B.PC9 = SFTY_GPO_IOCR_VAL;
+ 
++   Mcal_WriteCpuEndInitProtReg(&MODULE_P00.PDR0.U,(uint32)SFTYSYSINIT_MODULE_PX_PDR0.U);
++   Mcal_WriteCpuEndInitProtReg(&MODULE_P00.PDR1.U,(uint32)SFTYSYSINIT_MODULE_PX_PDR1.U);
++   Mcal_WriteCpuEndInitProtReg(&MODULE_P00.IOCR0.U,(uint32)SFTYSYSINIT_MODULE_PX_IOCR0.U);
++   Mcal_WriteCpuEndInitProtReg(&MODULE_P00.IOCR8.U,(uint32)SFTYSYSINIT_MODULE_PX_IOCR8.U);
++
++   /*---------------------------------------------------PORT 33----------------------------------------------------*/
++   SFTYSYSINIT_MODULE_PX_PDR0.U =    MODULE_P33.PDR0.U;
++   SFTYSYSINIT_MODULE_PX_PDR1.U =    MODULE_P33.PDR1.U;
++   SFTYSYSINIT_MODULE_PX_IOCR0.U =   MODULE_P33.IOCR0.U;
++   SFTYSYSINIT_MODULE_PX_IOCR8.U =  MODULE_P33.IOCR8.U;
++
++   /*---------------------------------SMU SUPPLY ERROR ----------------------------------------*/
++   SFTYSYSINIT_MODULE_PX_PDR1.B.PD8 = SFTY_IO_PORT_PDR_CMOS_SPD_GRD_1;
++   SFTYSYSINIT_MODULE_PX_PDR1.B.PL8 = SFTY_IO_PORT_PDR_CMOS_AUTOMOTIVE_LVL;
++   SFTYSYSINIT_MODULE_PX_IOCR8.B.PC8 = SFTY_GPO_IOCR_VAL;
++
++   /*---------------------------------SPI SYNC ----------------------------------------*/
++   SFTYSYSINIT_MODULE_PX_PDR1.B.PD9 = SFTY_IO_PORT_PDR_CMOS_SPD_GRD_1;
++   SFTYSYSINIT_MODULE_PX_PDR1.B.PL9 = SFTY_IO_PORT_PDR_CMOS_AUTOMOTIVE_LVL;
++   SFTYSYSINIT_MODULE_PX_IOCR8.B.PC9 = SFTY_GPI_IOCR_VAL;
++
++   /*---------------------------------SPI CS OND ----------------------------------------*/
++   SFTYSYSINIT_MODULE_PX_PDR1.B.PD10 = SFTY_IO_PORT_PDR_CMOS_SPD_GRD_1;
++   SFTYSYSINIT_MODULE_PX_PDR1.B.PL10 = SFTY_IO_PORT_PDR_CMOS_AUTOMOTIVE_LVL;
++   SFTYSYSINIT_MODULE_PX_IOCR8.B.PC10 = SFTY_GPI_IOCR_VAL;
++   
++   Mcal_WriteCpuEndInitProtReg(&MODULE_P33.PDR0.U,(uint32)SFTYSYSINIT_MODULE_PX_PDR0.U);
+    Mcal_WriteCpuEndInitProtReg(&MODULE_P33.PDR1.U,(uint32)SFTYSYSINIT_MODULE_PX_PDR1.U);
++   Mcal_WriteCpuEndInitProtReg(&MODULE_P33.IOCR0.U,(uint32)SFTYSYSINIT_MODULE_PX_IOCR0.U);
++   Mcal_WriteCpuEndInitProtReg(&MODULE_P33.IOCR8.U,(uint32)SFTYSYSINIT_MODULE_PX_IOCR8.U);
+ 
+ 
+-/*-------------------------------IOCR0-------------------------------------------*/
+-/*-------------------------------P00_IOCR0-------------------------------------------*/
+-
+-  SFTYSYSINIT_MODULE_PX_IOCR0.U =   MODULE_P00.IOCR0.U;
+-  SFTYSYSINIT_MODULE_PX_IOCR0.B.PC1 = SFTY_GPO_IOCR_VAL;  //SFTY_M_PW_DOWN_SBC_SW_PORT_IOCR_PC_PIN = SFTY_GPO_IOCR_VAL;
+-
+-  Mcal_WriteCpuEndInitProtReg(&MODULE_P00.IOCR0.U,(uint32)SFTYSYSINIT_MODULE_PX_IOCR0.U);
+-
+-/*-------------------------------P02_IOCR0-------------------------------------------*/
+-
+-   SFTYSYSINIT_MODULE_PX_IOCR0.U =   MODULE_P02.IOCR0.U;
+-   SFTYSYSINIT_MODULE_PX_IOCR0.B.PC0 = SFTY_GPO_IOCR_VAL;            //SFTY_PS_OC_DIAG_U_PORT_IOCR_PC_PIN = SFTY_GPO_IOCR_VAL;
+-   SFTYSYSINIT_MODULE_PX_IOCR0.B.PC2 = SFTY_GPO_IOCR_VAL;            //SFTY_PS_OC_DIAG_V_PORT_IOCR_PC_PIN = SFTY_GPO_IOCR_VAL;
+-
+-   Mcal_WriteCpuEndInitProtReg(&MODULE_P02.IOCR0.U,(uint32)SFTYSYSINIT_MODULE_PX_IOCR0.U);
+-
+-   /*-------------------------------P15_IOCR0-------------------------------------------*/
+-
+-   SFTYSYSINIT_MODULE_PX_IOCR0.U     = MODULE_P15.IOCR0.U;
+-   SFTYSYSINIT_MODULE_PX_IOCR0.B.PC2 = SFTY_GPO_IOCR_VAL;            //SFTY_PS_OC_EN_RES_PORT_IOCR_PC_PIN = SFTY_GPO_IOCR_VAL;
+-   SFTYSYSINIT_MODULE_PX_IOCR0.B.PC0 = SFTY_QSPI_CS_VAL;             //SFTY_QSPI_CS_PORT_IOCR_PIN   = SFTY_QSPI_CS_VAL;
+-
+-   Mcal_WriteCpuEndInitProtReg(&MODULE_P15.IOCR0.U,(uint32)SFTYSYSINIT_MODULE_PX_IOCR0.U);
+-
+-   /*-------------------------------P20_IOCR0-------------------------------------------*/
+-
+-   SFTYSYSINIT_MODULE_PX_IOCR0.U     = MODULE_P20.IOCR0.U;
+-   SFTYSYSINIT_MODULE_PX_IOCR0.B.PC3 = SFTY_GPI_PLLDWN_IOCR_VAL;      //SFTY_N_HV_FB_PORT_IOCR_PC_PIN = SFTY_GPI_PLLDWN_IOCR_VAL;
+-   SFTYSYSINIT_MODULE_PX_IOCR0.B.PC3 = SFTY_GPI_PLLDWN_IOCR_VAL;      //SFTY_VOL_COMP_ASC_PORT_IOCR_PC_PIN = SFTY_GPI_PLLDWN_IOCR_VAL;
+-
+-   Mcal_WriteCpuEndInitProtReg(&MODULE_P20.IOCR0.U,(uint32)SFTYSYSINIT_MODULE_PX_IOCR0.U);
+-
+-   /*-------------------------------P22_IOCR0-------------------------------------------*/
+-
+-   SFTYSYSINIT_MODULE_PX_IOCR0.U     = MODULE_P22.IOCR0.U;
+-   SFTYSYSINIT_MODULE_PX_IOCR0.B.PC0 = SFTY_GPI_PLLDWN_IOCR_VAL;      //SFTY_CTRL_IGBT_TOP_U_FB_PORT_IOCR_PC_PIN = SFTY_GPI_PLLDWN_IOCR_VAL;
+-   SFTYSYSINIT_MODULE_PX_IOCR0.B.PC1 = SFTY_GPI_PLLDWN_IOCR_VAL;      //SFTY_CTRL_IGBT_BOT_U_FB_PORT_IOCR_PC_PIN = SFTY_GPI_PLLDWN_IOCR_VAL;
+-   SFTYSYSINIT_MODULE_PX_IOCR0.B.PC2 = SFTY_GPI_PLLDWN_IOCR_VAL;      //SFTY_CTRL_IGBT_TOP_V_FB_PORT_IOCR_PC_PIN = SFTY_GPI_PLLDWN_IOCR_VAL;
+-   SFTYSYSINIT_MODULE_PX_IOCR0.B.PC3 = SFTY_GPI_PLLDWN_IOCR_VAL;      //SFTY_CTRL_IGBT_BOT_V_FB_PORT_IOCR_PC_PIN = SFTY_GPI_PLLDWN_IOCR_VAL;
+-
+-   Mcal_WriteCpuEndInitProtReg(&MODULE_P22.IOCR0.U,(uint32)SFTYSYSINIT_MODULE_PX_IOCR0.U);
+-
+-   /*-------------------------------P23_IOCR0-------------------------------------------*/
+-
+-   SFTYSYSINIT_MODULE_PX_IOCR0.U     = MODULE_P23.IOCR0.U;
+-   SFTYSYSINIT_MODULE_PX_IOCR0.B.PC0 = SFTY_GPI_PLLDWN_IOCR_VAL;      //SFTY_CTRL_IGBT_TOP_W_FB_PORT_IOCR_PC_PIN = SFTY_GPI_PLLDWN_IOCR_VAL;
+-   SFTYSYSINIT_MODULE_PX_IOCR0.B.PC1 = SFTY_GPI_PLLDWN_IOCR_VAL;      //SFTY_CTRL_IGBT_BOT_W_FB_PORT_IOCR_PC_PIN = SFTY_GPI_PLLDWN_IOCR_VAL;
+-
+-   Mcal_WriteCpuEndInitProtReg(&MODULE_P23.IOCR0.U,(uint32)SFTYSYSINIT_MODULE_PX_IOCR0.U);
+-
+-
+-   /*-------------------------------P32_IOCR0-------------------------------------------*/
+-
+-   SFTYSYSINIT_MODULE_PX_IOCR0.U\t = MODULE_P32.IOCR0.U;
+-   SFTYSYSINIT_MODULE_PX_IOCR0.B.PC2 = SFTY_GPI_PLLDWN_IOCR_VAL; \t //SFTY_CTRL_IGBT_TOP_W_FB_PORT_IOCR_PC_PIN = SFTY_GPI_PLLDWN_IOCR_VAL;
+-\t 
+-   Mcal_WriteCpuEndInitProtReg(&MODULE_P32.IOCR0.U,(uint32)SFTYSYSINIT_MODULE_PX_IOCR0.U);
+-
++   /*---------------------------------------------------PORT 32----------------------------------------------------*/
++   SFTYSYSINIT_MODULE_PX_PDR0.U =    MODULE_P32.PDR0.U;
++   SFTYSYSINIT_MODULE_PX_IOCR0.U =   MODULE_P32.IOCR0.U;
++   SFTYSYSINIT_MODULE_PX_IOCR4.U =   MODULE_P32.IOCR4.U;
+    
++   /*---------------------------------KL15 ----------------------------------------*/
++   SFTYSYSINIT_MODULE_PX_PDR0.B.PD2 = SFTY_IO_PORT_PDR_CMOS_SPD_GRD_1;
++   SFTYSYSINIT_MODULE_PX_PDR0.B.PL2 = SFTY_IO_PORT_PDR_CMOS_AUTOMOTIVE_LVL;
++   SFTYSYSINIT_MODULE_PX_IOCR0.B.PC2 = SFTY_GPI_IOCR_VAL;
+ 
+-   /*-------------------------------IOCR4-------------------------------------------*/
+-
+-   /*-------------------------------P01_IOCR4-------------------------------------------*/
+-
+-   SFTYSYSINIT_MODULE_PX_IOCR4.U     = MODULE_P01.IOCR4.U;
+-   SFTYSYSINIT_MODULE_PX_IOCR4.B.PC6 = SFTY_GPO_IOCR_VAL;              //SFTY_GD_RESET_U_TOP_PORT_IOCR_PC_PIN = SFTY_GPO_IOCR_VAL;
+-   SFTYSYSINIT_MODULE_PX_IOCR4.B.PC4 = SFTY_GPO_IOCR_VAL;              //SFTY_N_ASC_TOP_CTRL_RST_PORT_IOCR_PC_PIN = SFTY_GPO_IOCR_VAL;
+-
+-   Mcal_WriteCpuEndInitProtReg(&MODULE_P01.IOCR4.U,(uint32)SFTYSYSINIT_MODULE_PX_IOCR4.U);
+-
+-   /*-------------------------------P02_IOCR4-------------------------------------------*/
+-
+-   SFTYSYSINIT_MODULE_PX_IOCR4.U     = MODULE_P02.IOCR4.U;
+-   SFTYSYSINIT_MODULE_PX_IOCR4.B.PC5 = SFTY_GPO_IOCR_VAL;              //SFTY_PS_OC_DIAG_W_PORT_IOCR_PC_PIN = SFTY_GPO_IOCR_VAL;
+-
+-   Mcal_WriteCpuEndInitProtReg(&MODULE_P02.IOCR4.U,(uint32)SFTYSYSINIT_MODULE_PX_IOCR4.U );
+-
+-   /*-------------------------------P10_IOCR4-------------------------------------------*/
+-
+-   SFTYSYSINIT_MODULE_PX_IOCR4.U     = MODULE_P10.IOCR4.U;
+-   SFTYSYSINIT_MODULE_PX_IOCR4.B.PC4 = SFTY_GPO_IOCR_VAL;            //SFTY_PS_OC_DIAG_RES_PORT_IOCR_PC_PIN = SFTY_GPO_IOCR_VAL;
+-   SFTYSYSINIT_MODULE_PX_IOCR4.B.PC6 = SFTY_ASCLINSPI_CLK_VAL;       //SFTY_ASC2SPI_CLK_PORT_IOCR_PIN  = SFTY_ASCLINSPI_CLK_VAL;
+-
+-   Mcal_WriteCpuEndInitProtReg(&MODULE_P10.IOCR4.U,(uint32)SFTYSYSINIT_MODULE_PX_IOCR4.U);
++   /*---------------------------------SPI SYNCHRO ----------------------------------------*/
++   SFTYSYSINIT_MODULE_PX_PDR0.B.PD4 = SFTY_IO_PORT_PDR_CMOS_SPD_GRD_1;
++   SFTYSYSINIT_MODULE_PX_PDR0.B.PL4 = SFTY_IO_PORT_PDR_CMOS_AUTOMOTIVE_LVL;
++   SFTYSYSINIT_MODULE_PX_IOCR4.B.PC4 = SFTY_GPI_IOCR_VAL;
+ 
+-   /*-------------------------------P15_IOCR4-------------------------------------------*/
+-
+-   SFTYSYSINIT_MODULE_PX_IOCR4.U     = MODULE_P15.IOCR4.U;
+-   SFTYSYSINIT_MODULE_PX_IOCR4.B.PC7 = SFTY_GPO_IOCR_VAL;             //SFTY_GD_RESET_U_BOT_PORT_IOCR_PC_PIN = SFTY_GPO_IOCR_VAL;
+-   Mcal_WriteCpuEndInitProtReg(&MODULE_P15.IOCR4.U,(uint32)SFTYSYSINIT_MODULE_PX_IOCR4.U);
+-
+-   /*-------------------------------P20_IOCR4-------------------------------------------*/
+-
+-   SFTYSYSINIT_MODULE_PX_IOCR4.U     = MODULE_P20.IOCR4.U;
+-   SFTYSYSINIT_MODULE_PX_IOCR4.B.PC6 = SFTY_GPO_IOCR_VAL;              //SFTY_GD_RESET_V_TOP_PORT_IOCR_PC_PIN = SFTY_GPO_IOCR_VAL;
+-   Mcal_WriteCpuEndInitProtReg(&MODULE_P20.IOCR4.U,(uint32)SFTYSYSINIT_MODULE_PX_IOCR4.U);
+-
+-   /*-------------------------------P22_IOCR4-------------------------------------------*/
+-
+-   SFTYSYSINIT_MODULE_PX_IOCR4.U =   MODULE_P22.IOCR4.U;
+-   SFTYSYSINIT_MODULE_PX_IOCR4.B.PC4 = SFTY_GPO_IOCR_VAL;               //SFTY_GD_RESET_V_BOT_PORT_IOCR_PC_PIN = SFTY_GPO_IOCR_VAL;
+-   SFTYSYSINIT_MODULE_PX_IOCR4.B.PC5 = SFTY_GPO_IOCR_VAL;               //SFTY_PS_OC_EN_V_PORT_IOCR_PC_PIN = SFTY_GPO_IOCR_VAL;
+-   SFTYSYSINIT_MODULE_PX_IOCR4.B.PC6 = SFTY_QSPI_MRST_VAL;              //SFTY_QSPI_MRST_PORT_IOCR_PIN = SFTY_QSPI_MRST_VAL;
+-   SFTYSYSINIT_MODULE_PX_IOCR4.B.PC7 = SFTY_QSPI_CLK_VAL;               //SFTY_QSPI_CLK_PORT_IOCR_PIN  = SFTY_QSPI_CLK_VAL;
+-
+-   Mcal_WriteCpuEndInitProtReg(&MODULE_P22.IOCR4.U,(uint32)SFTYSYSINIT_MODULE_PX_IOCR4.U);
+-
+-   /*-------------------------------P23_IOCR4-------------------------------------------*/
+-
+-   SFTYSYSINIT_MODULE_PX_IOCR4.U =   MODULE_P23.IOCR4.U;
+-   SFTYSYSINIT_MODULE_PX_IOCR4.B.PC4 = SFTY_GPO_IOCR_VAL;                          // SFTY_N_ASC_CTRL_UC_PORT_IOCR_PC_PIN = SFTY_GPO_IOCR_VAL;
+-   Mcal_WriteCpuEndInitProtReg(&MODULE_P23.IOCR4.U,(uint32)SFTYSYSINIT_MODULE_PX_IOCR4.U);
+-
+-   /*-------------------------------P32_IOCR4-------------------------------------------*/
+-
+-   SFTYSYSINIT_MODULE_PX_IOCR4.U =   MODULE_P32.IOCR4.U;
+-   SFTYSYSINIT_MODULE_PX_IOCR4.B.PC5 = SFTY_GPO_IOCR_VAL;              //SFTY_GD_RESET_W_TOP_PORT_IOCR_PC_PIN = SFTY_GPO_IOCR_VAL;
++   Mcal_WriteCpuEndInitProtReg(&MODULE_P32.PDR0.U,(uint32)SFTYSYSINIT_MODULE_PX_PDR0.U);
++   Mcal_WriteCpuEndInitProtReg(&MODULE_P32.IOCR0.U,(uint32)SFTYSYSINIT_MODULE_PX_IOCR0.U);
+    Mcal_WriteCpuEndInitProtReg(&MODULE_P32.IOCR4.U,(uint32)SFTYSYSINIT_MODULE_PX_IOCR4.U);
+ 
+-   /*-------------------------------P33_IOCR4-------------------------------------------*/
+-
+-   SFTYSYSINIT_MODULE_PX_IOCR4.U =   MODULE_P33.IOCR4.U;
+-   SFTYSYSINIT_MODULE_PX_IOCR4.B.PC6 = SFTY_ASCLINSPI_CS_VAL;          //SFTY_ASC2SPI_CS_PORT_IOCR_PIN   = SFTY_ASCLINSPI_CS_VAL;
+-   Mcal_WriteCpuEndInitProtReg(&MODULE_P33.IOCR4.U,(uint32)SFTYSYSINIT_MODULE_PX_IOCR4.U);
+-
+-   /*-------------------------------P34_IOCR4-------------------------------------------*/
+-
+-   SFTYSYSINIT_MODULE_PX_IOCR4.U =   MODULE_P34.IOCR4.U;
+-   SFTYSYSINIT_MODULE_PX_IOCR4.B.PC4 = SFTY_GPO_IOCR_VAL;              //SFTY_KL30_INV_SW_PORT_IOCR_PC_PIN = SFTY_GPO_IOCR_VAL;
+-   Mcal_WriteCpuEndInitProtReg(&MODULE_P34.IOCR4.U,(uint32)SFTYSYSINIT_MODULE_PX_IOCR4.U);
+-
++   /*---------------------------------------------------PORT 23----------------------------------------------------*/
++   SFTYSYSINIT_MODULE_PX_PDR0.U =\tMODULE_P23.PDR0.U;
++   SFTYSYSINIT_MODULE_PX_IOCR0.U =\tMODULE_P23.IOCR0.U;
++   SFTYSYSINIT_MODULE_PX_IOCR4.U =  MODULE_P23.IOCR4.U;
+ 
+-  /*-------------------------------IOCR8-------------------------------------------*/
+-  /*-------------------------------P02_IOCR8-------------------------------------------*/
+-
+-   SFTYSYSINIT_MODULE_PX_IOCR8.U      = MODULE_P02.IOCR8.U;
+-   SFTYSYSINIT_MODULE_PX_IOCR8.B.PC11 = SFTY_GPO_IOCR_VAL;         //SFTY_PS_OC_EN_W_PORT_IOCR_PC_PIN = SFTY_GPO_IOCR_VAL;
+-
+-   /* ASCLIN pin Init */
+-   SFTYSYSINIT_MODULE_PX_IOCR8.B.PC9 = SFTY_ASCLINSPI_MTSR_VAL;    //SFTY_ASC2SPI_MTSR_PORT_IOCR_PIN = SFTY_ASCLINSPI_MTSR_VAL;
+-   SFTYSYSINIT_MODULE_PX_IOCR8.B.PC10 = SFTY_ASCLINSPI_MRST_VAL;   //SFTY_ASC2SPI_MRST_PORT_IOCR_PIN = SFTY_ASCLINSPI_MRST_VAL;
++    /*---------------------------------SPI CS OND ----------------------------------------*/
++   SFTYSYSINIT_MODULE_PX_PDR0.B.PD1 = SFTY_IO_PORT_PDR_CMOS_SPD_GRD_1;
++   SFTYSYSINIT_MODULE_PX_PDR0.B.PL1 = SFTY_IO_PORT_PDR_CMOS_AUTOMOTIVE_LVL;
++   SFTYSYSINIT_MODULE_PX_IOCR0.B.PC1 = SFTY_GPI_IOCR_VAL;
++   
++    /*---------------------------------SPI CS OND ----------------------------------------*/
++   SFTYSYSINIT_MODULE_PX_PDR0.B.PD4 = SFTY_IO_PORT_PDR_CMOS_SPD_GRD_1;
++   SFTYSYSINIT_MODULE_PX_PDR0.B.PL4 = SFTY_IO_PORT_PDR_CMOS_AUTOMOTIVE_LVL;
++   SFTYSYSINIT_MODULE_PX_IOCR4.B.PC4 = SFTY_GPI_IOCR_VAL;
+ 
+-   Mcal_WriteCpuEndInitProtReg(&MODULE_P02.IOCR8.U,(uint32)SFTYSYSINIT_MODULE_PX_IOCR8.U);
++   Mcal_WriteCpuEndInitProtReg(&MODULE_P23.PDR0.U,(uint32)SFTYSYSINIT_MODULE_PX_PDR0.U);
++   Mcal_WriteCpuEndInitProtReg(&MODULE_P23.IOCR0.U,(uint32)SFTYSYSINIT_MODULE_PX_IOCR0.U);
++   Mcal_WriteCpuEndInitProtReg(&MODULE_P23.IOCR4.U,(uint32)SFTYSYSINIT_MODULE_PX_IOCR4.U);
+ 
+-   /*-------------------------------P14_IOCR8-------------------------------------------*/
++   /*---------------------------------------------------PORT 21----------------------------------------------------*/
++   SFTYSYSINIT_MODULE_PX_PDR0.U =\tMODULE_P21.PDR0.U;
++   SFTYSYSINIT_MODULE_PX_IOCR0.U =  MODULE_P21.IOCR0.U;
++   SFTYSYSINIT_MODULE_PX_IOCR4.U =  MODULE_P21.IOCR4.U;
+ 
+-   SFTYSYSINIT_MODULE_PX_IOCR8.U      = MODULE_P14.IOCR8.U;
+-   SFTYSYSINIT_MODULE_PX_IOCR8.B.PC10 = SFTY_GPO_IOCR_VAL;          // SFTY_N_ASC_TOP_CTRL_PORT_IOCR_PC_PIN = SFTY_GPO_IOCR_VAL;
+-   Mcal_WriteCpuEndInitProtReg(&MODULE_P14.IOCR8.U,(uint32)SFTYSYSINIT_MODULE_PX_IOCR8.U);
++   /*---------------------------------SSI ----------------------------------------*/
++   SFTYSYSINIT_MODULE_PX_PDR0.B.PD1 = SFTY_IO_PORT_PDR_CMOS_SPD_GRD_1;
++   SFTYSYSINIT_MODULE_PX_PDR0.B.PL1 = SFTY_IO_PORT_PDR_CMOS_AUTOMOTIVE_LVL;
++   SFTYSYSINIT_MODULE_PX_IOCR0.B.PC1 = SFTY_GPI_IOCR_VAL;
+ 
+-   /*-------------------------------P20_IOCR8-------------------------------------------*/
++   Mcal_WriteCpuEndInitProtReg(&MODULE_P21.PDR0.U,(uint32)SFTYSYSINIT_MODULE_PX_PDR0.U);
++   Mcal_WriteCpuEndInitProtReg(&MODULE_P21.IOCR0.U,(uint32)SFTYSYSINIT_MODULE_PX_IOCR0.U);
+ 
+-   SFTYSYSINIT_MODULE_PX_IOCR8.U      = MODULE_P20.IOCR8.U;
+-   SFTYSYSINIT_MODULE_PX_IOCR8.B.PC10 = SFTY_GPO_IOCR_VAL;       //SFTY_PS_OC_EN_U_PORT_IOCR_PC_PIN = SFTY_GPO_IOCR_VAL;
+-   SFTYSYSINIT_MODULE_PX_IOCR8.B.PC9 = SFTY_GPO_IOCR_VAL;        //SFTY_EN_EXC_P_PORT_IOCR_PC_PIN = SFTY_GPO_IOCR_VAL;
+-   SFTYSYSINIT_MODULE_PX_IOCR8.B.PC8 = SFTY_GPO_IOCR_VAL;        //SFTY_EN_EXC_N_PORT_IOCR_PC_PIN = SFTY_GPO_IOCR_VAL;
++   /*---------------------------------------------------PORT 20----------------------------------------------------*/
++   SFTYSYSINIT_MODULE_PX_PDR1.U =\tMODULE_P20.PDR0.U;
++   SFTYSYSINIT_MODULE_PX_IOCR8.U =  MODULE_P20.IOCR8.U;
++   
++   /*---------------------------------SPI SYNCHRO POS ----------------------------------------*/
++   SFTYSYSINIT_MODULE_PX_PDR1.B.PD9 = SFTY_IO_PORT_PDR_CMOS_SPD_GRD_1;
++   SFTYSYSINIT_MODULE_PX_PDR1.B.PL9 = SFTY_IO_PORT_PDR_CMOS_AUTOMOTIVE_LVL;
++   SFTYSYSINIT_MODULE_PX_IOCR8.B.PC9 = SFTY_GPI_IOCR_VAL;
++
++   /*---------------------------------M_EXCITATION_IN ----------------------------------------*/
++   SFTYSYSINIT_MODULE_PX_PDR1.B.PD10 = SFTY_IO_PORT_PDR_CMOS_SPD_GRD_1;
++   SFTYSYSINIT_MODULE_PX_PDR1.B.PL10 = SFTY_IO_PORT_PDR_CMOS_AUTOMOTIVE_LVL;
++   SFTYSYSINIT_MODULE_PX_IOCR8.B.PC10 = SFTY_GPI_IOCR_VAL;   
++   
++   Mcal_WriteCpuEndInitProtReg(&MODULE_P20.PDR1.U,(uint32)SFTYSYSINIT_MODULE_PX_PDR1.U);
+    Mcal_WriteCpuEndInitProtReg(&MODULE_P20.IOCR8.U,(uint32)SFTYSYSINIT_MODULE_PX_IOCR8.U);
+ 
+-   /*-------------------------------P33_IOCR8-------------------------------------------*/
++   /*---------------------------------------------------PORT 13----------------------------------------------------*/
++   SFTYSYSINIT_MODULE_PX_PDR0.U =\tMODULE_P13.PDR0.U;
++   SFTYSYSINIT_MODULE_PX_IOCR0.U =  MODULE_P13.IOCR0.U;
+ 
+-   SFTYSYSINIT_MODULE_PX_IOCR8.U      = MODULE_P33.IOCR8.U;
+-   SFTYSYSINIT_MODULE_PX_IOCR8.B.PC10 = SFTY_GPO_IOCR_VAL;       //SFTY_GD_RESET_W_BOT_PORT_IOCR_PC_PIN = SFTY_GPO_IOCR_VAL;
+-   Mcal_WriteCpuEndInitProtReg(&MODULE_P33.IOCR8.U,(uint32)SFTYSYSINIT_MODULE_PX_IOCR8.U);
+-
+-   /*-------------------------------IOCR12-------------------------------------------*/
+-   /*-------------------------------P20_IOCR12-------------------------------------------*/
+-
+-   /* QSPI pin init */
+-   SFTYSYSINIT_MODULE_PX_IOCR12.U      = MODULE_P20.IOCR12.U;
+-   SFTYSYSINIT_MODULE_PX_IOCR12.B.PC12 = SFTY_QSPI_MTSR_VAL; //SFTY_QSPI_MTSR_PORT_IOCR_PIN = SFTY_QSPI_MTSR_VAL;
+-   Mcal_WriteCpuEndInitProtReg(&MODULE_P20.IOCR12.U,(uint32)SFTYSYSINIT_MODULE_PX_IOCR12.U);
+-
+-
+-#endif
++   /*---------------------------------PARKLOCK ENABLE ----------------------------------------*/
++   SFTYSYSINIT_MODULE_PX_PDR0.B.PD0 = SFTY_IO_PORT_PDR_CMOS_SPD_GRD_1;
++   SFTYSYSINIT_MODULE_PX_PDR0.B.PL0 = SFTY_IO_PORT_PDR_CMOS_AUTOMOTIVE_LVL;
++   SFTYSYSINIT_MODULE_PX_IOCR0.B.PC0 = SFTY_GPO_IOCR_VAL;
++   
++   Mcal_WriteCpuEndInitProtReg(&MODULE_P13.PDR0.U,(uint32)SFTYSYSINIT_MODULE_PX_PDR0.U);
++   Mcal_WriteCpuEndInitProtReg(&MODULE_P13.IOCR0.U,(uint32)SFTYSYSINIT_MODULE_PX_IOCR0.U);
++
++   /*---------------------------------------------------PORT 11----------------------------------------------------*/
++   SFTYSYSINIT_MODULE_PX_PDR0.U =  MODULE_P11.PDR0.U;
++   SFTYSYSINIT_MODULE_PX_PDR1.U =   MODULE_P11.PDR1.U;
++   SFTYSYSINIT_MODULE_PX_IOCR0.U =  MODULE_P11.IOCR0.U;
++   SFTYSYSINIT_MODULE_PX_IOCR4.U =  MODULE_P11.IOCR4.U;
++   SFTYSYSINIT_MODULE_PX_IOCR8.U =  MODULE_P11.IOCR8.U;
++   
++   /*---------------------------------PARKLOCK POSITION 2 ----------------------------------------*/
++   SFTYSYSINIT_MODULE_PX_PDR0.B.PD3 = SFTY_IO_PORT_PDR_CMOS_SPD_GRD_1;
++   SFTYSYSINIT_MODULE_PX_PDR0.B.PL3 = SFTY_IO_PORT_PDR_CMOS_AUTOMOTIVE_LVL;
++   SFTYSYSINIT_MODULE_PX_IOCR0.B.PC3 = SFTY_GPI_PLLDWN_IOCR_VAL;
++
++   /*---------------------------------PARKLOCK ENABLE 1 ----------------------------------------*/
++   SFTYSYSINIT_MODULE_PX_PDR0.B.PD6 = SFTY_IO_PORT_PDR_CMOS_SPD_GRD_1;
++   SFTYSYSINIT_MODULE_PX_PDR0.B.PL6 = SFTY_IO_PORT_PDR_CMOS_AUTOMOTIVE_LVL;
++   SFTYSYSINIT_MODULE_PX_IOCR4.B.PC6 = SFTY_GPO_IOCR_VAL;
++
++   /*---------------------------------PARKLOCK P5V ENABLE ----------------------------------------*/
++   SFTYSYSINIT_MODULE_PX_PDR1.B.PD9 = SFTY_IO_PORT_PDR_CMOS_SPD_GRD_1;
++   SFTYSYSINIT_MODULE_PX_PDR1.B.PL9 = SFTY_IO_PORT_PDR_CMOS_AUTOMOTIVE_LVL;
++   SFTYSYSINIT_MODULE_PX_IOCR8.B.PC9 = SFTY_GPO_IOCR_VAL;
++
++   Mcal_WriteCpuEndInitProtReg(&MODULE_P11.PDR0.U,(uint32)SFTYSYSINIT_MODULE_PX_PDR0.U);
++   Mcal_WriteCpuEndInitProtReg(&MODULE_P11.IOCR0.U,(uint32)SFTYSYSINIT_MODULE_PX_IOCR0.U);
++   Mcal_WriteCpuEndInitProtReg(&MODULE_P11.PDR1.U,(uint32)SFTYSYSINIT_MODULE_PX_PDR1.U);
++   Mcal_WriteCpuEndInitProtReg(&MODULE_P11.IOCR4.U,(uint32)SFTYSYSINIT_MODULE_PX_IOCR4.U);
++   Mcal_WriteCpuEndInitProtReg(&MODULE_P11.IOCR8.U,(uint32)SFTYSYSINIT_MODULE_PX_IOCR8.U);
+ 
+    return;
+ }
+@@ -981,7 +762,7 @@ FUNC(void, SFTYSYSINIT) SftySysInit_PreInitArea0(void)
+    /* Clear cold reset status bits */
+    SCU_RSTCON2_LOCAL.U = SCU_RSTCON2.U;
+    SCU_RSTCON2_LOCAL.B.CLRC = 1;
+-   Mcal_WriteSafetyEndInitProtReg(&SCU_RSTCON2.U,SCU_RSTCON2_LOCAL.U);
++   Mcal_WriteCpuEndInitProtReg(&SCU_RSTCON2.U,SCU_RSTCON2_LOCAL.U);
+ 
+    /* Set PSW IO setting back to USER1 */
+    SftyUtils_SetPswIoMode(SFTY_UTILS_PSW_IO_USER_MODE_1);
+'

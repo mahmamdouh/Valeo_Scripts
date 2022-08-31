@@ -1,0 +1,852 @@
+b'commit 139c2b4303b03832c7410640093b89a90d78ac05
+Author: Mohammed ANDALOUSSI (JV) <mohammed.andaloussi.jv@valeo.com>
+Date:   Fri Nov 26 22:12:25 2021 +0100
+
+    $100kW-43890$ - [SWIT] Debug mode not working properly
+    
+    Change-Id: I47472801c6b7880d5cb7f85973505164f85bc3ae
+
+diff --git a/src/fw_cu/Components/Cmn/Com/C2cCom/include/C2cComSftyData.h b/src/fw_cu/Components/Cmn/Com/C2cCom/include/C2cComSftyData.h
+index a6c449ff9..c881e1670 100644
+--- a/src/fw_cu/Components/Cmn/Com/C2cCom/include/C2cComSftyData.h
++++ b/src/fw_cu/Components/Cmn/Com/C2cCom/include/C2cComSftyData.h
+@@ -905,6 +905,18 @@ typedef struct SftyC2cDataType_
+      */
+      boolean RolSoftAscEna;
+ 
++     /*
++     @@ ELEMENT = DbgModAllwd
++     @@ STRUCTURE = SftyC2cDataType
++     @@ A2L_TYPE = MEASURE
++     @@ DATA_TYPE = UBYTE [0 ... 1]
++     @@ CONVERSION = TABLE 0 "DISABLED" 1 "ENABLED" DEFAULT_VALUE "Unknown"
++     @@ DESCRIPTION = "Allow entering debug mode for BSW "
++     @@ GROUP = C2cCom
++     @@ END
++     */
++     boolean DbgModAllwd;
++
+ } SftyC2cDataType;
+ 
+ typedef struct SftyC2cSecu2SftyDataType_
+diff --git a/src/fw_cu/Components/Cmn/MngModes/EMM/src/emm.c b/src/fw_cu/Components/Cmn/MngModes/EMM/src/emm.c
+index 26ac60211..670a02913 100644
+--- a/src/fw_cu/Components/Cmn/MngModes/EMM/src/emm.c
++++ b/src/fw_cu/Components/Cmn/MngModes/EMM/src/emm.c
+@@ -38,7 +38,7 @@
+ #include "BswM_UserCallouts.h"
+ #include "PlatformVariantType.h"
+ #include "LlswGtm_PrjImpl.h"
+-
++#include "IfxEdsadc_reg.h"
+ /* Core 2 core communication */
+ #include "C2cComBswData.h"
+ #include "C2cComSftyData.h"
+@@ -59,7 +59,16 @@
+ 
+ /*================== [defines] ======================================================================================*/
+ /*================== [type definitions] =============================================================================*/
+-
++/*! DSADC Hardware Assigned Channel IDs */ /*TODO: DSADC needs to be updated */
++typedef enum Emm_Dsadc_ChannelType_
++{
++   EMM_DSADC_Channel_0 = 0U,
++   EMM_DSADC_Channel_1 = 1U,
++   EMM_DSADC_Channel_2 = 2U,
++   EMM_DSADC_Channel_3 = 3U,
++   EMM_DSADC_Channel_4 = 4U,
++   EMM_DSADC_Channel_5 = 5U
++}Emm_Dsadc_ChannelType;
+ 
+ /*==================[external function declarations]=========================*/
+ 
+@@ -1159,79 +1168,88 @@ FUNC(void, EMM_CODE)  Emm_Init(void)
+     /*Check for Debug mode */
+     if(EmmReqDbgMod == TRUE)
+     {
+-      /*Read Vadc signals and update the array*/
+-      EmmDbgVadcRawValArr[AN_DELTA_SIN_POS_SAFE] = Vadc_GetChannelResult(AN_DELTA_SIN_POS_SAFE);
+-      EmmDbgVadcRawValArr[AN_DELTA_SIN_NEG_SAFE] = Vadc_GetChannelResult(AN_DELTA_SIN_NEG_SAFE);
+-      EmmDbgVadcRawValArr[AN_DELTA_COS_POS_SAFE] = Vadc_GetChannelResult(AN_DELTA_COS_POS_SAFE);
+-      EmmDbgVadcRawValArr[AN_DELTA_COS_NEG_SAFE] = Vadc_GetChannelResult(AN_DELTA_COS_NEG_SAFE);
+-      EmmDbgVadcRawValArr[AN_DIAG_CONS_EXC] = Vadc_GetChannelResult(AN_DIAG_CONS_EXC);
+-      EmmDbgVadcRawValArr[AN_M_INTLOC] = Vadc_GetChannelResult(AN_M_INTLOC);
+-      EmmDbgVadcRawValArr[AN_CRASH] = Vadc_GetChannelResult(AN_CRASH);
+-      EmmDbgVadcRawValArr[AN_CTP_MOT1_F] = Vadc_GetChannelResult(AN_CTP_MOT1_F);
+-      EmmDbgVadcRawValArr[AN_CTN_BOARD] = Vadc_GetChannelResult(AN_CTN_BOARD);
+-      EmmDbgVadcRawValArr[AN_CTN_BOARD_1] = Vadc_GetChannelResult(AN_CTN_BOARD_1);
+-      EmmDbgVadcRawValArr[AN_26V_BT] = Vadc_GetChannelResult(AN_26V_BT);
+-      EmmDbgVadcRawValArr[AN_SNS_SUP_1] = Vadc_GetChannelResult(AN_SNS_SUP_1);
+-      EmmDbgVadcRawValArr[AN_P12V_BATT_F] = Vadc_GetChannelResult(AN_P12V_BATT_F);
+-      EmmDbgVadcRawValArr[AN_SNS_SUP_2] = Vadc_GetChannelResult(AN_SNS_SUP_2);
+-      EmmDbgVadcRawValArr[AN_MAIN_SUP] = Vadc_GetChannelResult(AN_MAIN_SUP);
+-      EmmDbgVadcRawValArr[AN_CTP_COOLING_F] = Vadc_GetChannelResult(AN_CTP_COOLING_F);
+-      EmmDbgVadcRawValArr[AN_M_P5V_REF_PROT] = Vadc_GetChannelResult(AN_M_P5V_REF_PROT);
+-
+-      /*Read and update Dsadc signal values*/
+-      EmmDbgDsadcRawValArr[AN_DELTA_SIN] = Dsadc_GetChannelResult(DSADC_Channel_3);
+-      EmmDbgDsadcRawValArr[AN_DELTA_COS] = Dsadc_GetChannelResult(DSADC_Channel_2);
+-
+-      /*Read Dio Input input signals*/
+-      EmmDbgDiStsArr[DBG_M_KEY_ON] = Dio_GetPinSts(DioConf_DioChannel_M_KEY_ON);
+-      EmmDbgDiStsArr[DBG_M_ENA_HT_HS] = Dio_GetPinSts(DioConf_DioChannel_M_ENA_HT_HS);
+-      EmmDbgDiStsArr[DBG_M_ENA_HT_LS] = Dio_GetPinSts(DioConf_DioChannel_M_ENA_HT_LS);
+-      EmmDbgDiStsArr[DBG_M_PW_DOWN] = Dio_GetPinSts(DioConf_DioChannel_M_PW_DOWN);
+-
+-      /*Read Pwm Input signal*/
+-      EmmDbgPwmInpArr[DBG_M_EXCITATION_IN][DBG_M_EXCITATION_IN] = GtmDrv_GetPwmDtyCyc(M_EXCITATION_IN);
+-
+-     /* Read and copy Dio Output signal value*/
+-      if(EmmDbgDoStsOvrdEna == FALSE)
+-      {
+-        /*Set default value */
+-          EmmDbgDoReqdStArr[DBG_M_ENA_HT_HS] = EmmDbgDoStsDfltValArr[DBG_M_ENA_HT_HS];
+-          EmmDbgDoReqdStArr[DBG_M_ENA_HT_LS]= EmmDbgDoStsDfltValArr[DBG_M_ENA_HT_LS];
+-          EmmDbgDoReqdStArr[DBG_M_PW_DOWN]= EmmDbgDoStsDfltValArr[DBG_M_PW_DOWN];
+-      }
+-      else
+-      {
+-        /*Read Dio value from EmmDbgDoStsOvrdArr */
+-          EmmDbgDoReqdStArr[DBG_M_ENA_HT_HS] = EmmDbgDoStsOvrdArr[DBG_M_ENA_HT_HS];
+-          EmmDbgDoReqdStArr[DBG_M_ENA_HT_LS]= EmmDbgDoStsOvrdArr[DBG_M_ENA_HT_LS];
+-          EmmDbgDoReqdStArr[DBG_M_PW_DOWN]= EmmDbgDoStsOvrdArr[DBG_M_PW_DOWN];
+-      }
+-      /*Set Dio port pin*/
+-      Dio_SetPortPinSts(DioConf_DioChannel_M_ENA_HT_HS,EmmDbgDoReqdStArr[DBG_M_ENA_HT_HS]);
+-      Dio_SetPortPinSts(DioConf_DioChannel_M_ENA_HT_LS,EmmDbgDoReqdStArr[DBG_M_ENA_HT_LS]);
+-      Dio_SetPortPinSts(DioConf_DioChannel_M_PW_DOWN,EmmDbgDoReqdStArr[DBG_M_PW_DOWN]);
+-
+-     /*Read and copy Pwm output signal values */
+-     if(EmmDbgPwmValOvrdEna == FALSE)
+-     {
+-       EmmDbgPwmOutArr[DBG_M_RES_EXCITATION].PwmFreq = EmmDgbPwmValDfltArr[DBG_M_RES_EXCITATION].PwmFreq;
+-       EmmDbgPwmOutArr[DBG_M_RES_EXCITATION].PwmDutyCycle = EmmDgbPwmValDfltArr[DBG_M_RES_EXCITATION].PwmDutyCycle;
+-
+-       EmmDbgPwmOutArr[DBG_M_CLK_ALIM_1].PwmFreq = EmmDgbPwmValDfltArr[DBG_M_CLK_ALIM_1].PwmFreq;
+-       EmmDbgPwmOutArr[DBG_M_CLK_ALIM_1].PwmDutyCycle = EmmDgbPwmValDfltArr[DBG_M_CLK_ALIM_1].PwmDutyCycle;
+-     }
+-     else
+-     {
+-       EmmDbgPwmOutArr[DBG_M_RES_EXCITATION].PwmFreq = EmmDbgPwmValOvrdArr[DBG_M_RES_EXCITATION].PwmFreq;
+-       EmmDbgPwmOutArr[DBG_M_RES_EXCITATION].PwmDutyCycle = EmmDbgPwmValOvrdArr[DBG_M_RES_EXCITATION].PwmDutyCycle;
+-
+-       EmmDbgPwmOutArr[DBG_M_CLK_ALIM_1].PwmFreq = EmmDbgPwmValOvrdArr[DBG_M_CLK_ALIM_1].PwmFreq;
+-       EmmDbgPwmOutArr[DBG_M_CLK_ALIM_1].PwmDutyCycle = EmmDbgPwmValOvrdArr[DBG_M_CLK_ALIM_1].PwmDutyCycle;
+-     }
+-       /*Set Pwm output values */
+-       GtmPwm_Ctrl(M_RES_EXCITATION,EmmDbgPwmOutArr[DBG_M_RES_EXCITATION].PwmFreq,EmmDbgPwmOutArr[DBG_M_RES_EXCITATION].PwmDutyCycle);
+-       GtmPwm_Ctrl(M_CLK_ALIM_1,EmmDbgPwmOutArr[DBG_M_CLK_ALIM_1].PwmFreq,EmmDbgPwmOutArr[DBG_M_CLK_ALIM_1].PwmDutyCycle);
+-   }
++       if (SftyC2cData.DbgModAllwd == TRUE)
++       {
++          /*Read Vadc signals and update the array*/
++          EmmDbgVadcRawValArr[AN_DELTA_SIN_POS_SAFE] = Vadc_GetChannelResult(AN_DELTA_SIN_POS_SAFE);
++          EmmDbgVadcRawValArr[AN_DELTA_SIN_NEG_SAFE] = Vadc_GetChannelResult(AN_DELTA_SIN_NEG_SAFE);
++          EmmDbgVadcRawValArr[AN_DELTA_COS_POS_SAFE] = Vadc_GetChannelResult(AN_DELTA_COS_POS_SAFE);
++          EmmDbgVadcRawValArr[AN_DELTA_COS_NEG_SAFE] = Vadc_GetChannelResult(AN_DELTA_COS_NEG_SAFE);
++          EmmDbgVadcRawValArr[AN_DIAG_CONS_EXC] = Vadc_GetChannelResult(AN_DIAG_CONS_EXC);
++          EmmDbgVadcRawValArr[AN_M_INTLOC] = Vadc_GetChannelResult(AN_M_INTLOC);
++          EmmDbgVadcRawValArr[AN_CRASH] = Vadc_GetChannelResult(AN_CRASH);
++          EmmDbgVadcRawValArr[AN_CTP_MOT1_F] = Vadc_GetChannelResult(AN_CTP_MOT1_F);
++          EmmDbgVadcRawValArr[AN_CTN_BOARD] = Vadc_GetChannelResult(AN_CTN_BOARD);
++          EmmDbgVadcRawValArr[AN_CTN_BOARD_1] = Vadc_GetChannelResult(AN_CTN_BOARD_1);
++          EmmDbgVadcRawValArr[AN_26V_BT] = Vadc_GetChannelResult(AN_26V_BT);
++          EmmDbgVadcRawValArr[AN_SNS_SUP_1] = Vadc_GetChannelResult(AN_SNS_SUP_1);
++          EmmDbgVadcRawValArr[AN_P12V_BATT_F] = Vadc_GetChannelResult(AN_P12V_BATT_F);
++          EmmDbgVadcRawValArr[AN_SNS_SUP_2] = Vadc_GetChannelResult(AN_SNS_SUP_2);
++          EmmDbgVadcRawValArr[AN_MAIN_SUP] = Vadc_GetChannelResult(AN_MAIN_SUP);
++          EmmDbgVadcRawValArr[AN_CTP_COOLING_F] = Vadc_GetChannelResult(AN_CTP_COOLING_F);
++          EmmDbgVadcRawValArr[AN_M_P5V_REF_PROT] = Vadc_GetChannelResult(AN_M_P5V_REF_PROT);
++
++          /*Read and update Dsadc signal values*/
++          EmmDbgDsadcRawValArr[AN_DELTA_SIN] = ((sint16) MODULE_EDSADC.CH[EMM_DSADC_Channel_3].RESM.B.RESULTLO);
++          EmmDbgDsadcRawValArr[AN_DELTA_COS] = ((sint16) MODULE_EDSADC.CH[EMM_DSADC_Channel_2].RESM.B.RESULTLO);;
++
++          /*Read Dio Input input signals*/
++          EmmDbgDiStsArr[DBG_M_KEY_ON] = Dio_GetPinSts(DioConf_DioChannel_M_KEY_ON);
++          EmmDbgDiStsArr[DBG_M_ENA_HT_HS] = Dio_GetPinSts(DioConf_DioChannel_M_ENA_HT_HS);
++          EmmDbgDiStsArr[DBG_M_ENA_HT_LS] = Dio_GetPinSts(DioConf_DioChannel_M_ENA_HT_LS);
++          EmmDbgDiStsArr[DBG_M_PW_DOWN] = Dio_GetPinSts(DioConf_DioChannel_M_PW_DOWN);
++
++          /*Read Pwm Input signal*/
++          EmmDbgPwmInpArr[DBG_M_EXCITATION_IN][DBG_M_EXCITATION_IN] = GtmDrv_GetPwmDtyCyc(M_EXCITATION_IN);
++
++          /* Read and copy Dio Output signal value*/
++          if(EmmDbgDoStsOvrdEna == FALSE)
++          {
++             /*Set default value */
++             EmmDbgDoReqdStArr[DBG_M_ENA_HT_HS] = EmmDbgDoStsDfltValArr[DBG_M_ENA_HT_HS];
++             EmmDbgDoReqdStArr[DBG_M_ENA_HT_LS]= EmmDbgDoStsDfltValArr[DBG_M_ENA_HT_LS];
++             EmmDbgDoReqdStArr[DBG_M_PW_DOWN]= EmmDbgDoStsDfltValArr[DBG_M_PW_DOWN];
++          }
++          else
++          {
++             /*Read Dio value from EmmDbgDoStsOvrdArr */
++             EmmDbgDoReqdStArr[DBG_M_ENA_HT_HS] = EmmDbgDoStsOvrdArr[DBG_M_ENA_HT_HS];
++             EmmDbgDoReqdStArr[DBG_M_ENA_HT_LS]= EmmDbgDoStsOvrdArr[DBG_M_ENA_HT_LS];
++             EmmDbgDoReqdStArr[DBG_M_PW_DOWN]= EmmDbgDoStsOvrdArr[DBG_M_PW_DOWN];
++          }
++
++          /*Set Dio port pin*/
++          Dio_SetPortPinSts(DioConf_DioChannel_M_ENA_HT_HS,EmmDbgDoReqdStArr[DBG_M_ENA_HT_HS]);
++          Dio_SetPortPinSts(DioConf_DioChannel_M_ENA_HT_LS,EmmDbgDoReqdStArr[DBG_M_ENA_HT_LS]);
++          Dio_SetPortPinSts(DioConf_DioChannel_M_PW_DOWN,EmmDbgDoReqdStArr[DBG_M_PW_DOWN]);
++
++          /*Read and copy Pwm output signal values */
++          if(EmmDbgPwmValOvrdEna == FALSE)
++          {
++             EmmDbgPwmOutArr[DBG_M_RES_EXCITATION].PwmFreq = EmmDgbPwmValDfltArr[DBG_M_RES_EXCITATION].PwmFreq;
++             EmmDbgPwmOutArr[DBG_M_RES_EXCITATION].PwmDutyCycle = EmmDgbPwmValDfltArr[DBG_M_RES_EXCITATION].PwmDutyCycle;
++
++             EmmDbgPwmOutArr[DBG_M_CLK_ALIM_1].PwmFreq = EmmDgbPwmValDfltArr[DBG_M_CLK_ALIM_1].PwmFreq;
++             EmmDbgPwmOutArr[DBG_M_CLK_ALIM_1].PwmDutyCycle = EmmDgbPwmValDfltArr[DBG_M_CLK_ALIM_1].PwmDutyCycle;
++          }
++          else
++          {
++             EmmDbgPwmOutArr[DBG_M_RES_EXCITATION].PwmFreq = EmmDbgPwmValOvrdArr[DBG_M_RES_EXCITATION].PwmFreq;
++             EmmDbgPwmOutArr[DBG_M_RES_EXCITATION].PwmDutyCycle = EmmDbgPwmValOvrdArr[DBG_M_RES_EXCITATION].PwmDutyCycle;
++
++             EmmDbgPwmOutArr[DBG_M_CLK_ALIM_1].PwmFreq = EmmDbgPwmValOvrdArr[DBG_M_CLK_ALIM_1].PwmFreq;
++             EmmDbgPwmOutArr[DBG_M_CLK_ALIM_1].PwmDutyCycle = EmmDbgPwmValOvrdArr[DBG_M_CLK_ALIM_1].PwmDutyCycle;
++          }
++
++          /*Set Pwm output values */
++          GtmPwm_Ctrl(M_RES_EXCITATION,EmmDbgPwmOutArr[DBG_M_RES_EXCITATION].PwmFreq,EmmDbgPwmOutArr[DBG_M_RES_EXCITATION].PwmDutyCycle);
++          GtmPwm_Ctrl(M_CLK_ALIM_1,EmmDbgPwmOutArr[DBG_M_CLK_ALIM_1].PwmFreq,EmmDbgPwmOutArr[DBG_M_CLK_ALIM_1].PwmDutyCycle);
++       }
++       else
++       {
++          /* Wait till SSW allows entering debug mode*/
++       }
++    }
+ 
+     /*Update the Bsw C2c Data with EmmReqDbgMod*/
+     BswC2cData.DbgModSts = EmmReqDbgMod;
+diff --git a/src/fw_cu/Components/Safety/Sfty_Cmn/SftySdl/src/SftySdl_cfg.c b/src/fw_cu/Components/Safety/Sfty_Cmn/SftySdl/src/SftySdl_cfg.c
+index 3f1b9893d..500aaf24f 100644
+--- a/src/fw_cu/Components/Safety/Sfty_Cmn/SftySdl/src/SftySdl_cfg.c
++++ b/src/fw_cu/Components/Safety/Sfty_Cmn/SftySdl/src/SftySdl_cfg.c
+@@ -393,7 +393,7 @@ STATIC FUNC(void, SFTYSDL) SftySdl_FinishInit(void)
+ @@ INSTANCE = SftySdlTickCntNormRun._15_ SftySdlRunTiNormRun_SftyE2eRx_Main
+ @@ STRUCTURE = SftySdl_TickCntType
+ @@ END
+-@@ INSTANCE = SftySdlTickCntNormRun._16_ SftySdlRunTiNormRun_SftyQSpi_MainFunction
++@@ INSTANCE = SftySdlTickCntNormRun._16_ SftySdlRunTiNormRun_LLSWQSpi_MainFunction
+ @@ STRUCTURE = SftySdl_TickCntType
+ @@ END
+ @@ INSTANCE = SftySdlTickCntNormRun._17_ SftySdlRunTiNormRun_SftyActvDchaCtrl_MainFunction
+@@ -414,82 +414,67 @@ STATIC FUNC(void, SFTYSDL) SftySdl_FinishInit(void)
+ @@ INSTANCE = SftySdlTickCntNormRun._22_ SftySdlRunTiNormRun_SftyRslvrOffsHndlr_MainFunctionAsilC
+ @@ STRUCTURE = SftySdl_TickCntType
+ @@ END
+-@@ INSTANCE = SftySdlTickCntNormRun._23_ SftySdlRunTiNormRun_SftyFlshVldt_MainFuncAreaCmn
++@@ INSTANCE = SftySdlTickCntNormRun._23_ SftySdlRunTiNormRun_SftyRslvrOffsHndlr_MainFunctionFast
+ @@ STRUCTURE = SftySdl_TickCntType
+ @@ END
+-@@ INSTANCE = SftySdlTickCntNormRun._24_ SftySdlRunTiNormRun_SftySpdMon_MainFunctionAreaCmn
++@@ INSTANCE = SftySdlTickCntNormRun._24_ SftySdlRunTiNormRun_SftyFlshVldt_MainFuncAreaCmn
+ @@ STRUCTURE = SftySdl_TickCntType
+ @@ END
+-@@ INSTANCE = SftySdlTickCntNormRun._25_ SftySdlRunTiNormRun_SftyTqMon_MainFunction
++@@ INSTANCE = SftySdlTickCntNormRun._25_ SftySdlRunTiNormRun_SftySpdMon_MainFunctionAreaCmn
+ @@ STRUCTURE = SftySdl_TickCntType
+ @@ END
+-@@ INSTANCE = SftySdlTickCntNormRun._26_ SftySdlRunTiNormRun_SftyInvActr_MainFunctionArea0
++@@ INSTANCE = SftySdlTickCntNormRun._26_ SftySdlRunTiNormRun_SftyTqMon_MainFunction
+ @@ STRUCTURE = SftySdl_TickCntType
+ @@ END
+ @@ INSTANCE = SftySdlTickCntNormRun._27_ SftySdlRunTiNormRun_SftyInvActr_MainFunctionAreaCmn
+ @@ STRUCTURE = SftySdl_TickCntType
+ @@ END
+-@@ INSTANCE = SftySdlTickCntNormRun._28_ SftySdlRunTiNormRun_SftyAcEvln_RunVadcHvAcIMeasAdpn
++@@ INSTANCE = SftySdlTickCntNormRun._28_ SftySdlRunTiNormRun_Cmr_InvalidateParamDataCacheSSW
+ @@ STRUCTURE = SftySdl_TickCntType
+ @@ END
+-@@ INSTANCE = SftySdlTickCntNormRun._29_ SftySdlRunTiNormRun_SftyAcEvln_RunHvAcIMeasAdpn
++@@ INSTANCE = SftySdlTickCntNormRun._29_ SftySdlRunTiNormRun_SftyDcEvln_MainFunctionArea1Slow
+ @@ STRUCTURE = SftySdl_TickCntType
+ @@ END
+-@@ INSTANCE = SftySdlTickCntNormRun._30_ SftySdlRunTiNormRun_Cmr_InvalidateParamDataCacheSSW
++@@ INSTANCE = SftySdlTickCntNormRun._30_ SftySdlRunTiNormRun_SftyDcEvln_MainFunctionArea2Slow
+ @@ STRUCTURE = SftySdl_TickCntType
+ @@ END
+-@@ INSTANCE = SftySdlTickCntNormRun._31_ SftySdlRunTiNormRun_SftyDcEvln_MainFunctionArea1Slow
++@@ INSTANCE = SftySdlTickCntNormRun._31_ SftySdlRunTiNormRun_SftyErrDeb_MainFunctionAreaCmnSlow
+ @@ STRUCTURE = SftySdl_TickCntType
+ @@ END
+-@@ INSTANCE = SftySdlTickCntNormRun._32_ SftySdlRunTiNormRun_SftyDcEvln_MainFunctionArea2Slow
++@@ INSTANCE = SftySdlTickCntNormRun._32_ SftySdlRunTiNormRun_SftyTempEvln_MainFunction
+ @@ STRUCTURE = SftySdl_TickCntType
+ @@ END
+-@@ INSTANCE = SftySdlTickCntNormRun._33_ SftySdlRunTiNormRun_SftyErrDeb_MainFunctionAreaCmnSlow
++@@ INSTANCE = SftySdlTickCntNormRun._33_ SftySdlRunTiNormRun_SftyShutoffPahTst_Main
+ @@ STRUCTURE = SftySdl_TickCntType
+ @@ END
+-@@ INSTANCE = SftySdlTickCntNormRun._34_ SftySdlRunTiNormRun_SftyTempEvln_MainFunction
++@@ INSTANCE = SftySdlTickCntNormRun._34_ SftySdlRunTiNormRun_SftyCrashSigMon_MainFunction
+ @@ STRUCTURE = SftySdl_TickCntType
+ @@ END
+-@@ INSTANCE = SftySdlTickCntNormRun._35_ SftySdlRunTiNormRun_SftyLibApp_Run
++@@ INSTANCE = SftySdlTickCntNormRun._35_ SftySdlRunTiNormRun_SftyHvInterlock_MainFunction
+ @@ STRUCTURE = SftySdl_TickCntType
+ @@ END
+-@@ INSTANCE = SftySdlTickCntNormRun._36_ SftySdlRunTiNormRun_SftySbcCtrl_CheckAliveCounter
++@@ INSTANCE = SftySdlTickCntNormRun._36_ SftySdlRunTiNormRun_SftySdl_MPUChkArea1Slow
+ @@ STRUCTURE = SftySdl_TickCntType
+ @@ END
+-@@ INSTANCE = SftySdlTickCntNormRun._37_ SftySdlRunTiNormRun_SftyShutoffPahTst_Main
++@@ INSTANCE = SftySdlTickCntNormRun._37_ SftySdlRunTiNormRun_SftySdl_MPUChkArea2Slow
+ @@ STRUCTURE = SftySdl_TickCntType
+ @@ END
+-@@ INSTANCE = SftySdlTickCntNormRun._38_ SftySdlRunTiNormRun_SftySdl_MPUChkArea1Slow
++@@ INSTANCE = SftySdlTickCntNormRun._38_ SftySdlRunTiNormRun_SftySdl_MPUChkAreaCmnSlow
+ @@ STRUCTURE = SftySdl_TickCntType
+ @@ END
+-@@ INSTANCE = SftySdlTickCntNormRun._39_ SftySdlRunTiNormRun_SftySdl_MPUChkArea2Slow
++@@ INSTANCE = SftySdlTickCntNormRun._39_ SftySdlRunTiNormRun_SftySdl_MPUChkArea0
+ @@ STRUCTURE = SftySdl_TickCntType
+ @@ END
+-@@ INSTANCE = SftySdlTickCntNormRun._40_ SftySdlRunTiNormRun_SftySdl_MPUChkAreaCmnSlow
++@@ INSTANCE = SftySdlTickCntNormRun._40_ SftySdlRunTiNormRun_SftySdl_MPUChkArea1
+ @@ STRUCTURE = SftySdl_TickCntType
+ @@ END
+-@@ INSTANCE = SftySdlTickCntNormRun._41_ SftySdlRunTiNormRun_SftySdl_MPUChkArea0
++@@ INSTANCE = SftySdlTickCntNormRun._41_ SftySdlRunTiNormRun_SftySdl_MPUChkArea2
+ @@ STRUCTURE = SftySdl_TickCntType
+ @@ END
+-@@ INSTANCE = SftySdlTickCntNormRun._42_ SftySdlRunTiNormRun_SftySdl_MPUChkArea1
++@@ INSTANCE = SftySdlTickCntNormRun._42_ SftySdlRunTiNormRun_SftySdl_MPUChkAreaCmn
+ @@ STRUCTURE = SftySdl_TickCntType
+ @@ END
+-@@ INSTANCE = SftySdlTickCntNormRun._43_ SftySdlRunTiNormRun_SftySdl_MPUChkArea2
+-@@ STRUCTURE = SftySdl_TickCntType
+-@@ END
+-@@ INSTANCE = SftySdlTickCntNormRun._44_ SftySdlRunTiNormRun_SftySdl_MPUChkAreaCmn
+-@@ STRUCTURE = SftySdl_TickCntType
+-@@ END
+-@@ INSTANCE = SftySdlTickCntNormRun._45_ SftySdlRunTiNormRun_SdlCycRunTi
+-@@ STRUCTURE = SftySdl_TickCntType
+-@@ END
+-@@ INSTANCE = SftySdlTickCntNormRun._46_ SftySdlRunTiNormRun_SftyCrashSigMon_MainFunction
+-@@ STRUCTURE = SftySdl_TickCntType
+-@@ END
+-@@ INSTANCE = SftySdlTickCntNormRun._47_ SftySdlRunTiNormRun_SftyHvInterlock_MainFunction
+-@@ STRUCTURE = SftySdl_TickCntType
+-@@ END
+-@@ INSTANCE = SftySdlTickCntNormRun._48_ SftySdlRunTiNormRun_SftyRslvrOffsHndlr_MainFunctionFast
++@@ INSTANCE = SftySdlTickCntNormRun._43_ SftySdlRunTiNormRun_SftySysInit_DebugModChk
+ @@ STRUCTURE = SftySdl_TickCntType
+ @@ END
+ */
+@@ -560,6 +545,8 @@ CONST(SftySdl_TaskTblType, SFTYSDL) SftySdlNormRunTaskTbl[]=
+    ,{ SFTYSDL_AREA_1,   &SftySdl_MPUChkArea1,                    100u,           0u}
+    ,{ SFTYSDL_AREA_2,   &SftySdl_MPUChkArea2,                    100u,           0u}
+    ,{ SFTYSDL_AREA_CMN, &SftySdl_MPUChkAreaCmn,                  100u,           0u}
++   ,{ SFTYSDL_AREA_0, &SftySysInit_DebugModChk,                 5000u,           0u}
++
+ #endif /* SERIES_PRODUCTION */
+ };
+ 
+diff --git a/src/fw_cu/Components/Safety/Sfty_Cmn/SftySysInit/include/SftySysInit.h b/src/fw_cu/Components/Safety/Sfty_Cmn/SftySysInit/include/SftySysInit.h
+index efcbde998..5d4bc20ee 100644
+--- a/src/fw_cu/Components/Safety/Sfty_Cmn/SftySysInit/include/SftySysInit.h
++++ b/src/fw_cu/Components/Safety/Sfty_Cmn/SftySysInit/include/SftySysInit.h
+@@ -462,6 +462,7 @@
+ #define SFTYSYSINIT_AREA_0_START_SEC_CODE_SLOW
+ #include "MemMap.h"
+ 
++EXTERNAL_ FUNC(void, SFTYSYSINIT) SftySysInit_DebugModChk(void);
+ EXTERNAL_ FUNC(void, SFTYSYSINIT) SftySysInit_InitArea0(void);
+ EXTERNAL_ FUNC(void, SFTYSYSINIT) SftySysInit_PreInitArea0(void);
+ 
+diff --git a/src/fw_cu/Components/Safety/Sfty_Cmn/SftySysInit/src/SftySysInit.c b/src/fw_cu/Components/Safety/Sfty_Cmn/SftySysInit/src/SftySysInit.c
+index b09a85971..1cbf18239 100644
+--- a/src/fw_cu/Components/Safety/Sfty_Cmn/SftySysInit/src/SftySysInit.c
++++ b/src/fw_cu/Components/Safety/Sfty_Cmn/SftySysInit/src/SftySysInit.c
+@@ -46,6 +46,8 @@
+ #include "IfxScu_reg.h"
+ #include "IfxScu_bf.h"
+ #include "IfxMtu_reg.h"
++#include "C2cComBswData.h"
++#include "C2cComSftyData.h"
+ #ifdef TC2X_USED
+ #include "IfxXbar_reg.h"
+ #endif
+@@ -373,6 +375,71 @@ LOCAL_INLINE void SftySysInit_SetXbarAccen(uint32 AllwdTagId)
+    return;
+ }
+ #endif
++
++
++
++/******************************************************************/
++/*!
++ * \\fn      void SftySysInit_SetPortsAcsEna(uint32 AllwdTagId)
++ * \\brief   Activate access protection for relevant Ports
++ * \\param[in]  AllwdTagId - Allowed tag ID
++ */
++/******************************************************************/
++LOCAL_INLINE void SftySysInit_SetPortsAcsEna(uint32 AllwdTagId)
++{
++   /* Port00 is open for all cores */
++   Mcal_WriteSafetyEndInitProtReg(&MODULE_P00.ACCEN0.U, AllwdTagId);    //SFTY_PORT00_ACCEN = AllwdTagId;
++
++   /* Port01 is open for all cores */
++   Mcal_WriteSafetyEndInitProtReg(&MODULE_P01.ACCEN0.U,AllwdTagId);     //SFTY_PORT01_ACCEN = AllwdTagId;
++
++   /* Port02 is safety protected */
++   Mcal_WriteSafetyEndInitProtReg(&MODULE_P02.ACCEN0.U,AllwdTagId);     //SFTY_PORT02_ACCEN = AllwdTagId;
++
++   /* Port10 is safety protected */
++   Mcal_WriteSafetyEndInitProtReg(&MODULE_P10.ACCEN0.U,AllwdTagId);     //SFTY_PORT10_ACCEN = AllwdTagId;
++
++   /* Port11 is open for all cores */
++   Mcal_WriteSafetyEndInitProtReg(&MODULE_P11.ACCEN0.U,AllwdTagId);     //SFTY_PORT11_ACCEN = AllwdTagId;
++
++   /* Port12 is open for all cores */
++   Mcal_WriteSafetyEndInitProtReg(&MODULE_P12.ACCEN0.U,AllwdTagId);     //SFTY_PORT12_ACCEN = SFTY_UTILS_ALL;
++
++   /* Port13 is open for all cores */
++   Mcal_WriteSafetyEndInitProtReg(&MODULE_P13.ACCEN0.U,AllwdTagId);     //SFTY_PORT13_ACCEN = SFTY_UTILS_ALL;
++
++   /* Port14 is open for all cores */
++   Mcal_WriteSafetyEndInitProtReg(&MODULE_P14.ACCEN0.U,AllwdTagId);     //SFTY_PORT14_ACCEN = SFTY_UTILS_ALL;
++
++   /* Port15 is safety protected */
++   Mcal_WriteSafetyEndInitProtReg(&MODULE_P15.ACCEN0.U,AllwdTagId);     //SFTY_PORT15_ACCEN = AllwdTagId;
++
++   /* Port20 is safety protected */
++   Mcal_WriteSafetyEndInitProtReg(&MODULE_P20.ACCEN0.U,AllwdTagId);     //SFTY_PORT20_ACCEN = AllwdTagId;
++
++   /* Port21 is open for all cores */
++   Mcal_WriteSafetyEndInitProtReg(&MODULE_P21.ACCEN0.U,AllwdTagId);     //SFTY_PORT21_ACCEN = SFTY_UTILS_ALL;
++
++   /* Port22 is safety protected */
++   Mcal_WriteSafetyEndInitProtReg(&MODULE_P22.ACCEN0.U,AllwdTagId);      //SFTY_PORT22_ACCEN = AllwdTagId;
++
++   /* Port23 is safety protected */
++   Mcal_WriteSafetyEndInitProtReg(&MODULE_P23.ACCEN0.U,AllwdTagId);      //SFTY_PORT23_ACCEN = AllwdTagId;
++
++   /* Port32 is safety protected */
++   Mcal_WriteSafetyEndInitProtReg(&MODULE_P32.ACCEN0.U,AllwdTagId);      //SFTY_PORT32_ACCEN = AllwdTagId;
++
++   /* Port33 is safety protected */
++   Mcal_WriteSafetyEndInitProtReg(&MODULE_P33.ACCEN0.U,AllwdTagId);      //SFTY_PORT33_ACCEN = AllwdTagId;
++
++   /* Port34 is open for all cores */
++   Mcal_WriteSafetyEndInitProtReg(&MODULE_P34.ACCEN0.U,AllwdTagId);      //SFTY_PORT34_ACCEN = AllwdTagId;
++
++   /* Port40 is open for all cores */
++   Mcal_WriteSafetyEndInitProtReg(&MODULE_P40.ACCEN0.U,AllwdTagId);      //SFTY_PORT40_ACCEN = AllwdTagId;
++
++   return;
++}
+ /******************************************************************/
+ /*!
+  * \\fn      void SftySysInit_SetAcsEna(uint32 AllwdTagId)
+@@ -382,14 +449,14 @@ LOCAL_INLINE void SftySysInit_SetXbarAccen(uint32 AllwdTagId)
+ /******************************************************************/
+ LOCAL_INLINE void SftySysInit_SetAcsEna(uint32 AllwdTagId)
+ {
+-
+-
+    /* SMU Access Protection */
+    Mcal_WriteSafetyEndInitProtReg(&SMU_ACCEN0.U, AllwdTagId); //SMU_ACCEN0.U = AllwdTagId;
+ 
+    /* SCU Access protection */
+    SftySysInit_SetScuAccen(AllwdTagId);
+ 
++   SftySysInit_SetPortsAcsEna(AllwdTagId);
++
+ #ifdef TC27X_USED /* Update the implementation w.r.t TC3X */
+    /* XBAR Access protection */
+    //SftySysInit_SetXbarAccen(AllwdTagId);
+@@ -398,41 +465,6 @@ LOCAL_INLINE void SftySysInit_SetAcsEna(uint32 AllwdTagId)
+    /* MTU Access Protection */
+    MTU_ACCEN0.U = AllwdTagId;
+ 
+-   /* Port00 is open for all cores */
+-\tMcal_WriteSafetyEndInitProtReg(&MODULE_P00.ACCEN0.U, AllwdTagId);\t\t//SFTY_PORT00_ACCEN = AllwdTagId;
+-\t/* Port01 is open for all cores */
+-\tMcal_WriteSafetyEndInitProtReg(&MODULE_P01.ACCEN0.U,SFTY_UTILS_ALL);\t\t
+-\t/* Port02 is safety protected */
+-\tMcal_WriteSafetyEndInitProtReg(&MODULE_P02.ACCEN0.U,AllwdTagId);\t\t//SFTY_PORT02_ACCEN = AllwdTagId;
+-\t/* Port10 is safety protected */
+-\tMcal_WriteSafetyEndInitProtReg(&MODULE_P10.ACCEN0.U,SFTY_UTILS_ALL);\t
+-\t/* Port11 is open for all cores */
+-\tMcal_WriteSafetyEndInitProtReg(&MODULE_P11.ACCEN0.U,AllwdTagId);\t\t//SFTY_PORT11_ACCEN = AllwdTagId;
+-\t/* Port12 is open for all cores */
+-\tMcal_WriteSafetyEndInitProtReg(&MODULE_P12.ACCEN0.U,SFTY_UTILS_ALL);\t\t
+-\t/* Port13 is open for all cores */
+-\tMcal_WriteSafetyEndInitProtReg(&MODULE_P13.ACCEN0.U,AllwdTagId);\t\t//SFTY_PORT13_ACCEN = SFTY_UTILS_ALL;
+-\t/* Port14 is open for all cores */
+-\tMcal_WriteSafetyEndInitProtReg(&MODULE_P14.ACCEN0.U,SFTY_UTILS_ALL);\t\t
+-\t/* Port15 is safety protected */
+-\tMcal_WriteSafetyEndInitProtReg(&MODULE_P15.ACCEN0.U,SFTY_UTILS_ALL);\t
+-\t/* Port20 is safety protected */
+-\tMcal_WriteSafetyEndInitProtReg(&MODULE_P20.ACCEN0.U,AllwdTagId);\t\t//SFTY_PORT20_ACCEN = AllwdTagId;
+-\t/* Port21 is open for all cores */
+-\tMcal_WriteSafetyEndInitProtReg(&MODULE_P21.ACCEN0.U,SFTY_UTILS_ALL);\t\t
+-\t/* Port22 is safety protected */
+-\tMcal_WriteSafetyEndInitProtReg(&MODULE_P22.ACCEN0.U,SFTY_UTILS_ALL);\t\t 
+-\t/* Port23 is safety protected */
+-\tMcal_WriteSafetyEndInitProtReg(&MODULE_P23.ACCEN0.U,AllwdTagId);\t\t //SFTY_PORT23_ACCEN = AllwdTagId;
+-\t/* Port32 is safety protected */
+-\tMcal_WriteSafetyEndInitProtReg(&MODULE_P32.ACCEN0.U,AllwdTagId);\t\t //SFTY_PORT32_ACCEN = AllwdTagId;
+-\t/* Port33 is safety protected */
+-\tMcal_WriteSafetyEndInitProtReg(&MODULE_P33.ACCEN0.U,AllwdTagId);\t\t //SFTY_PORT33_ACCEN = AllwdTagId;
+-\t/* Port34 is open for all cores */
+-\tMcal_WriteSafetyEndInitProtReg(&MODULE_P34.ACCEN0.U,SFTY_UTILS_ALL);\t\t 
+-\t/* Port40 is open for all cores */
+-\tMcal_WriteSafetyEndInitProtReg(&MODULE_P40.ACCEN0.U,SFTY_UTILS_ALL);\t\t 
+-
+    return;
+ }
+ 
+@@ -704,6 +736,56 @@ LOCAL_INLINE void SftySysInit_MemProtn(uint32 AllwdTagId)
+ #define SFTYSYSINIT_AREA_0_START_SEC_CODE_SLOW
+ #include "MemMap.h"
+ 
++/*********************************************************************************/
++/*!
++ * \\fn      void SftySysInit_DebugModChk(void)
++ * \\brief   This Function enable access protection for all cores during debug mode
++ */
++/*********************************************************************************/
++FUNC(void, SFTYSYSINIT) SftySysInit_DebugModChk(void)
++{
++   /* ************* Source code **************** */
++   if(BswC2cData.DbgModSts == TRUE)
++   {
++      if(SftyC2cData.DbgModAllwd == FALSE)
++      {
++         /* Enable supervisor mode */
++         SftyUtils_SetPswIoMode(SFTY_UTILS_PSW_IO_SUPERVISOR_MODE);
++
++         SftySysInit_SetPortsAcsEna(SFTY_UTILS_ALL);
++
++         /* Set PSW IO setting back to USER1 */
++         SftyUtils_SetPswIoMode(SFTY_UTILS_PSW_IO_USER_MODE_1);
++
++         SftyC2cData.DbgModAllwd = TRUE;
++      }
++      else
++      {
++         /* Do nothing */
++      }
++
++   }
++   else if (SftyC2cData.DbgModAllwd == TRUE)
++   {
++      /* Enable supervisor mode */
++      SftyUtils_SetPswIoMode(SFTY_UTILS_PSW_IO_SUPERVISOR_MODE);
++
++      SftySysInit_SetPortsAcsEna(SFTY_UTILS_CPU1_NON_SAFE | SFTY_UTILS_CPU1_SAFE);
++
++      /* Set PSW IO setting back to USER1 */
++      SftyUtils_SetPswIoMode(SFTY_UTILS_PSW_IO_USER_MODE_1);
++
++      SftyC2cData.DbgModAllwd = FALSE;
++
++   }
++   else
++   {
++      /* Do nothing */
++   }
++
++   return;
++}
++
+ /******************************************************************/
+ /*!
+  * \\fn      void SftySysInit_InitArea0(void)
+@@ -719,6 +801,8 @@ FUNC(void, SFTYSYSINIT) SftySysInit_InitArea0(void)
+ 
+    /* ************* Source code **************** */
+ 
++   SftyC2cData.DbgModAllwd = FALSE;
++
+    /* Enable supervisor mode */
+    SftyUtils_SetPswIoMode(SFTY_UTILS_PSW_IO_SUPERVISOR_MODE);
+ 
+diff --git a/src/fw_cu/build/a2l/Measurements-to-Timeslices-Mapping.csv b/src/fw_cu/build/a2l/Measurements-to-Timeslices-Mapping.csv
+index c00cae26f..96b997303 100644
+--- a/src/fw_cu/build/a2l/Measurements-to-Timeslices-Mapping.csv
++++ b/src/fw_cu/build/a2l/Measurements-to-Timeslices-Mapping.csv
+@@ -5918,9 +5918,6 @@ SftyHvInterlockTiErrMonrSt,Core_1,Core_1_200us,0.2,,,SSW
+ SftyHvInterlockVadc,Core_1,Core_1_200us,0.2,,,SSW
+ SftyHvInterlockVadcCurTiStamp,Core_1,Core_1_200us,0.2,,,SSW
+ SftyHvInterlockVadcLstTiStamp,Core_1,Core_1_200us,0.2,,,SSW
+-SftySdlRunTiNormRun_SftyHvInterlock_MainFunction.CycTi,Core_1,Core_1_200us,0.2,,,SSW
+-SftySdlRunTiNormRun_SftyHvInterlock_MainFunction.RunTi,Core_1,Core_1_200us,0.2,,,SSW
+-SftySdlRunTiNormRun_SftyHvInterlock_MainFunction.TickStart,Core_1,Core_1_200us,0.2,,,SSW
+ Sfty_ResApp_AlvCntr,Core_1,Core_1_200us,0.2,,,SSW
+ Sfty_ResApp_InputData.CosRaw,Core_1,Core_1_200us,0.2,,,SSW
+ Sfty_ResApp_InputData.ScalRps,Core_1,Core_1_200us,0.2,,,SSW
+@@ -6620,141 +6617,138 @@ SftyRslvrOffsHndlrSpdErrMonrSt,Core_1,Core_1_200us,0.2,,,SSW
+ SftySbcFs6500WakeupSrc,Core_1,Core_1_200us,0.2,,,SSW
+ SftySdlIdCntInv,Core_1,Core_1_200us,0.2,,,SSW
+ SftySdlOverallCpuLoad,Core_1,Core_1_200us,10,,,SSW
+-SftySdlRunTiNormRun_Cmr_InvalidateParamDataCacheSSW.CycTi,Core_1,Core_1_200us,0.2,,,SSW
+-SftySdlRunTiNormRun_Cmr_InvalidateParamDataCacheSSW.RunTi,Core_1,Core_1_200us,0.2,,,SSW
+-SftySdlRunTiNormRun_Cmr_InvalidateParamDataCacheSSW.TickStart,Core_1,Core_1_200us,0.2,,,SSW
+-SftySdlRunTiNormRun_SdlCycRunTi.CycTi,Core_1,Core_1_200us,0.2,,,SSW
+-SftySdlRunTiNormRun_SdlCycRunTi.RunTi,Core_1,Core_1_200us,0.2,,,SSW
+-SftySdlRunTiNormRun_SdlCycRunTi.TickStart,Core_1,Core_1_200us,0.2,,,SSW
++SftySdlRunTiNormRun_SftySdl_ETKMeasTask.CycTi,Core_1,Core_1_200us,0.2,,,SSW
++SftySdlRunTiNormRun_SftySdl_ETKMeasTask.RunTi,Core_1,Core_1_200us,0.2,,,SSW
++SftySdlRunTiNormRun_SftySdl_ETKMeasTask.TickStart,Core_1,Core_1_200us,0.2,,,SSW
++SftySdlRunTiNormRun_SftyE2eFpga_MainFunction.CycTi,Core_1,Core_1_200us,0.2,,,SSW
++SftySdlRunTiNormRun_SftyE2eFpga_MainFunction.RunTi,Core_1,Core_1_200us,0.2,,,SSW
++SftySdlRunTiNormRun_SftyE2eFpga_MainFunction.TickStart,Core_1,Core_1_200us,0.2,,,SSW
+ SftySdlRunTiNormRun_SftyAcEvln_MainFunctionArea1.CycTi,Core_1,Core_1_200us,0.2,,,SSW
+ SftySdlRunTiNormRun_SftyAcEvln_MainFunctionArea1.RunTi,Core_1,Core_1_200us,0.2,,,SSW
+ SftySdlRunTiNormRun_SftyAcEvln_MainFunctionArea1.TickStart,Core_1,Core_1_200us,0.2,,,SSW
+ SftySdlRunTiNormRun_SftyAcEvln_MainFunctionArea2.CycTi,Core_1,Core_1_200us,0.2,,,SSW
+ SftySdlRunTiNormRun_SftyAcEvln_MainFunctionArea2.RunTi,Core_1,Core_1_200us,0.2,,,SSW
+ SftySdlRunTiNormRun_SftyAcEvln_MainFunctionArea2.TickStart,Core_1,Core_1_200us,0.2,,,SSW
++SftySdlRunTiNormRun_SftyRslvrEvln_MainFunctionArea1.CycTi,Core_1,Core_1_200us,0.2,,,SSW
++SftySdlRunTiNormRun_SftyRslvrEvln_MainFunctionArea1.RunTi,Core_1,Core_1_200us,0.2,,,SSW
++SftySdlRunTiNormRun_SftyRslvrEvln_MainFunctionArea1.TickStart,Core_1,Core_1_200us,0.2,,,SSW
++SftySdlRunTiNormRun_SftyRslvrEvln_MainFunctionArea2.CycTi,Core_1,Core_1_200us,0.2,,,SSW
++SftySdlRunTiNormRun_SftyRslvrEvln_MainFunctionArea2.RunTi,Core_1,Core_1_200us,0.2,,,SSW
++SftySdlRunTiNormRun_SftyRslvrEvln_MainFunctionArea2.TickStart,Core_1,Core_1_200us,0.2,,,SSW
+ SftySdlRunTiNormRun_SftyAcEvln_MainFunctionAreaCmn.CycTi,Core_1,Core_1_200us,0.2,,,SSW
+ SftySdlRunTiNormRun_SftyAcEvln_MainFunctionAreaCmn.RunTi,Core_1,Core_1_200us,0.2,,,SSW
+ SftySdlRunTiNormRun_SftyAcEvln_MainFunctionAreaCmn.TickStart,Core_1,Core_1_200us,0.2,,,SSW
+-SftySdlRunTiNormRun_SftyAcEvln_RunHvAcIMeasAdpn.CycTi,Core_1,Core_1_200us,0.2,,,SSW
+-SftySdlRunTiNormRun_SftyAcEvln_RunHvAcIMeasAdpn.RunTi,Core_1,Core_1_200us,0.2,,,SSW
+-SftySdlRunTiNormRun_SftyAcEvln_RunHvAcIMeasAdpn.TickStart,Core_1,Core_1_200us,0.2,,,SSW
+-SftySdlRunTiNormRun_SftyAcEvln_RunVadcHvAcIMeasAdpn.CycTi,Core_1,Core_1_200us,0.2,,,SSW
+-SftySdlRunTiNormRun_SftyAcEvln_RunVadcHvAcIMeasAdpn.RunTi,Core_1,Core_1_200us,0.2,,,SSW
+-SftySdlRunTiNormRun_SftyAcEvln_RunVadcHvAcIMeasAdpn.TickStart,Core_1,Core_1_200us,0.2,,,SSW
++SftySdlRunTiNormRun_SftyRslvrEvln_MainFunctionAreaCmn.CycTi,Core_1,Core_1_200us,0.2,,,SSW
++SftySdlRunTiNormRun_SftyRslvrEvln_MainFunctionAreaCmn.RunTi,Core_1,Core_1_200us,0.2,,,SSW
++SftySdlRunTiNormRun_SftyRslvrEvln_MainFunctionAreaCmn.TickStart,Core_1,Core_1_200us,0.2,,,SSW
++SftySdlRunTiNormRun_SftyHvDcUEvln_MainFunctionAreaCmn.CycTi,Core_1,Core_1_200us,0.2,,,SSW
++SftySdlRunTiNormRun_SftyHvDcUEvln_MainFunctionAreaCmn.RunTi,Core_1,Core_1_200us,0.2,,,SSW
++SftySdlRunTiNormRun_SftyHvDcUEvln_MainFunctionAreaCmn.TickStart,Core_1,Core_1_200us,0.2,,,SSW
++SftySdlRunTiNormRun_SftyRslvrCalcn_MainFunctionAreaCmn.CycTi,Core_1,Core_1_200us,0.2,,,SSW
++SftySdlRunTiNormRun_SftyRslvrCalcn_MainFunctionAreaCmn.RunTi,Core_1,Core_1_200us,0.2,,,SSW
++SftySdlRunTiNormRun_SftyRslvrCalcn_MainFunctionAreaCmn.TickStart,Core_1,Core_1_200us,0.2,,,SSW
++SftySdlRunTiNormRun_SftyTqEstimrCurMdl.CycTi,Core_1,Core_1_200us,0.2,,,SSW
++SftySdlRunTiNormRun_SftyTqEstimrCurMdl.RunTi,Core_1,Core_1_200us,0.2,,,SSW
++SftySdlRunTiNormRun_SftyTqEstimrCurMdl.TickStart,Core_1,Core_1_200us,0.2,,,SSW
++SftySdlRunTiNormRun_SftyTqEstimrPwrMdl_MainFunctionArea1.CycTi,Core_1,Core_1_200us,0.2,,,SSW
++SftySdlRunTiNormRun_SftyTqEstimrPwrMdl_MainFunctionArea1.RunTi,Core_1,Core_1_200us,0.2,,,SSW
++SftySdlRunTiNormRun_SftyTqEstimrPwrMdl_MainFunctionArea1.TickStart,Core_1,Core_1_200us,0.2,,,SSW
++SftySdlRunTiNormRun_SftyErrDeb_MainFunctionAreaCmn.CycTi,Core_1,Core_1_200us,0.2,,,SSW
++SftySdlRunTiNormRun_SftyErrDeb_MainFunctionAreaCmn.RunTi,Core_1,Core_1_200us,0.2,,,SSW
++SftySdlRunTiNormRun_SftyErrDeb_MainFunctionAreaCmn.TickStart,Core_1,Core_1_200us,0.2,,,SSW
++SftySdlRunTiNormRun_SftyModMgr_MainFunction.CycTi,Core_1,Core_1_200us,0.2,,,SSW
++SftySdlRunTiNormRun_SftyModMgr_MainFunction.RunTi,Core_1,Core_1_200us,0.2,,,SSW
++SftySdlRunTiNormRun_SftyModMgr_MainFunction.TickStart,Core_1,Core_1_200us,0.2,,,SSW
++SftySdlRunTiNormRun_SftyE2eTx_Main.CycTi,Core_1,Core_1_200us,0.2,,,SSW
++SftySdlRunTiNormRun_SftyE2eTx_Main.RunTi,Core_1,Core_1_200us,0.2,,,SSW
++SftySdlRunTiNormRun_SftyE2eTx_Main.TickStart,Core_1,Core_1_200us,0.2,,,SSW
++SftySdlRunTiNormRun_SftyE2eRx_Main.CycTi,Core_1,Core_1_200us,0.2,,,SSW
++SftySdlRunTiNormRun_SftyE2eRx_Main.RunTi,Core_1,Core_1_200us,0.2,,,SSW
++SftySdlRunTiNormRun_SftyE2eRx_Main.TickStart,Core_1,Core_1_200us,0.2,,,SSW
++SftySdlRunTiNormRun_LLSWQSpi_MainFunction.CycTi,Core_1,Core_1_200us,0.2,,,SSW
++SftySdlRunTiNormRun_LLSWQSpi_MainFunction.RunTi,Core_1,Core_1_200us,0.2,,,SSW
++SftySdlRunTiNormRun_LLSWQSpi_MainFunction.TickStart,Core_1,Core_1_200us,0.2,,,SSW
+ SftySdlRunTiNormRun_SftyActvDchaCtrl_MainFunction.CycTi,Core_1,Core_1_200us,0.2,,,SSW
+ SftySdlRunTiNormRun_SftyActvDchaCtrl_MainFunction.RunTi,Core_1,Core_1_200us,0.2,,,SSW
+ SftySdlRunTiNormRun_SftyActvDchaCtrl_MainFunction.TickStart,Core_1,Core_1_200us,0.2,,,SSW
+ SftySdlRunTiNormRun_SftyAscLinSpi_MainFunction.CycTi,Core_1,Core_1_200us,0.2,,,SSW
+ SftySdlRunTiNormRun_SftyAscLinSpi_MainFunction.RunTi,Core_1,Core_1_200us,0.2,,,SSW
+ SftySdlRunTiNormRun_SftyAscLinSpi_MainFunction.TickStart,Core_1,Core_1_200us,0.2,,,SSW
++SftySdlRunTiNormRun_SftySbcCtrl_MainFunction.CycTi,Core_1,Core_1_200us,0.2,,,SSW
++SftySdlRunTiNormRun_SftySbcCtrl_MainFunction.RunTi,Core_1,Core_1_200us,0.2,,,SSW
++SftySdlRunTiNormRun_SftySbcCtrl_MainFunction.TickStart,Core_1,Core_1_200us,0.2,,,SSW
+ SftySdlRunTiNormRun_SftyHvDcUEvln_MainFunctionArea1.CycTi,Core_1,Core_1_200us,0.2,,,SSW
+ SftySdlRunTiNormRun_SftyHvDcUEvln_MainFunctionArea1.RunTi,Core_1,Core_1_200us,0.2,,,SSW
+ SftySdlRunTiNormRun_SftyHvDcUEvln_MainFunctionArea1.TickStart,Core_1,Core_1_200us,0.2,,,SSW
+-SftySdlRunTiNormRun_SftyDcEvln_MainFunctionArea1Slow.CycTi,Core_1,Core_1_200us,0.2,,,SSW
+-SftySdlRunTiNormRun_SftyDcEvln_MainFunctionArea1Slow.RunTi,Core_1,Core_1_200us,0.2,,,SSW
+-SftySdlRunTiNormRun_SftyDcEvln_MainFunctionArea1Slow.TickStart,Core_1,Core_1_200us,0.2,,,SSW
+ SftySdlRunTiNormRun_SftyHvDcUEvln_MainFunctionArea2.CycTi,Core_1,Core_1_200us,0.2,,,SSW
+ SftySdlRunTiNormRun_SftyHvDcUEvln_MainFunctionArea2.RunTi,Core_1,Core_1_200us,0.2,,,SSW
+ SftySdlRunTiNormRun_SftyHvDcUEvln_MainFunctionArea2.TickStart,Core_1,Core_1_200us,0.2,,,SSW
+-SftySdlRunTiNormRun_SftyDcEvln_MainFunctionArea2Slow.CycTi,Core_1,Core_1_200us,0.2,,,SSW
+-SftySdlRunTiNormRun_SftyDcEvln_MainFunctionArea2Slow.RunTi,Core_1,Core_1_200us,0.2,,,SSW
+-SftySdlRunTiNormRun_SftyDcEvln_MainFunctionArea2Slow.TickStart,Core_1,Core_1_200us,0.2,,,SSW
+-SftySdlRunTiNormRun_SftyE2eFpga_MainFunction.CycTi,Core_1,Core_1_200us,0.2,,,SSW
+-SftySdlRunTiNormRun_SftyE2eFpga_MainFunction.RunTi,Core_1,Core_1_200us,0.2,,,SSW
+-SftySdlRunTiNormRun_SftyE2eFpga_MainFunction.TickStart,Core_1,Core_1_200us,0.2,,,SSW
+-SftySdlRunTiNormRun_SftyE2eRx_Main.CycTi,Core_1,Core_1_200us,500,,,SSW
+-SftySdlRunTiNormRun_SftyE2eRx_Main.RunTi,Core_1,Core_1_200us,500,,,SSW
+-SftySdlRunTiNormRun_SftyE2eRx_Main.TickStart,Core_1,Core_1_200us,500,,,SSW
+-SftySdlRunTiNormRun_SftyE2eTx_Main.CycTi,Core_1,Core_1_200us,500,,,SSW
+-SftySdlRunTiNormRun_SftyE2eTx_Main.RunTi,Core_1,Core_1_200us,500,,,SSW
+-SftySdlRunTiNormRun_SftyE2eTx_Main.TickStart,Core_1,Core_1_200us,500,,,SSW
+-SftySdlRunTiNormRun_SftyErrDeb_MainFunctionAreaCmn.CycTi,Core_1,Core_1_200us,0.2,,,SSW
+-SftySdlRunTiNormRun_SftyErrDeb_MainFunctionAreaCmn.RunTi,Core_1,Core_1_200us,0.2,,,SSW
+-SftySdlRunTiNormRun_SftyErrDeb_MainFunctionAreaCmn.TickStart,Core_1,Core_1_200us,0.2,,,SSW
+-SftySdlRunTiNormRun_SftyErrDeb_MainFunctionAreaCmnSlow.CycTi,Core_1,Core_1_200us,0.2,,,SSW
+-SftySdlRunTiNormRun_SftyErrDeb_MainFunctionAreaCmnSlow.RunTi,Core_1,Core_1_200us,0.2,,,SSW
+-SftySdlRunTiNormRun_SftyErrDeb_MainFunctionAreaCmnSlow.TickStart,Core_1,Core_1_200us,0.2,,,SSW
+-SftySdlRunTiNormRun_SftyInvActr_MainFunctionArea0.CycTi,Core_1,Core_1_200us,500,,,SSW
+-SftySdlRunTiNormRun_SftyInvActr_MainFunctionArea0.RunTi,Core_1,Core_1_200us,500,,,SSW
+-SftySdlRunTiNormRun_SftyInvActr_MainFunctionArea0.TickStart,Core_1,Core_1_200us,500,,,SSW
+-SftySdlRunTiNormRun_SftyInvActr_MainFunctionAreaCmn.CycTi,Core_1,Core_1_200us,500,,,SSW
+-SftySdlRunTiNormRun_SftyInvActr_MainFunctionAreaCmn.RunTi,Core_1,Core_1_200us,500,,,SSW
+-SftySdlRunTiNormRun_SftyInvActr_MainFunctionAreaCmn.TickStart,Core_1,Core_1_200us,500,,,SSW
+-SftySdlRunTiNormRun_SftyLibApp_Run.CycTi,Core_1,Core_1_200us,0.2,,,SSW
+-SftySdlRunTiNormRun_SftyLibApp_Run.RunTi,Core_1,Core_1_200us,0.2,,,SSW
+-SftySdlRunTiNormRun_SftyLibApp_Run.TickStart,Core_1,Core_1_200us,0.2,,,SSW
+-SftySdlRunTiNormRun_SftyModMgr_MainFunction.CycTi,Core_1,Core_1_200us,0.2,,,SSW
+-SftySdlRunTiNormRun_SftyModMgr_MainFunction.RunTi,Core_1,Core_1_200us,0.2,,,SSW
+-SftySdlRunTiNormRun_SftyModMgr_MainFunction.TickStart,Core_1,Core_1_200us,0.2,,,SSW
+-SftySdlRunTiNormRun_SftyQSpi_MainFunction.CycTi,Core_1,Core_1_200us,0.2,,,SSW
+-SftySdlRunTiNormRun_SftyQSpi_MainFunction.RunTi,Core_1,Core_1_200us,0.2,,,SSW
+-SftySdlRunTiNormRun_SftyQSpi_MainFunction.TickStart,Core_1,Core_1_200us,0.2,,,SSW
+-SftySdlRunTiNormRun_SftyRslvrCalcn_MainFunctionAreaCmn.CycTi,Core_1,Core_1_200us,0.2,,,SSW
+-SftySdlRunTiNormRun_SftyRslvrCalcn_MainFunctionAreaCmn.RunTi,Core_1,Core_1_200us,0.2,,,SSW
+-SftySdlRunTiNormRun_SftyRslvrCalcn_MainFunctionAreaCmn.TickStart,Core_1,Core_1_200us,0.2,,,SSW
+-SftySdlRunTiNormRun_SftyRslvrEvln_MainFunctionArea1.CycTi,Core_1,Core_1_200us,0.2,,,SSW
+-SftySdlRunTiNormRun_SftyRslvrEvln_MainFunctionArea1.RunTi,Core_1,Core_1_200us,0.2,,,SSW
+-SftySdlRunTiNormRun_SftyRslvrEvln_MainFunctionArea1.TickStart,Core_1,Core_1_200us,0.2,,,SSW
+-SftySdlRunTiNormRun_SftyRslvrEvln_MainFunctionArea2.CycTi,Core_1,Core_1_200us,0.2,,,SSW
+-SftySdlRunTiNormRun_SftyRslvrEvln_MainFunctionArea2.RunTi,Core_1,Core_1_200us,0.2,,,SSW
+-SftySdlRunTiNormRun_SftyRslvrEvln_MainFunctionArea2.TickStart,Core_1,Core_1_200us,0.2,,,SSW
+-SftySdlRunTiNormRun_SftyRslvrEvln_MainFunctionAreaCmn.CycTi,Core_1,Core_1_200us,0.2,,,SSW
+-SftySdlRunTiNormRun_SftyRslvrEvln_MainFunctionAreaCmn.RunTi,Core_1,Core_1_200us,0.2,,,SSW
+-SftySdlRunTiNormRun_SftyRslvrEvln_MainFunctionAreaCmn.TickStart,Core_1,Core_1_200us,0.2,,,SSW
+ SftySdlRunTiNormRun_SftyRslvrOffsHndlr_MainFunctionAsilC.CycTi,Core_1,Core_1_200us,0.2,,,SSW
+ SftySdlRunTiNormRun_SftyRslvrOffsHndlr_MainFunctionAsilC.RunTi,Core_1,Core_1_200us,0.2,,,SSW
+ SftySdlRunTiNormRun_SftyRslvrOffsHndlr_MainFunctionAsilC.TickStart,Core_1,Core_1_200us,0.2,,,SSW
+ SftySdlRunTiNormRun_SftyRslvrOffsHndlr_MainFunctionFast.CycTi,Core_1,Core_1_200us,0.2,,,SSW
+ SftySdlRunTiNormRun_SftyRslvrOffsHndlr_MainFunctionFast.RunTi,Core_1,Core_1_200us,0.2,,,SSW
+-SftySdlRunTiNormRun_SftyRslvrOffsHndlr_MainFunctionFast.TickStart,Core_1,Core_1_200us,0.2,,,
+-SftySdlRunTiNormRun_SftySbcCtrl_MainFunction.CycTi,Core_1,Core_1_200us,0.2,,,SSW
+-SftySdlRunTiNormRun_SftySbcCtrl_MainFunction.RunTi,Core_1,Core_1_200us,0.2,,,SSW
+-SftySdlRunTiNormRun_SftySbcCtrl_MainFunction.TickStart,Core_1,Core_1_200us,0.2,,,SSW
+-SftySdlRunTiNormRun_SftySdl_ETKMeasTask.CycTi,Core_1,Core_1_200us,0.2,,,SSW
+-SftySdlRunTiNormRun_SftySdl_ETKMeasTask.RunTi,Core_1,Core_1_200us,0.2,,,SSW
+-SftySdlRunTiNormRun_SftySdl_ETKMeasTask.TickStart,Core_1,Core_1_200us,0.2,,,SSW
++SftySdlRunTiNormRun_SftyRslvrOffsHndlr_MainFunctionFast.TickStart,Core_1,Core_1_200us,0.2,,,SSW
++SftySdlRunTiNormRun_SftyFlshVldt_MainFuncAreaCmn.CycTi,Core_1,Core_1_200us,0.2,,,SSW
++SftySdlRunTiNormRun_SftyFlshVldt_MainFuncAreaCmn.RunTi,Core_1,Core_1_200us,0.2,,,SSW
++SftySdlRunTiNormRun_SftyFlshVldt_MainFuncAreaCmn.TickStart,Core_1,Core_1_200us,0.2,,,SSW
+ SftySdlRunTiNormRun_SftySpdMon_MainFunctionAreaCmn.CycTi,Core_1,Core_1_200us,0.2,,,SSW
+ SftySdlRunTiNormRun_SftySpdMon_MainFunctionAreaCmn.RunTi,Core_1,Core_1_200us,0.2,,,SSW
+ SftySdlRunTiNormRun_SftySpdMon_MainFunctionAreaCmn.TickStart,Core_1,Core_1_200us,0.2,,,SSW
+-SftySdlRunTiNormRun_SftyTempEvln_MainFunction.CycTi,Core_1,Core_1_200us,0.2,,,SSW
+-SftySdlRunTiNormRun_SftyTempEvln_MainFunction.RunTi,Core_1,Core_1_200us,0.2,,,SSW
+-SftySdlRunTiNormRun_SftyTempEvln_MainFunction.TickStart,Core_1,Core_1_200us,0.2,,,SSW
+-SftySdlRunTiNormRun_SftyTqEstimrCurMdl.CycTi,Core_1,Core_1_200us,0.2,,,SSW
+-SftySdlRunTiNormRun_SftyTqEstimrCurMdl.RunTi,Core_1,Core_1_200us,0.2,,,SSW
+-SftySdlRunTiNormRun_SftyTqEstimrCurMdl.TickStart,Core_1,Core_1_200us,0.2,,,SSW
+-SftySdlRunTiNormRun_SftyTqEstimrPwrMdl_MainFunctionArea1.CycTi,Core_1,Core_1_200us,0.2,,,SSW
+-SftySdlRunTiNormRun_SftyTqEstimrPwrMdl_MainFunctionArea1.RunTi,Core_1,Core_1_200us,0.2,,,SSW
+-SftySdlRunTiNormRun_SftyTqEstimrPwrMdl_MainFunctionArea1.TickStart,Core_1,Core_1_200us,0.2,,,SSW
+ SftySdlRunTiNormRun_SftyTqMon_MainFunction.CycTi,Core_1,Core_1_200us,0.2,,,SSW
+ SftySdlRunTiNormRun_SftyTqMon_MainFunction.RunTi,Core_1,Core_1_200us,0.2,,,SSW
+ SftySdlRunTiNormRun_SftyTqMon_MainFunction.TickStart,Core_1,Core_1_200us,0.2,,,SSW
++SftySdlRunTiNormRun_SftyInvActr_MainFunctionAreaCmn.CycTi,Core_1,Core_1_200us,0.2,,,SSW
++SftySdlRunTiNormRun_SftyInvActr_MainFunctionAreaCmn.RunTi,Core_1,Core_1_200us,0.2,,,SSW
++SftySdlRunTiNormRun_SftyInvActr_MainFunctionAreaCmn.TickStart,Core_1,Core_1_200us,0.2,,,SSW
++SftySdlRunTiNormRun_Cmr_InvalidateParamDataCacheSSW.CycTi,Core_1,Core_1_200us,0.2,,,SSW
++SftySdlRunTiNormRun_Cmr_InvalidateParamDataCacheSSW.RunTi,Core_1,Core_1_200us,0.2,,,SSW
++SftySdlRunTiNormRun_Cmr_InvalidateParamDataCacheSSW.TickStart,Core_1,Core_1_200us,0.2,,,SSW
++SftySdlRunTiNormRun_SftyDcEvln_MainFunctionArea1Slow.CycTi,Core_1,Core_1_200us,0.2,,,SSW
++SftySdlRunTiNormRun_SftyDcEvln_MainFunctionArea1Slow.RunTi,Core_1,Core_1_200us,0.2,,,SSW
++SftySdlRunTiNormRun_SftyDcEvln_MainFunctionArea1Slow.TickStart,Core_1,Core_1_200us,0.2,,,SSW
++SftySdlRunTiNormRun_SftyDcEvln_MainFunctionArea2Slow.CycTi,Core_1,Core_1_200us,0.2,,,SSW
++SftySdlRunTiNormRun_SftyDcEvln_MainFunctionArea2Slow.RunTi,Core_1,Core_1_200us,0.2,,,SSW
++SftySdlRunTiNormRun_SftyDcEvln_MainFunctionArea2Slow.TickStart,Core_1,Core_1_200us,0.2,,,SSW
++SftySdlRunTiNormRun_SftyErrDeb_MainFunctionAreaCmnSlow.CycTi,Core_1,Core_1_200us,0.2,,,SSW
++SftySdlRunTiNormRun_SftyErrDeb_MainFunctionAreaCmnSlow.RunTi,Core_1,Core_1_200us,0.2,,,SSW
++SftySdlRunTiNormRun_SftyErrDeb_MainFunctionAreaCmnSlow.TickStart,Core_1,Core_1_200us,0.2,,,SSW
++SftySdlRunTiNormRun_SftyTempEvln_MainFunction.CycTi,Core_1,Core_1_200us,0.2,,,SSW
++SftySdlRunTiNormRun_SftyTempEvln_MainFunction.RunTi,Core_1,Core_1_200us,0.2,,,SSW
++SftySdlRunTiNormRun_SftyTempEvln_MainFunction.TickStart,Core_1,Core_1_200us,0.2,,,SSW
++SftySdlRunTiNormRun_SftyShutoffPahTst_Main.CycTi,Core_1,Core_1_200us,0.2,,,SSW
++SftySdlRunTiNormRun_SftyShutoffPahTst_Main.RunTi,Core_1,Core_1_200us,0.2,,,SSW
++SftySdlRunTiNormRun_SftyShutoffPahTst_Main.TickStart,Core_1,Core_1_200us,0.2,,,SSW
++SftySdlRunTiNormRun_SftyCrashSigMon_MainFunction.CycTi,Core_1,Core_1_200us,0.2,,,SSW
++SftySdlRunTiNormRun_SftyCrashSigMon_MainFunction.RunTi,Core_1,Core_1_200us,0.2,,,SSW
++SftySdlRunTiNormRun_SftyCrashSigMon_MainFunction.TickStart,Core_1,Core_1_200us,0.2,,,SSW
++SftySdlRunTiNormRun_SftyHvInterlock_MainFunction.CycTi,Core_1,Core_1_200us,0.2,,,SSW
++SftySdlRunTiNormRun_SftyHvInterlock_MainFunction.RunTi,Core_1,Core_1_200us,0.2,,,SSW
++SftySdlRunTiNormRun_SftyHvInterlock_MainFunction.TickStart,Core_1,Core_1_200us,0.2,,,SSW
++SftySdlRunTiNormRun_SftySdl_MPUChkArea1Slow.CycTi,Core_1,Core_1_200us,0.2,,,SSW
++SftySdlRunTiNormRun_SftySdl_MPUChkArea1Slow.RunTi,Core_1,Core_1_200us,0.2,,,SSW
++SftySdlRunTiNormRun_SftySdl_MPUChkArea1Slow.TickStart,Core_1,Core_1_200us,0.2,,,SSW
++SftySdlRunTiNormRun_SftySdl_MPUChkArea2Slow.CycTi,Core_1,Core_1_200us,0.2,,,SSW
++SftySdlRunTiNormRun_SftySdl_MPUChkArea2Slow.RunTi,Core_1,Core_1_200us,0.2,,,SSW
++SftySdlRunTiNormRun_SftySdl_MPUChkArea2Slow.TickStart,Core_1,Core_1_200us,0.2,,,SSW
++SftySdlRunTiNormRun_SftySdl_MPUChkAreaCmnSlow.CycTi,Core_1,Core_1_200us,0.2,,,SSW
++SftySdlRunTiNormRun_SftySdl_MPUChkAreaCmnSlow.RunTi,Core_1,Core_1_200us,0.2,,,SSW
++SftySdlRunTiNormRun_SftySdl_MPUChkAreaCmnSlow.TickStart,Core_1,Core_1_200us,0.2,,,SSW
+ SftySdlRunTiNormRun_SftySdl_MPUChkArea0.CycTi,Core_1,Core_1_200us,0.2,,,SSW
+ SftySdlRunTiNormRun_SftySdl_MPUChkArea0.RunTi,Core_1,Core_1_200us,0.2,,,SSW
+ SftySdlRunTiNormRun_SftySdl_MPUChkArea0.TickStart,Core_1,Core_1_200us,0.2,,,SSW
+ SftySdlRunTiNormRun_SftySdl_MPUChkArea1.CycTi,Core_1,Core_1_200us,0.2,,,SSW
+ SftySdlRunTiNormRun_SftySdl_MPUChkArea1.RunTi,Core_1,Core_1_200us,0.2,,,SSW
+ SftySdlRunTiNormRun_SftySdl_MPUChkArea1.TickStart,Core_1,Core_1_200us,0.2,,,SSW
+-SftySdlRunTiNormRun_SftySdl_MPUChkArea1Slow.CycTi,Core_1,Core_1_200us,0.2,,,SSW
+-SftySdlRunTiNormRun_SftySdl_MPUChkArea1Slow.RunTi,Core_1,Core_1_200us,0.2,,,SSW
+-SftySdlRunTiNormRun_SftySdl_MPUChkArea1Slow.TickStart,Core_1,Core_1_200us,0.2,,,SSW
+ SftySdlRunTiNormRun_SftySdl_MPUChkArea2.CycTi,Core_1,Core_1_200us,0.2,,,SSW
+ SftySdlRunTiNormRun_SftySdl_MPUChkArea2.RunTi,Core_1,Core_1_200us,0.2,,,SSW
+ SftySdlRunTiNormRun_SftySdl_MPUChkArea2.TickStart,Core_1,Core_1_200us,0.2,,,SSW
+-SftySdlRunTiNormRun_SftySdl_MPUChkArea2Slow.CycTi,Core_1,Core_1_200us,0.2,,,SSW
+-SftySdlRunTiNormRun_SftySdl_MPUChkArea2Slow.RunTi,Core_1,Core_1_200us,0.2,,,SSW
+-SftySdlRunTiNormRun_SftySdl_MPUChkArea2Slow.TickStart,Core_1,Core_1_200us,0.2,,,SSW
+ SftySdlRunTiNormRun_SftySdl_MPUChkAreaCmn.CycTi,Core_1,Core_1_200us,0.2,,,SSW
+ SftySdlRunTiNormRun_SftySdl_MPUChkAreaCmn.RunTi,Core_1,Core_1_200us,0.2,,,SSW
+ SftySdlRunTiNormRun_SftySdl_MPUChkAreaCmn.TickStart,Core_1,Core_1_200us,0.2,,,SSW
+-SftySdlRunTiNormRun_SftySdl_MPUChkAreaCmnSlow.CycTi,Core_1,Core_1_200us,0.2,,,SSW
+-SftySdlRunTiNormRun_SftySdl_MPUChkAreaCmnSlow.RunTi,Core_1,Core_1_200us,0.2,,,SSW
+-SftySdlRunTiNormRun_SftySdl_MPUChkAreaCmnSlow.TickStart,Core_1,Core_1_200us,0.2,,,SSW
+-SftySdlRunTiNormRun_SftySbcCtrl_CheckAliveCounter.CycTi,Core_1,Core_1_200us,0.2,,,SSW
+-SftySdlRunTiNormRun_SftySbcCtrl_CheckAliveCounter.RunTi,Core_1,Core_1_200us,0.2,,,SSW
+-SftySdlRunTiNormRun_SftySbcCtrl_CheckAliveCounter.TickStart,Core_1,Core_1_200us,0.2,,,SSW
+-SftySdlRunTiNormRun_SftyShutoffPahTst_Main.CycTi,Core_1,Core_1_200us,0.2,,,SSW
+-SftySdlRunTiNormRun_SftyShutoffPahTst_Main.RunTi,Core_1,Core_1_200us,0.2,,,SSW
+-SftySdlRunTiNormRun_SftyShutoffPahTst_Main.TickStart,Core_1,Core_1_200us,0.2,,,SSW
++SftySdlRunTiNormRun_SftySysInit_DebugModChk.CycTi,Core_1,Core_1_200us,0.2,,,SSW
++SftySdlRunTiNormRun_SftySysInit_DebugModChk.RunTi,Core_1,Core_1_200us,0.2,,,SSW
++SftySdlRunTiNormRun_SftySysInit_DebugModChk.TickStart,Core_1,Core_1_200us,0.2,,,SSW
+ SftyShutoffPahTstIgbtSts.botU,Core_1,Core_1_200us,0.2,,,SSW
+ SftyShutoffPahTstIgbtSts.botV,Core_1,Core_1_200us,0.2,,,SSW
+ SftyShutoffPahTstIgbtSts.botW,Core_1,Core_1_200us,0.2,,,SSW
+@@ -6817,9 +6811,6 @@ SftyE2eFpgaIpduRx.Data.RxA.Id.Mx3.Sig.IgbtTempU_MSB4,Core_1,Core_1_200us,0.2,,,S
+ SftyE2eFpgaTempIGBTRawVal,Core_1,Core_1_200us,0.2,,,SSW
+ SftyHvDcUEvlnCtrlBdE2eFpgaRxCrcErrMonrSt,Core_1,Core_1_200us,0.2,,,SSW
+ SftyHvDcUEvlnCtrlBdPwrSplyP16Prsnt,Core_1,Core_1_200us,0.2,,,SSW
+-SftySdlRunTiNormRun_SftyCrashSigMon_MainFunction.CycTi,Core_1,Core_1_200us,0.2,,,SSW
+-SftySdlRunTiNormRun_SftyCrashSigMon_MainFunction.RunTi,Core_1,Core_1_200us,0.2,,,SSW
+-SftySdlRunTiNormRun_SftyCrashSigMon_MainFunction.TickStart,Core_1,Core_1_200us,0.2,,,SSW
+ SigColl_AlvCntr,Core_2,C2_100u_PWM,0.1,,,DRCO
+ SigColl_InputData.ActvtHFSigColl,Core_2,C2_100u_PWM,0.1,,,DRCO
+ SigColl_InputData.AgErrElecSnsrlessCtrl,Core_2,C2_100u_PWM,0.1,,,DRCO
+@@ -7582,9 +7573,6 @@ SftyFlshVldtCrcCalcDataSecuCode.CrcCalcFirstCall,Core_1,Core_1_200us,0.2,,,SSW
+ SftyFlshVldtCrcCalcSt,Core_1,Core_1_200us,0.2,,,SSW
+ SftyFlshVldtSecuCodeAdminBlkCrc.CalcCrc,Core_1,Core_1_200us,0.2,,,SSW
+ SftyFlshVldtSecuCodeAdminBlkCrc.ExpectedCrc,Core_1,Core_1_200us,0.2,,,SSW
+-SftySdlRunTiNormRun_SftyFlshVldt_MainFuncAreaCmn.CycTi,Core_1,Core_1_200us,0.2,,,SSW
+-SftySdlRunTiNormRun_SftyFlshVldt_MainFuncAreaCmn.RunTi,Core_1,Core_1_200us,0.2,,,SSW
+-SftySdlRunTiNormRun_SftyFlshVldt_MainFuncAreaCmn.TickStart,Core_1,Core_1_200us,0.2,,,SSW
+ SWIT_funcCovDma1,Core_1,Core_1_200us,0.2,,,SWIT
+ SWIT_funcCovDma2,Core_1,Core_1_200us,0.2,,,SWIT
+ SWIT_funcCovInlineSftyAcEvln,Core_1,Core_1_200us,0.2,,,SWIT
+@@ -8215,9 +8203,6 @@ DrvCtrlSdlRbl1msFpgaSetTx.RunTi,Core_2,C2_1ms,1,,,SWIT
+ SftyAcEvlnRxCrcErrMonrSt,Core_1,Core_1_200us,0.2,,,SSW
+ SftyAcEvlnSetOverCurrPhaReinitSt,Core_1,Core_1_200us,0.2,,,SSW
+ SftyAcEvlnSetPlausReinitSt,Core_1,Core_1_200us,0.2,,,SSW
+-SftySdlRunTiNormRun_SftyHvDcUEvln_MainFunctionAreaCmn.CycTi,Core_1,Core_1_200us,0.2,,,SSW
+-SftySdlRunTiNormRun_SftyHvDcUEvln_MainFunctionAreaCmn.RunTi,Core_1,Core_1_200us,0.2,,,SSW
+-SftySdlRunTiNormRun_SftyHvDcUEvln_MainFunctionAreaCmn.TickStart,Core_1,Core_1_200us,0.2,,,SSW
+ BswFpgaIfFltRstAckKl15,Core_2,C2_100u_PWM,0.1,,,DRCO
+ BswFpgaIfFltRstAckClrDtc,Core_2,C2_100u_PWM,0.1,,,DRCO
+ SftyE2eFpgaIpduRx.Data.RxS.Sig.Spare1_LSB8,Core_1,Core_1_200us,0.2,,,SSW
+@@ -8454,3 +8439,4 @@ SWIT_SftyE2e_Input_hook_uint32,Core_1,Core_1_200us,0.2,,,SWIT
+ SWIT_SftyE2e_Input_hook_uint8,Core_1,Core_1_200us,0.2,,,SWIT
+ SWIT_SftyE2e_Interface_Output_key_Debugger,Core_1,Core_1_200us,0.2,,,SWIT
+ SWIT_SftyE2e_Interfaces_Main_key_Debugger,Core_1,Core_1_200us,0.2,,,SWIT
++SftyC2cData.DbgModAllwd,Core_1,Core_1_200us,0.2,,,SSW
+\\ No newline at end of file
+'

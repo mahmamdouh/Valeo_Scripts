@@ -1,0 +1,177 @@
+b'commit 60f6d976b42340e47efd5a8819720f581650e8bd
+Author: Srinivasareddy MALAPALLI <srinivasareddy.malapalli@valeo.com>
+Date:   Wed Dec 22 14:00:46 2021 +0530
+
+    $100kW-49241$ SWIT_IT Code for MngFailure and E2E
+    
+    Change-Id: Iecb5d20d0d27263b654dd3cc0e18afee0598e791
+
+diff --git a/src/fw_cu/Components/Cmn/SWIT/SWIT_SFTY/include/SWIT_Sfty.h b/src/fw_cu/Components/Cmn/SWIT/SWIT_SFTY/include/SWIT_Sfty.h
+index ffb0fbfe0..25bda8f97 100644
+--- a/src/fw_cu/Components/Cmn/SWIT/SWIT_SFTY/include/SWIT_Sfty.h
++++ b/src/fw_cu/Components/Cmn/SWIT/SWIT_SFTY/include/SWIT_Sfty.h
+@@ -2244,12 +2244,38 @@
+ #define SftyHvInterlockMonrStsToVeh_Output_KEY 20110
+ #define SftyE2eFpgaCtrlBrdRawVal_Output_KEY  30042
+ #define SftyE2eFpgaDrvBrdRawVal_Output_KEY   30043
+-#define SftyErrDebFctInhbnSts_B_FctIdActvDcha_Input_KEY 20302
+-#define SftyErrDebFctInhbnSts_B_FctIdActvDcha_Output_KEY 20308
+-#define SftyErrDebFctInhbnSts_B_FctIdHsAscSfty_Output_KEY 20309
+-#define SftyErrDebFctInhbnSts_B_FctIdHsAscSfty_Intput_KEY 20303
+-#define SftyErrDebFctInhbnSts_B_FctIdLsAscSfty_Output_KEY 20310
+-#define SftyErrDebFctInhbnSts_B_FctIdLsAscSfty_Intput_KEY 20304
++#define SftyErrDebFctInhbnSts_B_FctIdActvDcha_Output_KEY            20308
++#define SftyErrDebFctInhbnSts_B_FctIdHsAsc_Output_KEY               20309
++#define SftyErrDebFctInhbnSts_B_FctIdLsAsc_Output_KEY               20310
++#define SftyErrDebFctInhbnSts_B_FctIdCoordLsAscSpo_Output_KEY       20311
++#define SftyErrDebFctInhbnSts_B_FctIdSpo_Output_KEY                 20312
++#define SftyErrDebFctInhbnSts_B_FctIdCoordHsAscSpo_Output_KEY       20313
++#define SftyErrDebFctInhbnSts_B_FctIdCanVcuInvStat2_Output_KEY      20314
++#define SftyErrDebFctInhbnSts_B_FctIdCanVcuInvStat1_Output_KEY      20315
++#define SftyErrDebFctInhbnSts_B_FctIdActvDchaCanFailr_Output_KEY    20316
++#define SftyErrDebFctInhbnSts_B_FctIdCanVcuInvCtrl2_Output_KEY      20317
++#define SftyErrDebFctInhbnSts_B_FctIdCanVcuInvCtrl1_Output_KEY      20318
++#define SftyErrDebFctInhbnSts_B_FctIdFltGrp1_Output_KEY             20319
++#define SftyErrDebFctInhbnSts_B_FctIdInterlockFlt_Output_KEY        20320
++#define SftyE2ePhyDataVcuInvCtrl2PrkgPosnReqVld_Output_KEY          30081
++#define SftyE2ePhyDataVcuInvStat1BattContactorSt_Output_KEY         30082
++
++#define SftyErrDebFctInhbnSts_B_FctIdActvDcha_Input_KEY             20302
++#define SftyErrDebFctInhbnSts_B_FctIdHsAsc_Input_KEY                20303
++#define SftyErrDebFctInhbnSts_B_FctIdLsAsc_Input_KEY                20304
++#define SftyErrDebFctInhbnSts_B_FctIdCoordLsAscSpo_Input_KEY        20305
++#define SftyErrDebFctInhbnSts_B_FctIdSpo_Input_KEY                  20306
++#define SftyErrDebFctInhbnSts_B_FctIdCoordHsAscSpo_Input_KEY        20307
++#define SftyErrDebFctInhbnSts_B_FctIdCanVcuInvStat2_Input_KEY       20321
++#define SftyErrDebFctInhbnSts_B_FctIdCanVcuInvStat1_Input_KEY       20322
++#define SftyErrDebFctInhbnSts_B_FctIdCanVcuInvStat1_1_Input_KEY     20323
++#define SftyErrDebFctInhbnSts_B_FctIdActvDchaCanFailr_Input_KEY     20324
++#define SftyErrDebFctInhbnSts_B_FctIdCanVcuInvCtrl2_Input_KEY       20325
++#define SftyErrDebFctInhbnSts_B_FctIdCanVcuInvCtrl1_Input_KEY       20326
++#define SftyErrDebFctInhbnSts_B_FctIdFltGrp1_Input_KEY              20327
++#define SftyErrDebFctInhbnSts_B_FctIdInterlockFlt_Input_KEY         20328
++#define SftyE2ePhyDataVcuInvCtrl2PrkgPosnReqVld_Input_KEY           20076
++#define SftyE2ePhyDataVcuInvStat1BattContactorSt_Input_KEY          20077
+ 
+ #define SftyAcEvlnSetPlausReinitSt_Input_KEY 20150
+ #define SftyAcEvlnSetPlausReinitSt_Output_KEY 20153
+diff --git a/src/fw_cu/Components/Cmn/SWIT/SWIT_SFTY/src/SWIT_SFTY_AreaCMN.c b/src/fw_cu/Components/Cmn/SWIT/SWIT_SFTY/src/SWIT_SFTY_AreaCMN.c
+index 7d9255373..5b4936d1d 100644
+--- a/src/fw_cu/Components/Cmn/SWIT/SWIT_SFTY/src/SWIT_SFTY_AreaCMN.c
++++ b/src/fw_cu/Components/Cmn/SWIT/SWIT_SFTY/src/SWIT_SFTY_AreaCMN.c
+@@ -625,6 +625,31 @@ void SWIT_SftyRslvrOffsHndlr_AccumIq_BgnHook(void)
+ 
+ void SWIT_SftyInvActr_MainFunctionAreaCmn_EndHook(ErrDeb_FctIdBitFieType *SftyErrDebFct)
+ {
++   if(SftyErrDebFctInhbnSts_B_FctIdHsAsc_Input_KEY==SWIT_Interface_Input_key)
++   {
++      SWIT_Sfty_Input_hook_uint8 = SftyErrDebFctInhbnSts.B.FctIdHsAsc;
++    }
++
++   if(SftyErrDebFctInhbnSts_B_FctIdLsAsc_Input_KEY==SWIT_Interface_Input_key)
++   {
++      SWIT_Sfty_Input_hook_uint8 = SftyErrDebFctInhbnSts.B.FctIdLsAsc;
++   }
++
++   if(SftyErrDebFctInhbnSts_B_FctIdCoordLsAscSpo_Input_KEY==SWIT_Interface_Input_key)
++   {
++      SWIT_Sfty_Input_hook_uint8 = SftyErrDebFctInhbnSts.B.FctIdCoordLsAscSpo;
++   }
++
++   if(SftyErrDebFctInhbnSts_B_FctIdSpo_Input_KEY==SWIT_Interface_Input_key)
++   {
++      SWIT_Sfty_Input_hook_uint8 = SftyErrDebFctInhbnSts.B.FctIdSpo;
++   }
++
++   if(SftyErrDebFctInhbnSts_B_FctIdCoordHsAscSpo_Input_KEY==SWIT_Interface_Input_key)
++   {
++      SWIT_Sfty_Input_hook_uint8 = SftyErrDebFctInhbnSts.B.FctIdCoordHsAscSpo;
++   }
++
+    SWIT_Sfty_Set(&SftyInvActrKl30InvSt, SWIT_SftyInvActrKl30InvSt_Output_KEY, SWIT_UINT8);
+    SWIT_Sfty_Check_Input(&SftyModMgrKl30InvStReq, SWIT_SftyModMgrKl30InvStReq_Input_KEY, SWIT_UINT8);
+    SWIT_Sfty_Set(&SftyInvActrStateReqEmgySw, SWIT_SftyInvActrStateReqEmgySw_Output_KEY, SWIT_UINT8);
+@@ -925,6 +950,9 @@ void SWIT_SftyE2eRx_Main_EndHook(ErrDeb_FctIdBitFieType *SftyErrDebFct)
+       SWIT_Sfty_Set(&SftyE2ePhyDataVcuInvCtrl1ModeReq,SftyE2ePhyDataVcuInvCtrl1ModeReq_Output_KEY, SWIT_UINT8);
+ 
+       SWIT_Sfty_Set(&SftyE2ePhyDataVcuInvCtrl1TorqReq,SftyE2ePhyDataVcuInvCtrl1TorqReq_Output_KEY, SWIT_FLOAT32);
++
++      SWIT_Sfty_Set(&SftyE2ePhyDataVcuInvCtrl2PrkgPosnReqVld,SftyE2ePhyDataVcuInvCtrl2PrkgPosnReqVld_Output_KEY, SWIT_UINT8);
++      SWIT_Sfty_Set(&SftyE2ePhyDataVcuInvStat1BattContactorSt,SftyE2ePhyDataVcuInvStat1BattContactorSt_Output_KEY, SWIT_UINT8);
+ //  SWIT_Sfty_Set(&SftyE2eHvk01BzErrMonrSt, SWIT_SftyE2eHvk01BzErrMonrSt_Output_KEY, SWIT_UINT8);
+ //  SWIT_Sfty_Set(&SftyE2eHvk01CrcErrMonrSt, SWIT_SftyE2eHvk01CrcErrMonrSt_Output_KEY, SWIT_UINT8);
+ //  SWIT_Sfty_Set(&SftyE2eEsp21TiOutErrMonrSt, SWIT_SftyE2eEsp21TiOutErrMonrSt_Output_KEY, SWIT_UINT8);
+@@ -1090,25 +1118,46 @@ void SWIT_SftyErrDeb_MainFunctionAreaCmn_EndHook(void)
+ 
+    if(SftyErrDebFctInhbnSts_B_FctIdActvDcha_Output_KEY==SWIT_Interface_Output_key)
+    {
+-
+       SWIT_Sfty_Set(&SWIT_SftyErrDebFctInhbnSts, SftyErrDebFctInhbnSts_B_FctIdActvDcha_Output_KEY, SWIT_UINT8);
+       (SftyErrDebFctInhbnSts.B.FctIdActvDcha)=SWIT_SftyErrDebFctInhbnSts;
+    }
+ 
+-  /* if(SftyErrDebFctInhbnSts_B_FctIdHsAscSfty_Output_KEY==SWIT_Interface_Output_key)
+-      {
++   if(SftyErrDebFctInhbnSts_B_FctIdHsAsc_Output_KEY==SWIT_Interface_Output_key)
++   {
++      SWIT_Sfty_Set(&SWIT_SftyErrDebFctInhbnSts, SftyErrDebFctInhbnSts_B_FctIdHsAsc_Output_KEY, SWIT_UINT8);
++      (SftyErrDebFctInhbnSts.B.FctIdHsAsc)=SWIT_SftyErrDebFctInhbnSts;
++    }
+ 
+-         SWIT_Sfty_Set(&SWIT_SftyErrDebFctInhbnSts, SftyErrDebFctInhbnSts_B_FctIdHsAscSfty_Output_KEY, SWIT_UINT8);
+-         (SftyErrDebFctInhbnSts.B.FctIdHsAscSfty)=SWIT_SftyErrDebFctInhbnSts;
+-      }
++   if(SftyErrDebFctInhbnSts_B_FctIdLsAsc_Output_KEY==SWIT_Interface_Output_key)
++   {
++      SWIT_Sfty_Set(&SWIT_SftyErrDebFctInhbnSts, SftyErrDebFctInhbnSts_B_FctIdLsAsc_Output_KEY, SWIT_UINT8);
++      (SftyErrDebFctInhbnSts.B.FctIdLsAsc)=SWIT_SftyErrDebFctInhbnSts;
++   }
++
++   if(SftyErrDebFctInhbnSts_B_FctIdCoordLsAscSpo_Output_KEY==SWIT_Interface_Output_key)
++   {
++      SWIT_Sfty_Set(&SWIT_SftyErrDebFctInhbnSts, SftyErrDebFctInhbnSts_B_FctIdCoordLsAscSpo_Output_KEY, SWIT_UINT8);
++      (SftyErrDebFctInhbnSts.B.FctIdCoordLsAscSpo)=SWIT_SftyErrDebFctInhbnSts;
++   }
+ 
+-   if(SftyErrDebFctInhbnSts_B_FctIdLsAscSfty_Output_KEY==SWIT_Interface_Output_key)
++   if(SftyErrDebFctInhbnSts_B_FctIdSpo_Output_KEY==SWIT_Interface_Output_key)
+    {
++      SWIT_Sfty_Set(&SWIT_SftyErrDebFctInhbnSts, SftyErrDebFctInhbnSts_B_FctIdSpo_Output_KEY, SWIT_UINT8);
++      (SftyErrDebFctInhbnSts.B.FctIdSpo)=SWIT_SftyErrDebFctInhbnSts;
++   }
++
++   if(SftyErrDebFctInhbnSts_B_FctIdCoordHsAscSpo_Output_KEY==SWIT_Interface_Output_key)
++   {
++      SWIT_Sfty_Set(&SWIT_SftyErrDebFctInhbnSts, SftyErrDebFctInhbnSts_B_FctIdCoordHsAscSpo_Output_KEY, SWIT_UINT8);
++      (SftyErrDebFctInhbnSts.B.FctIdCoordHsAscSpo)=SWIT_SftyErrDebFctInhbnSts;
++   }
+ 
+-      SWIT_Sfty_Set(&SWIT_SftyErrDebFctInhbnSts, SftyErrDebFctInhbnSts_B_FctIdLsAscSfty_Output_KEY, SWIT_UINT8);
+-      (SftyErrDebFctInhbnSts.B.FctIdLsAscSfty)=SWIT_SftyErrDebFctInhbnSts;
++   if(SftyErrDebFctInhbnSts_B_FctIdFltGrp1_Output_KEY==SWIT_Interface_Output_key)
++   {
++      SWIT_Sfty_Set(&SWIT_SftyErrDebFctInhbnSts, SftyErrDebFctInhbnSts_B_FctIdFltGrp1_Output_KEY, SWIT_UINT8);
++      (SftyErrDebFctInhbnSts.B.FctIdFltGrp1)=SWIT_SftyErrDebFctInhbnSts;
+    }
+-*/
++
+    SWIT_Sfty_Check_Input(&SftyE2eVcuInvStat1CntrErrMonrSt,SftyE2eVcuInvStat1CntrErrMonrSt_Input_KEY , SWIT_UINT8);
+    SWIT_Sfty_Check_Input(&SftyE2eVcuInvCtrl1TiOutErrMonrSt,SftyE2eVcuInvCtrl1TiOutErrMonrSt_Input_KEY , SWIT_UINT8);
+    SWIT_Sfty_Check_Input(&SftyE2eVcuInvStat1CrcErrMonrSt,SftyE2eVcuInvStat1CrcErrMonrSt_Input_KEY , SWIT_UINT8);
+@@ -1119,7 +1168,6 @@ void SWIT_SftyErrDeb_MainFunctionAreaCmn_EndHook(void)
+    SWIT_Sfty_Check_Input(&SftyE2eVcuInvStat1TiOutErrMonrSt,SftyE2eVcuInvStat1TiOutErrMonrSt_Input_KEY , SWIT_UINT8);
+    SWIT_Sfty_Check_Input(&SftyE2eVcuInvCtrl2TiOutErrMonrSt,SftyE2eVcuInvCtrl2TiOutErrMonrSt_Input_KEY , SWIT_UINT8);
+    SWIT_Sfty_Check_Input(&SftyE2ePhyDataVcuInvCtrl1TorqReq,SftyE2ePhyDataVcuInvCtrl1TorqReq_Input_KEY, SWIT_FLOAT32);
+-   SWIT_Sfty_Check_Input(&SftyE2ePhyDataVcuInvCtrl2RslvrOffsCalReq,SftyE2ePhyDataVcuInvCtrl2RslvrOffsCalReq_Input_KEY , SWIT_UINT8);
+    SWIT_Sfty_Check_Input(&SftyE2ePhyDataVcuInvCtrl1ModeReq,SftyE2ePhyDataVcuInvCtrl1ModeReq_Input_KEY , SWIT_UINT8);
+ }
+ 
+@@ -1204,6 +1252,7 @@ void SWIT_SftyRslvrCalcn_SpdCalcnFromRawVadcVal_EndHook(void){
+ }
+ 
+ void SWIT_SftyRslvrOffsHndlr_MainFunctionAsilC_BgnHook(void){
++   SWIT_Sfty_Check_Input(&SftyE2ePhyDataVcuInvCtrl2RslvrOffsCalReq,SftyE2ePhyDataVcuInvCtrl2RslvrOffsCalReq_Input_KEY , SWIT_UINT8);
+ \tSWIT_Sfty_Check_Input(&SftyRslvrCalcnAgVldyFlg, SWIT_SftyRslvrCalcnAgVldyFlg_SftyRslvrOffsHndlr_Input_KEY, SWIT_UINT8);
+ \tSWIT_Sfty_Check_Input(&SftyRslvrEvlnVldyFlg,SWIT_SftyRslvrEvlnVldyFlg_SftyRslvrOffsHndlr_Input_KEY,SWIT_UINT8);
+ \tSWIT_Sfty_Check_Input(&SftyRslvrCalcnMeclSpdFild,SWIT_SftyRslvrCalcnMeclSpdFild_SftyRslvrOffsHndlr_Input_KEY,SWIT_FLOAT32);
+'

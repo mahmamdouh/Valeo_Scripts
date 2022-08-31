@@ -1,0 +1,1968 @@
+b'commit 9b3886be17d0a6d656284829faa06fb839fa2604
+Author: Abdelrahman AMRALLAH <abdelrahman.amrallah@valeo.com>
+Date:   Wed Nov 3 15:10:29 2021 +0200
+
+    $100kW-44413$ Merging B01 hooks and SWIT_FC fix
+    
+    Change-Id: I6ba408f0cba80c8bd9de4fd1f93d09e02f0b56ce
+
+diff --git a/src/fw_cu/Components/Cmn/SWIT/SWIT_SFTY/include/SWIT_Sfty.h b/src/fw_cu/Components/Cmn/SWIT/SWIT_SFTY/include/SWIT_Sfty.h
+index 0cf72bdb2..ad1a94f7d 100644
+--- a/src/fw_cu/Components/Cmn/SWIT/SWIT_SFTY/include/SWIT_Sfty.h
++++ b/src/fw_cu/Components/Cmn/SWIT/SWIT_SFTY/include/SWIT_Sfty.h
+@@ -561,6 +561,7 @@
+ #define SWIT_DrvCtrlC2cData_TqActt_Output_KEY                           (50000)
+ #define SWIT_SftyDmaMotStatorTRawVal_Input_KEY (1997)
+ #define SWIT_SftyDmaVadcCrashTi_Output_KEY (1998)
++#define SWIT_SftyE2eFpga_CrcEval_OutputKEY (1999)
+ 
+ /* sfty Resolver Offset */
+ #define SWIT_SftyC2cData_RslvrOffsNvm_RslvrOffsChks_Output_KEY (30701)
+@@ -2224,6 +2225,7 @@
+ #define SftyDmaVadcCrash_Output_KEY 30076
+ #define SftyTempEvlnIgbtTempHWPErrMonrSt_Output_KEY 30077
+ #define SftyTempEvlnMotStatorTempHWPErrMonrSt_Output_KEY 30078
++#define SftyCrashSigMonTiStampErrMonrSt_Output_KEY 30079
+ #define SftyHvDcUEvlnPlausErrMonrSt_Output_KEY 30020
+ #define SftyHvDcUEvlnSetPlausReinitSt_Output_KEY 30021
+ #define SftyHvDcUEvlnSetPlausReinitSt_Input_KEY 20015
+@@ -3136,6 +3138,14 @@ do{\\
+    }\\
+ }while(0)
+ 
++#define SWIT_BswFpgaIf_UpdRxFrm_BgnHook()\\
++do{\\
++   if((SWIT_Interface_Output_key_Debugger == SWIT_SftyE2eFpga_CrcEval_OutputKEY))\\
++   {\\
++\t   BswFpgaIf_GetFrameRxSCtrl() = 123;\\
++   }\\
++}while(0)
++
+ /*End of ActeSafeSt System function*/
+ 
+ #endif
+@@ -3363,6 +3373,7 @@ extern void SWIT_SftyTEvln_MainFunction_EndHook(void);
+ extern void SWIT_SftyDma_UpdateVadcRawMotStatorValAndTiStamp_EndHook(void);
+ extern void SWIT_SftyDma_UpdateRawCrashData_EndHook(void);
+ extern void SWIT_SftyCrashSigMon_RngChk_EndHook(void);
++extern void SWIT_SftyCrashSigMon_GetDmaData_EndHook(void);
+ extern void SWIT_SftyCrashSigMon_DetAngCrashSts_EndHook(void);
+ extern void SWIT_SftyCrashSigMon_DetCanCrashSts_EndHook(void);
+ extern void SWIT_SftyCrashSigMon_DetCanCrashSts_BgnHook(void);
+@@ -4027,7 +4038,7 @@ extern VAR(uint8,SWIT_Sfty_VAR) SWIT_funcCovInlineSftyE2eTx;
+ 
+ extern VAR(uint8,SWIT_Sfty_VAR) SWIT_funcCovInlineSftyE2eP02Lib;
+ 
+-extern VAR(uint8,SWIT_Sfty_VAR) SWIT_funcCovInlineSftyActvDchaCtrlrIf;
++//extern VAR(uint8,SWIT_Sfty_VAR) SWIT_funcCovInlineSftyActvDchaCtrlrIf;
+ 
+ extern VAR(uint8,SWIT_Sfty_VAR) SWIT_funcCovInlineSftyLibApp2 ;
+ 
+@@ -4143,21 +4154,21 @@ extern VAR(uint16, SWIT_Sfty_VAR) SWIT_funcCovPflashMonTst;
+ 
+ //extern VAR(uint16, SWIT_Sfty_VAR) SWIT_funcCovWdgTst;
+ 
+-extern VAR(uint16, SWIT_Sfty_VAR) SWIT_funcCovSmu1;
++//extern VAR(uint16, SWIT_Sfty_VAR) SWIT_funcCovSmu1;
+ 
+-extern VAR(uint16,SWIT_Sfty_VAR) SWIT_funcCovInlineSftyDcEvln ;
++//extern VAR(uint16,SWIT_Sfty_VAR) SWIT_funcCovInlineSftyDcEvln ;
+ 
+-extern VAR(uint16,SWIT_Sfty_VAR) SWIT_funcCovInlineSftyDcEvln3;
++//extern VAR(uint16,SWIT_Sfty_VAR) SWIT_funcCovInlineSftyDcEvln3;
+ 
+ extern VAR(uint16,SWIT_Sfty_VAR) SWIT_funcCovInlineSftySramEccTstMgr;
+ 
+-extern VAR(uint16,SWIT_Sfty_VAR) SWIT_funcCovInlineSftySbcCtrl ;
++//extern VAR(uint16,SWIT_Sfty_VAR) SWIT_funcCovInlineSftySbcCtrl ;
+ 
+-extern VAR(uint16,SWIT_Sfty_VAR) SWIT_funcCovInlineSftyUtils ;
++//extern VAR(uint16,SWIT_Sfty_VAR) SWIT_funcCovInlineSftyUtils ;
+ 
+ extern VAR(uint16,SWIT_Sfty_VAR) SWIT_funcCovInlineSftyE2eRx ;
+ 
+-extern VAR(uint16,SWIT_Sfty_VAR) SWIT_funcCovInlineSftyDcEvln4 ;
++//extern VAR(uint16,SWIT_Sfty_VAR) SWIT_funcCovInlineSftyDcEvln4 ;
+ 
+ extern VAR(uint16,SWIT_Sfty_VAR) SWIT_funcCovInlineSftyRslvrEvln;
+ 
+@@ -4173,11 +4184,11 @@ extern VAR(uint16,SWIT_Sfty_VAR) SWIT_funcCovInlineSftyE2eRx1 ;
+ 
+ extern VAR(uint16,SWIT_Sfty_VAR) SWIT_funcCovInlineSftyAcEvln ;
+ 
+-extern VAR(uint16,SWIT_Sfty_VAR) SWIT_funcCovInlineSftyDcEvln1 ;
++//extern VAR(uint16,SWIT_Sfty_VAR) SWIT_funcCovInlineSftyDcEvln1 ;
+ 
+-extern VAR(uint16,SWIT_Sfty_VAR) SWIT_funcCovInlineSftyDcEvln2;
++//extern VAR(uint16,SWIT_Sfty_VAR) SWIT_funcCovInlineSftyDcEvln2;
+ 
+-extern VAR(uint16,SWIT_Sfty_VAR) SWIT_funcCovInlineSftyActvDchaCtrl ;
++//extern VAR(uint16,SWIT_Sfty_VAR) SWIT_funcCovInlineSftyActvDchaCtrl ;
+ 
+ #define SWIT_STOP_SEC_VAR_SHARE_INIT
+ #include "SWIT_MemMap.h"
+@@ -4574,6 +4585,8 @@ while(0)*/
+ #define SWIT_SFTY_AREA_0_START_SEC_CODE_SLOW
+ #include "SWIT_MemMap.h"
+ 
++extern void SWIT_SftyTempEvln_MainFunction_BgnHook(void);
++extern void SWIT_SftyTempEvln_Init_BgnHook(void);
+ extern void SWIT_SftySysInit_SetXbarAccen_BgnHook(void);
+ extern void SWIT_SftySysInit_ClkMonEna_BgnHook(void);
+ extern void SWIT_SftySysInit_Stop_BgnHook(void);
+@@ -4609,19 +4622,19 @@ extern void SWIT_Smu_Init_BgnHook (void);
+ extern void SWIT_Smu_DeInit_BgnHook (void);
+ extern void SWIT_Smu_ClearAlarmStatus_BgnHook (void);
+ extern void SWIT_Smu_SetAlarmStatus_BgnHook (void);
+-extern void SWIT_Smu_GetAlarmStatus_BgnHook (void);
+-extern void SWIT_Smu_GetAlarmDebugStatus_BgnHook (void);
+-extern void SWIT_Smu_GetAlarmAction_BgnHook (void);
+-extern void SWIT_Smu_SetAlarmAction_BgnHook (void);
+-extern void SWIT_Smu_ReleaseFSP_BgnHook (void);
+-extern void SWIT_Smu_ActivateFSP_BgnHook (void);
+-extern void SWIT_Smu_SetupErrorPin_BgnHook (void);
+-extern void SWIT_Smu_ReleaseErrorPin_BgnHook (void);
+-extern void SWIT_Smu_GetRTMissedEvent_BgnHook (void);
+-extern void SWIT_Smu_RTStop_BgnHook (void);
+-extern void SWIT_Smu_LockConfigRegs_BgnHook (void);
+-extern void SWIT_Smu_GetSmuState_BgnHook (void);
+-extern void SWIT_Smu_ActivateRunState_BgnHook (void);
++//extern void SWIT_Smu_GetAlarmStatus_BgnHook (void);
++//extern void SWIT_Smu_GetAlarmDebugStatus_BgnHook (void);
++//extern void SWIT_Smu_GetAlarmAction_BgnHook (void);
++//extern void SWIT_Smu_SetAlarmAction_BgnHook (void);
++//extern void SWIT_Smu_ReleaseFSP_BgnHook (void);
++//extern void SWIT_Smu_ActivateFSP_BgnHook (void);
++//extern void SWIT_Smu_SetupErrorPin_BgnHook (void);
++//extern void SWIT_Smu_ReleaseErrorPin_BgnHook (void);
++//extern void SWIT_Smu_GetRTMissedEvent_BgnHook (void);
++//extern void SWIT_Smu_RTStop_BgnHook (void);
++//extern void SWIT_Smu_LockConfigRegs_BgnHook (void);
++//extern void SWIT_Smu_GetSmuState_BgnHook (void);
++//extern void SWIT_Smu_ActivateRunState_BgnHook (void);
+ extern void SWIT_SftyLibApp__BgnHook (void);
+ extern void SWIT_SftyLibApp_PreRun_BgnHook (void);
+ extern void SWIT_SftyAppLib_RunInit_BgnHook (void);
+@@ -4661,9 +4674,9 @@ extern void SWIT_SftySramEccTstMgr_InitTstData_BgnHook (void); //area 0
+ extern void SWIT_SftySysInit_SetAcsEna_BgnHook (void);  //area 0
+ extern void SWIT_SftySysInit_PortInit_BgnHook (void);  //area 0
+ extern void SWIT_SftySysInit_MemoryProtn_BgnHook (void);  //area 0
+-extern void SWIT_SftyUtils_GetPSWregVal_BgnHook (void);    //area 0
+-extern void SWIT_SftyUtils_SetPSWregVal_BgnHook (void);   //area 0
+-extern void SWIT_SftySbcCtrl_DiIntWdg_BgnHook (void);      //area 0
++//extern void SWIT_SftyUtils_GetPSWregVal_BgnHook (void);    //area 0
++//extern void SWIT_SftyUtils_SetPSWregVal_BgnHook (void);   //area 0
++//extern void SWIT_SftySbcCtrl_DiIntWdg_BgnHook (void);      //area 0
+ extern void SWIT_SftyQSpi_BaudRateConfig_BgnHook (void);  //area 0
+ extern void SWIT_SftyDmaDrvr_InitChannel_BgnHook (void);      //area 0
+ extern void SWIT_SftyEccMonEov_InitFlashMon_BgnHook (void); //area 0
+@@ -4752,63 +4765,63 @@ extern void SWIT_SftyRslvrEvln_GetVadcValFromDma_BgnHook (void);     //area 1
+ extern void SWIT_SftyRslvrEvln_InitVadcErrMonrStVar_BgnHook (void);   //area 1
+ extern void SWIT_SftyTqEstimrPwrMdl_VtgCalc_BgnHook (void)  ;          //area 1
+ extern void SWIT_SftyTqEstimrPwrMdlFrctnLossCalc_BgnHook (void)  ;          //area 1
+-extern void SWIT_SftyDcEvln_OCPStrtUpDiag_BgnHook(void);
+-extern void SWIT_SftyDcEvln_SepicOffStrtUpDiag_BgnHook(void);
+-extern void SWIT_SftyDcEvln_GetSepicOutFromDma_BgnHook (void);
+-extern void SWIT_SftyDcEvln_KL15Evln_BgnHook (void);
+-extern void SWIT_SftyDcEvln_VolCompAscSt_BgnHook (void);
+-extern void SWIT_SftyDcEvln_P14HvLvActv_BgnHook (void);
+-extern void SWIT_SftyDcEvln_P15ResSwtActv_BgnHook (void);
+-extern void SWIT_SftyDcEvln_P15USwtActv_BgnHook (void);
+-extern void SWIT_SftyDcEvln_P15VSwtActv_BgnHook (void);
+-extern void SWIT_SftyDcEvln_P15WSwtActv_BgnHook (void);
+-extern void SWIT_SftyDcEvln_GetKL15FromDma_BgnHook (void);
+-extern void SWIT_SftyDcEvln_GetKL30PrMeasAFromDma_BgnHook (void);
+-extern void SWIT_SftyDcEvln_GetP5UFromDma_BgnHook (void);
+-extern void SWIT_SftyDcEvln_GetP5VFromDma_BgnHook (void);
+-extern void SWIT_SftyDcEvln_GetP5WFromDma_BgnHook (void);
+-extern void SWIT_SftyDcEvln_GetP5Asc2FromDma_BgnHook (void);
+-extern void SWIT_SftyDcEvln_GetP15FromDma_BgnHook (void);
+-extern void SWIT_SftyDcEvln_GetP15RESFromDma_BgnHook (void);
+-extern void SWIT_SftyDcEvln_GetP15UFromDma_BgnHook (void);
+-extern void SWIT_SftyDcEvln_GetP15VFromDma_BgnHook (void);
+-extern void SWIT_SftyDcEvln_GetP15WFromDma_BgnHook (void);
+-extern void SWIT_SftyDcEvln_GetP14HvLvFromDma_BgnHook (void);
+-extern void SWIT_SftyDcEvln_GetExtAdcUdc_BgnHook (void);
+-extern void SWIT_SftyDcEvln_ChkExtUdcElecHi_BgnHook (void);
+-extern void SWIT_SftyDcEvln_ChkExtUdcRngHi_BgnHook (void);
+-extern void SWIT_SftyDcEvln_ScaUdcExtAdcVal_BgnHook (void);
+-extern void SWIT_SftyDcEvln_ScaKL30PrMeasA_BgnHook (void);
+-extern void SWIT_SftyDcEvln_KL30PhyRngHi_BgnHook (void);
+-extern void SWIT_SftyDcEvln_KL30PhyRngLo_BgnHook (void);
+-extern void SWIT_SftyDcEvln_KL30PhyRngUv_BgnHook (void);
+-extern void SWIT_SftyDcEvln_KL30PhyRngUvCan_BgnHook (void);
+-extern void SWIT_SftyDcEvln_KL30PhyRngUvHwp_BgnHook (void);
+-extern void SWIT_SftyDcEvln_KL30PhyRngOv_BgnHook (void);
+-extern void SWIT_SftyDcEvln_KL30PhyRngOvCan_BgnHook (void);
+-extern void SWIT_SftyDcEvln_SepicOutPhyRngChk_BgnHook (void);
+-extern void SWIT_SftyDcEvln_Kl30ElecHi_BgnHook (void);
+-extern void SWIT_SftyDcEvln_Kl30ElecLo_BgnHook (void);
+-extern void SWIT_SftyDcEvln_KL30RngEvln_BgnHook (void);
+-extern void SWIT_SftyDcEvln_KL15RngEvln_BgnHook (void);
+-extern void SWIT_SftyDcEvln_SepicOutRngEvln_BgnHook (void);
+-extern void SWIT_SftyDcEvln_P15GrdtChk_BgnHook (void);
+-extern void SWIT_SftyDcEvln_P15RngEvln_BgnHook (void);
+-extern void SWIT_SftyDcEvln_P15ResRngEvln_BgnHook (void);
+-extern void SWIT_SftyDcEvln_P15URngEvln_BgnHook (void);
+-extern void SWIT_SftyDcEvln_P15VRngEvln_BgnHook (void);
+-extern void SWIT_SftyDcEvln_P15WRngEvln_BgnHook (void);
+-extern void SWIT_SftyDcEvln_P15ResStrtUpRngEvln_BgnHook (void);
+-extern void SWIT_SftyDcEvln_P15UStrtUpRngEvln_BgnHook (void);
+-extern void SWIT_SftyDcEvln_P15VStrtUpRngEvln_BgnHook (void);
+-extern void SWIT_SftyDcEvln_P15WStrtUpRngEvln_BgnHook (void);
+-extern void SWIT_SftyDcEvln_P14HvLvRngEvln_BgnHook (void);
+-extern void SWIT_SftyDcEvln_P5URngEvln_BgnHook (void);
+-extern void SWIT_SftyDcEvln_P5VRngEvln_BgnHook (void);
+-extern void SWIT_SftyDcEvln_P5WRngEvln_BgnHook (void);
+-extern void SWIT_SftyDcEvln_P5Asc2RngEvln_BgnHook (void);
+-extern void SWIT_SftyDcEvln_AscTogFltCuEvln_BgnHook (void);
+-extern void SWIT_SftyDcEvln_AscTogFltPuEvln_BgnHook (void);
++//extern void SWIT_SftyDcEvln_OCPStrtUpDiag_BgnHook(void);
++//extern void SWIT_SftyDcEvln_SepicOffStrtUpDiag_BgnHook(void);
++//extern void SWIT_SftyDcEvln_GetSepicOutFromDma_BgnHook (void);
++//extern void SWIT_SftyDcEvln_KL15Evln_BgnHook (void);
++//extern void SWIT_SftyDcEvln_VolCompAscSt_BgnHook (void);
++//extern void SWIT_SftyDcEvln_P14HvLvActv_BgnHook (void);
++//extern void SWIT_SftyDcEvln_P15ResSwtActv_BgnHook (void);
++//extern void SWIT_SftyDcEvln_P15USwtActv_BgnHook (void);
++//extern void SWIT_SftyDcEvln_P15VSwtActv_BgnHook (void);
++//extern void SWIT_SftyDcEvln_P15WSwtActv_BgnHook (void);
++//extern void SWIT_SftyDcEvln_GetKL15FromDma_BgnHook (void);
++//extern void SWIT_SftyDcEvln_GetKL30PrMeasAFromDma_BgnHook (void);
++//extern void SWIT_SftyDcEvln_GetP5UFromDma_BgnHook (void);
++//extern void SWIT_SftyDcEvln_GetP5VFromDma_BgnHook (void);
++//extern void SWIT_SftyDcEvln_GetP5WFromDma_BgnHook (void);
++//extern void SWIT_SftyDcEvln_GetP5Asc2FromDma_BgnHook (void);
++//extern void SWIT_SftyDcEvln_GetP15FromDma_BgnHook (void);
++//extern void SWIT_SftyDcEvln_GetP15RESFromDma_BgnHook (void);
++//extern void SWIT_SftyDcEvln_GetP15UFromDma_BgnHook (void);
++//extern void SWIT_SftyDcEvln_GetP15VFromDma_BgnHook (void);
++//extern void SWIT_SftyDcEvln_GetP15WFromDma_BgnHook (void);
++//extern void SWIT_SftyDcEvln_GetP14HvLvFromDma_BgnHook (void);
++//extern void SWIT_SftyDcEvln_GetExtAdcUdc_BgnHook (void);
++//extern void SWIT_SftyDcEvln_ChkExtUdcElecHi_BgnHook (void);
++//extern void SWIT_SftyDcEvln_ChkExtUdcRngHi_BgnHook (void);
++//extern void SWIT_SftyDcEvln_ScaUdcExtAdcVal_BgnHook (void);
++//extern void SWIT_SftyDcEvln_ScaKL30PrMeasA_BgnHook (void);
++//extern void SWIT_SftyDcEvln_KL30PhyRngHi_BgnHook (void);
++//extern void SWIT_SftyDcEvln_KL30PhyRngLo_BgnHook (void);
++//extern void SWIT_SftyDcEvln_KL30PhyRngUv_BgnHook (void);
++//extern void SWIT_SftyDcEvln_KL30PhyRngUvCan_BgnHook (void);
++//extern void SWIT_SftyDcEvln_KL30PhyRngUvHwp_BgnHook (void);
++//extern void SWIT_SftyDcEvln_KL30PhyRngOv_BgnHook (void);
++//extern void SWIT_SftyDcEvln_KL30PhyRngOvCan_BgnHook (void);
++//extern void SWIT_SftyDcEvln_SepicOutPhyRngChk_BgnHook (void);
++//extern void SWIT_SftyDcEvln_Kl30ElecHi_BgnHook (void);
++//extern void SWIT_SftyDcEvln_Kl30ElecLo_BgnHook (void);
++//extern void SWIT_SftyDcEvln_KL30RngEvln_BgnHook (void);
++//extern void SWIT_SftyDcEvln_KL15RngEvln_BgnHook (void);
++//extern void SWIT_SftyDcEvln_SepicOutRngEvln_BgnHook (void);
++//extern void SWIT_SftyDcEvln_P15GrdtChk_BgnHook (void);
++//extern void SWIT_SftyDcEvln_P15RngEvln_BgnHook (void);
++//extern void SWIT_SftyDcEvln_P15ResRngEvln_BgnHook (void);
++//extern void SWIT_SftyDcEvln_P15URngEvln_BgnHook (void);
++//extern void SWIT_SftyDcEvln_P15VRngEvln_BgnHook (void);
++//extern void SWIT_SftyDcEvln_P15WRngEvln_BgnHook (void);
++//extern void SWIT_SftyDcEvln_P15ResStrtUpRngEvln_BgnHook (void);
++//extern void SWIT_SftyDcEvln_P15UStrtUpRngEvln_BgnHook (void);
++//extern void SWIT_SftyDcEvln_P15VStrtUpRngEvln_BgnHook (void);
++//extern void SWIT_SftyDcEvln_P15WStrtUpRngEvln_BgnHook (void);
++//extern void SWIT_SftyDcEvln_P14HvLvRngEvln_BgnHook (void);
++//extern void SWIT_SftyDcEvln_P5URngEvln_BgnHook (void);
++//extern void SWIT_SftyDcEvln_P5VRngEvln_BgnHook (void);
++//extern void SWIT_SftyDcEvln_P5WRngEvln_BgnHook (void);
++//extern void SWIT_SftyDcEvln_P5Asc2RngEvln_BgnHook (void);
++//extern void SWIT_SftyDcEvln_AscTogFltCuEvln_BgnHook (void);
++//extern void SWIT_SftyDcEvln_AscTogFltPuEvln_BgnHook (void);
+ extern void SWIT_SftyDcEvln_StrtUpDiagNormOper_BgnHook (void);
+ extern void SWIT_SftyAcEvln_MainFunctionArea1_BgnHook (void);
+ /*extern void SWIT_SftyAcEvln_RunVadcHvAcIMeasAdpn_BgnHook (void);*/
+@@ -4835,7 +4848,7 @@ extern void SWIT_SftyDma_UpdateP15AndTiStamp_BgnHook (void);
+ extern void SWIT_SftyDma_UpdateP15RESAndTiStamp_BgnHook (void);
+ extern void SWIT_SftyDma_UpdateP15UAndTiStamp_BgnHook (void);
+ extern void SWIT_SftyDma_UpdateP15VAndTiStamp_BgnHook (void);
+-extern void SWIT_SftyUtils_CalcTiStampDif_BgnHook (void);
++//extern void SWIT_SftyUtils_CalcTiStampDif_BgnHook (void);
+ extern void SWIT_SftyRslvrEvln_MainFunctionArea1_BgnHook (void);
+ extern void SWIT_SftyRslvrEvln_InitArea1_BgnHook (void);
+ extern void SWIT_SftySdl_MPUChkArea1Slow_BgnHook (void);
+@@ -4908,7 +4921,7 @@ extern void SWIT_SftyHvDcUEvln_InitArea2_BgnHook (void);
+ /*extern void SWIT_SftyAcEvln_ChkDsadcSum_BgnHook (void);*/  //area 2
+ /*extern void SWIT_SftyAcEvln_ChkDsadcPhaElecRng_BgnHook (void);*/   //area 2
+ /*extern void SWIT_SftyAcEvln_ScaDsadcVal_BgnHook (void);*/  //area 1
+-extern void SWIT_SftyDcEvln_AscTogFltCuEvln_BgnHook (void);
++//extern void SWIT_SftyDcEvln_AscTogFltCuEvln_BgnHook (void);
+ extern void SWIT_SftyAscLinSpi_Init_BgnHook (void);
+ extern void SWIT_Sl_lReadFlashPage_BgnHook (void);
+ extern void SWIT_Sl_lProgramPageFcn_BgnHook (void);
+@@ -4931,19 +4944,19 @@ extern void SWIT_SftyDma_UpdateDsadcRawUdcAndTiStamp_BgnHook (void);
+ extern void SWIT_SftyDma_UpdateVadcRawUdcAndTiStamp_BgnHook (void);
+ extern void SWIT_SftyDma_UpdateKL30PrMeasBAndTiStamp_BgnHook (void);
+ extern void SWIT_SftyTqEstimrCurMdl_BgnHook (void);
+-extern void SWIT_SftyDcEvln_NHvFbSt_BgnHook (void);
+-extern void SWIT_SftyDcEvln_GetKL30PrMeasBFromDma_BgnHook (void);
+-extern void SWIT_SftyDcEvln_GetDsadcUdcFromDma_BgnHook (void);
+-extern void SWIT_SftyDcEvln_GetVadcUdcFromDma_BgnHook (void);
+-extern void SWIT_SftyDcEvln_ChkVadcUdcElecHi_BgnHook (void);
+-extern void SWIT_SftyDcEvln_ChkDsadcRngHi_BgnHook (void);
+-extern void SWIT_SftyDcEvln_ScaUdcDsadcVal_BgnHook (void);
+-extern void SWIT_SftyDcEvln_Kl30BElecHi_BgnHook (void);
+-extern void SWIT_SftyDcEvln_Kl30BElecLo_BgnHook (void);
+-extern void SWIT_SftyDcEvln_Kl30BPhyRngHi_BgnHook (void);
+-extern void SWIT_SftyDcEvln_Kl30BPhyRngLo_BgnHook (void);
+-extern void SWIT_SftyDcEvln_ScaKl30PrMeasB_BgnHook (void);
+-extern void SWIT_SftyDcEvln_KL30BRngEvln_BgnHook (void);
++//extern void SWIT_SftyDcEvln_NHvFbSt_BgnHook (void);
++//extern void SWIT_SftyDcEvln_GetKL30PrMeasBFromDma_BgnHook (void);
++//extern void SWIT_SftyDcEvln_GetDsadcUdcFromDma_BgnHook (void);
++//extern void SWIT_SftyDcEvln_GetVadcUdcFromDma_BgnHook (void);
++//extern void SWIT_SftyDcEvln_ChkVadcUdcElecHi_BgnHook (void);
++//extern void SWIT_SftyDcEvln_ChkDsadcRngHi_BgnHook (void);
++//extern void SWIT_SftyDcEvln_ScaUdcDsadcVal_BgnHook (void);
++//extern void SWIT_SftyDcEvln_Kl30BElecHi_BgnHook (void);
++//extern void SWIT_SftyDcEvln_Kl30BElecLo_BgnHook (void);
++//extern void SWIT_SftyDcEvln_Kl30BPhyRngHi_BgnHook (void);
++//extern void SWIT_SftyDcEvln_Kl30BPhyRngLo_BgnHook (void);
++//extern void SWIT_SftyDcEvln_ScaKl30PrMeasB_BgnHook (void);
++//extern void SWIT_SftyDcEvln_KL30BRngEvln_BgnHook (void);
+ extern void SWIT_SftyRslvrEvln_MainFunctionArea2_BgnHook (void);
+ extern void SWIT_SftyRslvrEvln_InitArea2_BgnHook (void);
+ //extern void SWIT_SftySbcCtrl_ChkAlvCntr_BgnHook (void);
+@@ -5028,10 +5041,10 @@ extern void SWIT_SftyRslvrEvln_CalcAtan_BgnHook (void);
+ extern void SWIT_SftyRslvrEvln_AmpAndOffsetCorrection_BgnHook (void);
+ extern void SWIT_SftyRslvrEvln_AurHwFltChkFromRawVal_BgnHook (void);
+ extern void SWIT_SftyRslvrEvln_InitAreaCmnErrMonrStVar_BgnHook (void);
+-extern void SWIT_SftyDcEvln_EMXStatusSpgfreiheitEvln_BgnHook (void);
+-extern void SWIT_SftyDcEvln_EMXStatusEoHVLEvln_BgnHook (void);
++//extern void SWIT_SftyDcEvln_EMXStatusSpgfreiheitEvln_BgnHook (void);
++//extern void SWIT_SftyDcEvln_EMXStatusEoHVLEvln_BgnHook (void);
+ extern void SWIT_SftyRslvrCalcn_AdaptTiStampDif_BgnHook (void);
+-extern void SWIT_SftyActvDchaCtrlrIf_CalcPsP15UPhyVal_BgnHook(void);
++//extern void SWIT_SftyActvDchaCtrlrIf_CalcPsP15UPhyVal_BgnHook(void);
+ extern void SWIT_SftyShutoffPahTst_PreInitHw_BgnHook(void);
+ extern void SWIT_SftyFlshVldt_MainFuncAreaCmn_BgnHook (void);
+ extern void SWIT_SftyFlshVldt_DoCrcCalc_BgnHook (void);
+@@ -5039,8 +5052,8 @@ extern void SWIT_SftyFlshVldt_CrcVldt_BgnHook (void);
+ /*extern void SWIT_SftyModMgr_ChkStabPwrSplySepic_BgnHook (void);*/
+ extern void SWIT_SftyErrDeb_PreInit_BgnHook (void);
+ extern void SWIT_SftyShutoffPahTst_Hw_BgnHook (void); //area 0
+-extern void SWIT_SftyDcEvln_CompUdcVal_BgnHook (void);
+-extern void SWIT_SftyDcEvln_EM1StatusEoHVLEvln_BgnHook (void);
++//extern void SWIT_SftyDcEvln_CompUdcVal_BgnHook (void);
++//extern void SWIT_SftyDcEvln_EM1StatusEoHVLEvln_BgnHook (void);
+ extern void SWIT_SftyRslvrOffsHndlr_ValidateOnlineRoda_BgnHook (void);
+ //extern void SWIT_SftyRslvrOffsHndlr_ValidateRslvrDataUds_BgnHook (void);
+ extern void SWIT_SftySdl_InitializeMpu_BgnHook (void);
+@@ -5054,9 +5067,9 @@ extern void SWIT_SftyShutoffPahTst_IvtrRunTest_BgnHook (void);
+ extern void SWIT_SftyAcEvln_MainFunctionAreaCmn_BgnHook (void);
+ extern void SWIT_SftyAcEvln_InitAreaCmn_BgnHook (void);
+ extern void SWIT_SftyAcEvln_PlausReinitMonrData_BgnHook (void);
+-extern void SWIT_SftyActvDchaCtrl_Init_BgnHook (void);
+-extern void SWIT_SftyActvDchaCtrlrIf_TrigWrMsg_BgnHook (void);
+-extern void SWIT_SftyActvDchaCtrlrIf_ReadMsg_BgnHook (void);
++//extern void SWIT_SftyActvDchaCtrl_Init_BgnHook (void);
++//extern void SWIT_SftyActvDchaCtrlrIf_TrigWrMsg_BgnHook (void);
++//extern void SWIT_SftyActvDchaCtrlrIf_ReadMsg_BgnHook (void);
+ extern void SWIT_SftyCrc_CalcCRC8_BgnHook (void);
+ extern void SWIT_SftyCrc_CalcCRC16_BgnHook (void);
+ extern void SWIT_SftyCrc_CalcCRC32_BgnHook (void);
+@@ -5083,7 +5096,7 @@ extern void SWIT_SftyErrDeb__BgnHook (void);
+ extern void SWIT_SftyErrDeb_Init_BgnHook (void);
+ extern void SWIT_SftyErrDeb_PreRun_BgnHook (void);
+ extern void SWIT_SftyFlshVldt_InitAreaCmn_BgnHook (void);
+-extern void SWIT_SftyUtils_AlgnAddr_BgnHook (void);
++//extern void SWIT_SftyUtils_AlgnAddr_BgnHook (void);
+ extern void SWIT_SftyModMgr_MainFunction_BgnHook (void);
+ extern void SWIT_SftyModMgr_Init_BgnHook (void);
+ extern void SWIT_SftyModMgr_ReinitStartUp_BgnHook (void);
+@@ -5183,7 +5196,7 @@ extern void SWIT_SftySdl_Init_BgnHook (void);  //area cmn
+ extern void SWIT_SftySdl_SelSdl_BgnHook (void);  //area cmn
+ /*extern void SWIT_SftyAcEvln_AdcValComp_BgnHook (void);*/   //area cmn
+ /*extern void SWIT_SftyAcEvln_SelectSafePhaIPah_BgnHook (void);*/    //area cmn
+-extern void SWIT_SftyActvDchaCtrl_GetEncData_BgnHook (void);  //area cmn
++/*extern void SWIT_SftyActvDchaCtrl_GetEncData_BgnHook (void);  //area cmn
+ extern void SWIT_SftyActvDchaCtrl_ChkSendReqEncData_BgnHook (void);  //area cmn
+ extern void SWIT_SftyActvDchaCtrl_DecDataHandlr_BgnHook (void);   //area cmn
+ extern void SWIT_SftyActvDchaCtrl_PrmBlkIdxHandlr_BgnHook (void);    //area cmn
+@@ -5192,13 +5205,13 @@ extern void SWIT_SftyActvDchaCtrl_BuildCycPrmBlk_BgnHook (void);   //area cmn
+ extern void SWIT_SftyActvDchaCtrl_ActvDchaSyncHandlr_BgnHook (void);   //area cmn
+ extern void SWIT_SftyActvDchaCtrl_ActvDchaReqHandlr_BgnHook (void);  //area cmn
+ extern void SWIT_SftyActvDchaCtrl_BuildPrmntPrmBlk_BgnHook (void);   //area cmn
+-extern void SWIT_SftyActDcharCtrlr_ChlngRspnsSti_BgnHook (void);  //area cmn
+-extern void SWIT_SftyActvDchaCtrlrIf_InsertTxAlvCntr_BgnHook (void);   //area cmn
++extern void SWIT_SftyActDcharCtrlr_ChlngRspnsSti_BgnHook (void);  //area cmn*/
++/*extern void SWIT_SftyActvDchaCtrlrIf_InsertTxAlvCntr_BgnHook (void);   //area cmn
+ extern void SWIT_SftyActvDchaCtrlrIf_GetDecData_BgnHook (void);    //area cmn
+ extern void SWIT_SftyActvDchaCtrlrIf_InsertTxCrc_BgnHook (void);   //area cmn
+ extern void SWIT_SftyActvDchaCtrlrIf_ChkRxCrc_BgnHook (void);    //area cmn
+ extern void SWIT_SftyActvDchaCtrlrIf_ChkRxAlvCntr_BgnHook (void);   //area cmn
+-extern void SWIT_SftyActvDchaCtrlrIf_ItpVldMsg_BgnHook (void);    //area cmn
++extern void SWIT_SftyActvDchaCtrlrIf_ItpVldMsg_BgnHook (void);    //area cmn*/
+ extern void SWIT_SftyCrc_ClearCrcStatus_BgnHook (void);    //area cmn
+ extern void SWIT_SftyCrc_SetCrc32Init_BgnHook (void);   //area cmn
+ extern void SWIT_SftyCrc_CRC32Add_BgnHook (void);  //area cmn
+@@ -5217,10 +5230,10 @@ extern void SWIT_SftyE2eRx_StoreE2eHvk01Data_BgnHook (void);    //area cmn
+ extern void SWIT_SftyE2eRx_StoreE2eHvk01ReplcmtVal_BgnHook (void);  //area cmn
+ extern void SWIT_SftyE2eRx_StoreE2eMotor56Data_BgnHook (void);    //area cmn
+ extern void SWIT_SftyE2eRx_StoreE2eMotor56ReplcmtVal_BgnHook (void);  //area cmn
+-extern void SWIT_SftyDcEvln_EM1StatusSpgfreiheitEvln_BgnHook (void);
++//extern void SWIT_SftyDcEvln_EM1StatusSpgfreiheitEvln_BgnHook (void);
+ extern void SWIT_SftyTqMon_GetQmTqAct_BgnHook (void)  ;          //area cmn
+ extern void SWIT_SftyTqMon_ChkTqEsp_BgnHook (void)   ;          //area cmn
+-extern void SWIT_SftyActvDchaCtrl_MainFunction_BgnHook(void)   ;
++//extern void SWIT_SftyActvDchaCtrl_MainFunction_BgnHook(void)   ;
+ extern void  SWIT_SftySpdMon_MainFunctionAreaCmn_BgnHook(void);
+ 
+ ///********Genral use Inline functions*********/
+diff --git a/src/fw_cu/Components/Cmn/SWIT/SWIT_SFTY/src/SWIT_SFTY_Area0.c b/src/fw_cu/Components/Cmn/SWIT/SWIT_SFTY/src/SWIT_SFTY_Area0.c
+index 3cfc34c1c..1945c3fe2 100644
+--- a/src/fw_cu/Components/Cmn/SWIT/SWIT_SFTY/src/SWIT_SFTY_Area0.c
++++ b/src/fw_cu/Components/Cmn/SWIT/SWIT_SFTY/src/SWIT_SFTY_Area0.c
+@@ -350,6 +350,16 @@ void SWIT_SftyTempEvln_MainFunction_BgnHook(void)
+ 
+ /*BgnHook Functions*/
+ 
++void SWIT_SftyTempEvln_MainFunction_BgnHook (void)  //area 0
++{
++ SWIT_FUNC_COV_SetVAR (&SWIT_funcCovSftyTEvln,bit0,SWIT_UINT8);
++}
++
++void SWIT_SftyTempEvln_Init_BgnHook (void)
++{
++ SWIT_FUNC_COV_SetVAR (&SWIT_funcCovSftyTEvln,bit1,SWIT_UINT8);
++}
++
+ void SWIT_SftySysInit_SetXbarAccen_BgnHook (void)  //area 0
+ {
+  SWIT_FUNC_COV_SetVAR (&SWIT_funcCovInlineSftySysInit,bit3,SWIT_UINT8);
+@@ -509,7 +519,7 @@ void SWIT_Smu_SetAlarmStatus_BgnHook (void)
+ {
+  SWIT_FUNC_COV_SetVAR (&SWIT_funcCovSmu,bit15,SWIT_UINT16);
+ }
+-void SWIT_Smu_GetAlarmStatus_BgnHook (void)
++/*void SWIT_Smu_GetAlarmStatus_BgnHook (void)
+ {
+  SWIT_FUNC_COV_SetVAR (&SWIT_funcCovSmu1,bit0,SWIT_UINT16);
+ }
+@@ -560,7 +570,7 @@ void SWIT_Smu_GetSmuState_BgnHook (void)
+ void SWIT_Smu_ActivateRunState_BgnHook (void)
+ {
+  SWIT_FUNC_COV_SetVAR (&SWIT_funcCovSmu1,bit12,SWIT_UINT16);
+-}
++}*/
+ void SWIT_SftyLibApp__BgnHook (void)
+ {
+  SWIT_FUNC_COV_SetVAR (&SWIT_funcCovSftyLibApp,bit7,SWIT_UINT16);
+@@ -725,18 +735,18 @@ void SWIT_SftySysInit_MemoryProtn_BgnHook (void)  //area 0
+ {
+  SWIT_FUNC_COV_SetVAR (&SWIT_funcCovInlineSftySysInit,bit2,SWIT_UINT8);
+ }
+-void SWIT_SftyUtils_GetPSWregVal_BgnHook (void)    //area 0
++/*void SWIT_SftyUtils_GetPSWregVal_BgnHook (void)    //area 0
+ {
+  SWIT_FUNC_COV_SetVAR (&SWIT_funcCovInlineSftyUtils,bit0,SWIT_UINT8);
+ }
+ void SWIT_SftyUtils_SetPSWregVal_BgnHook (void)   //area 0
+ {
+  SWIT_FUNC_COV_SetVAR (&SWIT_funcCovInlineSftyUtils,bit1,SWIT_UINT8);
+-}
+-void SWIT_SftySbcCtrl_DiIntWdg_BgnHook (void)      //area 0
++}*/
++/*void SWIT_SftySbcCtrl_DiIntWdg_BgnHook (void)      //area 0
+ {
+  SWIT_FUNC_COV_SetVAR (&SWIT_funcCovInlineSftySbcCtrl,bit0,SWIT_UINT16);
+-}
++}*/
+ void SWIT_SftyQSpi_BaudRateConfig_BgnHook (void)  //area 0
+ {
+  SWIT_FUNC_COV_SetVAR (&SWIT_funcCovInlineSftyQSpi,bit1,SWIT_UINT8);
+diff --git a/src/fw_cu/Components/Cmn/SWIT/SWIT_SFTY/src/SWIT_SFTY_Area1.c b/src/fw_cu/Components/Cmn/SWIT/SWIT_SFTY/src/SWIT_SFTY_Area1.c
+index 84e0378b8..21a73118b 100644
+--- a/src/fw_cu/Components/Cmn/SWIT/SWIT_SFTY/src/SWIT_SFTY_Area1.c
++++ b/src/fw_cu/Components/Cmn/SWIT/SWIT_SFTY/src/SWIT_SFTY_Area1.c
+@@ -1105,6 +1105,11 @@ void SWIT_SftyCrashSigMon_RngChk_EndHook()
+    SWIT_Sfty_Set(&SftyCrashSigMonRngHiErrMonrSt, SftyCrashSigMonRngHiErrMonrSt_Output_KEY, SWIT_UINT8);
+ }
+ 
++void SWIT_SftyCrashSigMon_GetDmaData_EndHook()
++{
++   SWIT_Sfty_Set(&SftyCrashSigMonTiStampErrMonrSt, SftyCrashSigMonTiStampErrMonrSt_Output_KEY, SWIT_UINT8);
++}
++
+ void SWIT_SftyCrashSigMon_DetAngCrashSts_EndHook()
+ {
+    SWIT_Sfty_Set(&SftyCrashSigMonAnErrMonrSt, SftyCrashSigMonAnErrMonrSt_Output_KEY, SWIT_UINT8);
+@@ -1314,7 +1319,7 @@ void SWIT_SftyRslvrEvln_InitVadcErrMonrStVar_BgnHook (void)   //area 1
+ {
+  SWIT_FUNC_COV_SetVAR (&SWIT_funcCovInlineSftyRslvrEvln1,bit4,SWIT_UINT16);
+ }
+-void SWIT_SftyDcEvln_OCPStrtUpDiag_BgnHook(void)
++/*void SWIT_SftyDcEvln_OCPStrtUpDiag_BgnHook(void)
+ {
+    SWIT_FUNC_COV_SetVAR(&SWIT_funcCovInlineSftyDcEvln4,bit12,SWIT_UINT16);
+ 
+@@ -1551,7 +1556,7 @@ void SWIT_SftyDcEvln_StrtUpDiagNormOper_BgnHook (void)
+ {
+    SWIT_FUNC_COV_SetVAR(&SWIT_funcCovInlineSftyDcEvln4,bit8,SWIT_UINT16);
+ }
+-
++*/
+ void SWIT_SftyAcEvln_MainFunctionArea1_BgnHook (void)
+ {
+  SWIT_FUNC_COV_SetVAR (&SWIT_funcCovSftyAcEvln,bit0,SWIT_UINT8);
+@@ -1659,10 +1664,10 @@ void SWIT_SftyDma_UpdateP15VAndTiStamp_BgnHook (void)
+ {
+  SWIT_FUNC_COV_SetVAR (&SWIT_funcCovDma2,bit9,SWIT_UINT16);
+ }
+-void SWIT_SftyUtils_CalcTiStampDif_BgnHook (void)
++/*void SWIT_SftyUtils_CalcTiStampDif_BgnHook (void)
+ {
+    SWIT_FUNC_COV_SetVAR (&SWIT_funcCovInlineSftyUtils,bit3,SWIT_UINT16);
+-}
++}*/
+ void SWIT_SftyRslvrEvln_MainFunctionArea1_BgnHook (void)
+ {
+  SWIT_FUNC_COV_SetVAR (&SWIT_funcCovSftyRslvrEvln,bit0,SWIT_UINT8);
+@@ -1680,15 +1685,6 @@ void SWIT_SftySdl_MPUChkArea1_BgnHook (void)
+  SWIT_FUNC_COV_SetVAR (&SWIT_funcCovSftySdlMpuTst,bit4,SWIT_UINT8);
+ }
+ 
+-void SWIT_SftyTEvln_MainFunctionArea1_BgnHook (void)
+-{
+- SWIT_FUNC_COV_SetVAR (&SWIT_funcCovSftyTEvln,bit0,SWIT_UINT8);
+-}
+-
+-void SWIT_SftyTEvln_InitArea1_BgnHook (void)
+-{
+- SWIT_FUNC_COV_SetVAR (&SWIT_funcCovSftyTEvln,bit1,SWIT_UINT8);
+-}
+ void SWIT_SftyTqEstimrPwrMdl_MainFunctionArea1_BgnHook (void)
+ {
+  SWIT_FUNC_COV_SetVAR (&SWIT_funcCovSftyTqEstimrPwrMdl,bit0,SWIT_UINT8);
+diff --git a/src/fw_cu/Components/Cmn/SWIT/SWIT_SFTY/src/SWIT_SFTY_Area2.c b/src/fw_cu/Components/Cmn/SWIT/SWIT_SFTY/src/SWIT_SFTY_Area2.c
+index 01e33b6be..26bf948c6 100644
+--- a/src/fw_cu/Components/Cmn/SWIT/SWIT_SFTY/src/SWIT_SFTY_Area2.c
++++ b/src/fw_cu/Components/Cmn/SWIT/SWIT_SFTY/src/SWIT_SFTY_Area2.c
+@@ -748,10 +748,10 @@ void SWIT_SftyAcEvln_ScaDsadcVal_BgnHook (void)  //area 1
+  SWIT_FUNC_COV_SetVAR (&SWIT_funcCovInlineSftyAcEvln,bit3, SWIT_UINT16);
+ }*/
+ #endif
+-void SWIT_SftyDcEvln_AscTogFltCuEvln_BgnHook (void)
++/*void SWIT_SftyDcEvln_AscTogFltCuEvln_BgnHook (void)
+ {
+    SWIT_FUNC_COV_SetVAR(&SWIT_funcCovInlineSftyDcEvln4,bit6,SWIT_UINT16);
+-}
++}*/
+ void SWIT_SftyAscLinSpi_Init_BgnHook (void)
+ {
+  SWIT_FUNC_COV_SetVAR (&SWIT_funcCovSftyAscLinSpi,bit0,SWIT_UINT8);
+@@ -844,7 +844,7 @@ void SWIT_SftyDcEvln_MainFunctionArea2_BgnHook (void)
+  {
+      SWIT_FUNC_COV_SetVAR (&SWIT_funcCovSftyTqEstimrCurMdl,bit0,SWIT_UINT8);
+  }
+- void SWIT_SftyDcEvln_NHvFbSt_BgnHook (void)
++ /*void SWIT_SftyDcEvln_NHvFbSt_BgnHook (void)
+  {
+     SWIT_FUNC_COV_SetVAR(&SWIT_funcCovInlineSftyDcEvln,bit0,SWIT_UINT16);
+  }
+@@ -895,7 +895,7 @@ void SWIT_SftyDcEvln_MainFunctionArea2_BgnHook (void)
+  void SWIT_SftyDcEvln_KL30BRngEvln_BgnHook (void)
+  {
+     SWIT_FUNC_COV_SetVAR(&SWIT_funcCovInlineSftyDcEvln3,bit2,SWIT_UINT16);
+- }
++ }*/
+  void SWIT_SftyRslvrEvln_MainFunctionArea2_BgnHook (void)
+  {
+   SWIT_FUNC_COV_SetVAR (&SWIT_funcCovSftyRslvrEvln,bit2,SWIT_UINT8);
+diff --git a/src/fw_cu/Components/Cmn/SWIT/SWIT_SFTY/src/SWIT_SFTY_AreaCMN.c b/src/fw_cu/Components/Cmn/SWIT/SWIT_SFTY/src/SWIT_SFTY_AreaCMN.c
+index d3ee6014b..deaf03857 100644
+--- a/src/fw_cu/Components/Cmn/SWIT/SWIT_SFTY/src/SWIT_SFTY_AreaCMN.c
++++ b/src/fw_cu/Components/Cmn/SWIT/SWIT_SFTY/src/SWIT_SFTY_AreaCMN.c
+@@ -1437,7 +1437,7 @@ SWIT_FUNC_COV_SetVAR (&SWIT_funcCovInlineSftyRslvrEvln1,bit3,SWIT_UINT16);
+ }
+ 
+ 
+-void SWIT_SftyDcEvln_EMXStatusSpgfreiheitEvln_BgnHook (void)
++/*void SWIT_SftyDcEvln_EMXStatusSpgfreiheitEvln_BgnHook (void)
+ {
+    SWIT_FUNC_COV_SetVAR(&SWIT_funcCovInlineSftyDcEvln4,bit10,SWIT_UINT16);
+ 
+@@ -1446,17 +1446,17 @@ void SWIT_SftyDcEvln_EMXStatusEoHVLEvln_BgnHook (void)
+ {
+    SWIT_FUNC_COV_SetVAR(&SWIT_funcCovInlineSftyDcEvln4,bit8,SWIT_UINT16);
+ 
+-}
++}*/
+ void SWIT_SftyRslvrCalcn_AdaptTiStampDif_BgnHook (void)
+ {
+    SWIT_FUNC_COV_SetVAR (&SWIT_funcCovInlineSftyRslvrCalcn,bit7,SWIT_UINT8);
+ 
+ }
+-void SWIT_SftyActvDchaCtrlrIf_CalcPsP15UPhyVal_BgnHook(void)
++/*void SWIT_SftyActvDchaCtrlrIf_CalcPsP15UPhyVal_BgnHook(void)
+ {
+    SWIT_FUNC_COV_SetVAR (&SWIT_funcCovInlineSftyActvDchaCtrlrIf,bit6,SWIT_UINT8);
+ 
+-}
++}*/
+ void SWIT_SftyShutoffPahTst_PreInitHw_BgnHook(void)
+ {
+    SWIT_FUNC_COV_SetVAR (&SWIT_funcCovInlineSftyShutoffPahTst,bit7,SWIT_UINT8);
+@@ -1490,14 +1490,14 @@ void SWIT_SftyShutoffPahTst_Hw_BgnHook (void) //area 0
+ {
+  SWIT_FUNC_COV_SetVAR (&SWIT_funcCovInlineSftyShutoffPahTst,bit7,SWIT_UINT8);
+ }
+-void SWIT_SftyDcEvln_CompUdcVal_BgnHook (void)
++/*void SWIT_SftyDcEvln_CompUdcVal_BgnHook (void)
+ {
+    SWIT_FUNC_COV_SetVAR(&SWIT_funcCovInlineSftyDcEvln1,bit15,SWIT_UINT16);
+ }
+ void SWIT_SftyDcEvln_EM1StatusEoHVLEvln_BgnHook (void)
+ {
+    SWIT_FUNC_COV_SetVAR(&SWIT_funcCovInlineSftyDcEvln4,bit4,SWIT_UINT16);
+-}
++}*/
+ void SWIT_SftyRslvrOffsHndlr_ValidateOnlineRoda_BgnHook (void)
+ {
+  SWIT_FUNC_COV_SetVAR (&SWIT_funcCovSftyRslvrOffsHndlr,bit0,SWIT_UINT8);
+@@ -1687,10 +1687,10 @@ void SWIT_SftyFlshVldt_InitAreaCmn_BgnHook (void)
+  SWIT_FUNC_COV_SetVAR (&SWIT_funcCovSftyFlshVldt,bit0,SWIT_UINT8);
+ }
+ 
+-void SWIT_SftyUtils_AlgnAddr_BgnHook (void)
++/*void SWIT_SftyUtils_AlgnAddr_BgnHook (void)
+ {
+    SWIT_FUNC_COV_SetVAR (&SWIT_funcCovInlineSftyUtils,bit2,SWIT_UINT16);
+-}
++}*/
+ void SWIT_SftyModMgr_MainFunction_BgnHook (void)
+ {
+  SWIT_FUNC_COV_SetVAR (&SWIT_funcCovSftyModMgr,bit0,SWIT_UINT8);
+@@ -2218,7 +2218,7 @@ void SWIT_SftyAcEvln_SelectSafePhaIPah_BgnHook (void)    //area cmn
+  SWIT_FUNC_COV_SetVAR (&SWIT_funcCovInlineSftyAcEvln,bit11, SWIT_UINT16);
+ }*/
+ #endif
+-void SWIT_SftyActvDchaCtrl_GetEncData_BgnHook (void)  //area cmn
++/*void SWIT_SftyActvDchaCtrl_GetEncData_BgnHook (void)  //area cmn
+ {
+  SWIT_FUNC_COV_SetVAR (&SWIT_funcCovInlineSftyActvDchaCtrl,bit0,SWIT_UINT16);
+ }
+@@ -2281,7 +2281,7 @@ void SWIT_SftyActvDchaCtrlrIf_ChkRxAlvCntr_BgnHook (void)   //area cmn
+ void SWIT_SftyActvDchaCtrlrIf_ItpVldMsg_BgnHook (void)    //area cmn
+ {
+  SWIT_FUNC_COV_SetVAR (&SWIT_funcCovInlineSftyActvDchaCtrlrIf,bit5,SWIT_UINT8);
+-}
++}*/
+ void SWIT_SftyCrc_ClearCrcStatus_BgnHook (void)    //area cmn
+ {
+  SWIT_FUNC_COV_SetVAR (&SWIT_funcCovInlineSftyCrc,bit2,SWIT_UINT8);
+@@ -2358,10 +2358,10 @@ void SWIT_SftyE2eRx_StoreE2eMotor56ReplcmtVal_BgnHook (void)  //area cmn
+ {
+  SWIT_FUNC_COV_SetVAR (&SWIT_funcCovSftyE2eRx,bit7,SWIT_UINT16);
+ }
+-void SWIT_SftyDcEvln_EM1StatusSpgfreiheitEvln_BgnHook (void)
++/*void SWIT_SftyDcEvln_EM1StatusSpgfreiheitEvln_BgnHook (void)
+ {
+    SWIT_FUNC_COV_SetVAR(&SWIT_funcCovInlineSftyDcEvln4,bit5,SWIT_UINT16);
+-}
++}*/
+ 
+ #define SWIT_SFTY_AREA_3_STOP_SEC_CODE_SLOW
+ #include "SWIT_MemMap.h"
+diff --git a/src/fw_cu/Components/Cmn/SWIT/SWIT_SFTY/src/SWIT_Sfty.c b/src/fw_cu/Components/Cmn/SWIT/SWIT_SFTY/src/SWIT_Sfty.c
+index 8b008c657..3f374b721 100644
+--- a/src/fw_cu/Components/Cmn/SWIT/SWIT_SFTY/src/SWIT_Sfty.c
++++ b/src/fw_cu/Components/Cmn/SWIT/SWIT_SFTY/src/SWIT_Sfty.c
+@@ -1211,9 +1211,9 @@ VAR(uint8,SWIT_Sfty_VAR) SWIT_funcCovSftyUtils = 0;
+ @@ DATA_TYPE = UBYTE
+ @@ GROUP = SWIT_TESTING_VARIABLES
+ @@ END
+-*/
+ 
+-VAR(uint8,SWIT_Sfty_VAR) SWIT_funcCovInlineSftyActvDchaCtrlrIf = 0;
++
++VAR(uint8,SWIT_Sfty_VAR) SWIT_funcCovInlineSftyActvDchaCtrlrIf = 0;*/
+ 
+ /*
+ @@ SYMBOL = SWIT_funcCovInlineSftyAscLinSpi
+@@ -1498,9 +1498,9 @@ VAR(uint16,SWIT_Sfty_VAR) SWIT_funcCovSftyHvDcUEvln = 0;
+ @@ DATA_TYPE = UWORD
+ @@ GROUP = SWIT_TESTING_VARIABLES
+ @@ END
+-*/
+ 
+-VAR(uint16,SWIT_Sfty_VAR) SWIT_funcCovInlineSftyUtils = 0;
++
++VAR(uint16,SWIT_Sfty_VAR) SWIT_funcCovInlineSftyUtils = 0;*/
+ 
+ 
+ /*
+@@ -1906,9 +1906,9 @@ VAR(uint16,SWIT_Sfty_VAR) SWIT_funcCovWdgTst = 0;*/
+ @@ DATA_TYPE = UWORD
+ @@ GROUP = SWIT_TESTING_VARIABLES
+ @@ END
+-*/
+ 
+-VAR(uint16,SWIT_Sfty_VAR) SWIT_funcCovSmu1 = 0;
++
++VAR(uint16,SWIT_Sfty_VAR) SWIT_funcCovSmu1 = 0;*/
+ 
+ /*
+ @@ SYMBOL = SWIT_funcCovInlineSftyAcEvln
+@@ -1926,9 +1926,9 @@ VAR(uint16,SWIT_Sfty_VAR) SWIT_funcCovInlineSftyAcEvln = 0;
+ @@ DATA_TYPE = UWORD
+ @@ GROUP = SWIT_TESTING_VARIABLES
+ @@ END
+-*/
+ 
+-VAR(uint16,SWIT_Sfty_VAR) SWIT_funcCovInlineSftyActvDchaCtrl = 0;
++
++VAR(uint16,SWIT_Sfty_VAR) SWIT_funcCovInlineSftyActvDchaCtrl = 0;*/
+ 
+ 
+ 
+@@ -1938,7 +1938,7 @@ VAR(uint16,SWIT_Sfty_VAR) SWIT_funcCovInlineSftyActvDchaCtrl = 0;
+ @@ DATA_TYPE = UWORD
+ @@ GROUP = SWIT_TESTING_VARIABLES
+ @@ END
+-*/
++
+ 
+ VAR(uint16,SWIT_Sfty_VAR) SWIT_funcCovInlineSftyDcEvln = 0;
+ 
+@@ -1948,7 +1948,7 @@ VAR(uint16,SWIT_Sfty_VAR) SWIT_funcCovInlineSftyDcEvln = 0;
+ @@ DATA_TYPE = UWORD
+ @@ GROUP = SWIT_TESTING_VARIABLES
+ @@ END
+-*/
++
+ 
+ VAR(uint16,SWIT_Sfty_VAR) SWIT_funcCovInlineSftyDcEvln1 = 0;
+ 
+@@ -1958,7 +1958,7 @@ VAR(uint16,SWIT_Sfty_VAR) SWIT_funcCovInlineSftyDcEvln1 = 0;
+ @@ DATA_TYPE = UWORD
+ @@ GROUP = SWIT_TESTING_VARIABLES
+ @@ END
+-*/
++
+ 
+ VAR(uint16,SWIT_Sfty_VAR) SWIT_funcCovInlineSftyDcEvln2 = 0;
+ 
+@@ -1968,7 +1968,7 @@ VAR(uint16,SWIT_Sfty_VAR) SWIT_funcCovInlineSftyDcEvln2 = 0;
+ @@ DATA_TYPE = UWORD
+ @@ GROUP = SWIT_TESTING_VARIABLES
+ @@ END
+-*/
++
+ 
+ VAR(uint16,SWIT_Sfty_VAR) SWIT_funcCovInlineSftyDcEvln3 = 0;
+ 
+@@ -1978,9 +1978,9 @@ VAR(uint16,SWIT_Sfty_VAR) SWIT_funcCovInlineSftyDcEvln3 = 0;
+ @@ DATA_TYPE = UWORD
+ @@ GROUP = SWIT_TESTING_VARIABLES
+ @@ END
+-*/
+ 
+-VAR(uint16,SWIT_Sfty_VAR) SWIT_funcCovInlineSftyDcEvln4 = 0;
++
++VAR(uint16,SWIT_Sfty_VAR) SWIT_funcCovInlineSftyDcEvln4 = 0;*/
+ 
+ /*
+ @@ SYMBOL = SWIT_funcCovInlineSftyE2eRx
+@@ -2068,9 +2068,9 @@ VAR(uint16,SWIT_Sfty_VAR) SWIT_funcCovInlineSftyRslvrEvln1 = 0;
+ @@ DATA_TYPE = UWORD
+ @@ GROUP = SWIT_TESTING_VARIABLES
+ @@ END
+-*/
+ 
+-VAR(uint16,SWIT_Sfty_VAR) SWIT_funcCovInlineSftySbcCtrl = 0;
++
++VAR(uint16,SWIT_Sfty_VAR) SWIT_funcCovInlineSftySbcCtrl = 0;*/
+ 
+ /*
+ @@ SYMBOL = SWIT_funcCovInlineSftySramEccTstMgr
+diff --git a/src/fw_cu/Components/Inv/ValMeasAndProc/BswFpgaIf/src/BswFpgaIf.c b/src/fw_cu/Components/Inv/ValMeasAndProc/BswFpgaIf/src/BswFpgaIf.c
+index 46978f284..30620f68c 100644
+--- a/src/fw_cu/Components/Inv/ValMeasAndProc/BswFpgaIf/src/BswFpgaIf.c
++++ b/src/fw_cu/Components/Inv/ValMeasAndProc/BswFpgaIf/src/BswFpgaIf.c
+@@ -30,6 +30,9 @@
+ #include "emm_common.h"
+ #include "RotorAgSpdCalcn_data.h"
+ #include "C2cComDrvCtrlData.h"
++#ifdef SWIT_Active
++#include "SWIT_Sfty.h"
++#endif
+ /*******************************************************************************
+ **                            General Notes                                   **
+ *******************************************************************************/
+@@ -1864,6 +1867,9 @@ void BswFpgaIf_SetTxFrm(void)
+ /******************************************************************/
+ void BswFpgaIf_UpdRxFrm(void)
+ {
++#ifdef SWIT_Active
++   SWIT_BswFpgaIf_UpdRxFrm_BgnHook();
++#endif
+    uint8 u8LocalIdRx;
+    uint8 u8LocalIdRxNm1;
+    boolean bLocalCheckStatusRxA;
+diff --git a/src/fw_cu/Components/Safety/Sfty_Cmn/SftyCrashSigMon/src/SftyCrashSigMon.c b/src/fw_cu/Components/Safety/Sfty_Cmn/SftyCrashSigMon/src/SftyCrashSigMon.c
+index 47231e88d..ff518c933 100644
+--- a/src/fw_cu/Components/Safety/Sfty_Cmn/SftyCrashSigMon/src/SftyCrashSigMon.c
++++ b/src/fw_cu/Components/Safety/Sfty_Cmn/SftyCrashSigMon/src/SftyCrashSigMon.c
+@@ -183,6 +183,9 @@ LOCAL_INLINE void SftyCrashSigMon_GetDmaData(void)
+       /* Measurement invalid */
+       SftyCrashSigMonUMeasVld = FALSE;
+    }
++#ifdef SWIT_IT_Active
++   SWIT_SftyCrashSigMon_GetDmaData_EndHook();
++#endif
+    return;
+ }
+ 
+diff --git a/src/fw_cu/Components/Safety/Sfty_Cmn/SftyE2eFpga/src/SftyE2eFpga.c b/src/fw_cu/Components/Safety/Sfty_Cmn/SftyE2eFpga/src/SftyE2eFpga.c
+index fe7afedf4..aad145cd9 100644
+--- a/src/fw_cu/Components/Safety/Sfty_Cmn/SftyE2eFpga/src/SftyE2eFpga.c
++++ b/src/fw_cu/Components/Safety/Sfty_Cmn/SftyE2eFpga/src/SftyE2eFpga.c
+@@ -48,6 +48,9 @@
+ #if defined(SWIT_IT_Active)
+ #include "SWIT_Sfty.h"
+ #endif
++#ifdef SWIT_Active
++#include "SWIT_Sfty.h"
++#endif
+ /*================== [defines] ==============================================*/
+ 
+ #define SFTY_E2E_FPGA_ALV_CNTR_MAX       (3U)
+diff --git a/src/fw_cu/Components/Safety/Sfty_Cmn/SftyErrDeb/src/SftyErrDeb.c b/src/fw_cu/Components/Safety/Sfty_Cmn/SftyErrDeb/src/SftyErrDeb.c
+index 868ade21e..3e463a743 100644
+--- a/src/fw_cu/Components/Safety/Sfty_Cmn/SftyErrDeb/src/SftyErrDeb.c
++++ b/src/fw_cu/Components/Safety/Sfty_Cmn/SftyErrDeb/src/SftyErrDeb.c
+@@ -320,6 +320,9 @@ if((SWIT_SftyErrDeb_EN_KEY==SWIT_First_HookEnableKey))
+ 
+ FUNC(void, SFTY_ERR_DEB_CODE) SftyErrDeb_PreInit(void)
+ {
++#ifdef SWIT_FC_Active
++   SWIT_SftyErrDeb_PreInit_BgnHook();
++#endif
+    ErrDeb_PreInitFlts(ERR_DEB_TASK_ID_CORE1_200US);
+ 
+    SftyErrDebNvmDataCrcMonrSt = ERR_DEB_MONR_STS_INACTIVE;
+@@ -337,6 +340,9 @@ FUNC(void, SFTY_ERR_DEB_CODE) SftyErrDeb_PreInit(void)
+ 
+ FUNC(void, SFTY_ERR_DEB_CODE) SftyErrDeb_Init(void)
+ {
++#ifdef SWIT_FC_Active
++   SWIT_SftyErrDeb_Init_BgnHook();
++#endif
+    CoreSync_WaitCore1(CSP_NVM_READ);
+ 
+    SftyErrDeb_NvmCrcCheck();
+@@ -360,6 +366,9 @@ FUNC(void, SFTY_ERR_DEB_CODE) SftyErrDeb_Init(void)
+ 
+ FUNC(void, SFTY_ERR_DEB_CODE) SftyErrDeb_PreRun(void)
+ {
++#ifdef SWIT_FC_Active
++   SWIT_SftyErrDeb_PreRun_BgnHook();
++#endif
+    CoreSync_WaitCore1(CSP_BSW_INIT_END);
+ 
+    ErrDeb_FidColl(ERR_DEB_TASK_ID_CORE1_200US, SftyErrDebFctInhbnSts.U, TRUE);
+diff --git a/src/fw_cu/Components/Safety/Sfty_Cmn/SftySysInit/src/SftySysInit.c b/src/fw_cu/Components/Safety/Sfty_Cmn/SftySysInit/src/SftySysInit.c
+index 76a092f8b..b09a85971 100644
+--- a/src/fw_cu/Components/Safety/Sfty_Cmn/SftySysInit/src/SftySysInit.c
++++ b/src/fw_cu/Components/Safety/Sfty_Cmn/SftySysInit/src/SftySysInit.c
+@@ -712,6 +712,9 @@ LOCAL_INLINE void SftySysInit_MemProtn(uint32 AllwdTagId)
+ /******************************************************************/
+ FUNC(void, SFTYSYSINIT) SftySysInit_InitArea0(void)
+ {
++#ifdef SWIT_FC_Active
++   SWIT_SftySysInit_InitArea0_BgnHook();
++#endif
+    Ifx_SCU_LCLCON1   SFTYSYSINIT_SCU_LCLCON1;
+ 
+    /* ************* Source code **************** */
+diff --git a/src/fw_cu/Components/Safety/Sfty_Cmn/SftyUtils/src/SftyUtils.c b/src/fw_cu/Components/Safety/Sfty_Cmn/SftyUtils/src/SftyUtils.c
+index ff4c2bc79..be185d4af 100644
+--- a/src/fw_cu/Components/Safety/Sfty_Cmn/SftyUtils/src/SftyUtils.c
++++ b/src/fw_cu/Components/Safety/Sfty_Cmn/SftyUtils/src/SftyUtils.c
+@@ -62,10 +62,10 @@
+ /******************************************************************/
+ LOCAL_INLINE uint32 SftyUtils_GetPSWregVal(void)
+ {
+-#ifdef SWIT_FC_Active
++/*#ifdef SWIT_FC_Active
+ if((SWIT_SftyUtils_EN_KEY==SWIT_First_HookEnableKey))
+    SWIT_SftyUtils_GetPSWregVal_BgnHook ();
+-#endif
++#endif*/
+    return ((uint32)__mfcr((sint32)CPU_PSW));  /* PRQA S 3335, 4447 */
+ }
+ 
+@@ -78,10 +78,10 @@ if((SWIT_SftyUtils_EN_KEY==SWIT_First_HookEnableKey))
+ /******************************************************************/
+ LOCAL_INLINE void SftyUtils_SetPSWregVal(sint32 regVal)
+ {
+-#ifdef SWIT_FC_Active
++/*#ifdef SWIT_FC_Active
+ if((SWIT_SftyUtils_EN_KEY==SWIT_First_HookEnableKey))
+    SWIT_SftyUtils_SetPSWregVal_BgnHook ();
+-#endif
++#endif*/
+ 
+   (void) __mtcr((sint32)CPU_PSW, regVal); /* PRQA S 3335*/
+    return;
+diff --git a/src/fw_cu/Components/Safety/Sfty_Inv/SftyActvDchaCtrlrIf/src/SftyActvDchaCtrlrIf.c b/src/fw_cu/Components/Safety/Sfty_Inv/SftyActvDchaCtrlrIf/src/SftyActvDchaCtrlrIf.c
+index 1bbba63cb..3695fb20e 100644
+--- a/src/fw_cu/Components/Safety/Sfty_Inv/SftyActvDchaCtrlrIf/src/SftyActvDchaCtrlrIf.c
++++ b/src/fw_cu/Components/Safety/Sfty_Inv/SftyActvDchaCtrlrIf/src/SftyActvDchaCtrlrIf.c
+@@ -84,10 +84,10 @@
+ /******************************************************************/
+ LOCAL_INLINE void SftyActvDchaCtrlrIf_InsertTxAlvCntr(uint8 msg[])
+ {
+-#ifdef SWIT_FC_Active
++/*#ifdef SWIT_FC_Active
+ if((SWIT_SftyActvDchaCtrlrIf_EN_KEY==SWIT_First_HookEnableKey))
+    SWIT_SftyActvDchaCtrlrIf_InsertTxAlvCntr_BgnHook ();
+-#endif
++#endif*/
+    /* ******** Variables declaration *********** */
+ 
+    /* ************* Source code **************** */
+@@ -121,10 +121,10 @@ if((SWIT_SftyActvDchaCtrlrIf_EN_KEY==SWIT_First_HookEnableKey))
+ /******************************************************************/
+ LOCAL_INLINE void SftyActvDchaCtrlrIf_GetDecData(SftyActvDchaCtrl_MeasIdType id, const uint8 msg[])
+ {
+-#ifdef SWIT_FC_Active
++/*#ifdef SWIT_FC_Active
+ if((SWIT_SftyActvDchaCtrlrIf_EN_KEY==SWIT_First_HookEnableKey))
+    SWIT_SftyActvDchaCtrlrIf_GetDecData_BgnHook ();
+-#endif
++#endif*/
+    /* ******** Variables declaration *********** */
+ 
+    /* ************* Source code **************** */
+@@ -190,10 +190,10 @@ if((SWIT_SftyActvDchaCtrlrIf_EN_KEY==SWIT_First_HookEnableKey))
+ /******************************************************************/
+ LOCAL_INLINE void SftyActvDchaCtrlrIf_InsertTxCrc(uint8 msg[])
+ {
+-#ifdef SWIT_FC_Active
++/*#ifdef SWIT_FC_Active
+ if((SWIT_SftyActvDchaCtrlrIf_EN_KEY==SWIT_First_HookEnableKey))
+    SWIT_SftyActvDchaCtrlrIf_InsertTxCrc_BgnHook ();
+-#endif
++#endif*/
+    /* ******** Variables declaration *********** */
+    uint32 crc;
+ 
+@@ -235,10 +235,10 @@ if((SWIT_SftyActvDchaCtrlrIf_EN_KEY==SWIT_First_HookEnableKey))
+ /******************************************************************/
+ LOCAL_INLINE ErrDeb_MonrStsType SftyActvDchaCtrlrIf_ChkRxCrc(const uint8 msg[])
+ {
+-#ifdef SWIT_FC_Active
++/*#ifdef SWIT_FC_Active
+ if((SWIT_SftyActvDchaCtrlrIf_EN_KEY==SWIT_First_HookEnableKey))
+    SWIT_SftyActvDchaCtrlrIf_ChkRxCrc_BgnHook ();
+-#endif
++#endif*/
+    /* ******** Variables declaration *********** */
+    ErrDeb_MonrStsType retVal;
+    uint32                   crc;
+@@ -277,10 +277,10 @@ if((SWIT_SftyActvDchaCtrlrIf_EN_KEY==SWIT_First_HookEnableKey))
+ /******************************************************************/
+ LOCAL_INLINE ErrDeb_MonrStsType SftyActvDchaCtrlrIf_ChkRxAlvCntr(const uint8 msg[])
+ {
+-#ifdef SWIT_FC_Active
++/*#ifdef SWIT_FC_Active
+ if((SWIT_SftyActvDchaCtrlrIf_EN_KEY==SWIT_First_HookEnableKey))
+    SWIT_SftyActvDchaCtrlrIf_ChkRxAlvCntr_BgnHook ();
+-#endif
++#endif*/
+    /* ******** Variables declaration *********** */
+    ErrDeb_MonrStsType retVal;
+    
+@@ -322,10 +322,10 @@ if((SWIT_SftyActvDchaCtrlrIf_EN_KEY==SWIT_First_HookEnableKey))
+ /****************************************************************************************/
+ LOCAL_INLINE void SftyActvDchaCtrlrIf_CalcPsP15UPhyVal(void)
+ {
+-#ifdef SWIT_FC_Active
++/*#ifdef SWIT_FC_Active
+ if((SWIT_SftyActvDchaCtrlrIf_EN_KEY==SWIT_First_HookEnableKey))
+    SWIT_SftyActvDchaCtrlrIf_CalcPsP15UPhyVal_BgnHook ();
+-#endif
++#endif*/
+    /* ******** Variables declaration *********** */
+    uint8  psP15HvLimUErrMonrSt = 0U;
+    sint32 actvDchaCtrlP15Drv               = 0L;
+@@ -370,10 +370,10 @@ if((SWIT_SftyActvDchaCtrlrIf_EN_KEY==SWIT_First_HookEnableKey))
+ /******************************************************************/
+ LOCAL_INLINE void SftyActvDchaCtrlrIf_ItpVldMsg(const uint8 msg[])
+ {
+-#ifdef SWIT_FC_Active
++/*#ifdef SWIT_FC_Active
+ if((SWIT_SftyActvDchaCtrlrIf_EN_KEY==SWIT_First_HookEnableKey))
+    SWIT_SftyActvDchaCtrlrIf_ItpVldMsg_BgnHook ();
+-#endif
++#endif*/
+    /* ******** Variables declaration *********** */
+    uint16    measId;
+    uint32    measData;
+diff --git a/src/fw_cu/Components/Safety/Sfty_Inv/SftyDcEvln/src/SftyDcEvln.c b/src/fw_cu/Components/Safety/Sfty_Inv/SftyDcEvln/src/SftyDcEvln.c
+index eb9eae71b..6993cd9e1 100644
+--- a/src/fw_cu/Components/Safety/Sfty_Inv/SftyDcEvln/src/SftyDcEvln.c
++++ b/src/fw_cu/Components/Safety/Sfty_Inv/SftyDcEvln/src/SftyDcEvln.c
+@@ -83,10 +83,10 @@
+ /***************************************************************************/
+ LOCAL_INLINE uint8 SftyDcEvln_NHvFbSt(void)
+ {
+-#ifdef SWIT_FC_Active
++/*#ifdef SWIT_FC_Active
+ if((SWIT_SftyDcEvln_EN_KEY==SWIT_First_HookEnableKey))
+    SWIT_SftyDcEvln_NHvFbSt_BgnHook ();
+-#endif
++#endif*/
+    uint8 retVal;
+ 
+    /* WARNING!
+@@ -122,10 +122,10 @@ if((SWIT_SftyDcEvln_EN_KEY==SWIT_First_HookEnableKey))
+ /***************************************************************************/
+ LOCAL_INLINE uint8 SftyDcEvln_VolCompAscSt(void)
+ {
+-#ifdef SWIT_FC_Active
++/*#ifdef SWIT_FC_Active
+ if((SWIT_SftyDcEvln_EN_KEY==SWIT_First_HookEnableKey))
+    SWIT_SftyDcEvln_VolCompAscSt_BgnHook ();
+-#endif
++#endif*/
+    uint8 retVal;
+ 
+    if(SFTY_VOL_COMP_ASC_PIN == STD_LOW)
+@@ -149,10 +149,10 @@ if((SWIT_SftyDcEvln_EN_KEY==SWIT_First_HookEnableKey))
+ /***************************************************************************/
+ LOCAL_INLINE uint8 SftyDcEvln_P14HvLvActv(void)
+ {
+-#ifdef SWIT_FC_Active
++/*#ifdef SWIT_FC_Active
+ if((SWIT_SftyDcEvln_EN_KEY==SWIT_First_HookEnableKey))
+    SWIT_SftyDcEvln_P14HvLvActv_BgnHook ();
+-#endif
++#endif*/
+    uint8 retVal;
+ 
+    if(SftyDcEvlnUdcVal > SftyDcEvlnP14HvLvValUdcRngThd)
+@@ -177,10 +177,10 @@ if((SWIT_SftyDcEvln_EN_KEY==SWIT_First_HookEnableKey))
+ /***************************************************************************/
+ LOCAL_INLINE uint8 SftyDcEvln_P15ResSwtActv(void)
+ {
+-#ifdef SWIT_FC_Active
++/*#ifdef SWIT_FC_Active
+ if((SWIT_SftyDcEvln_EN_KEY==SWIT_First_HookEnableKey))
+    SWIT_SftyDcEvln_P15ResSwtActv_BgnHook ();
+-#endif
++#endif*/
+    uint8 retVal;
+ 
+    if(SFTY_PS_OC_EN_RES_PIN == STD_LOW)
+@@ -203,10 +203,10 @@ if((SWIT_SftyDcEvln_EN_KEY==SWIT_First_HookEnableKey))
+ /***************************************************************************/
+ LOCAL_INLINE uint8 SftyDcEvln_P15USwtActv(void)
+ {
+-#ifdef SWIT_FC_Active
++/*#ifdef SWIT_FC_Active
+ if((SWIT_SftyDcEvln_EN_KEY==SWIT_First_HookEnableKey))
+    SWIT_SftyDcEvln_P15USwtActv_BgnHook ();
+-#endif
++#endif*/
+    uint8 retVal;
+ 
+    if(SFTY_PS_OC_EN_U_PIN == STD_LOW)
+@@ -229,10 +229,10 @@ if((SWIT_SftyDcEvln_EN_KEY==SWIT_First_HookEnableKey))
+ /***************************************************************************/
+ LOCAL_INLINE uint8 SftyDcEvln_P15VSwtActv(void)
+ {
+-#ifdef SWIT_FC_Active
++/*#ifdef SWIT_FC_Active
+ if((SWIT_SftyDcEvln_EN_KEY==SWIT_First_HookEnableKey))
+    SWIT_SftyDcEvln_P15VSwtActv_BgnHook ();
+-#endif
++#endif*/
+    uint8 retVal;
+ 
+    if(SFTY_PS_OC_EN_V_PIN == STD_LOW)
+@@ -255,10 +255,10 @@ if((SWIT_SftyDcEvln_EN_KEY==SWIT_First_HookEnableKey))
+ /***************************************************************************/
+ LOCAL_INLINE uint8 SftyDcEvln_P15WSwtActv(void)
+ {
+-#ifdef SWIT_FC_Active
++/*#ifdef SWIT_FC_Active
+ if((SWIT_SftyDcEvln_EN_KEY==SWIT_First_HookEnableKey))
+    SWIT_SftyDcEvln_P15WSwtActv_BgnHook ();
+-#endif
++#endif*/
+    uint8 retVal;
+ 
+    if(SFTY_PS_OC_EN_W_PIN == STD_LOW)
+@@ -282,10 +282,10 @@ if((SWIT_SftyDcEvln_EN_KEY==SWIT_First_HookEnableKey))
+ /******************************************************************/
+ LOCAL_INLINE void SftyDcEvln_GetKL15FromDma(void)
+ {
+-#ifdef SWIT_FC_Active
++/*#ifdef SWIT_FC_Active
+ if((SWIT_SftyDcEvln_EN_KEY==SWIT_First_HookEnableKey))
+    SWIT_SftyDcEvln_GetKL15FromDma_BgnHook ();
+-#endif
++#endif*/
+    /* ************* Source code **************** */
+ 
+    /* Get KL15 raw value and DMA time-stamp */
+@@ -342,10 +342,10 @@ if((SWIT_SftyDcEvln_EN_KEY==SWIT_First_HookEnableKey)||(SWIT_SftyDcEvln_EN_KEY==
+ /******************************************************************/
+ LOCAL_INLINE void SftyDcEvln_GetKL30PrMeasAFromDma(void)
+ {
+-#ifdef SWIT_FC_Active
++/*#ifdef SWIT_FC_Active
+ if((SWIT_SftyDcEvln_EN_KEY==SWIT_First_HookEnableKey))
+    SWIT_SftyDcEvln_GetKL30PrMeasAFromDma_BgnHook ();
+-#endif
++#endif*/
+    /* ************* Source code **************** */
+ 
+    /* Get value and timestamp from DMA */
+@@ -399,10 +399,10 @@ if((SWIT_SftyDcEvln_EN_KEY==SWIT_First_HookEnableKey)||(SWIT_SftyDcEvln_EN_KEY==
+ /******************************************************************/
+ LOCAL_INLINE void SftyDcEvln_GetKL30PrMeasBFromDma(void)
+ {
+-#ifdef SWIT_FC_Active
++/*#ifdef SWIT_FC_Active
+ if((SWIT_SftyDcEvln_EN_KEY==SWIT_First_HookEnableKey))
+    SWIT_SftyDcEvln_GetKL30PrMeasBFromDma_BgnHook ();
+-#endif
++#endif*/
+    /* ************* Source code **************** */
+ 
+    /* Get value and time-stamp from DMA */
+@@ -453,10 +453,10 @@ if((SWIT_SftyDcEvln_EN_KEY==SWIT_First_HookEnableKey)||(SWIT_SftyDcEvln_EN_KEY==
+ /***********************************************************************************/
+ LOCAL_INLINE void SftyDcEvln_GetP5UFromDma(void)
+ {
+-#ifdef SWIT_FC_Active
++/*#ifdef SWIT_FC_Active
+ if((SWIT_SftyDcEvln_EN_KEY==SWIT_First_HookEnableKey))
+    SWIT_SftyDcEvln_GetP5UFromDma_BgnHook ();
+-#endif
++#endif*/
+    /* ************* Source code **************** */
+ 
+    /* Get value and timestamp from DMA */
+@@ -511,10 +511,10 @@ if((SWIT_SftyDcEvln_EN_KEY==SWIT_First_HookEnableKey)||(SWIT_SftyDcEvln_EN_KEY==
+ /************************************************************************************/
+ LOCAL_INLINE void SftyDcEvln_GetP5VFromDma(void)
+ {
+-#ifdef SWIT_FC_Active
++/*#ifdef SWIT_FC_Active
+ if((SWIT_SftyDcEvln_EN_KEY==SWIT_First_HookEnableKey))
+    SWIT_SftyDcEvln_GetP5VFromDma_BgnHook ();
+-#endif
++#endif*/
+    /* ************* Source code **************** */
+ 
+    /* Get value and timestamp from DMA */
+@@ -568,10 +568,10 @@ if((SWIT_SftyDcEvln_EN_KEY==SWIT_First_HookEnableKey)||(SWIT_SftyDcEvln_EN_KEY==
+ /************************************************************************************/
+ LOCAL_INLINE void SftyDcEvln_GetP5WFromDma(void)
+ {
+-#ifdef SWIT_FC_Active
++/*#ifdef SWIT_FC_Active
+ if((SWIT_SftyDcEvln_EN_KEY==SWIT_First_HookEnableKey))
+    SWIT_SftyDcEvln_GetP5WFromDma_BgnHook ();
+-#endif
++#endif*/
+    /* ************* Source code **************** */
+ 
+    /* Get value and timestamp from DMA */
+@@ -626,10 +626,10 @@ if((SWIT_SftyDcEvln_EN_KEY==SWIT_First_HookEnableKey)||(SWIT_SftyDcEvln_EN_KEY==
+ /*************************************************************************************/
+ LOCAL_INLINE void SftyDcEvln_GetP5Asc2FromDma(void)
+ {
+-#ifdef SWIT_FC_Active
++/*#ifdef SWIT_FC_Active
+ if((SWIT_SftyDcEvln_EN_KEY==SWIT_First_HookEnableKey))
+    SWIT_SftyDcEvln_GetP5Asc2FromDma_BgnHook ();
+-#endif
++#endif*/
+    /* ************* Source code **************** */
+ 
+    /* Get value and timestamp from DMA */
+@@ -684,10 +684,10 @@ if((SWIT_SftyDcEvln_EN_KEY==SWIT_First_HookEnableKey)||(SWIT_SftyDcEvln_EN_KEY==
+ /******************************************************************/
+ LOCAL_INLINE void SftyDcEvln_GetP15FromDma(void)
+ {
+-#ifdef SWIT_FC_Active
++/*#ifdef SWIT_FC_Active
+ if((SWIT_SftyDcEvln_EN_KEY==SWIT_First_HookEnableKey))
+    SWIT_SftyDcEvln_GetP15FromDma_BgnHook ();
+-#endif
++#endif*/
+    /* ************* Source code **************** */
+    /* Get value and timestamp from DMA */
+    /* SftyDma_UpdateP15AndTiStamp(); */
+@@ -740,10 +740,10 @@ if((SWIT_SftyDcEvln_EN_KEY==SWIT_First_HookEnableKey)||(SWIT_SftyDcEvln_EN_KEY==
+ /***************************************************************************************/
+ LOCAL_INLINE void SftyDcEvln_GetP15RESFromDma(void)
+ {
+-#ifdef SWIT_FC_Active
++/*#ifdef SWIT_FC_Active
+ if((SWIT_SftyDcEvln_EN_KEY==SWIT_First_HookEnableKey))
+    SWIT_SftyDcEvln_GetP15RESFromDma_BgnHook ();
+-#endif
++#endif*/
+    /* ************* Source code **************** */
+    /* Get value and timestamp from DMA */
+   /* SftyDma_UpdateP15RESAndTiStamp(); */
+@@ -796,10 +796,10 @@ if((SWIT_SftyDcEvln_EN_KEY==SWIT_First_HookEnableKey)||(SWIT_SftyDcEvln_EN_KEY==
+ /***********************************************************************************/
+ LOCAL_INLINE void SftyDcEvln_GetP15UFromDma(void)
+ {
+-#ifdef SWIT_FC_Active
++/*#ifdef SWIT_FC_Active
+ if((SWIT_SftyDcEvln_EN_KEY==SWIT_First_HookEnableKey))
+    SWIT_SftyDcEvln_GetP15UFromDma_BgnHook ();
+-#endif
++#endif*/
+    /* ************* Source code **************** */
+    /* Get value and timestamp from DMA */
+   /* SftyDma_UpdateP15UAndTiStamp(); */
+@@ -851,10 +851,10 @@ if((SWIT_SftyDcEvln_EN_KEY==SWIT_First_HookEnableKey)||(SWIT_SftyDcEvln_EN_KEY==
+ /******************************************************************/
+ LOCAL_INLINE void SftyDcEvln_GetP15VFromDma(void)
+ {
+-#ifdef SWIT_FC_Active
++/*#ifdef SWIT_FC_Active
+ if((SWIT_SftyDcEvln_EN_KEY==SWIT_First_HookEnableKey))
+    SWIT_SftyDcEvln_GetP15VFromDma_BgnHook ();
+-#endif
++#endif*/
+    /* ************* Source code **************** */
+    /* Get value and timestamp from DMA */
+   /* SftyDma_UpdateP15VAndTiStamp(); */
+@@ -905,10 +905,10 @@ if((SWIT_SftyDcEvln_EN_KEY==SWIT_First_HookEnableKey)||(SWIT_SftyDcEvln_EN_KEY==
+ /******************************************************************/
+ LOCAL_INLINE void SftyDcEvln_GetP15WFromDma(void)
+ {
+-#ifdef SWIT_FC_Active
++/*#ifdef SWIT_FC_Active
+ if((SWIT_SftyDcEvln_EN_KEY==SWIT_First_HookEnableKey))
+    SWIT_SftyDcEvln_GetP15WFromDma_BgnHook ();
+-#endif
++#endif*/
+    /* ************* Source code **************** */
+    /* Get value and timestamp from DMA */
+   /* SftyDma_UpdateP15WAndTiStamp(); */
+@@ -963,10 +963,10 @@ if((SWIT_SftyDcEvln_EN_KEY==SWIT_First_HookEnableKey)||(SWIT_SftyDcEvln_EN_KEY==
+ LOCAL_INLINE void SftyDcEvln_GetSepicOutFromDma(void)
+ {
+ 
+-#ifdef SWIT_FC_Active
++/*#ifdef SWIT_FC_Active
+ if((SWIT_SftyDcEvln_EN_KEY==SWIT_First_HookEnableKey))
+    SWIT_SftyDcEvln_GetSepicOutFromDma_BgnHook ();
+-#endif
++#endif*/
+    /* ************* Source code **************** */
+ 
+    /* Get raw value and time-stamp from DMA */
+@@ -1020,10 +1020,10 @@ if((SWIT_SftyDcEvln_EN_KEY==SWIT_First_HookEnableKey)||(SWIT_SftyDcEvln_EN_KEY==
+ /*****************************************************************************/
+ LOCAL_INLINE void SftyDcEvln_GetP14HvLvFromDma(void)
+ {
+-#ifdef SWIT_FC_Active
++/*#ifdef SWIT_FC_Active
+ if((SWIT_SftyDcEvln_EN_KEY==SWIT_First_HookEnableKey))
+    SWIT_SftyDcEvln_GetP14HvLvFromDma_BgnHook ();
+-#endif
++#endif*/
+    /* ************* Source code **************** */
+ 
+    /* Get raw value and time-stamp from DMA */
+@@ -1076,10 +1076,10 @@ if((SWIT_SftyDcEvln_EN_KEY==SWIT_First_HookEnableKey)||(SWIT_SftyDcEvln_EN_KEY==
+ /******************************************************************/
+ LOCAL_INLINE void SftyDcEvln_GetExtAdcUdc(void)
+ {
+-#ifdef SWIT_FC_Active
++/*#ifdef SWIT_FC_Active
+ if((SWIT_SftyDcEvln_EN_KEY==SWIT_First_HookEnableKey))
+    SWIT_SftyDcEvln_GetExtAdcUdc_BgnHook ();
+-#endif
++#endif*/
+ #ifndef SERIES_PRODUCTION
+ 
+    if(SftyReplcmtDcEvlnExtUdcRawStiEna == TRUE)
+@@ -1109,10 +1109,10 @@ if((SWIT_SftyDcEvln_EN_KEY==SWIT_First_HookEnableKey))
+ /******************************************************************/
+ LOCAL_INLINE ErrDeb_MonrStsType SftyDcEvln_ChkExtUdcElecHi(void)
+ {
+-#ifdef SWIT_FC_Active
++/*#ifdef SWIT_FC_Active
+ if((SWIT_SftyDcEvln_EN_KEY==SWIT_First_HookEnableKey))
+    SWIT_SftyDcEvln_ChkExtUdcElecHi_BgnHook ();
+-#endif
++#endif*/
+    /* ******** Variables declaration *********** */
+    ErrDeb_MonrStsType retVal;
+ 
+@@ -1143,10 +1143,10 @@ if((SWIT_SftyDcEvln_EN_KEY==SWIT_First_HookEnableKey))
+ /******************************************************************/
+ LOCAL_INLINE ErrDeb_MonrStsType SftyDcEvln_ChkExtUdcRngHi(void)
+ {
+-#ifdef SWIT_FC_Active
++/*#ifdef SWIT_FC_Active
+ if((SWIT_SftyDcEvln_EN_KEY==SWIT_First_HookEnableKey))
+    SWIT_SftyDcEvln_ChkExtUdcRngHi_BgnHook ();
+-#endif
++#endif*/
+    /* ******** Variables declaration *********** */
+    ErrDeb_MonrStsType retVal;
+ 
+@@ -1176,10 +1176,10 @@ if((SWIT_SftyDcEvln_EN_KEY==SWIT_First_HookEnableKey))
+ /******************************************************************/
+ LOCAL_INLINE void SftyDcEvln_GetDsadcUdcFromDma(void)
+ {
+-#ifdef SWIT_FC_Active
++/*#ifdef SWIT_FC_Active
+ if((SWIT_SftyDcEvln_EN_KEY==SWIT_First_HookEnableKey))
+    SWIT_SftyDcEvln_GetDsadcUdcFromDma_BgnHook ();
+-#endif
++#endif*/
+    float32 udcVal;
+ 
+    /* Get DSADC raw Udc value and time-stamp */
+@@ -1240,10 +1240,10 @@ if((SWIT_SftyDcEvln_EN_KEY==SWIT_First_HookEnableKey)||(SWIT_SftyDcEvln_EN_KEY==
+ /******************************************************************/
+ LOCAL_INLINE void SftyDcEvln_GetVadcUdcFromDma(void)
+ {
+-#ifdef SWIT_FC_Active
++/*#ifdef SWIT_FC_Active
+ if((SWIT_SftyDcEvln_EN_KEY==SWIT_First_HookEnableKey))
+    SWIT_SftyDcEvln_GetVadcUdcFromDma_BgnHook ();
+-#endif
++#endif*/
+    /* Get VADC raw Udc value and time-stamp */
+    /* SftyDma_UpdateVadcRawUdcAndTiStamp(); */
+ 
+@@ -1327,10 +1327,10 @@ if((SWIT_SftyDcEvln_EN_KEY==SWIT_First_HookEnableKey)||(SWIT_SftyDcEvln_EN_KEY==
+ /******************************************************************/
+ LOCAL_INLINE ErrDeb_MonrStsType SftyDcEvln_ChkVadcUdcElecHi(void)
+ {
+-#ifdef SWIT_FC_Active
++/*#ifdef SWIT_FC_Active
+ if((SWIT_SftyDcEvln_EN_KEY==SWIT_First_HookEnableKey))
+    SWIT_SftyDcEvln_ChkVadcUdcElecHi_BgnHook ();
+-#endif
++#endif*/
+    /* ******** Variables declaration *********** */
+    ErrDeb_MonrStsType retVal;
+    /* ************* Source code **************** */
+@@ -1362,10 +1362,10 @@ if((SWIT_SftyDcEvln_EN_KEY==SWIT_First_HookEnableKey))
+ /******************************************************************/
+ LOCAL_INLINE ErrDeb_MonrStsType SftyDcEvln_ChkDsadcRngHi(void)
+ {
+-#ifdef SWIT_FC_Active
++/*#ifdef SWIT_FC_Active
+ if((SWIT_SftyDcEvln_EN_KEY==SWIT_First_HookEnableKey))
+    SWIT_SftyDcEvln_ChkDsadcRngHi_BgnHook ();
+-#endif
++#endif*/
+    /* ******** Variables declaration *********** */
+    ErrDeb_MonrStsType retVal;
+ 
+@@ -1395,10 +1395,10 @@ if((SWIT_SftyDcEvln_EN_KEY==SWIT_First_HookEnableKey))
+ /******************************************************************/
+ LOCAL_INLINE void SftyDcEvln_ScaUdcExtAdcVal(void)
+ {
+-#ifdef SWIT_FC_Active
++/*#ifdef SWIT_FC_Active
+ if((SWIT_SftyDcEvln_EN_KEY==SWIT_First_HookEnableKey))
+    SWIT_SftyDcEvln_ScaUdcExtAdcVal_BgnHook ();
+-#endif
++#endif*/
+    /* ******** Variables declaration *********** */
+    register float32 udcVal;
+ 
+@@ -1425,10 +1425,10 @@ if((SWIT_SftyDcEvln_EN_KEY==SWIT_First_HookEnableKey))
+ /******************************************************************/
+ LOCAL_INLINE void SftyDcEvln_ScaUdcDsadcVal(void)
+ {
+-#ifdef SWIT_FC_Active
++/*#ifdef SWIT_FC_Active
+ if((SWIT_SftyDcEvln_EN_KEY==SWIT_First_HookEnableKey))
+    SWIT_SftyDcEvln_ScaUdcDsadcVal_BgnHook ();
+-#endif
++#endif*/
+    /* ******** Variables declaration *********** */
+    register float32 udcVal;
+    /* ************* Source code **************** */
+@@ -1455,10 +1455,10 @@ if((SWIT_SftyDcEvln_EN_KEY==SWIT_First_HookEnableKey))
+ /******************************************************************/
+ LOCAL_INLINE ErrDeb_MonrStsType SftyDcEvln_CompUdcVal(void)
+ {
+-#ifdef SWIT_FC_Active
++/*#ifdef SWIT_FC_Active
+ if((SWIT_SftyDcEvln_EN_KEY==SWIT_First_HookEnableKey))
+    SWIT_SftyDcEvln_CompUdcVal_BgnHook ();
+-#endif
++#endif*/
+    /* ******** Variables declaration *********** */
+    ErrDeb_MonrStsType uDcValPlaus;
+ 
+@@ -1491,10 +1491,10 @@ if((SWIT_SftyDcEvln_EN_KEY==SWIT_First_HookEnableKey))
+ /******************************************************************/
+ LOCAL_INLINE float32 SftyDcEvln_ScaKL30PrMeasA(void)
+ {
+-#ifdef SWIT_FC_Active
++/*#ifdef SWIT_FC_Active
+ if((SWIT_SftyDcEvln_EN_KEY==SWIT_First_HookEnableKey))
+    SWIT_SftyDcEvln_ScaKL30PrMeasA_BgnHook ();
+-#endif
++#endif*/
+    /* Convert raw value to physical voltage, consider voltage divider Ratio*/
+    return (((float32)SftyDcEvlnKl30PrMeasARawVal) * SftyDcEvlnKl30PrMeasAGain) + SftyDcEvlnKl30PrMeasAOffset;
+ }
+@@ -1508,10 +1508,10 @@ if((SWIT_SftyDcEvln_EN_KEY==SWIT_First_HookEnableKey))
+ /******************************************************************/
+ LOCAL_INLINE ErrDeb_MonrStsType SftyDcEvln_KL30PhyRngHi(float32 valKL30)
+ {
+-#ifdef SWIT_FC_Active
++/*#ifdef SWIT_FC_Active
+ if((SWIT_SftyDcEvln_EN_KEY==SWIT_First_HookEnableKey))
+    SWIT_SftyDcEvln_KL30PhyRngHi_BgnHook ();
+-#endif
++#endif*/
+    ErrDeb_MonrStsType kL30PhyRngHi;
+ 
+    /* Check if kl30 voltage is above Range High threshold */
+@@ -1537,10 +1537,10 @@ if((SWIT_SftyDcEvln_EN_KEY==SWIT_First_HookEnableKey))
+ /******************************************************************/
+ LOCAL_INLINE ErrDeb_MonrStsType SftyDcEvln_KL30PhyRngLo(float32 valKL30)
+ {
+-#ifdef SWIT_FC_Active
++/*#ifdef SWIT_FC_Active
+ if((SWIT_SftyDcEvln_EN_KEY==SWIT_First_HookEnableKey))
+    SWIT_SftyDcEvln_KL30PhyRngLo_BgnHook ();
+-#endif
++#endif*/
+    ErrDeb_MonrStsType kL30PhyRngLo;
+ 
+    /* Check kl30 voltage is below Range Low threshold*/
+@@ -1566,10 +1566,10 @@ if((SWIT_SftyDcEvln_EN_KEY==SWIT_First_HookEnableKey))
+ /******************************************************************/
+ LOCAL_INLINE ErrDeb_MonrStsType SftyDcEvln_KL30PhyRngUv(float32 valKL30)
+ {
+-#ifdef SWIT_FC_Active
++/*#ifdef SWIT_FC_Active
+ if((SWIT_SftyDcEvln_EN_KEY==SWIT_First_HookEnableKey))
+    SWIT_SftyDcEvln_KL30PhyRngUv_BgnHook ();
+-#endif
++#endif*/
+    ErrDeb_MonrStsType kL30PhyRngUv;
+ 
+    /* Check if kl30 voltage is below UnderVoltage threshold*/
+@@ -1595,11 +1595,11 @@ if((SWIT_SftyDcEvln_EN_KEY==SWIT_First_HookEnableKey))
+ /***********************************************************************************************/
+ LOCAL_INLINE ErrDeb_MonrStsType SftyDcEvln_KL30PhyRngUvCan(float32 valKL30)
+ {
+-   #ifdef SWIT_FC_Active
++/*   #ifdef SWIT_FC_Active
+ if((SWIT_SftyDcEvln_EN_KEY==SWIT_First_HookEnableKey))
+ 
+    SWIT_SftyDcEvln_KL30PhyRngUvCan_BgnHook ();
+-#endif
++#endif*/
+    ErrDeb_MonrStsType kl30RngUvCan;
+ 
+    /* Keeping the hysteresis state */
+@@ -1632,10 +1632,10 @@ if((SWIT_SftyDcEvln_EN_KEY==SWIT_First_HookEnableKey))
+ /****************************************************************************/
+ LOCAL_INLINE ErrDeb_MonrStsType SftyDcEvln_KL30PhyRngUvHwp(float32 valKL30)
+ {
+-#ifdef SWIT_FC_Active
++/*#ifdef SWIT_FC_Active
+ if((SWIT_SftyDcEvln_EN_KEY==SWIT_First_HookEnableKey))
+    SWIT_SftyDcEvln_KL30PhyRngUvHwp_BgnHook ();
+-#endif
++#endif*/
+    ErrDeb_MonrStsType kl30RngUvHwp;
+ 
+    /* Keeping the hysteresis state */
+@@ -1668,10 +1668,10 @@ if((SWIT_SftyDcEvln_EN_KEY==SWIT_First_HookEnableKey))
+ /****************************************************************************************************/
+ LOCAL_INLINE ErrDeb_MonrStsType SftyDcEvln_KL30PhyRngOv(float32 valKL30)
+ {
+-#ifdef SWIT_FC_Active
++/*#ifdef SWIT_FC_Active
+ if((SWIT_SftyDcEvln_EN_KEY==SWIT_First_HookEnableKey))
+    SWIT_SftyDcEvln_KL30PhyRngOv_BgnHook ();
+-#endif
++#endif*/
+    ErrDeb_MonrStsType kL30PhyRngOv;
+ 
+    /* Check if kl30 voltage is below Range Low threshold*/
+@@ -1697,10 +1697,10 @@ if((SWIT_SftyDcEvln_EN_KEY==SWIT_First_HookEnableKey))
+ /****************************************************************************************************/
+ LOCAL_INLINE ErrDeb_MonrStsType SftyDcEvln_KL30PhyRngOvCan(float32 valKL30)
+ {
+-#ifdef SWIT_FC_Active
++/*#ifdef SWIT_FC_Active
+ if((SWIT_SftyDcEvln_EN_KEY==SWIT_First_HookEnableKey))
+    SWIT_SftyDcEvln_KL30PhyRngOvCan_BgnHook ();
+-#endif
++#endif*/
+    ErrDeb_MonrStsType kl30RngOvCan;
+ 
+    /* Keeping the hysteresis state */
+@@ -1734,10 +1734,10 @@ if((SWIT_SftyDcEvln_EN_KEY==SWIT_First_HookEnableKey))
+ /************************************************************************************************/
+ LOCAL_INLINE ErrDeb_MonrStsType SftyDcEvln_SepicOutPhyRngChk(void)
+ {
+-#ifdef SWIT_FC_Active
++/*#ifdef SWIT_FC_Active
+ if((SWIT_SftyDcEvln_EN_KEY==SWIT_First_HookEnableKey))
+    SWIT_SftyDcEvln_SepicOutPhyRngChk_BgnHook ();
+-#endif
++#endif*/
+    /****Variable declaration****/
+    ErrDeb_MonrStsType sepicOutRngChkSt;
+ 
+@@ -1765,10 +1765,10 @@ if((SWIT_SftyDcEvln_EN_KEY==SWIT_First_HookEnableKey))
+ /****************************************************************************************************/
+ LOCAL_INLINE ErrDeb_MonrStsType SftyDcEvln_Kl30ElecHi(void)
+ {
+-#ifdef SWIT_FC_Active
++/*#ifdef SWIT_FC_Active
+ if((SWIT_SftyDcEvln_EN_KEY==SWIT_First_HookEnableKey))
+    SWIT_SftyDcEvln_Kl30ElecHi_BgnHook ();
+-#endif
++#endif*/
+    ErrDeb_MonrStsType kL30ElecHi;
+ 
+    /* Check if KL30 raw value is greater 95% of VADC range */
+@@ -1794,10 +1794,10 @@ if((SWIT_SftyDcEvln_EN_KEY==SWIT_First_HookEnableKey))
+ /****************************************************************************************************/
+ LOCAL_INLINE ErrDeb_MonrStsType SftyDcEvln_Kl30ElecLo(void)
+ {
+-#ifdef SWIT_FC_Active
++/*#ifdef SWIT_FC_Active
+ if((SWIT_SftyDcEvln_EN_KEY==SWIT_First_HookEnableKey))
+    SWIT_SftyDcEvln_Kl30ElecLo_BgnHook ();
+-#endif
++#endif*/
+    ErrDeb_MonrStsType kL30AElecLo;
+ 
+    /* Check if KL30 raw value is greater 95% of VADC range */
+@@ -1823,10 +1823,10 @@ if((SWIT_SftyDcEvln_EN_KEY==SWIT_First_HookEnableKey))
+ /****************************************************************************************************/
+ LOCAL_INLINE void SftyDcEvln_KL30RngEvln(void)
+ {
+-#ifdef SWIT_FC_Active
++/*#ifdef SWIT_FC_Active
+ if((SWIT_SftyDcEvln_EN_KEY==SWIT_First_HookEnableKey))
+    SWIT_SftyDcEvln_KL30RngEvln_BgnHook ();
+-#endif
++#endif*/
+    /* Initialize the error monitoring status variables*/
+    SftyDcEvlnKl30RngHiErrMonrSt         = ERR_DEB_MONR_STS_INACTIVE;
+    SftyDcEvlnKl30RngLoErrMonrSt         = ERR_DEB_MONR_STS_INACTIVE;
+@@ -1905,10 +1905,10 @@ if((SWIT_SftyDcEvln_EN_KEY==SWIT_First_HookEnableKey)||(SWIT_SftyDcEvln_EN_KEY==
+ /******************************************************************/
+ LOCAL_INLINE ErrDeb_MonrStsType SftyDcEvln_Kl30BElecHi(void)
+ {
+-#ifdef SWIT_FC_Active
++/*#ifdef SWIT_FC_Active
+ if((SWIT_SftyDcEvln_EN_KEY==SWIT_First_HookEnableKey))
+    SWIT_SftyDcEvln_Kl30BElecHi_BgnHook ();
+-#endif
++#endif*/
+    ErrDeb_MonrStsType kL30BElecHi;
+ 
+    /* Check if kl30 voltage is above Range High threshold */
+@@ -1934,10 +1934,10 @@ if((SWIT_SftyDcEvln_EN_KEY==SWIT_First_HookEnableKey))
+ /******************************************************************/
+ LOCAL_INLINE ErrDeb_MonrStsType SftyDcEvln_Kl30BElecLo(void)
+ {
+-#ifdef SWIT_FC_Active
++/*#ifdef SWIT_FC_Active
+ if((SWIT_SftyDcEvln_EN_KEY==SWIT_First_HookEnableKey))
+    SWIT_SftyDcEvln_Kl30BElecLo_BgnHook ();
+-#endif
++#endif*/
+    ErrDeb_MonrStsType kL30BElecLo;
+ 
+    /* Check if kl30 voltage is above Range High threshold */
+@@ -1963,10 +1963,10 @@ if((SWIT_SftyDcEvln_EN_KEY==SWIT_First_HookEnableKey))
+ /************************************************************************/
+ LOCAL_INLINE ErrDeb_MonrStsType SftyDcEvln_Kl30BPhyRngHi(float32 valKl30)
+ {
+-#ifdef SWIT_FC_Active
++/*#ifdef SWIT_FC_Active
+ if((SWIT_SftyDcEvln_EN_KEY==SWIT_First_HookEnableKey))
+    SWIT_SftyDcEvln_Kl30BPhyRngHi_BgnHook ();
+-#endif
++#endif*/
+    ErrDeb_MonrStsType kl30BRngHi;
+ 
+    /* Check if kl30 voltage is above Range High threshold */
+@@ -1992,10 +1992,10 @@ if((SWIT_SftyDcEvln_EN_KEY==SWIT_First_HookEnableKey))
+ /************************************************************************/
+ LOCAL_INLINE ErrDeb_MonrStsType SftyDcEvln_Kl30BPhyRngLo(float32 valKl30)
+ {
+-#ifdef SWIT_FC_Active
++/*#ifdef SWIT_FC_Active
+ if((SWIT_SftyDcEvln_EN_KEY==SWIT_First_HookEnableKey))
+    SWIT_SftyDcEvln_Kl30BPhyRngLo_BgnHook ();
+-#endif
++#endif*/
+    ErrDeb_MonrStsType kl30BRngLo;
+ 
+    /* Check if kl30 voltage is above Range High threshold */
+@@ -2021,10 +2021,10 @@ if((SWIT_SftyDcEvln_EN_KEY==SWIT_First_HookEnableKey))
+ /****************************************************************************************************/
+ LOCAL_INLINE float32 SftyDcEvln_ScaKl30PrMeasB(void)
+ {
+-#ifdef SWIT_FC_Active
++/*#ifdef SWIT_FC_Active
+ if((SWIT_SftyDcEvln_EN_KEY==SWIT_First_HookEnableKey))
+    SWIT_SftyDcEvln_ScaKl30PrMeasB_BgnHook ();
+-#endif
++#endif*/
+    /* Convert the raw value sensed by SBC to physical voltage */
+    return((((float32)SftyDcEvlnKl30PrMeasBRawVal) * SftyDcEvlnKl30PrMeasBGain) + SftyDcEvlnKl30PrMeasBOffset);
+ }
+@@ -2038,10 +2038,10 @@ if((SWIT_SftyDcEvln_EN_KEY==SWIT_First_HookEnableKey))
+ /****************************************************************************************************/
+ LOCAL_INLINE void SftyDcEvln_KL30BRngEvln(void)
+ {
+-#ifdef SWIT_FC_Active
++/*#ifdef SWIT_FC_Active
+ if((SWIT_SftyDcEvln_EN_KEY==SWIT_First_HookEnableKey))
+    SWIT_SftyDcEvln_KL30BRngEvln_BgnHook ();
+-#endif
++#endif*/
+     /* Initialize the error monitoring status variables*/
+     SftyDcEvlnKl30BRngHiErrMonrSt         = ERR_DEB_MONR_STS_INACTIVE;
+     SftyDcEvlnKl30BRngLoErrMonrSt         = ERR_DEB_MONR_STS_INACTIVE;
+@@ -2103,11 +2103,11 @@ if((SWIT_SftyDcEvln_EN_KEY==SWIT_First_HookEnableKey)||(SWIT_SftyDcEvln_EN_KEY==
+ *********************************************************************************/
+ LOCAL_INLINE void SftyDcEvln_KL15Evln(void)
+ {
+-#ifdef SWIT_FC_Active
++/*#ifdef SWIT_FC_Active
+ if((SWIT_SftyDcEvln_EN_KEY==SWIT_First_HookEnableKey))
+ 
+    SWIT_SftyDcEvln_KL15Evln_BgnHook ();
+-#endif
++#endif*/
+    float32 kl15Val;
+ 
+    /* Initialize the error monitoring status variables*/
+@@ -2163,10 +2163,10 @@ if((SWIT_SftyDcEvln_EN_KEY==SWIT_First_HookEnableKey)||(SWIT_SftyDcEvln_EN_KEY==
+ /*****************************************************************************/
+ LOCAL_INLINE void SftyDcEvln_SepicOutRngEvln(void)
+ {
+-#ifdef SWIT_FC_Active
++/*#ifdef SWIT_FC_Active
+ if((SWIT_SftyDcEvln_EN_KEY==SWIT_First_HookEnableKey))
+    SWIT_SftyDcEvln_SepicOutRngEvln_BgnHook ();
+-#endif
++#endif*/
+    /* Initialize the error monitoring status variables*/
+    SftyDcEvlnSepicOutTiStmpErrMonrSt = ERR_DEB_MONR_STS_INACTIVE;
+    SftyDcEvlnSepicOutFltErrMonrSt    = ERR_DEB_MONR_STS_INACTIVE;
+@@ -2215,10 +2215,10 @@ if((SWIT_SftyDcEvln_EN_KEY==SWIT_First_HookEnableKey)||(SWIT_SftyDcEvln_EN_KEY==
+ /***************************************************************************/
+ LOCAL_INLINE void SftyDcEvln_P15GrdtChk(float32 curP15)
+ {
+-#ifdef SWIT_FC_Active
++/*#ifdef SWIT_FC_Active
+ if((SWIT_SftyDcEvln_EN_KEY==SWIT_First_HookEnableKey))
+    SWIT_SftyDcEvln_P15GrdtChk_BgnHook ();
+-#endif
++#endif*/
+    /* Filtered P15 Voltage */
+    SftyDcEvlnP15CurFildVal = SftyUtils_LowPassFil(curP15, SftyDcEvlnP15CurFildVal, SftyDcEvlnP15LoPassFilCon, FALSE);
+ 
+@@ -2260,10 +2260,10 @@ if((SWIT_SftyDcEvln_EN_KEY==SWIT_First_HookEnableKey))
+ /***************************************************************************/
+ LOCAL_INLINE void SftyDcEvln_P15RngEvln(void)
+ {
+-#ifdef SWIT_FC_Active
++/*#ifdef SWIT_FC_Active
+ if((SWIT_SftyDcEvln_EN_KEY==SWIT_First_HookEnableKey))
+    SWIT_SftyDcEvln_P15RngEvln_BgnHook ();
+-#endif
++#endif*/
+    float32 curP15;
+ 
+    /* Initialize the error monitoring status variables*/
+@@ -2342,10 +2342,10 @@ if((SWIT_SftyDcEvln_EN_KEY==SWIT_First_HookEnableKey))
+ /***************************************************************************/
+ LOCAL_INLINE void SftyDcEvln_P15ResRngEvln(void)
+ {
+-#ifdef SWIT_FC_Active
++/*#ifdef SWIT_FC_Active
+ if((SWIT_SftyDcEvln_EN_KEY==SWIT_First_HookEnableKey))
+    SWIT_SftyDcEvln_P15ResRngEvln_BgnHook ();
+-#endif
++#endif*/
+    /* Initialize the error monitoring status variables*/
+    SftyDcEvlnP15ResTiStampErrMonrSt = ERR_DEB_MONR_STS_INACTIVE;
+    SftyDcEvlnP15ResErrMonrSt        = ERR_DEB_MONR_STS_INACTIVE;
+@@ -2395,10 +2395,10 @@ if((SWIT_SftyDcEvln_EN_KEY==SWIT_First_HookEnableKey))
+ /***************************************************************************/
+ LOCAL_INLINE void SftyDcEvln_P15URngEvln(void)
+ {
+-#ifdef SWIT_FC_Active
++/*#ifdef SWIT_FC_Active
+ if((SWIT_SftyDcEvln_EN_KEY==SWIT_First_HookEnableKey))
+    SWIT_SftyDcEvln_P15URngEvln_BgnHook ();
+-#endif
++#endif*/
+    /* Initialize the error monitoring status variables*/
+    SftyDcEvlnP15UTiStampErrMonrSt = ERR_DEB_MONR_STS_INACTIVE;
+    SftyDcEvlnP15UErrMonrSt        = ERR_DEB_MONR_STS_INACTIVE;
+@@ -2450,10 +2450,10 @@ if((SWIT_SftyDcEvln_EN_KEY==SWIT_First_HookEnableKey))
+ /***************************************************************************/
+ LOCAL_INLINE void SftyDcEvln_P15VRngEvln(void)
+ {
+-#ifdef SWIT_FC_Active
++/*#ifdef SWIT_FC_Active
+ if((SWIT_SftyDcEvln_EN_KEY==SWIT_First_HookEnableKey))
+    SWIT_SftyDcEvln_P15VRngEvln_BgnHook ();
+-#endif
++#endif*/
+    /*Initialize the error monitoring status variables*/
+    SftyDcEvlnP15VTiStampErrMonrSt = ERR_DEB_MONR_STS_INACTIVE;
+    SftyDcEvlnP15VErrMonrSt        = ERR_DEB_MONR_STS_INACTIVE;
+@@ -2505,10 +2505,10 @@ if((SWIT_SftyDcEvln_EN_KEY==SWIT_First_HookEnableKey))
+ /***************************************************************************/
+ LOCAL_INLINE void SftyDcEvln_P15WRngEvln(void)
+ {
+-#ifdef SWIT_FC_Active
++/*#ifdef SWIT_FC_Active
+ if((SWIT_SftyDcEvln_EN_KEY==SWIT_First_HookEnableKey))
+    SWIT_SftyDcEvln_P15WRngEvln_BgnHook ();
+-#endif
++#endif*/
+    /*Initialize the error monitoring status variables*/
+    SftyDcEvlnP15WTiStampErrMonrSt = ERR_DEB_MONR_STS_INACTIVE;
+    SftyDcEvlnP15WErrMonrSt        = ERR_DEB_MONR_STS_INACTIVE;
+@@ -2560,10 +2560,10 @@ if((SWIT_SftyDcEvln_EN_KEY==SWIT_First_HookEnableKey))
+ /**************************************************************************************/
+ LOCAL_INLINE void SftyDcEvln_P15ResStrtUpRngEvln(void)
+ {
+-#ifdef SWIT_FC_Active
++/*#ifdef SWIT_FC_Active
+ if((SWIT_SftyDcEvln_EN_KEY==SWIT_First_HookEnableKey))
+    SWIT_SftyDcEvln_P15ResStrtUpRngEvln_BgnHook ();
+-#endif
++#endif*/
+    /* Read P15_RES voltage */
+    /* SftyDma_UpdateP15RESAndTiStamp(); */
+ 
+@@ -2599,9 +2599,9 @@ if((SWIT_SftyDcEvln_EN_KEY==SWIT_First_HookEnableKey))
+ /**************************************************************************************/
+ LOCAL_INLINE void SftyDcEvln_P15UStrtUpRngEvln(void)
+ {
+-#ifdef SWIT_FC_Active
++/*#ifdef SWIT_FC_Active
+    SWIT_SftyDcEvln_P15UStrtUpRngEvln_BgnHook ();
+-#endif
++#endif*/
+    /* Read P15_U voltage */
+    /* SftyDma_UpdateP15UAndTiStamp(); */
+ 
+@@ -2636,9 +2636,9 @@ if((SWIT_SftyDcEvln_EN_KEY==SWIT_First_HookEnableKey)||(SWIT_SftyDcEvln_EN_KEY==
+ /**************************************************************************************/
+ LOCAL_INLINE void SftyDcEvln_P15VStrtUpRngEvln(void)
+ {
+-#ifdef SWIT_FC_Active
++/*#ifdef SWIT_FC_Active
+    SWIT_SftyDcEvln_P15VStrtUpRngEvln_BgnHook ();
+-#endif
++#endif*/
+    /* Read P15_V voltage */
+    /* SftyDma_UpdateP15VAndTiStamp(); */
+ 
+@@ -2673,9 +2673,9 @@ if((SWIT_SftyDcEvln_EN_KEY==SWIT_First_HookEnableKey)||(SWIT_SftyDcEvln_EN_KEY==
+ /**************************************************************************************/
+ LOCAL_INLINE void SftyDcEvln_P15WStrtUpRngEvln(void)
+ {
+-#ifdef SWIT_FC_Active
++/*#ifdef SWIT_FC_Active
+    SWIT_SftyDcEvln_P15WStrtUpRngEvln_BgnHook ();
+-#endif
++#endif*/
+    /* Read P15_W voltage */
+    /* SftyDma_UpdateP15WAndTiStamp(); */
+ 
+@@ -2713,7 +2713,7 @@ if((SWIT_SftyDcEvln_EN_KEY==SWIT_First_HookEnableKey)||(SWIT_SftyDcEvln_EN_KEY==
+ /**************************************************************************************/
+ LOCAL_INLINE void SftyDcEvln_P14HvLvRngEvln(void)
+ {
+-#ifdef SWIT_FC_Active
++/*#ifdef SWIT_FC_Active
+ if((SWIT_SftyDcEvln_EN_KEY==SWIT_First_HookEnableKey))
+    SWIT_SftyDcEvln_P14HvLvRngEvln_BgnHook ();
+ #endif
+@@ -2764,10 +2764,10 @@ if((SWIT_SftyDcEvln_EN_KEY==SWIT_First_HookEnableKey))
+ /***************************************************************************/
+ LOCAL_INLINE void SftyDcEvln_P5URngEvln(void)
+ {
+-#ifdef SWIT_FC_Active
++/*#ifdef SWIT_FC_Active
+ if((SWIT_SftyDcEvln_EN_KEY==SWIT_First_HookEnableKey))
+    SWIT_SftyDcEvln_P5URngEvln_BgnHook ();
+-#endif
++#endif*/
+    /* Initialize the error monitoring status variables*/
+    SftyDcEvlnP5UTiStampErrMonrSt = ERR_DEB_MONR_STS_INACTIVE;
+    SftyDcEvlnP5UErrMonrSt        = ERR_DEB_MONR_STS_INACTIVE;
+@@ -2819,10 +2819,10 @@ if((SWIT_SftyDcEvln_EN_KEY==SWIT_First_HookEnableKey))
+ /***************************************************************************/
+ LOCAL_INLINE void SftyDcEvln_P5VRngEvln(void)
+ {
+-#ifdef SWIT_FC_Active
++/*#ifdef SWIT_FC_Active
+ if((SWIT_SftyDcEvln_EN_KEY==SWIT_First_HookEnableKey))
+    SWIT_SftyDcEvln_P5VRngEvln_BgnHook ();
+-#endif
++#endif*/
+    /* Initialize the error monitoring status variables*/
+    SftyDcEvlnP5VTiStampErrMonrSt = ERR_DEB_MONR_STS_INACTIVE;
+    SftyDcEvlnP5VErrMonrSt        = ERR_DEB_MONR_STS_INACTIVE;
+@@ -2873,10 +2873,10 @@ if((SWIT_SftyDcEvln_EN_KEY==SWIT_First_HookEnableKey))
+ /***************************************************************************/
+ LOCAL_INLINE void SftyDcEvln_P5WRngEvln(void)
+ {
+-#ifdef SWIT_FC_Active
++/*#ifdef SWIT_FC_Active
+ if((SWIT_SftyDcEvln_EN_KEY==SWIT_First_HookEnableKey))
+    SWIT_SftyDcEvln_P5WRngEvln_BgnHook ();
+-#endif
++#endif*/
+    /*Initialize the error monitoring status variables*/
+    SftyDcEvlnP5WTiStampErrMonrSt = ERR_DEB_MONR_STS_INACTIVE;
+    SftyDcEvlnP5WErrMonrSt        = ERR_DEB_MONR_STS_INACTIVE;
+@@ -2928,10 +2928,10 @@ if((SWIT_SftyDcEvln_EN_KEY==SWIT_First_HookEnableKey))
+ /***************************************************************************/
+ LOCAL_INLINE void SftyDcEvln_P5Asc2RngEvln(void)
+ {
+-#ifdef SWIT_FC_Active
++/*#ifdef SWIT_FC_Active
+ if((SWIT_SftyDcEvln_EN_KEY==SWIT_First_HookEnableKey))
+    SWIT_SftyDcEvln_P5Asc2RngEvln_BgnHook ();
+-#endif
++#endif*/
+    /*Initialize the error monitoring status variables*/
+    SftyDcEvlnP5Asc2TiStampErrMonrSt = ERR_DEB_MONR_STS_INACTIVE;
+    SftyDcEvlnP5Asc2ErrMonrSt        = ERR_DEB_MONR_STS_INACTIVE;
+@@ -2981,10 +2981,10 @@ if((SWIT_SftyDcEvln_EN_KEY==SWIT_First_HookEnableKey))
+ /**********************************************************************/
+ LOCAL_INLINE void SftyDcEvln_EMXStatusEoHVLEvln(void)
+ {
+-#ifdef SWIT_FC_Active
++/*#ifdef SWIT_FC_Active
+ if((SWIT_SftyDcEvln_EN_KEY==SWIT_First_HookEnableKey))
+    SWIT_SftyDcEvln_EMXStatusEoHVLEvln_BgnHook ();
+-#endif
++#endif*/
+    /* Check if high voltage network is active */
+    if(TRUE)
+    {
+@@ -3039,10 +3039,10 @@ if((SWIT_SftyDcEvln_EN_KEY==SWIT_First_HookEnableKey))
+ /**********************************************************************/
+ LOCAL_INLINE void SftyDcEvln_EMXStatusSpgfreiheitEvln(void)
+ {
+-#ifdef SWIT_FC_Active
++/*#ifdef SWIT_FC_Active
+ if((SWIT_SftyDcEvln_EN_KEY==SWIT_First_HookEnableKey))
+    SWIT_SftyDcEvln_EMXStatusSpgfreiheitEvln_BgnHook ();
+-#endif
++#endif*/
+ /* comments code for new FM v1.1.0*/
+ #if 0
+    /* Check FCT_ID_FLT_GRP_1 status. It "gathers" status of all debounced UHVDC errors */
+@@ -3093,9 +3093,9 @@ if((SWIT_SftyDcEvln_EN_KEY==SWIT_First_HookEnableKey))
+ /***************************************************************************/
+ LOCAL_INLINE void SftyDcEvln_AscTogFltCuEvln(void)
+ {
+-#ifdef SWIT_FC_Active
++/*#ifdef SWIT_FC_Active
+    SWIT_SftyDcEvln_AscTogFltCuEvln_BgnHook ();
+-#endif
++#endif*/
+    /* Initialize the error monitoring status variable */
+    SftyDcEvlnAscTogFltCuErrMonrSt  = ERR_DEB_MONR_STS_INACTIVE;
+ 
+@@ -3133,10 +3133,10 @@ LOCAL_INLINE void SftyDcEvln_AscTogFltCuEvln(void)
+ /***************************************************************************/
+ LOCAL_INLINE void SftyDcEvln_AscTogFltPuEvln(void)
+ {
+-#ifdef SWIT_FC_Active
++/*#ifdef SWIT_FC_Active
+ if((SWIT_SftyDcEvln_EN_KEY==SWIT_First_HookEnableKey))
+    SWIT_SftyDcEvln_AscTogFltPuEvln_BgnHook ();
+-#endif
++#endif*/
+    /* Initialize the error monitoring status variable */
+    SftyDcEvlnAscTogFltPuErrMonrSt  = ERR_DEB_MONR_STS_INACTIVE;
+ 
+@@ -3174,10 +3174,10 @@ if((SWIT_SftyDcEvln_EN_KEY==SWIT_First_HookEnableKey))
+ /***********************************************************************************/
+ LOCAL_INLINE void SftyDcEvln_SepicOffStrtUpDiag(void)
+ {
+-#ifdef SWIT_FC_Active
++/*#ifdef SWIT_FC_Active
+ if((SWIT_SftyDcEvln_EN_KEY==SWIT_First_HookEnableKey))
+    SWIT_SftyDcEvln_SepicOffStrtUpDiag_BgnHook ();
+-#endif
++#endif*/
+    SftyDcEvlnSepicOutStrtUpErrMonrSt = ERR_DEB_MONR_STS_INACTIVE;
+    SftyDcEvlnP15StrtUpErrMonrSt      = ERR_DEB_MONR_STS_INACTIVE;
+ 
+@@ -3282,10 +3282,10 @@ if((SWIT_SftyDcEvln_EN_KEY==SWIT_First_HookEnableKey))
+ /******************************************************************/
+ LOCAL_INLINE void SftyDcEvln_OCPStrtUpDiag(void)
+ {
+-#ifdef SWIT_FC_Active
++/*#ifdef SWIT_FC_Active
+ if((SWIT_SftyDcEvln_EN_KEY==SWIT_First_HookEnableKey))
+    SWIT_SftyDcEvln_OCPStrtUpDiag_BgnHook ();
+-#endif
++#endif*/
+    /* Initialize the error monitoring status variables*/
+    SftyDcEvlnP15ResStrtUpErrMonrSt = ERR_DEB_MONR_STS_INACTIVE;
+    SftyDcEvlnP15UStrtUpErrMonrSt   = ERR_DEB_MONR_STS_INACTIVE;
+diff --git a/src/fw_cu/Components/Safety/Sfty_Inv/SftyTempEvln/src/SftyTempEvln.c b/src/fw_cu/Components/Safety/Sfty_Inv/SftyTempEvln/src/SftyTempEvln.c
+index 492eb26bf..e63fae4b4 100644
+--- a/src/fw_cu/Components/Safety/Sfty_Inv/SftyTempEvln/src/SftyTempEvln.c
++++ b/src/fw_cu/Components/Safety/Sfty_Inv/SftyTempEvln/src/SftyTempEvln.c
+@@ -835,7 +835,8 @@ FUNC(void, SFTY_TEMP_EVLN_CODE) SftyTempEvln_MainFunction(void)
+    /* ************* Source code **************** */
+ 
+ #ifdef SWIT_FC_Active
+-   SWIT_SftyTempEvln_MainFunctionArea1_BgnHook();
++   if((SWIT_SftyTEvln_EN_KEY==SWIT_First_HookEnableKey))
++   SWIT_SftyTempEvln_MainFunction_BgnHook();
+ #endif
+ 
+ #ifdef SWIT_IT_Active
+@@ -860,6 +861,10 @@ FUNC(void, SFTY_TEMP_EVLN_CODE) SftyTempEvln_MainFunction(void)
+ /******************************************************************/
+ FUNC(void, SFTY_TEMP_EVLN_CODE) SftyTempEvln_Init(void)
+ {
++
++#ifdef SWIT_FC_Active
++   SWIT_SftyTempEvln_Init_BgnHook();
++#endif
+    /* ******** Variables declaration *********** */
+ 
+   /* ************* Source code **************** */
+'

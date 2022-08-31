@@ -1,0 +1,307 @@
+b'commit a05b1be10c8250abb8814672d5a0419929f5175e
+Author: Santosh Pallanti <santos.pallanti.jv.ext@valeo.com>
+Date:   Fri Mar 11 21:43:57 2022 +0530
+
+    $100kW-40048$ - Over Speed Protection Error not Implemented in the SW
+    
+    Change-Id: I52be5bd691e6baaf54543880627e97284e18a4d2
+
+Submodule src/fw_cu/Components/Safety/Sfty_Inv/SftyRslvrCompst 7d13f87a5..f2b01b76e:
+  > $100kW-54790$ - Over Speed Protection Error not Implemented in the SW
+diff --git a/src/fw_cu/Components/Safety/Sfty_Inv/SftyRslvrOffsHndlr/src/SftyRslvrOffsHndlr.c b/src/fw_cu/Components/Safety/Sfty_Inv/SftyRslvrOffsHndlr/src/SftyRslvrOffsHndlr.c
+index 12211b7ec..71dee3dc0 100644
+--- a/src/fw_cu/Components/Safety/Sfty_Inv/SftyRslvrOffsHndlr/src/SftyRslvrOffsHndlr.c
++++ b/src/fw_cu/Components/Safety/Sfty_Inv/SftyRslvrOffsHndlr/src/SftyRslvrOffsHndlr.c
+@@ -2616,6 +2616,7 @@ LOCAL_INLINE void SftyRslvrOffsHndlr_ValidateRslvrDataNvmInit(void)
+    /* Change NvM validation state to PATTERN_CHK */
+    SftyRslvrOffsHndlrNvMOffsVldnState = SFTYRSLVROFFSHNDLR_NVM_VLDN_PATTERN_CHK;
+ 
++
+    return;
+ }
+ 
+@@ -2704,6 +2705,9 @@ LOCAL_INLINE void SftyRslvrOffsHndlr_ValidateRslvrDataNvmCrcChk(void)
+    }
+    else
+    {
++      /* Update CRC error monitor state to Failed */
++      SftyRslvrOffsHndlrRslvrOffsCrcErrMonrSt = ERR_DEB_MONR_STS_FAILED;
++
+       /* NvM resolver offset checksum is invalid. Set SSW calibration status to FAILED */
+       SftyC2cData.StsCalibSfty = (uint8)SFTYRSLVROFFSHNDLR_CALIB_FAILED;
+ 
+@@ -3574,8 +3578,8 @@ FUNC(void, SFTYRSLVROFFSHNDLR_CODE) SftyRslvrOffsHndlr_InitAsilC(void)
+    SftyRslvrOffsHndlrFirstRunDone            = FALSE;
+    SftyRslvrOffsHndlrAscVldMeasCycCntr       = 0U;
+    SftyRslvrOffsHndlrInVldMeasCycCntr        = 0U;
+-   SftyRslvrOffsHndlrIqCntr                  = 0U;
+-   SftyRslvrOffsHndlrInternRslvrOffsVld      = SFTY_RSLVR_OFFS_UNDETM;
++   SftyRslvrOffsHndlrInternRslvrOffsVld      = SFTY_RSLVR_OFFS_INVLD;
++   SftyRslvrOffsHndlrC2cRslvrOffsVld         = SFTY_RSLVR_OFFS_INVLD;
+ 
+    SftyC2cData.StsCalibSfty = (uint8)SFTYRSLVROFFSHNDLR_CALIB_INACTIVE;
+ 
+diff --git a/src/fw_cu/Components/Safety/Sfty_Inv/SftyTqMon/include/SftyTqMon_data.h b/src/fw_cu/Components/Safety/Sfty_Inv/SftyTqMon/include/SftyTqMon_data.h
+index a43a2c631..24276199e 100644
+--- a/src/fw_cu/Components/Safety/Sfty_Inv/SftyTqMon/include/SftyTqMon_data.h
++++ b/src/fw_cu/Components/Safety/Sfty_Inv/SftyTqMon/include/SftyTqMon_data.h
+@@ -243,36 +243,6 @@ extern VAR(float32, SFTYRSLVRCALCN_VAR) SftyRslvrCalcnMeclSpdFildAbs;
+ 
+ 
+ 
+-
+-
+-   /* Begin: SFTYSPDMON_START_SEC_VAR_AREA_CMN_FAST_INIT_8 (online) */
+-#define SFTYSPDMON_START_SEC_VAR_AREA_CMN_FAST_INIT_8
+-#include "MemMap.h"
+-
+-extern VAR(uint8, SFTYSPDMON_VAR) SftySpdMonDrehzahlMaxSt;
+-   #define SFTYSPDMON_STOP_SEC_VAR_AREA_CMN_FAST_INIT_8
+-#include "MemMap.h"
+-/* End: SFTYSPDMON_STOP_SEC_VAR_AREA_CMN_FAST_INIT_8 (online) */
+-
+-
+-
+-
+-
+-
+-   /* Begin: SFTYSPDMON_START_SEC_VAR_AREA_CMN_FAST_INIT_8 (online) */
+-#define SFTYSPDMON_START_SEC_VAR_AREA_CMN_FAST_INIT_8
+-#include "MemMap.h"
+-
+-extern VAR(uint8, SFTYSPDMON_VAR) SftySpdMonDrehzahlMinSt;
+-   #define SFTYSPDMON_STOP_SEC_VAR_AREA_CMN_FAST_INIT_8
+-#include "MemMap.h"
+-/* End: SFTYSPDMON_STOP_SEC_VAR_AREA_CMN_FAST_INIT_8 (online) */
+-
+-
+-
+-
+-
+-
+    /* Begin: SFTYTQESTIMRCURMDL_START_SEC_VAR_AREA_2_FAST_NO_INIT_32 (online) */
+ #define SFTYTQESTIMRCURMDL_START_SEC_VAR_AREA_2_FAST_NO_INIT_32
+ #include "MemMap.h"
+diff --git a/src/fw_cu/Components/Safety/Sfty_Inv/SftyTqMon/src/SftyTqMon.c b/src/fw_cu/Components/Safety/Sfty_Inv/SftyTqMon/src/SftyTqMon.c
+index 58be9e563..a4d392246 100644
+--- a/src/fw_cu/Components/Safety/Sfty_Inv/SftyTqMon/src/SftyTqMon.c
++++ b/src/fw_cu/Components/Safety/Sfty_Inv/SftyTqMon/src/SftyTqMon.c
+@@ -786,6 +786,7 @@ if((SWIT_SftyTqMon_EN_KEY==SWIT_First_HookEnableKey))
+         (SftyTqEstimrPwrMdlIgbtModAct      == SFTY_ST_ACTIVE)
+      )
+    {
++#if 0
+       if(SftySpdMonDrehzahlMaxSt == TRUE)
+       {
+          /* Max speed violated, average positive torques shall be detected */
+@@ -808,6 +809,7 @@ if((SWIT_SftyTqMon_EN_KEY==SWIT_First_HookEnableKey))
+          accrDif = 0.F;
+          brkDif  = 0.F;
+       }
++#endif
+ 
+       /* Integrators. To prevent them from running too high, always subtract allowed value */
+       SftyTqMonTqEspTqBrkSum  = (SftyTqMonTqEspTqBrkSum  + brkDif)  - SftyTqMonTqEspMaxActDampBrkTq;
+diff --git a/src/fw_cu/build/Parfiles/P2_100kW/Testbench/VW310E_76_49_A274_0028_VEH_200901.par b/src/fw_cu/build/Parfiles/P2_100kW/Testbench/VW310E_76_49_A274_0028_VEH_200901.par
+index 93eb07e00..8a038cbe6 100644
+--- a/src/fw_cu/build/Parfiles/P2_100kW/Testbench/VW310E_76_49_A274_0028_VEH_200901.par
++++ b/src/fw_cu/build/Parfiles/P2_100kW/Testbench/VW310E_76_49_A274_0028_VEH_200901.par
+@@ -10854,13 +10854,11 @@ SftyShutoffPahTstInvNomValPart2._8_.pwmReq [INT(32)]  2 ; IGBT_TOP_OFF_BOT_ON
+ SftyShutoffPahTstInvNomValPart2._8_.smu [UINT(8)]  0 ; STD_OFF
+ SftyShutoffPahTstInvNomValPart2._8_.topAsc [UINT(8)]  0 ; STD_OFF
+ SftyShutoffPahTstInvNomValPart2._8_.topNomVal [UINT(8)]  0 ; STD_OFF
+-SftySpdMonMaxDrehzahlDampHiThd [FLOAT]  1000 ;  1000
+-SftySpdMonMaxDrehzahlDampLoThd [FLOAT] -500 ; -500
+-SftySpdMonMeclOvrSpdThdHi [FLOAT]  16900 ;  16900
+-SftySpdMonMeclOvrSpdThdLo [FLOAT] -4500 ; -4500
+-SftySpdMonMinDrehzahlDampHiThd [FLOAT] -500 ; -500
+-SftySpdMonMinDrehzahlDampLoThd [FLOAT]  1000 ;  1000
+-SftySpdMonSpdPlausThd [FLOAT]  125 ;  125
++SftySpdMonMeclOvrSpdThdHi [FLOAT]  1632 ;  1632
++SftySpdMonMeclOvrSpdThdLo [FLOAT] -840 ; -840
++SftySpdMonMeclOvrSpdHysThdLo [FLOAT] -820 ; -820
++SftySpdMonMeclOvrSpdHysThdHi [FLOAT] 1612 ; 1612
++SftySpdMonSpdPlausThd [FLOAT]  250 ;  250
+ SftySysInitAurixSftySysEnad [UINT(8)]  0 ; FALSE
+ SftySysInitCcuLockTiOut [UINT(32)]  100 ;  100
+ SftyTqEstimrCrvOfTqDrgInCurMdlAxis [UINT(16),(1,19)]
+diff --git a/src/fw_cu/build/a2l/Add.a2l b/src/fw_cu/build/a2l/Add.a2l
+index 44f128437..749f68c66 100644
+--- a/src/fw_cu/build/a2l/Add.a2l
++++ b/src/fw_cu/build/a2l/Add.a2l
+@@ -16279,64 +16279,6 @@ ASAP2_VERSION 1 60
+          /end IF_DATA
+       /end MEASUREMENT
+ 
+-      /begin MEASUREMENT SftySpdMonDrehzahlMax
+-         "Max motor speed limit"
+-         FLOAT32_IEEE
+-         _CNV_R_R_RATIONALFU_1_CM
+-         1
+-         0.
+-         -3.402823466385288e+038
+-         3.402823466385288e+038
+-         ECU_ADDRESS 0x0
+-         FORMAT "%.15"
+-         /begin IF_DATA ETK_XETK
+-            DEFAULT_RASTERS 13 
+-         /end IF_DATA
+-      /end MEASUREMENT
+-
+-      /begin MEASUREMENT SftySpdMonDrehzahlMaxSt
+-         "Status of motor speed if exceeded max threshold"
+-         UBYTE
+-         _CNV_S_2_STRING_BOO_3_CM
+-         1
+-         0.
+-         0.
+-         1.
+-         ECU_ADDRESS 0x0
+-         /begin IF_DATA ETK_XETK
+-            DEFAULT_RASTERS 13 
+-         /end IF_DATA
+-      /end MEASUREMENT
+-
+-      /begin MEASUREMENT SftySpdMonDrehzahlMin
+-         "Min motor speed"
+-         FLOAT32_IEEE
+-         _CNV_R_R_RATIONALFU_1_CM
+-         1
+-         0.
+-         -3.402823466385288e+038
+-         3.402823466385288e+038
+-         ECU_ADDRESS 0x0
+-         FORMAT "%.15"
+-         /begin IF_DATA ETK_XETK
+-            DEFAULT_RASTERS 13 
+-         /end IF_DATA
+-      /end MEASUREMENT
+-
+-      /begin MEASUREMENT SftySpdMonDrehzahlMinSt
+-         "Status of motor speed if min threshold is exceeded"
+-         UBYTE
+-         _CNV_S_2_STRING_BOO_3_CM
+-         1
+-         0.
+-         0.
+-         1.
+-         ECU_ADDRESS 0x0
+-         /begin IF_DATA ETK_XETK
+-            DEFAULT_RASTERS 13 
+-         /end IF_DATA
+-      /end MEASUREMENT
+-
+       /begin MEASUREMENT SftySpdMonOvrSpdErrMonrSt
+          "Overspeed monitor error state"
+          UBYTE
+@@ -26329,30 +26271,6 @@ ASAP2_VERSION 1 60
+          FORMAT "%.15"
+       /end CHARACTERISTIC
+ 
+-      /begin CHARACTERISTIC SftySpdMonMinDrehzahlDampHiThd
+-         "Upper hysteresis threshold for minimum engine speed"
+-         VALUE
+-         0x0
+-         _REC_S1VAL_Autosar40_F4
+-         6.805646932770577e+38
+-         _CNV_R_R_RATIONALFU_1_CM
+-         -3.402823466385288e+038
+-         3.402823466385288e+038
+-         FORMAT "%.15"
+-      /end CHARACTERISTIC
+-
+-      /begin CHARACTERISTIC SftySpdMonMinDrehzahlDampLoThd
+-         "Lower hysteresis threshold for minimum motor speed limit"
+-         VALUE
+-         0x0
+-         _REC_S1VAL_Autosar40_F4
+-         6.805646932770577e+38
+-         _CNV_R_R_RATIONALFU_1_CM
+-         -3.402823466385288e+038
+-         3.402823466385288e+038
+-         FORMAT "%.15"
+-      /end CHARACTERISTIC
+-
+       /begin CHARACTERISTIC SftySpdMonSpdPlausThd
+          "Threshold value for Speed Monitoring"
+          VALUE
+@@ -35611,17 +35529,13 @@ ASAP2_VERSION 1 60
+          "1.5.0     SftySpdMon"
+          FUNCTION_VERSION "1.5.0"
+          /begin DEF_CHARACTERISTIC
+-            SftySpdMonMaxDrehzahlDampHiThd
+-            SftySpdMonMaxDrehzahlDampLoThd
+             SftySpdMonMeclOvrSpdThdHi
+             SftySpdMonMeclOvrSpdThdLo
+-            SftySpdMonMinDrehzahlDampHiThd
+-            SftySpdMonMinDrehzahlDampLoThd
++            SftySpdMonMeclOvrSpdHysThdLo
++            SftySpdMonMeclOvrSpdHysThdHi
+             SftySpdMonSpdPlausThd
+          /end DEF_CHARACTERISTIC
+          /begin OUT_MEASUREMENT
+-            SftySpdMonDrehzahlMaxSt
+-            SftySpdMonDrehzahlMinSt
+             SftySpdMonOvrSpdErrMonrSt
+             SftySpdMonSpdPlausErrMonrSt
+          /end OUT_MEASUREMENT
+@@ -35633,8 +35547,6 @@ ASAP2_VERSION 1 60
+          /end IN_MEASUREMENT
+          /begin LOC_MEASUREMENT
+             SftySpdMonAbsDifSpd
+-            SftySpdMonDrehzahlMax
+-            SftySpdMonDrehzahlMin
+          /end LOC_MEASUREMENT
+       /end FUNCTION
+ 
+@@ -35755,8 +35667,6 @@ ASAP2_VERSION 1 60
+             SftyE2ePhySigDataMotor56MO_EMX_SollMoment
+             SftyRslvrCalcnMeclSpdFild
+             SftyRslvrCalcnMeclSpdFildAbs
+-            SftySpdMonDrehzahlMaxSt
+-            SftySpdMonDrehzahlMinSt
+             SftyTqEstimrCurMdlFildTq
+             SftyTqEstimrCurMdlVldyFlg
+             SftyTqEstimrPwrMdlFildTq
+diff --git a/src/fw_cu/build/a2l/Measurements-to-Timeslices-Mapping.csv b/src/fw_cu/build/a2l/Measurements-to-Timeslices-Mapping.csv
+index 70c4515b7..831a0c0f9 100644
+--- a/src/fw_cu/build/a2l/Measurements-to-Timeslices-Mapping.csv
++++ b/src/fw_cu/build/a2l/Measurements-to-Timeslices-Mapping.csv
+@@ -5351,12 +5351,15 @@ SftyShutoffPahTstIgbtSts.topV,Core_1,Core_1_200us,0.2,,,SSW
+ SftyShutoffPahTstIgbtSts.topW,Core_1,Core_1_200us,0.2,,,SSW
+ SftyShutoffPahTstIvtrFltSt.st,Core_1,Core_1_200us,0.2,,,SSW
+ SftyShutoffPahTstIvtrFltSt.step,Core_1,Core_1_200us,0.2,,,SSW
++SftySpdMonAbsDifAg,Core_1,Core_1_200us,0.2,,,SSW
+ SftySpdMonAgPlausErrMonrSt,Core_1,Core_1_200us,0.2,,,SSW
+ SftySpdMonAgVldyFlg,Core_1,Core_1_200us,0.2,,,SSW
+ SftySpdMonMeclAg,Core_1,Core_1_200us,0.2,,,SSW
+ SftySpdMonMeclSpdFild,Core_1,Core_1_200us,0.2,,,SSW
+ SftySpdMonMeclSpdRpmFild,Core_1,Core_1_200us,0.2,,,SSW
+ SftySpdMonMeclSpdVldyFlg,Core_1,Core_1_200us,0.2,,,SSW
++SftySpdMonOvrSpdErrMonrSt,Core_1,Core_1_200us,0.2,,,SSW
++SftySpdMonSpdPlausErrMonrSt,Core_1,Core_1_200us,0.2,,,SSW
+ SftySpdMonSpdVldyFlg,Core_1,Core_1_200us,0.2,,,SSW
+ SftySysInitPwrOnRstFlg,Core_1,Core_1_200us,0.2,,,SSW
+ SftySysInitPwrOnRstHwFlg,Core_1,Core_1_200us,0.2,,,SSW
+diff --git a/src/fw_cu/build/subVariants/series_production/Parfiles/Testbench/VW310E_75_49_265A_0024_VEH_192701.par b/src/fw_cu/build/subVariants/series_production/Parfiles/Testbench/VW310E_75_49_265A_0024_VEH_192701.par
+index 4473b8435..b48c4b8a4 100644
+--- a/src/fw_cu/build/subVariants/series_production/Parfiles/Testbench/VW310E_75_49_265A_0024_VEH_192701.par
++++ b/src/fw_cu/build/subVariants/series_production/Parfiles/Testbench/VW310E_75_49_265A_0024_VEH_192701.par
+@@ -29715,12 +29715,10 @@ SftyShutoffPahTstInvNomValPart2._8_.pwmReq [INT(32)]  2 ; IGBT_TOP_OFF_BOT_ON
+ SftyShutoffPahTstInvNomValPart2._8_.smu [UINT(8)]  0 ; STD_OFF
+ SftyShutoffPahTstInvNomValPart2._8_.topAsc [UINT(8)]  0 ; STD_OFF
+ SftyShutoffPahTstInvNomValPart2._8_.topNomVal [UINT(8)]  0 ; STD_OFF
+-SftySpdMonMaxDrehzahlDampHiThd [FLOAT]  1000 ;  1000
+-SftySpdMonMaxDrehzahlDampLoThd [FLOAT]  -500 ; -500
+-SftySpdMonMeclOvrSpdThdHi [FLOAT]  16300 ;  16300
+-SftySpdMonMeclOvrSpdThdLo [FLOAT]  -3000 ; -3000
+-SftySpdMonMinDrehzahlDampHiThd [FLOAT]  -500 ; -500
+-SftySpdMonMinDrehzahlDampLoThd [FLOAT]  1000 ;  1000
++SftySpdMonMeclOvrSpdThdHi [FLOAT]  1632 ;  1632
++SftySpdMonMeclOvrSpdThdLo [FLOAT]  -840 ; -840
++SftySpdMonMeclOvrSpdHysThdLo [FLOAT] -820 ; -820
++SftySpdMonMeclOvrSpdHysThdHi [FLOAT] 1612 ; 1612
+ SftySpdMonSpdPlausThd [FLOAT]  250 ;  250
+ SftyTEvlnCuT1SnsrChartcTPrmL [FLOAT,(1,17)]
+ :  -50 ; -50
+'

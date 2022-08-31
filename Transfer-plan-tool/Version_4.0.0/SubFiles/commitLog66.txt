@@ -1,0 +1,67 @@
+b'commit 74d0caa889415246d2c53a81567013195f3faa57
+Author: Adi GODAVARTHI (JV) <adi.godavarthi.jv@valeo.com>
+Date:   Wed Jan 19 09:34:10 2022 +0100
+
+    LLSW changes
+    
+    Change-Id: I8af26efb970781ad7499bf6632bf4b0fecc01a8d
+
+diff --git a/src/fw_cu/Components/Cmn/Com/LlswQSpi_Cfg/src/LlswQSpi_cfg_core0.c b/src/fw_cu/Components/Cmn/Com/LlswQSpi_Cfg/src/LlswQSpi_cfg_core0.c
+index c50d77404..1cc3922bb 100644
+--- a/src/fw_cu/Components/Cmn/Com/LlswQSpi_Cfg/src/LlswQSpi_cfg_core0.c
++++ b/src/fw_cu/Components/Cmn/Com/LlswQSpi_Cfg/src/LlswQSpi_cfg_core0.c
+@@ -187,7 +187,7 @@ STATIC CONST(LLSWQSpi_HwUnitChCfgType, LLSWQSPI_CALIB) LlswQSpi_HwUnitChCfg_0[]
+        *  */
+       .SPIUnit = QSPI3,
+       .OpMode = QSPI_SEQUENCE_MODE,
+-      .PISEL.B.MRIS = (uint8)(LLSW_QSPI_MRIS_B),
++      .PISEL.B.MRIS = (uint8)(LLSW_QSPI_MRIS_A),
+ 
+       .GLOBALCON.B.MS = LLSWQSPI_ENABLE_MASTER_MODE,
+       .GLOBALCON.B.SI = LLSWQSPI_DISABLE_STATINJECTION,
+diff --git a/src/fw_cu/workspace/Tresos/nextgen/config/Port.xdm b/src/fw_cu/workspace/Tresos/nextgen/config/Port.xdm
+index 74691ae6c..cb9036a1b 100644
+--- a/src/fw_cu/workspace/Tresos/nextgen/config/Port.xdm
++++ b/src/fw_cu/workspace/Tresos/nextgen/config/Port.xdm
+@@ -1505,12 +1505,7 @@
+                           </a:a>
+                         </d:var>
+                         <d:var name="PortPinSymbolicName" type="STRING" 
+-                               value="PORT_2_PIN_5">
+-                          <a:a name="IMPORTER_INFO">
+-                            <a:v>@DEF</a:v>
+-                            <a:v>@CALC</a:v>
+-                          </a:a>
+-                        </d:var>
++                               value="PORT_2_PIN_5_MISO_BS"/>
+                         <d:var name="PortPinDirection" type="ENUMERATION" 
+                                value="PORT_PIN_IN"/>
+                         <d:var name="PortPinDirectionChangeable" type="BOOLEAN" 
+@@ -1533,7 +1528,7 @@
+                           <a:a name="IMPORTER_INFO" value="@DEF"/>
+                         </d:var>
+                         <d:var name="PortPinInputPullResistor" 
+-                               type="ENUMERATION" value="PORT_PIN_IN_PULL_DOWN"/>
++                               type="ENUMERATION" value="PORT_PIN_IN_NO_PULL"/>
+                         <d:var name="PortPinOutputPadDriveStrength" 
+                                type="ENUMERATION" 
+                                value="PORT_PIN_DEFAULT_DRIVER">
+@@ -2397,7 +2392,7 @@
+                           </a:a>
+                         </d:var>
+                         <d:var name="PortPinSymbolicName" type="STRING" 
+-                               value="PORT_10_PIN_7_M_CAN_SPI_MISO"/>
++                               value="PORT_10_PIN_7_UNUSED"/>
+                         <d:var name="PortPinDirection" type="ENUMERATION" 
+                                value="PORT_PIN_IN"/>
+                         <d:var name="PortPinDirectionChangeable" type="BOOLEAN" 
+@@ -2422,7 +2417,7 @@
+                           <a:a name="IMPORTER_INFO" value="@DEF"/>
+                         </d:var>
+                         <d:var name="PortPinInputPullResistor" 
+-                               type="ENUMERATION" value="PORT_PIN_IN_NO_PULL"/>
++                               type="ENUMERATION" value="PORT_PIN_IN_PULL_DOWN"/>
+                         <d:var name="PortPinOutputPadDriveStrength" 
+                                type="ENUMERATION" 
+                                value="PORT_PIN_DEFAULT_DRIVER">
+'

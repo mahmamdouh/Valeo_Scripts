@@ -1,0 +1,508 @@
+b'commit 9aea4a8fb4798908854e42f60be1a2febd5bb871
+Author: mbahaa1 <mohamed.bahaa@valeo.com>
+Date:   Sun Jan 23 10:05:38 2022 +0200
+
+    $100kW-50079$ SWIT E2eFpga Fault Injection Test Hooks
+    
+    Change-Id: I2adf4333560035afcde78982c34f061de971a5cd
+
+diff --git a/src/fw_cu/Components/Cmn/SWIT/SWIT_BSW/include/SWIT_BSW.h b/src/fw_cu/Components/Cmn/SWIT/SWIT_BSW/include/SWIT_BSW.h
+index 1bd2e0eaa..50ef89c6f 100644
+--- a/src/fw_cu/Components/Cmn/SWIT/SWIT_BSW/include/SWIT_BSW.h
++++ b/src/fw_cu/Components/Cmn/SWIT/SWIT_BSW/include/SWIT_BSW.h
+@@ -63,6 +63,11 @@
+ #define SWIT_SftyC2cData_StsCalibSfty_Input_Key_1 (30706)
+ #define SWIT_SftyC2cData_StsCalibSfty_Input_Key_2 (30725)
+ 
++/* E2eFpga Hooks*/
++
++#define SWIT_SftyE2eFpgaTxCrcCtrlAErrMonrStAcc_Output_KEY 30797
++#define SWIT_SftyE2eFpgaTxCrcCtrlSErrMonrStAcc_Output_KEY 30796
++
+ 
+ #define SWIT_LLSWQSpi_SeqEndNotifCfg_core2_Key 8050
+ 
+@@ -100,6 +105,20 @@
+  // Produced
+ 
+ 
++#define SWIT_BswFpgaIf_vidWriteDataCheck18B_EndHook()\\
++      do{\\
++         if((SWIT_SftyE2eFpgaTxCrcCtrlAErrMonrStAcc_Output_KEY == SWIT_BSW_Key) && (SWIT_BSW_Interfaces_Main_key == 1)){\\
++        \t *u16DataChk = SWIT_BSW_Output_hook_uint16_Calib;\\
++         }\\
++      }while(0)
++
++#define SWIT_BswFpgaIf_vidWriteDataCheck10B_EndHook()\\
++      do{\\
++         if((SWIT_SftyE2eFpgaTxCrcCtrlSErrMonrStAcc_Output_KEY == SWIT_BSW_Key) && (SWIT_BSW_Interfaces_Main_key == 1)){\\
++        \t *u16DataChk = 0;\\
++         }\\
++      }while(0)
++
+ /*IvtrCom Hooks*/
+ 
+ 
+diff --git a/src/fw_cu/Components/Cmn/SWIT/SWIT_DRCO/include/SWIT_DRCO.h b/src/fw_cu/Components/Cmn/SWIT/SWIT_DRCO/include/SWIT_DRCO.h
+index 020244545..078d1a5c7 100644
+--- a/src/fw_cu/Components/Cmn/SWIT/SWIT_DRCO/include/SWIT_DRCO.h
++++ b/src/fw_cu/Components/Cmn/SWIT/SWIT_DRCO/include/SWIT_DRCO.h
+@@ -25,7 +25,6 @@
+ #include "EncCalcn_data.h"
+ #include "RslvrCalcn_data.h"
+ #include "IvtrThermMdl_data.h"
+-#include "IpmCtrl_data.h"
+ #include "HvAcIMeas_data.h"
+ #define SWIT_DRCO_INTERFACES_MAIN_KEY_ENABLE 1
+ 
+diff --git a/src/fw_cu/Components/Cmn/SWIT/SWIT_DRCO/src/SWIT_DRCO.c b/src/fw_cu/Components/Cmn/SWIT/SWIT_DRCO/src/SWIT_DRCO.c
+index a8c44ca7a..c59149d58 100644
+--- a/src/fw_cu/Components/Cmn/SWIT/SWIT_DRCO/src/SWIT_DRCO.c
++++ b/src/fw_cu/Components/Cmn/SWIT/SWIT_DRCO/src/SWIT_DRCO.c
+@@ -343,7 +343,7 @@
+ 
+   void SWIT_HvDcICalcn_Run_BgnHook()
+   {
+-     SWIT_DRCO_Set_A(&TqCtrlAcPwrElec,SWIT_TqCtrlAcPwrElec_Output_KEY,SWIT_FLOAT32_A);
++     //SWIT_DRCO_Set_A(&TqCtrlAcPwrElec,SWIT_TqCtrlAcPwrElec_Output_KEY,SWIT_FLOAT32_A);
+   }
+ 
+ 
+@@ -358,12 +358,13 @@
+  {
+     //SWIT_DSPR_Core_2();
+    // SWIT_DMA_Core_2();
+-    SWIT_Asclin_Core_2();
+-    SWIT_Ports_Core_2();
++   // SWIT_Asclin_Core_2();
++   // SWIT_Ports_Core_2();
+  }
+ /*DRCO FUNCTIONS END*/
+ 
+  //extern void SWIT_IpmCtrl_Run_BgnHook();
++
+  void SWIT_IpmCtrl_Run_BgnHook(){
+   // SWIT_DRCO_Check_Input(&HvDcUCalcnUDc,SWIT_HvDcUCalcnUDc_IpmCtrl_INPUT_KEY,SWIT_FLOAT32);
+  }
+@@ -396,6 +397,7 @@
+   // SWIT_DRCO_Check_Input(&HvDcUCalcnUDcFild1,SWIT_HvDcUCalcnUDcFild1_TqMgr_INPUT_KEY,SWIT_FLOAT32);
+  }
+ 
++
+  void SWIT_EncFil_Run_BgnHook(){
+  \tSWIT_DRCO_Set(&EncCalcnSpdMecl,SWIT_EncCalcnSpdMecl_Output_KEY,SWIT_FLOAT32);
+  }
+diff --git a/src/fw_cu/Components/Cmn/SWIT/SWIT_SFTY/include/SWIT_Sfty.h b/src/fw_cu/Components/Cmn/SWIT/SWIT_SFTY/include/SWIT_Sfty.h
+index 13ceee71b..fdd1d50ca 100644
+--- a/src/fw_cu/Components/Cmn/SWIT/SWIT_SFTY/include/SWIT_Sfty.h
++++ b/src/fw_cu/Components/Cmn/SWIT/SWIT_SFTY/include/SWIT_Sfty.h
+@@ -14,7 +14,7 @@
+ 
+ #define SWIT_SftyAscLinSpi_EN_KEY  6000
+ #define SWIT_SftyCrc_EN_KEY  6100
+-#define SWIT_SftyDma_EN_KEY  6200
++#define SWIT_SftyDma_EN_KEY2  6200
+ #define SWIT_SftyDmaDrvr_EN_KEY 6300
+ #define SWIT_SftyDmaDrvr_cfg_EN_KEY   6400 
+ #define SWIT_SftyE2eP02Lib_EN_KEY  6500
+@@ -135,7 +135,8 @@
+ 
+ #define SWIT_SftyAscLinSpi_EN_KEY  6000
+ #define SWIT_SftyCrc_EN_KEY  6100
+-#define SWIT_SftyDma_EN_KEY  6200
++#define SWIT_SftyDma_EN_KEY  17700
++#define SWIT_SftyDma_EN_KEY2  6200
+ #define SWIT_SftyDmaDrvr_EN_KEY 6300
+ #define SWIT_SftyDmaDrvr_cfg_EN_KEY   6400
+ #define SWIT_SftyE2eP02Lib_EN_KEY  6500
+@@ -655,7 +656,8 @@
+ 
+ #define SWIT_SftyAscLinSpi_EN_KEY  6000
+ #define SWIT_SftyCrc_EN_KEY  6100
+-#define SWIT_SftyDma_EN_KEY  6200
++#define SWIT_SftyDma_EN_KEY  17700
++#define SWIT_SftyDma_EN_KEY2  6200
+ #define SWIT_SftyDmaDrvr_EN_KEY 6300
+ #define SWIT_SftyDmaDrvr_cfg_EN_KEY   6400
+ #define SWIT_SftyE2eP02Lib_EN_KEY  6500
+@@ -911,7 +913,7 @@
+ #define SWIT_SftyRslvrEvlnDsadcDmaErrMonrSt_Output_KEY\t            (30229)
+ #define SWIT_SftyRslvrEvlnDsadcOldTiStampErrMonrSt_Output_KEY\t    (30230)
+ #define SWIT_SftyRslvrEvlnVadcOldTiStampErrMonrSt_Output_KEY\t    (30231)
+-#define SWIT_SftyRslvrEvlnValCompErrMonrSt_Output_KEY               (30232)
++#define SWIT_SftyRslvrEvlnAurixHwFltErrMonrSt_Output_KEY            (30232)
+ 
+ #define SWIT_SftyRslvrEvlnVldyFlg_Output_KEY \t                    (30233)
+ #define SWIT_SftyRslvrEvlnTiStamp_Output_KEY \t                    (30234)
+@@ -938,6 +940,8 @@
+ #define SWIT_SftyRslvrDmaDsadcSinData_data_Output_KEY \t            (30260)
+ #define SWIT_SftyRslvrDmaDsadcCosData_data_Output_KEY \t            (30262)
+ #define SWIT_SftyDmaCsTimeStampData_data_Output_KEY        \t        (30264)
++#define SWIT_SftySpdMonMeclSpdVldyFlg_Output_KEY \t                (30265)
++#define SWIT_SftySpdMonMeclSpdRpmFild_Output_KEY \t                (30266)
+ 
+ #define SWIT_SftyRslvrEvlnVldyFlg_SftyRslvrCalcn_Input_KEY\t                   (30431)
+ #define SWIT_SftyRslvrEvlnVldyFlg_SftyRslvrOffsHndlr_Input_KEY\t               (30432)
+@@ -979,6 +983,8 @@
+ #define SWIT_SftyRslvrDmaDsadcCosData_tiStamp_Input_KEY \t                   (30467)
+ #define SWIT_SftyDmaCsTimeStampData_data_Input_KEY \t                           (30468)
+ #define SWIT_SftyDmaCsTimeStampData_tiStamp_Input_KEY \t                       (30469)
++#define SWIT_SftySpdMonMeclSpdVldyFlg_Input_KEY \t                           (30483)
++#define SWIT_SftySpdMonMeclSpdRpmFild_Input_KEY \t                           (30484)
+ 
+ #define SWIT_DrvCtrlC2cData_SpdActRpmFlt1_Output_KEY \t                       (30470)
+ 
+@@ -1008,7 +1014,7 @@
+ 
+ #define SWIT_SftyC2cData_FpgaTxDataFltBReinitSt_Output_KEY                     (20612)
+ 
+-//#define SWIT_SftySpdMonOvrSpdErrMonrSt_Output_KEY                              (20600)
++#define SWIT_SftySpdMonOvrSpdErrMonrSt_OUTPUT_KEY                              (20600)
+ 
+ #define SWIT_SftyE2eFpgaOverVoltVBatFltSts_Output_KEY                          (20604)
+ 
+@@ -2344,6 +2350,20 @@
+ #define SWIT_sftyTempEvlnPhaIV_Input_KEY 20202
+ #define SWIT_sftyTempEvlnPhaIW_Input_KEY 20204
+ #define SWIT_SftyAcEvlnPlausErrMonrSt_Output_KEY 20251
++
++
++/*E2eFpga System Function*/
++#define SWIT_CrcEval_InjectError_KEY 30800
++#define SWIT_SftyE2eFpgaSyncOutEarlyErrMonrStAcc_Output_KEY 30799
++#define SWIT_SftyE2eFpgaSyncOutLateErrMonrStAcc_Output_KEY 30798
++#define SWIT_SftyE2eFpgaTxCrcCtrlAErrMonrStAcc_Output_KEY 30797
++#define SWIT_SftyE2eFpgaTxCrcCtrlSErrMonrStAcc_Output_KEY 30796
++#define SWIT_ChkTiStamp_InjectError_KEY 30795
++#define SWIT_CrcRxA_InjectError_KEY 30794
++#define SWIT_CrcRxS_InjectError_KEY 30793
++#define SWIT_AlvCntrChk_InjectError_KEY 30792
++#define SWIT_ModPlaus_InjectError_KEY 30791
++#define SWIT_FpgaLossCom_InjectError_KEY 30790
+ #endif
+ 
+ 
+@@ -2687,6 +2707,66 @@ extern CONST(uint32, SWIT_Sfty_CALIB) SWIT_Stack_ID_Degbug ;
+           }\\
+       }while(0)
+ 
++/*E2eFpga Hooks*/
++#define SWIT_SftyE2eFpga_ARxCrcChk_EndHook()\\
++      do{\\
++         if((SWIT_SFTY_INTERFACES_MAIN_KEY_ENABLE==SWIT_SFTY_Interfaces_Main_key)&&(SWIT_CrcRxA_InjectError_KEY == SWIT_Interface_Output_key)){\\
++        \t retVal = E_NOT_OK;\\
++         }\\
++      }while(0)
++
++#define SWIT_SftyE2eFpga_SRxCrcChk_EndHook()\\
++      do{\\
++         if((SWIT_SFTY_INTERFACES_MAIN_KEY_ENABLE==SWIT_SFTY_Interfaces_Main_key)&&(SWIT_CrcRxS_InjectError_KEY == SWIT_Interface_Output_key)){\\
++        \t retVal = E_NOT_OK;\\
++         }\\
++      }while(0)
++
++#define SWIT_SftyE2eFpga_E2eFrameHndlr_BgnHook()\\
++      do{\\
++         if((SWIT_SFTY_INTERFACES_MAIN_KEY_ENABLE==SWIT_SFTY_Interfaces_Main_key)&&(SWIT_ModPlaus_InjectError_KEY == SWIT_Interface_Output_key)){\\
++        \t SftyInvActrStateReqMod = SftyE2eFpgaCurrMod + 1;\\
++         }\\
++      }while(0)
++
++
++#define SWIT_SftyE2eFpga_ChkTiStamp_BgnHook()\\
++      do{\\
++         if((SWIT_SFTY_INTERFACES_MAIN_KEY_ENABLE==SWIT_SFTY_Interfaces_Main_key)&&(SWIT_ChkTiStamp_InjectError_KEY == SWIT_Interface_Output_key)){\\
++        \t SftyDmaE2eFpgaFrameRx[frameIdx].Data.tiStamp = 1;\\
++         }\\
++      }while(0)
++
++#define SWIT_SftyE2eFpga_AlvCntrChk_BgnHook()\\
++      do{\\
++         if((SWIT_SFTY_INTERFACES_MAIN_KEY_ENABLE==SWIT_SFTY_Interfaces_Main_key)&&(SWIT_AlvCntrChk_InjectError_KEY == SWIT_Interface_Output_key)){\\
++        \t alvCntr = SftyE2eFpgaAlvCntr;\\
++         }\\
++      }while(0)
++
++#define SWIT_SftyE2eFpga_ExtrFltSts_EndHook()\\
++      do{\\
++         if((SWIT_SFTY_INTERFACES_MAIN_KEY_ENABLE==SWIT_SFTY_Interfaces_Main_key)&&(SWIT_FpgaLossCom_InjectError_KEY == SWIT_Interface_Output_key)){\\
++        \t SftyE2eFpgaLossComErrMonrStAcc = 1;\\
++         }\\
++      }while(0)
++
++#define SWIT_SftyE2eFpga_ExtractErrMonrSt_EndHook()\\
++      do{\\
++         if((SWIT_SFTY_INTERFACES_MAIN_KEY_ENABLE==SWIT_SFTY_Interfaces_Main_key)&&(SWIT_SftyE2eFpgaSyncOutEarlyErrMonrStAcc_Output_KEY == SWIT_Interface_Output_key)){\\
++        \t SftyE2eFpgaSyncOutEarlyErrMonrStAcc = 1;\\
++         }\\
++         if((SWIT_SFTY_INTERFACES_MAIN_KEY_ENABLE==SWIT_SFTY_Interfaces_Main_key)&&(SWIT_SftyE2eFpgaSyncOutLateErrMonrStAcc_Output_KEY == SWIT_Interface_Output_key)){\\
++        \t SftyE2eFpgaSyncOutLateErrMonrStAcc = 1;\\
++         }\\
++         if((SWIT_SFTY_INTERFACES_MAIN_KEY_ENABLE==SWIT_SFTY_Interfaces_Main_key)&&(SWIT_SftyE2eFpgaTxCrcCtrlAErrMonrStAcc_Output_KEY == SWIT_Interface_Output_key)){\\
++        \t SftyE2eFpgaTxCrcCtrlAErrMonrStAcc = 1;\\
++         }\\
++         if((SWIT_SFTY_INTERFACES_MAIN_KEY_ENABLE==SWIT_SFTY_Interfaces_Main_key)&&(SWIT_SftyE2eFpgaTxCrcCtrlSErrMonrStAcc_Output_KEY == SWIT_Interface_Output_key)){\\
++        \t SftyE2eFpgaTxCrcCtrlSErrMonrStAcc = 1;\\
++         }\\
++      }while(0)
++
+ //********Function calls*********/
+ /***************Start of QM Functions***********************/
+ #define SWIT_SFTY_AREA_0_START_SEC_CODE_SLOW
+@@ -3451,7 +3531,7 @@ extern void SWIT_SftyCrashSigMon_DetCanCrashSts_BgnHook(void);
+ 
+ /*DetmnRotorSPdANgHooks*/
+ extern void SWIT_SftyRslvrEvln_MainFunctionArea1_EndHook(void);
+-
++extern void SWIT_SftyParkLockMgr_MainFunction_BgnHook(void);
+ 
+ #define SWIT_SFTY_AREA_1_STOP_SEC_CODE_SLOW
+ #include "SWIT_MemMap.h"
+@@ -3829,7 +3909,8 @@ extern void SWIT_SftyDma_UpdateRawInterlockData_EndHook(void);
+ 
+    #define SWIT_SftyAscLinSpi_EN_KEY  6000
+    #define SWIT_SftyCrc_EN_KEY  6100
+-   #define SWIT_SftyDma_EN_KEY  6200
++   #define SWIT_SftyDma_EN_KEY  17700
++   #define SWIT_SftyDma_EN_KEY2  6200
+    #define SWIT_SftyDmaDrvr_EN_KEY 6300
+    #define SWIT_SftyDmaDrvr_cfg_EN_KEY   6400
+    #define SWIT_SftyE2eP02Lib_EN_KEY  6500
+diff --git a/src/fw_cu/Components/Cmn/SWIT/SWIT_SFTY/src/SWIT_SFTY_Area1.c b/src/fw_cu/Components/Cmn/SWIT/SWIT_SFTY/src/SWIT_SFTY_Area1.c
+index 9e38f75d0..024ce2970 100644
+--- a/src/fw_cu/Components/Cmn/SWIT/SWIT_SFTY/src/SWIT_SFTY_Area1.c
++++ b/src/fw_cu/Components/Cmn/SWIT/SWIT_SFTY/src/SWIT_SFTY_Area1.c
+@@ -413,7 +413,7 @@ void SWIT_SftyRslvrDma_UpdateRawRslvrValAndTiStamp_EndHook(void)
+ 
+    SWIT_Sfty_Set(&SftyRslvrDmaExctPeriodVldFlg , SWIT_SftyRslvrDmaExctPeriodVldFlg_Output_KEY , SWIT_UINT8);
+    SWIT_Sfty_Set(&SftyRslvrDmaVadcVldFlg , SWIT_SftyDmaRslvrVadcVldFlg_KEY , SWIT_UINT8);
+-   //SWIT_Sfty_Set(&SftyDmaRslvrDsadcVldFlg , SWIT_SftyDmaRslvrDsadcVldFlg_KEY , SWIT_UINT8);
++   SWIT_Sfty_Set(&SftyRslvrDmaDsadcVldFlg , SWIT_SftyDmaRslvrDsadcVldFlg_KEY , SWIT_UINT8);
+ 
+ }
+ 
+@@ -484,7 +484,11 @@ void SWIT_SftyRslvrDma_UpdateRawRslvrValAndTiStamp_EndHook(void)
+ 
+ /*EndHook Functions*/ //ASILA
+ 
+-
++void SWIT_SftyParkLockMgr_MainFunction_BgnHook(void)
++{
++   SWIT_Sfty_Check_Input(&SftySpdMonMeclSpdVldyFlg,SWIT_SftySpdMonMeclSpdVldyFlg_Input_KEY,SWIT_UINT8);
++   SWIT_Sfty_Check_Input(&SftySpdMonMeclSpdRpmFild,SWIT_SftySpdMonMeclSpdRpmFild_Input_KEY,SWIT_FLOAT32);
++}
+ 
+ void SftyDcEvln_MainFunctionArea1_EndHook(void){
+    SWIT_Sfty_Set(&SftyDcEvlnExtAdcElecHiErrMonrSt,SWIT_SftyDcEvlnExtAdcElecHiErrMonrSt_Output_KEY,SWIT_UINT8);
+diff --git a/src/fw_cu/Components/Cmn/SWIT/SWIT_SFTY/src/SWIT_SFTY_AreaCMN.c b/src/fw_cu/Components/Cmn/SWIT/SWIT_SFTY/src/SWIT_SFTY_AreaCMN.c
+index 275d87872..2443bad35 100644
+--- a/src/fw_cu/Components/Cmn/SWIT/SWIT_SFTY/src/SWIT_SFTY_AreaCMN.c
++++ b/src/fw_cu/Components/Cmn/SWIT/SWIT_SFTY/src/SWIT_SFTY_AreaCMN.c
+@@ -757,6 +757,7 @@ void SWIT_SftyInvActr_ReinitMonrData_EndHook(void)
+ }*/
+ 
+ void SWIT_SftyRslvrEvln_MainFunctionAreaCmn_EndHook(void){
++\tSWIT_Sfty_Set(&SftyRslvrEvlnAurixHwFltErrMonrSt, SWIT_SftyRslvrEvlnAurixHwFltErrMonrSt_Output_KEY, SWIT_UINT8);
+    SWIT_Sfty_Set(&SftyRslvrEvlnVadcExctElecOpenErrMonrSt, SWIT_SftyRslvrEvInVadcExctElecOpenErrMonrSt_Output_KEY, SWIT_UINT8);
+    SWIT_Sfty_Set(&SftyRslvrEvlnVadcExctElecHiErrMonrSt, SWIT_SftyRslvrEvlnVadcExctElecHiErrMonrSt_Output_KEY, SWIT_UINT8);
+    SWIT_Sfty_Set(&SftyRslvrEvlnVadcExctElecLoErrMonrSt, SWIT_SftyRslvrEvInVadcExctElecLoErrMonrSt_Output_KEY, SWIT_UINT8);
+@@ -783,7 +784,7 @@ void SWIT_SftyRslvrEvln_MainFunctionAreaCmn_EndHook(void){
+    SWIT_Sfty_Set(&SftyRslvrEvlnSinCosPlausAmpErrMonrSt, SWIT_SftyRslvrEvlnSinCosPlausAmpErrMonrSt_Output_KEY, SWIT_UINT8);
+    SWIT_Sfty_Set(&SftyRslvrEvlnSqdSumErrMonrSt, SWIT_SftyRslvrEvlnSqdSumErrMonrSt_Output_KEY, SWIT_UINT8);
+    SWIT_Sfty_Set(&SftyRslvrEvlnVadcExctPlausErrMonrSt, SWIT_SftyRslvrEvlnVadcExctPlausErrMonrSt_Output_KEY, SWIT_UINT8);
+-   SWIT_Sfty_Set(&SftyRslvrEvlnValCompErrMonrSt, SWIT_SftyRslvrEvlnValCompErrMonrSt_Output_KEY, SWIT_UINT8);
++   //SWIT_Sfty_Set(&SftyRslvrEvlnValCompErrMonrSt, SWIT_SftyRslvrEvlnValCompErrMonrSt_Output_KEY, SWIT_UINT8);
+    SWIT_Sfty_Set(&SftyRslvrEvlnVldyFlg, SWIT_SftyRslvrEvlnVldyFlg_Output_KEY, SWIT_UINT8);
+    SWIT_Sfty_Set(&SftyRslvrEvlnTiStamp, SWIT_SftyRslvrEvlnTiStamp_Output_KEY, SWIT_UINT32);
+    SWIT_Sfty_Set(&SftyRslvrEvlnAtanVal,SWIT_SftyRslvrEvlnAtanVal_Output_KEY,SWIT_FLOAT32);
+@@ -1241,7 +1242,10 @@ void SWIT_SftySpdMon_MainFunctionAreaCmn_EndHook(void)
+    SWIT_Sfty_Set(&SftySpdMonAgPlausErrMonrSt, SWIT_SftySpdMonAgPlausErrMonrSt_Output_KEY, SWIT_UINT8);
+    SWIT_Sfty_Set(&SftySpdMonSpdPlausErrMonrSt, SWIT_SftySpdMonSpdPlausErrMonrSt_Output_KEY, SWIT_UINT8);
+    SWIT_Sfty_Set(&SftySpdMonOvrSpdErrMonrSt, SWIT_SftySpdMonOvrSpdErrMonrSt_Output_KEY, SWIT_UINT8);
++   SWIT_Sfty_Set(&SftySpdMonOvrSpdErrMonrSt, SWIT_SftySpdMonOvrSpdErrMonrSt_OUTPUT_KEY, SWIT_UINT8);
+    SWIT_Sfty_Set(&SftyC2cData.EAxleSpd, SWIT_SftyC2cData_EAxleSpd_Output_KEY, SWIT_FLOAT32);
++   SWIT_Sfty_Set(&SftySpdMonMeclSpdVldyFlg, SWIT_SftySpdMonMeclSpdVldyFlg_Output_KEY, SWIT_UINT8);
++   SWIT_Sfty_Set(&SftySpdMonMeclSpdRpmFild, SWIT_SftySpdMonMeclSpdRpmFild_Output_KEY, SWIT_FLOAT32);
+ }
+ void SWIT_SftyRslvrCalcn_SpdAndAgCalcn_EndHook(void){
+    SWIT_Sfty_Check_Input(&SftyRslvrCalcnMeclSpdFildAbs,SWIT_SftyRslvrCalcnMeclSpdFildAbs_CurMdl_Input_KEY,SWIT_FLOAT32);
+diff --git a/src/fw_cu/Components/Inv/ValMeasAndProc/BswFpgaIf/include/BswFpgaIfChk.h b/src/fw_cu/Components/Inv/ValMeasAndProc/BswFpgaIf/include/BswFpgaIfChk.h
+index 63507ca84..ca96dab41 100644
+--- a/src/fw_cu/Components/Inv/ValMeasAndProc/BswFpgaIf/include/BswFpgaIfChk.h
++++ b/src/fw_cu/Components/Inv/ValMeasAndProc/BswFpgaIf/include/BswFpgaIfChk.h
+@@ -20,6 +20,10 @@
+ **                      Includes                                              **
+ *******************************************************************************/
+ #include <Std_Types.h>
++
++#ifdef SWIT_Active
++#include "SWIT_BSW.h"
++#endif
+ /*----------------------------------------------------------------------------*/
+ /* Check Endianness                                                           */
+ /*----------------------------------------------------------------------------*/
+@@ -206,6 +210,10 @@ static inline void BswFpgaIf_vidWriteDataCheck10B(
+ 
+ 
+    *u16DataChk = u16LocalDataChk;
++
++#ifdef SWIT_Active
++   SWIT_BswFpgaIf_vidWriteDataCheck10B_EndHook();
++#endif
+ }
+ 
+ 
+@@ -536,6 +544,10 @@ static inline void BswFpgaIf_vidWriteDataCheck18B(
+    u16LocalDataChk = (((uint16)(u16LocalDataChk >> 8) & 0xFF) |  ((uint16)(u16LocalDataChk << 8) & 0xFF00));
+ 
+    *u16DataChk = u16LocalDataChk;
++
++#ifdef SWIT_Active
++   SWIT_BswFpgaIf_vidWriteDataCheck18B_EndHook();
++#endif
+ }
+ 
+ 
+diff --git a/src/fw_cu/Components/Inv/ValMeasAndProc/IvtrThermMdl/src/IvtrThermMdl.c b/src/fw_cu/Components/Inv/ValMeasAndProc/IvtrThermMdl/src/IvtrThermMdl.c
+index a4839f0ff..a2bdb4d2b 100644
+--- a/src/fw_cu/Components/Inv/ValMeasAndProc/IvtrThermMdl/src/IvtrThermMdl.c
++++ b/src/fw_cu/Components/Inv/ValMeasAndProc/IvtrThermMdl/src/IvtrThermMdl.c
+@@ -35,6 +35,12 @@
+ #include "C2cComSftyData.h"
+ #include "C2cComDrvCtrlData.h"
+ 
++#ifdef SWIT_Active
++#include "SWIT_DRCO.h"
++#endif
++
++
++
+ /*================== [defines] ==============================================*/
+ 
+ /*================== [type definitions] =====================================*/
+diff --git a/src/fw_cu/Components/Safety/Sfty_Cmn/SftyDma/src/SftyDma.c b/src/fw_cu/Components/Safety/Sfty_Cmn/SftyDma/src/SftyDma.c
+index 3dc12b4b5..c5bf53af3 100644
+--- a/src/fw_cu/Components/Safety/Sfty_Cmn/SftyDma/src/SftyDma.c
++++ b/src/fw_cu/Components/Safety/Sfty_Cmn/SftyDma/src/SftyDma.c
+@@ -111,7 +111,7 @@ LOCAL_INLINE FUNC(uint8, SFTY_DMA_CODE) SftyDma_DecIdx(uint8 idx, uint8 lastIdx)
+   uint8 retVal;
+ 
+ #ifdef SWIT_FC_Active
+-if((SWIT_SftyDma_EN_KEY==SWIT_First_HookEnableKey))
++if((SWIT_SftyDma_EN_KEY2==SWIT_First_HookEnableKey))
+   SWIT_SftyDma_DecIdx_BgnHook ();
+ #endif
+   if(idx == 0U)
+diff --git a/src/fw_cu/Components/Safety/Sfty_Cmn/SftyE2eFpga/src/SftyE2eFpga.c b/src/fw_cu/Components/Safety/Sfty_Cmn/SftyE2eFpga/src/SftyE2eFpga.c
+index 243035d0e..ec86f34c9 100644
+--- a/src/fw_cu/Components/Safety/Sfty_Cmn/SftyE2eFpga/src/SftyE2eFpga.c
++++ b/src/fw_cu/Components/Safety/Sfty_Cmn/SftyE2eFpga/src/SftyE2eFpga.c
+@@ -607,6 +607,10 @@ LOCAL_INLINE Std_ReturnType SftyE2eFpga_AlvCntrChk(uint8 alvCntr)
+    Std_ReturnType retVal;
+    uint8 alvCntrDelta;
+ 
++#ifdef SWIT_Active
++   SWIT_SftyE2eFpga_AlvCntrChk_BgnHook();
++#endif
++
+    /* Check first run of alive counter check */
+    if(SftyE2eFpgaFirstRunCntrChkDone == TRUE)
+    {
+@@ -798,6 +802,7 @@ LOCAL_INLINE Std_ReturnType SftyE2eFpga_CrcEval(const uint8 crcData[], uint16 re
+       /* Do nothing */
+    }
+ 
++
+    return retVal;
+ }
+ 
+@@ -1757,6 +1762,9 @@ LOCAL_INLINE void SftyE2eFpga_ExtractErrMonrSt(void)
+ 
+    SftyE2eFpgaTxCrcCtrlSErrMonrStAcc                     |= ((uint8)(~(SftyE2eFpgaIpduRx.Data.RxS.Sig.FDSts_TxS)) & 0x01u);
+ 
++#ifdef SWIT_Active
++   SWIT_SftyE2eFpga_ExtractErrMonrSt_EndHook();
++#endif
+    return;
+ }
+ /******************************************************************/
+@@ -1790,6 +1798,9 @@ LOCAL_INLINE void SftyE2eFpga_ExtractSRxDataFromIpdu(void)
+ /******************************************************************/
+ LOCAL_INLINE uint8 SftyE2eFpga_ChkTiStamp(uint8 frameIdx)
+ {
++#ifdef SWIT_Active
++   SWIT_SftyE2eFpga_ChkTiStamp_BgnHook();
++#endif
+    uint8 retVal;
+ 
+    /* Get current timestamp */
+@@ -2199,6 +2210,10 @@ LOCAL_INLINE Std_ReturnType SftyE2eFpga_ARxCrcChk(uint8 idx)
+ 
+    retVal = SftyE2eFpga_CrcEval(SftyDmaE2eFpgaFrameRx[idx].Data.RxA.Data8, recCrc);
+ 
++#ifdef SWIT_Active
++   SWIT_SftyE2eFpga_ARxCrcChk_EndHook();
++#endif
++
+    return retVal;
+ }
+ 
+@@ -2221,6 +2236,9 @@ LOCAL_INLINE Std_ReturnType SftyE2eFpga_SRxCrcChk(uint8 idx)
+ 
+    retVal = SftyE2eFpga_CrcEval(SftyDmaE2eFpgaFrameRx[idx].Data.RxS.Data8, recCrc);
+ 
++#ifdef SWIT_Active
++   SWIT_SftyE2eFpga_SRxCrcChk_EndHook();
++#endif
+    return retVal;
+ }
+ 
+@@ -2495,6 +2513,9 @@ STATIC FUNC(void, SFTYE2E_CODE) SftyE2eFpga_UpdFltSts(void)
+ /******************************************************************/
+ STATIC FUNC(void, SFTYE2E_CODE) SftyE2eFpga_E2eFrameHndlr(uint8 frameIdx)
+ {
++#ifdef SWIT_Active
++   SWIT_SftyE2eFpga_E2eFrameHndlr_BgnHook();
++#endif
+    uint8  alvCntr;
+    Std_ReturnType res;
+ 
+diff --git a/src/fw_cu/Components/Safety/Sfty_Cmn/SftyParkLockMgr/src/SftyParkLockMgr.c b/src/fw_cu/Components/Safety/Sfty_Cmn/SftyParkLockMgr/src/SftyParkLockMgr.c
+index 21947c3ea..f8d1e537c 100644
+--- a/src/fw_cu/Components/Safety/Sfty_Cmn/SftyParkLockMgr/src/SftyParkLockMgr.c
++++ b/src/fw_cu/Components/Safety/Sfty_Cmn/SftyParkLockMgr/src/SftyParkLockMgr.c
+@@ -54,6 +54,10 @@
+ #include "SftyErrDeb.h"
+ #include "C2cComSftyData.h"
+ 
++#ifdef SWIT_IT_Active
++#include "SWIT_Sfty.h"
++#endif
++
+ /*================== [defines] ==============================================*/
+ #define DIV_BY_TWO 2.0f
+ /*================== [type definitions] =====================================*/
+@@ -1982,6 +1986,9 @@ LOCAL_INLINE void SftyParkLockMgr_HandlePlkStates(void)
+ /***********************************************************************************************************/
+ FUNC(void,SFTY_PARKLOCK_MGR_CODE) SftyParkLockMgr_MainFunction(void)
+ {
++#ifdef SWIT_IT_Active
++  SWIT_SftyParkLockMgr_MainFunction_BgnHook();
++#endif
+ #ifndef SERIES_PRODUCTION
+    /* Replacement value disabled for parklock internal fault status */
+    if(SftyReplcmtParkLockMgrPlkIntFltStiEna == TRUE)
+diff --git a/src/fw_cu/Components/Safety/Sfty_Inv/SftyHvInterlock/src/SftyHvInterlock.c b/src/fw_cu/Components/Safety/Sfty_Inv/SftyHvInterlock/src/SftyHvInterlock.c
+index 6098cf584..eae37f6ad 100644
+--- a/src/fw_cu/Components/Safety/Sfty_Inv/SftyHvInterlock/src/SftyHvInterlock.c
++++ b/src/fw_cu/Components/Safety/Sfty_Inv/SftyHvInterlock/src/SftyHvInterlock.c
+@@ -132,7 +132,7 @@ LOCAL_INLINE void SftyHvInterlock_GetTiStamp(void)
+    SWIT_SftyHvInterlock_GetTiStamp_BgnHook();
+ #endif
+ #ifdef SWIT_Active
+-   if(SWIT_SftyDma_EN_KEY==SWIT_First_HookEnableKey){
++   if(SWIT_SftyDma_EN_KEY2==SWIT_First_HookEnableKey){
+      SWIT_SftyHvInterlock_GetTiStamp_EndHook(&SftyHvInterlockVadcLstTiStamp);
+    }
+ #endif
+'

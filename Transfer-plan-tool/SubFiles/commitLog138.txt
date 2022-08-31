@@ -1,0 +1,24 @@
+b'commit 545bbe4047a3c8649382492853188694da19a328
+Author: Xingge XU (JV) <xingge.xu.jv@valeo.com>
+Date:   Wed Nov 3 13:18:03 2021 +0800
+
+    $100kW-44486$ - B-Sample - MISC - BSW - Defect/CR/Issue support - fix CPU load negative value
+    
+    Change-Id: I64274e319ecd34d4accdb466ed6412937799148e
+
+diff --git a/src/fw_cu/Components/Cmn/MngFlts/Clm/src/Clm.c b/src/fw_cu/Components/Cmn/MngFlts/Clm/src/Clm.c
+index b0dbacd60..e0a1ad457 100644
+--- a/src/fw_cu/Components/Cmn/MngFlts/Clm/src/Clm.c
++++ b/src/fw_cu/Components/Cmn/MngFlts/Clm/src/Clm.c
+@@ -45,8 +45,8 @@
+ #define CLM_CPU_LOAD_TRESHOLD_CORE0 (70u)
+ #define CLM_CPU_LOAD_TRESHOLD_CORE1 (70u)
+ #define CLM_CPU_LOAD_TRESHOLD_CORE2 (70u)
+-#define INITIAL_COUNT_DELTA_CORE0   (6.5f)
+-#define INITIAL_COUNT_DELTA_CORE2   (5.5f)
++#define INITIAL_COUNT_DELTA_CORE0   (1.0f)
++#define INITIAL_COUNT_DELTA_CORE2   (1.0f)
+ #define CLM_MEAS_INT_BSW_LOWER   (0u)
+ #define CLM_MEAS_INT_BSW_UPPER   (255)
+ #define CLM_MEAS_INT_ISW_LOWER   (0u)
+'

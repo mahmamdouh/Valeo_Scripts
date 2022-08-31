@@ -1,0 +1,1796 @@
+b'commit ad6e26911deaee848d83cbed6f23b3234eab24ca
+Author: Santosh Pallanti <santos.pallanti.jv.ext@valeo.com>
+Date:   Mon Dec 13 19:30:56 2021 +0530
+
+    $100kW-48745$ - FCT_CtrlParkPos - Implement SW Unit SftyParkLockEvln
+    
+    Change-Id: I7234bbb2eaadcbf2cadeec0827b66659ed93e191
+
+diff --git a/src/fw_cu/Components/Cmn/Shared/MemMap/include/SftyNextGen_MemMap.h b/src/fw_cu/Components/Cmn/Shared/MemMap/include/SftyNextGen_MemMap.h
+index 06ad7ba34..acdf6f112 100644
+--- a/src/fw_cu/Components/Cmn/Shared/MemMap/include/SftyNextGen_MemMap.h
++++ b/src/fw_cu/Components/Cmn/Shared/MemMap/include/SftyNextGen_MemMap.h
+@@ -319,38 +319,38 @@
+    #include "BasicNextGen_MemMap.h"
+    #pragma align restore
+ 
+-#elif (defined SFTY_DMA_QM_SHARE_START_SEC_VAR_FAST_NO_INIT_ALIGN_0x40)
+-   #undef SFTY_DMA_QM_SHARE_START_SEC_VAR_FAST_NO_INIT_ALIGN_0x40
++#elif (defined SFTY_DMA_QM_SHARE_START_SEC_VAR_FAST_NO_INIT_ALIGN_HEX_40)
++   #undef SFTY_DMA_QM_SHARE_START_SEC_VAR_FAST_NO_INIT_ALIGN_HEX_40
+    #define SFTY_QM_SHARE_START_SEC_VAR_NOINIT
+    #include "BasicNextGen_MemMap.h"
+    #pragma section farnoclear "share.safety_QM_share_noinit_0x40"
+    #pragma align 0x40
+-#elif (defined SFTY_DMA_QM_SHARE_STOP_SEC_VAR_FAST_NO_INIT_ALIGN_0x40)
+-   #undef SFTY_DMA_QM_SHARE_STOP_SEC_VAR_FAST_NO_INIT_ALIGN_0x40
++#elif (defined SFTY_DMA_QM_SHARE_STOP_SEC_VAR_FAST_NO_INIT_ALIGN_HEX_40)
++   #undef SFTY_DMA_QM_SHARE_STOP_SEC_VAR_FAST_NO_INIT_ALIGN_HEX_40
+    #define SFTY_QM_SHARE_STOP_SEC_VAR_NOINIT
+    #include "BasicNextGen_MemMap.h"
+    #pragma align restore
+ 
+-#elif (defined SFTY_DMA_QM_SHARE_START_SEC_VAR_FAST_NO_INIT_ALIGN_0x20)
+-   #undef SFTY_DMA_QM_SHARE_START_SEC_VAR_FAST_NO_INIT_ALIGN_0x20
++#elif (defined SFTY_DMA_QM_SHARE_START_SEC_VAR_FAST_NO_INIT_ALIGN_HEX_20)
++   #undef SFTY_DMA_QM_SHARE_START_SEC_VAR_FAST_NO_INIT_ALIGN_HEX_20
+    #define SFTY_QM_SHARE_START_SEC_VAR_NOINIT
+    #include "BasicNextGen_MemMap.h"
+    #pragma section farnoclear "share.safety_QM_share_noinit_0x20"
+    #pragma align 0x20
+-#elif (defined SFTY_DMA_QM_SHARE_STOP_SEC_VAR_FAST_NO_INIT_ALIGN_0x20)
+-   #undef SFTY_DMA_QM_SHARE_STOP_SEC_VAR_FAST_NO_INIT_ALIGN_0x20
++#elif (defined SFTY_DMA_QM_SHARE_STOP_SEC_VAR_FAST_NO_INIT_ALIGN_HEX_20)
++   #undef SFTY_DMA_QM_SHARE_STOP_SEC_VAR_FAST_NO_INIT_ALIGN_HEX_20
+    #define SFTY_QM_SHARE_STOP_SEC_VAR_NOINIT
+    #include "BasicNextGen_MemMap.h"
+    #pragma align restore
+ 
+-#elif (defined SFTY_DMA_QM_SHARE_START_SEC_VAR_FAST_NO_INIT_ALIGN_0x10)
+-   #undef SFTY_DMA_QM_SHARE_START_SEC_VAR_FAST_NO_INIT_ALIGN_0x10
++#elif (defined SFTY_DMA_QM_SHARE_START_SEC_VAR_FAST_NO_INIT_ALIGN_HEX_10)
++   #undef SFTY_DMA_QM_SHARE_START_SEC_VAR_FAST_NO_INIT_ALIGN_HEX_10
+    #define SFTY_QM_SHARE_START_SEC_VAR_NOINIT
+    #include "BasicNextGen_MemMap.h"
+    #pragma section farnoclear "share.safety_QM_share_noinit_0x10"
+    #pragma align 0x10
+-#elif (defined SFTY_DMA_QM_SHARE_STOP_SEC_VAR_FAST_NO_INIT_ALIGN_0x10)
+-   #undef SFTY_DMA_QM_SHARE_STOP_SEC_VAR_FAST_NO_INIT_ALIGN_0x10
++#elif (defined SFTY_DMA_QM_SHARE_STOP_SEC_VAR_FAST_NO_INIT_ALIGN_HEX_10)
++   #undef SFTY_DMA_QM_SHARE_STOP_SEC_VAR_FAST_NO_INIT_ALIGN_HEX_10
+    #define SFTY_QM_SHARE_STOP_SEC_VAR_NOINIT
+    #include "BasicNextGen_MemMap.h"
+    #pragma align restore
+@@ -516,6 +516,26 @@
+    #define SFTY_ASIL_C_STOP_SEC_VAR_FAST_INIT
+    #include "BasicNextGen_MemMap.h"
+ 
++#elif (defined SFTYDMA_START_SEC_VAR_AREA_CMN_SLOW_INIT_32)
++   #undef SFTYDMA_START_SEC_VAR_AREA_CMN_SLOW_INIT_32
++   #define SFTY_ASIL_C_START_SEC_VAR_FAST_INIT
++   #include "BasicNextGen_MemMap.h"
++
++#elif (defined SFTYDMA_STOP_SEC_VAR_AREA_CMN_SLOW_INIT_32)
++   #undef SFTYDMA_STOP_SEC_VAR_AREA_CMN_SLOW_INIT_32
++   #define SFTY_ASIL_C_STOP_SEC_VAR_FAST_INIT
++   #include "BasicNextGen_MemMap.h"
++
++#elif (defined SFTYDMA_START_SEC_VAR_AREA_CMN_SLOW_INIT_16)
++   #undef SFTYDMA_START_SEC_VAR_AREA_CMN_SLOW_INIT_16
++   #define SFTY_ASIL_C_START_SEC_VAR_FAST_INIT
++   #include "BasicNextGen_MemMap.h"
++
++#elif (defined SFTYDMA_STOP_SEC_VAR_AREA_CMN_SLOW_INIT_16)
++   #undef SFTYDMA_STOP_SEC_VAR_AREA_CMN_SLOW_INIT_16
++   #define SFTY_ASIL_C_STOP_SEC_VAR_FAST_INIT
++   #include "BasicNextGen_MemMap.h"
++
+ #elif (defined SFTYDMA_START_SEC_VAR_QM_SHARE_FAST_INIT_32)
+    #undef SFTYDMA_START_SEC_VAR_QM_SHARE_FAST_INIT_32
+    #define SFTY_QM_SHARE_START_SEC_VAR_INIT
+@@ -552,6 +572,26 @@
+    #include "BasicNextGen_MemMap.h"
+    #pragma align restore
+ 
++#elif (defined SFTYDMA_START_SEC_VAR_AREA_0_FAST_INIT_16)
++   #undef SFTYDMA_START_SEC_VAR_AREA_0_FAST_INIT_16
++   #define SFTY_QM_START_SEC_VAR_FAST_INIT
++   #include "BasicNextGen_MemMap.h"
++
++#elif (defined SFTYDMA_STOP_SEC_VAR_AREA_0_FAST_INIT_16)
++   #undef SFTYDMA_STOP_SEC_VAR_AREA_0_FAST_INIT_16
++   #define SFTY_QM_STOP_SEC_VAR_FAST_INIT
++   #include "BasicNextGen_MemMap.h"
++
++#elif (defined SFTYDMA_START_SEC_VAR_AREA_0_FAST_INIT_32)
++   #undef SFTYDMA_START_SEC_VAR_AREA_0_FAST_INIT_32
++   #define SFTY_QM_START_SEC_VAR_FAST_INIT
++   #include "BasicNextGen_MemMap.h"
++
++#elif (defined SFTYDMA_STOP_SEC_VAR_AREA_0_FAST_INIT_32)
++   #undef SFTYDMA_STOP_SEC_VAR_AREA_0_FAST_INIT_32
++   #define SFTY_QM_STOP_SEC_VAR_FAST_INIT
++   #include "BasicNextGen_MemMap.h"
++
+ #elif (defined SFTY_DMA_AREA_1_START_SEC_CODE_SLOW)
+    #undef SFTY_DMA_AREA_1_START_SEC_CODE_SLOW
+    #define SFTY_ASIL_A_START_SEC_CODE_SLOW
+@@ -603,6 +643,16 @@
+    #define SFTY_ASIL_B_STOP_SEC_CODE_SLOW
+    #include "BasicNextGen_MemMap.h"
+ 
++#elif (defined SFTY_DMA_AREA_0_START_SEC_CODE_FAST)
++   #undef SFTY_DMA_AREA_0_START_SEC_CODE_FAST
++   #define SFTY_QM_START_SEC_CODE_FAST
++   #include "BasicNextGen_MemMap.h"
++
++#elif (defined SFTY_DMA_AREA_0_STOP_SEC_CODE_FAST)
++   #undef SFTY_DMA_AREA_0_STOP_SEC_CODE_FAST
++   #define SFTY_QM_STOP_SEC_CODE_FAST
++   #include "BasicNextGen_MemMap.h"
++
+ #elif (defined SFTY_DMA_AREA_CMN_START_SEC_CODE_FAST)
+    #undef SFTY_DMA_AREA_CMN_START_SEC_CODE_FAST
+    #define SFTY_ASIL_C_START_SEC_CODE_FAST
+diff --git a/src/fw_cu/Components/Cmn/ValMeasAndProc/EVADC/src/Evadc.c b/src/fw_cu/Components/Cmn/ValMeasAndProc/EVADC/src/Evadc.c
+index f2544994c..bf0c7cfb2 100644
+--- a/src/fw_cu/Components/Cmn/ValMeasAndProc/EVADC/src/Evadc.c
++++ b/src/fw_cu/Components/Cmn/ValMeasAndProc/EVADC/src/Evadc.c
+@@ -40,11 +40,6 @@
+ #include "SftyDma.h"
+ 
+ 
+-extern VAR(SftyRslvrDma_DataType, SFTY_RSLVRDMA_VAR) SftyDmaVadcKl30Udata[2];
+-extern VAR(SftyRslvrDma_DataType, SFTY_RSLVRDMA_VAR) SftyDmaVadcPlcActrlData[2];
+-extern VAR(SftyRslvrDma_DataType, SFTY_RSLVRDMA_VAR) SftyDmaVadcPlcActrPosUData[2];
+-extern VAR(SftyRslvrDma_DataType, SFTY_RSLVRDMA_VAR) SftyDmaVadcPlcActrNegUData[2];
+-
+ /*================== [prototype of local functions] ================================*/
+ 
+ #define VADC_START_SEC_INIT_CODE_SLOW
+@@ -1006,7 +1001,7 @@ LOCAL_INLINE FUNC(void, VADC_CODE) Vadc_InterruptInit(void)
+    SRC_VADCG2SR0.U      = temp_SRC_SRCR.U;
+ 
+    temp_SRC_SRCR.U = 0U;
+-   temp_SRC_SRCR.B.SRPN = (uint32)SFTY_DMA_DRVR_CH_IDX_VADC_AN_P12V_BATT_F;
++   temp_SRC_SRCR.B.SRPN = (uint32)SFTYDMADRVR_CH_IDX_VADC_KL30_DATA;
+    temp_SRC_SRCR.B.SRE  = VADC_SERVICE_REQUEST_ENABLE;
+    temp_SRC_SRCR.B.TOS  = TOS_DMA;
+    temp_SRC_SRCR.B.CLRR = 1U;
+@@ -1039,21 +1034,21 @@ LOCAL_INLINE FUNC(void, VADC_CODE) Vadc_InterruptInit(void)
+    SRC_VADCG8SR0.U      = temp_SRC_SRCR.U;
+ 
+    temp_SRC_SRCR.U = 0U;
+-   temp_SRC_SRCR.B.SRPN = (uint32)SFTY_DMA_DRVR_CH_IDX_VADC_AN_PLC_MOT_N_DIAG;
++   temp_SRC_SRCR.B.SRPN = (uint32)SFTY_DMA_DRVR_CH_IDX_PLC_MOT_N_DIAG;
+    temp_SRC_SRCR.B.SRE  = VADC_SERVICE_REQUEST_ENABLE;
+    temp_SRC_SRCR.B.TOS  = TOS_DMA;
+    temp_SRC_SRCR.B.CLRR = 1U;
+    SRC_VADCG8SR1.U      = temp_SRC_SRCR.U;
+ 
+    temp_SRC_SRCR.U = 0U;
+-   temp_SRC_SRCR.B.SRPN = (uint32)SFTY_DMA_DRVR_CH_IDX_VADC_AN_PLC_MOT_P_DIAG;
++   temp_SRC_SRCR.B.SRPN = (uint32)SFTY_DMA_DRVR_CH_IDX_PLC_MOT_P_DIAG;
+    temp_SRC_SRCR.B.SRE  = VADC_SERVICE_REQUEST_ENABLE;
+    temp_SRC_SRCR.B.TOS  = TOS_DMA;
+    temp_SRC_SRCR.B.CLRR = 1U;
+    SRC_VADCG8SR2.U      = temp_SRC_SRCR.U;
+ 
+    temp_SRC_SRCR.U = 0U;
+-   temp_SRC_SRCR.B.SRPN = (uint32)SFTY_DMA_DRVR_CH_IDX_VADC_AN_PLC_CURRENT_MEAS;
++   temp_SRC_SRCR.B.SRPN = (uint32)SFTY_DMA_DRVR_CH_IDX_PLC_CURRENT;
+    temp_SRC_SRCR.B.SRE  = VADC_SERVICE_REQUEST_ENABLE;
+    temp_SRC_SRCR.B.TOS  = TOS_DMA;
+    temp_SRC_SRCR.B.CLRR = 1U;
+@@ -1404,7 +1399,7 @@ LOCAL_INLINE FUNC(void, VADC_CODE) Vadc_StoreQueueResultG2(void)
+    }
+ 
+    Kl30Udata = 0U;
+-   if ( E_OK == Vadc_GetLastValFromSftyBuff((uint16)SFTY_DMA_DRVR_CH_IDX_VADC_AN_P12V_BATT_F, 8, SftyDmaVadcKl30Udata, &Kl30Udata) )   /* ????????????????????   use macro for buffer length */
++   if ( E_OK == Vadc_GetLastValFromSftyBuff((uint16)SFTYDMADRVR_CH_IDX_VADC_KL30_DATA, SFTYDMA_VADC_KL30_BUF_LEN, SftyDmaVadcKl30UData, &Kl30Udata) )   /* ????????????????????   use macro for buffer length */
+    {
+        Vadc_Result[AN_P12V_BATT_F] = Kl30Udata;
+    }
+@@ -1517,7 +1512,7 @@ LOCAL_INLINE FUNC(void, VADC_CODE) Vadc_StoreQueueResultG8(void)
+    }
+ 
+    ActrNegUData = 0U;
+-   if ( E_OK == Vadc_GetLastValFromSftyBuff((uint16)SFTY_DMA_DRVR_CH_IDX_VADC_AN_PLC_MOT_N_DIAG, 8, SftyDmaVadcPlcActrNegUData, &ActrNegUData) )   /* ????????????????????   use macro for buffer length */
++   if ( E_OK == Vadc_GetLastValFromSftyBuff((uint16)SFTY_DMA_DRVR_CH_IDX_PLC_MOT_N_DIAG, SFTY_DMA_PLK_N_CHN_U_MEAS_BUF_LEN, SftyDmaVadcPlcActrNegUData, &ActrNegUData) )   /* ????????????????????   use macro for buffer length */
+    {
+        Vadc_Result[AN_PLC_MOT_N_DIAG] = ActrNegUData;
+    }
+@@ -1527,7 +1522,7 @@ LOCAL_INLINE FUNC(void, VADC_CODE) Vadc_StoreQueueResultG8(void)
+    }
+ 
+    ActrPosUData = 0U;
+-   if ( E_OK == Vadc_GetLastValFromSftyBuff((uint16)SFTY_DMA_DRVR_CH_IDX_VADC_AN_PLC_MOT_P_DIAG, 8, SftyDmaVadcPlcActrPosUData, &ActrPosUData) )    /* ????????????????????   use macro for buffer length */
++   if ( E_OK == Vadc_GetLastValFromSftyBuff((uint16)SFTY_DMA_DRVR_CH_IDX_PLC_MOT_P_DIAG, SFTY_DMA_PLK_P_CHN_U_MEAS_BUF_LEN, SftyDmaVadcPlcPosUData, &ActrPosUData) )    /* ????????????????????   use macro for buffer length */
+    {
+        Vadc_Result[AN_PLC_MOT_P_DIAG] = ActrPosUData;
+    }
+@@ -1537,7 +1532,7 @@ LOCAL_INLINE FUNC(void, VADC_CODE) Vadc_StoreQueueResultG8(void)
+    }
+ 
+    PlcActrlData = 0U;
+-   if ( E_OK == Vadc_GetLastValFromSftyBuff((uint16)SFTY_DMA_DRVR_CH_IDX_VADC_AN_PLC_CURRENT_MEAS, 8, SftyDmaVadcPlcActrlData, &PlcActrlData) )    /* ????????????????????   use macro for buffer length */
++   if ( E_OK == Vadc_GetLastValFromSftyBuff((uint16)SFTY_DMA_DRVR_CH_IDX_PLC_CURRENT, SFTY_DMA_PLK_P_ACT_I_MEAS_BUF_LEN, SftyDmaVadcPlcActrIData, &PlcActrlData) )    /* ????????????????????   use macro for buffer length */
+    {
+        Vadc_Result[AN_PLC_CURRENT_MEAS] = PlcActrlData;
+    }
+diff --git a/src/fw_cu/Components/Safety/Sfty_Cmn/SftyDma/include/SftyDma.h b/src/fw_cu/Components/Safety/Sfty_Cmn/SftyDma/include/SftyDma.h
+index 05ade5ca5..a8d13abfd 100644
+--- a/src/fw_cu/Components/Safety/Sfty_Cmn/SftyDma/include/SftyDma.h
++++ b/src/fw_cu/Components/Safety/Sfty_Cmn/SftyDma/include/SftyDma.h
+@@ -1,5 +1,5 @@
+ /* ********************************************************************** */
+-/* Sourcefile:    SftyDma.h                                         */
++/* Sourcefile:    SftyDma.h                                               */
+ /*                                                                        */
+ /* Project:       100kw                                                   */
+ /* TriCore                                                                */
+@@ -11,8 +11,8 @@
+ /* Copyright (C) Valeo Siemens eAutomotive Germany GmbH 2021              */
+ /* All Rights Reserved. Confidential                                      */
+ /* ********************************************************************** */
+-#ifndef SftyDma_H
+-#define SftyDma_H
++#ifndef SFTYDMA_H
++#define SFTYDMA_H
+ /*!
+ * \\addtogroup SftyDma_module
+ * @{
+@@ -21,95 +21,37 @@
+ #include "AddEnumTypes.h"
+ #include "AddGlobalDefines.h"
+ 
+-#ifdef MASTER_SFTY_DMA_
+-#define EXTERNAL_
+-#else
+-#define EXTERNAL_ extern
+-#endif
+ 
+ /*================== [includes] =============================================*/
+ 
+ /*================== [macros] ===============================================*/
+ 
+-/*! Size of DMA-buffer used for phase currents */
+-#define SFTY_DMA_PHA_I_BUF_LEN                   (8U)
+-
+ /*! Size of DMA-buffer used for QSpi Data */
+ #define SFTY_DMA_Q_SPI_RX_BUF_LEN                (8U)
+ 
+-/*! Size of DMA-buffer used for Udc */
+-#define SFTY_DMA_U_DC_BUF_LEN                    (8U)
+-
+-/*! Size of DMA-buffer used for CU temperature signals */
+-#define SFTY_DMA_A_TEMP_CU_BUF_LEN               (8U)
+-
+-/*! Size of DMA-buffer used for CU temperature 2 signals */
+-#define SFTY_DMA_B_TEMP_CU_BUF_LEN               (8U)
+-
+-/*! Size of DMA-buffer used for P5_U value measured by VADC */
+-#define SFTY_DMA_VADC_P5_U_BUF_LEN               (2U)
+-
+-#if SYSCON_FTR_PSM == 1 /* USE_IPMCTRL_CONTROL */
+-/*! Size of DMA-buffer used for P5_ASC2 value measured by VADC */
+-#define SFTY_DMA_VADC_P5_ASC2_BUF_LEN            (2U)
+-#endif /* SYSCON_FTR_PSM == 1  USE_IPMCTRL_CONTROL */
+-
+-/*! Size of DMA-buffer used for SEPIC_OUT measurement by VADC */
+-#define SFTY_DMA_VADC_SEPIC_OUT_BUF_LEN          (2U)
+-
+-
+-/*! Size of DMA-buffer used for P5_V value measured by VADC */
+-#define SFTY_DMA_VADC_P5_V_BUF_LEN               (2U)
+-
+-/*! Size of DMA-buffer used for P5_W value measured by VADC */
+-#define SFTY_DMA_VADC_P5_W_BUF_LEN               (2U)
+-
+-/*! Size of DMA-buffer used for P15 value measured by VADC */
+-#define SFTY_DMA_VADC_P15_BUF_LEN                (2U)
+-
+-/*! Size of DMA-buffer used for P15_RES value measured by VADC */
+-#define SFTY_DMA_VADC_P15_RES_BUF_LEN            (2U)
+-
+-/*! Size of DMA-buffer used for P15_U value measured by VADC */
+-#define SFTY_DMA_VADC_P15_U_BUF_LEN              (2U)
+-
+-/*! Size of DMA-buffer used for P15_V value measured by VADC */
+-#define SFTY_DMA_VADC_P15_V_BUF_LEN              (2U)
+-
+-/*! Size of DMA-buffer used for P15_W value measured by VADC */
+-#define SFTY_DMA_VADC_P15_W_BUF_LEN              (2U)
+-
+-/*! Size of DMA-buffer used for P16 value measured by VADC */
+-#define SFTY_DMA_VADC_P16_BUF_LEN                (2U)
+-
+-/*! Size of DMA-buffer used for KL15 value measured by VADC */
+-#define SFTY_DMA_VADC_KL15_BUF_LEN               (2U)
+-
+-/*! Size of DMA-buffer used for KL30 value measured by VADC */
+-#define SFTY_DMA_VADC_KL30_BUF_LEN               (2U)
+-
+-/* DMA buffer length used for DC_U_1_P_MON */
+-#define SFTY_DMA_VADC_DC_U_1_P_MON_BUF_LEN       (2U)
+-
+-/* DMA buffer length used for DC_U_1_M_MON */
+-#define SFTY_DMA_VADC_DC_U_1_M_MON_BUF_LEN       (2U)
+-
+-/*! Size of DMA-buffer used for dutycycle measurement */
+-#define SFTY_DMA_CTRL_IGBT_FB                    (8U)
+-
+ /*! Size of DMA-buffer used for Motor temperature measurement */
+ #define SFTY_DMA_CTP_MOT1_BUF_LEN                (8U)
+ 
+ /*! Size of DMA-buffer used for Crash value detection */
+-#define SFTY_DMA_VADC_ANALOG_CRASH_BUF_LEN           (2U)
++#define SFTY_DMA_VADC_ANALOG_CRASH_BUF_LEN       (2U)
+ 
+ /*! Size of DMA-buffer used for HvInterlock value detection */
+-#define SFTY_DMA_VADC_INTERLOCK_BUF_LEN           (2U)
+-
++#define SFTY_DMA_VADC_INTERLOCK_BUF_LEN          (2U)
+ 
+ /*! Size of DMA-buffer used for HvInterlock value detection */
+-#define SFTY_DMA_CS_TIMESTAMP_BUF_LEN           (2U)
++#define SFTY_DMA_CS_TIMESTAMP_BUF_LEN            (2U)
+ 
++/*! Size of DMA-buffer used for Parklock P channel voltage measured by VADC */
++#define SFTY_DMA_PLK_P_CHN_U_MEAS_BUF_LEN        (2U)
++
++/*! Size of DMA-buffer used for Parklock N channel voltage measured by VADC */
++#define SFTY_DMA_PLK_N_CHN_U_MEAS_BUF_LEN        (2U)
++
++/*! Size of DMA-buffer used for parklock primary actuator current measured by VADC */
++#define SFTY_DMA_PLK_P_ACT_I_MEAS_BUF_LEN        (2U)
++
++/*! Size of DMA-buffer used for KL30 value measured by VADC */
++#define SFTYDMA_VADC_KL30_BUF_LEN                (2U)
+ 
+ /*================== [type definitions] =====================================*/
+ 
+@@ -140,251 +82,194 @@ typedef struct SftyDma_DataType_
+ 
+ }SftyDma_DataType;
+ 
+-/*================== [declaration of public data] ===========================*/
+-
+-/*! \\cond Exclude following variables from doxygen parser, to avoid multiple appearance inside of doxy-documentation */
+-
+-#define SFTY_DMA_QM_SHARE_START_SEC_VAR_FAST_NO_INIT_ALIGN_0x20
+-#include "MemMap.h"
+-
+-extern VAR(uint32, SFTY_DMA_VAR) SftyDmaQSpiRxData[SFTY_DMA_Q_SPI_RX_BUF_LEN];
+-
+-#define SFTY_DMA_QM_SHARE_STOP_SEC_VAR_FAST_NO_INIT_ALIGN_0x20
+-#include "MemMap.h"
+-
+-#define SFTY_DMA_QM_SHARE_START_SEC_VAR_FAST_NO_INIT_ALIGN_0x40
+-#include "MemMap.h"
+-
+-/* This variable contains DMA-ring buffer for IGBT_BOT_U dutycycle measurement (TIM value) */
+-extern VAR(SftyDma_DataType, SFTY_DMA_VAR) SftyDmaTimCtrlIgbtBotUData[SFTY_DMA_CTRL_IGBT_FB];
+-
+-/* This variable contains DMA-ring buffer for IGBT_TOP_U dutycycle measurement (TIM value) */
+-extern VAR(SftyDma_DataType, SFTY_DMA_VAR) SftyDmaTimCtrlIgbtTopUData[SFTY_DMA_CTRL_IGBT_FB];
+-
+-/* This variable contains DMA-ring buffer for IGBT_TOP_V dutycycle measurement (TIM value) */
+-extern VAR(SftyDma_DataType, SFTY_DMA_VAR) SftyDmaTimCtrlIgbtTopVData[SFTY_DMA_CTRL_IGBT_FB];
+-
+-/* This variable contains DMA-ring buffer for IGBT_BOT_V dutycycle measurement (TIM value) */
+-extern VAR(SftyDma_DataType, SFTY_DMA_VAR) SftyDmaTimCtrlIgbtBotVData[SFTY_DMA_CTRL_IGBT_FB];
+-
+-/* This variable contains DMA-ring buffer for IGBT_TOP_W dutycycle measurement (TIM value) */
+-extern VAR(SftyDma_DataType, SFTY_DMA_VAR) SftyDmaTimCtrlIgbtTopWData[SFTY_DMA_CTRL_IGBT_FB];
++/*! This struct will contain transfered data, used only for DMA-buffer definitions */
++typedef struct SftyDma_ParkLockSENTDataType_
++{
++   /*
++   @@ ELEMENT = SnsrData
++   @@ STRUCTURE = SftyDma_ParkLockSENTDataType
++   @@ A2L_TYPE = MEASURE
++   @@ DATA_TYPE = ULONG
++   @@ DESCRIPTION = " data  "
++   @@ GROUP = SftyDma | SftyDma_Local
++   @@ END
++    */
++   uint32 SnsrData;    /*!< Sensor data transfered from DMA */
+ 
+-/* This variable contains DMA-ring buffer for IGBT_BOT_W dutycycle measurement (TIM value) */
+-extern VAR(SftyDma_DataType, SFTY_DMA_VAR) SftyDmaTimCtrlIgbtBotWData[SFTY_DMA_CTRL_IGBT_FB];
++   /*
++   @@ ELEMENT = CrcData
++   @@ STRUCTURE = SftyDma_ParkLockSENTDataType
++   @@ A2L_TYPE = MEASURE
++   @@ DATA_TYPE = ULONG
++   @@ DESCRIPTION = " Crc data  "
++   @@ GROUP = SftyDma | SftyDma_Local
++   @@ END
++   */
++   uint32 CrcData; /*!< CRC data saved from DMA */
+ 
+-/*! This variable contains DMA-ringbuffer for DSADC-Iu-Phase current values */
+-extern VAR(SftyDma_DataType, SFTY_DMA_VAR) SftyDmaDsadcIuData[SFTY_DMA_PHA_I_BUF_LEN];
++   /*
++   @@ ELEMENT = TiStampRts
++   @@ STRUCTURE = SftyDma_ParkLockSENTDataType
++   @@ A2L_TYPE = MEASURE
++   @@ DATA_TYPE = ULONG
++   @@ DESCRIPTION = " Time stamp Rts  "
++   @@ GROUP = SftyDma | SftyDma_Local
++   @@ END
++   */
++   uint32 TiStampRts; /*!< SENT timestamp saved from RTS */
+ 
+-/*! This variable contains DMA-ringbuffer for DSADC-Iv-Phase current values */
+-extern VAR(SftyDma_DataType, SFTY_DMA_VAR) SftyDmaDsadcIvData[SFTY_DMA_PHA_I_BUF_LEN];
++   /*
++   @@ ELEMENT = RxIntStat
++   @@ STRUCTURE = SftyDma_ParkLockSENTDataType
++   @@ A2L_TYPE = MEASURE
++   @@ DATA_TYPE = ULONG
++   @@ DESCRIPTION = " Int status  "
++   @@ GROUP = SftyDma | SftyDma_Local
++   @@ END
++   */
++   uint32 RxIntStat; /*!< SENT INT status saved from DMA */
+ 
+-/*! This variable contains DMA-ringbuffer for DSADC-Iw-Phase current values */
+-extern VAR(SftyDma_DataType, SFTY_DMA_VAR) SftyDmaDsadcIwData[SFTY_DMA_PHA_I_BUF_LEN];
+ 
+-/*! This variable contains DMA-ringbuffer for VADC-Iu-Phase current values */
+-extern VAR(SftyDma_DataType, SFTY_DMA_VAR) SftyDmaVadcIuData[SFTY_DMA_PHA_I_BUF_LEN];
++   /*
++   @@ ELEMENT = TiStampDma
++   @@ STRUCTURE = SftyDma_ParkLockSENTDataType
++   @@ A2L_TYPE = MEASURE
++   @@ DATA_TYPE = ULONG
++   @@ DESCRIPTION = " Time stamp dma  "
++   @@ GROUP = SftyDma | SftyDma_Local
++   @@ END
++   */
++   uint32 TiStampDma; /*!< Timestamp saved from DMA */
+ 
+-/*! This variable contains DMA-ringbuffer for VADC-Iv-Phase current values */
+-extern VAR(SftyDma_DataType, SFTY_DMA_VAR) SftyDmaVadcIvData[SFTY_DMA_PHA_I_BUF_LEN];
++}SftyDma_ParkLockSENTDataType;
+ 
+-/*! This variable contains DMA-ringbuffer for VADC-Iw-Phase current values */
+-extern VAR(SftyDma_DataType, SFTY_DMA_VAR) SftyDmaVadcIwData[SFTY_DMA_PHA_I_BUF_LEN];
+ 
+-/*! This variable contains DMA-ringbuffer for DSADC-Udc voltage values */
+-extern VAR(SftyDma_DataType, SFTY_DMA_VAR) SftyDmaDsadcUdcData[SFTY_DMA_U_DC_BUF_LEN];
++/*================== [declaration of public data] ===========================*/
+ 
+-/*! This variable contains DMA-ring buffer for ADC-Temperature CU value */
+-extern VAR(SftyDma_DataType, SFTY_DMA_VAR) SftyDmaVadcATempCuData[SFTY_DMA_A_TEMP_CU_BUF_LEN];
++#define SFTY_DMA_QM_SHARE_START_SEC_VAR_FAST_NO_INIT_ALIGN_HEX_20
++#include "MemMap.h"
+ 
+-/*! This variable contains DMA-ring buffer for ADC value of CU temperature sensor 2 */
+-extern VAR(SftyDma_DataType, SFTY_DMA_VAR) SftyDmaVadcBTempCuData[SFTY_DMA_B_TEMP_CU_BUF_LEN];
++extern VAR(uint32, SFTY_DMA_VAR) SftyDmaQSpiRxData[SFTY_DMA_Q_SPI_RX_BUF_LEN];
+ 
+-/* This variable contains DMA-ring buffer for DC_U_1_M_MON Adc value */
+-extern VAR(SftyDma_DataType, SFTY_DMA_VAR) SftyDmaVadcDcU1MMonData[SFTY_DMA_VADC_DC_U_1_M_MON_BUF_LEN];
++#define SFTY_DMA_QM_SHARE_STOP_SEC_VAR_FAST_NO_INIT_ALIGN_HEX_20
++#include "MemMap.h"
+ 
+-/* This variable contains DMA-ring buffer for DC_U_1_P_MON Adc value */
+-extern VAR(SftyDma_DataType, SFTY_DMA_VAR) SftyDmaVadcDcU1PMonData[SFTY_DMA_VADC_DC_U_1_P_MON_BUF_LEN];
++#define SFTY_DMA_QM_SHARE_START_SEC_VAR_FAST_NO_INIT_ALIGN_HEX_40
++#include "MemMap.h"
+ 
+-/*! This variable contains DMA-ringbuffer for VADC-CTP_MOT1 Temperature value */
++/*! This variable contains DMA-ring buffer for VADC-CTP_MOT1 Temperature value */
+ extern VAR(SftyDma_DataType, SFTY_DMA_VAR) SftyDmaMotStatorTData[SFTY_DMA_CTP_MOT1_BUF_LEN];
+ 
+-#define SFTY_DMA_QM_SHARE_STOP_SEC_VAR_FAST_NO_INIT_ALIGN_0x40
++#define SFTY_DMA_QM_SHARE_STOP_SEC_VAR_FAST_NO_INIT_ALIGN_HEX_40
+ #include "MemMap.h"
+ 
+-#define SFTY_DMA_QM_SHARE_START_SEC_VAR_FAST_NO_INIT_ALIGN_0x10
++#define SFTY_DMA_QM_SHARE_START_SEC_VAR_FAST_NO_INIT_ALIGN_HEX_10
+ #include "MemMap.h"
+ 
+-/*!This variable contains KL30 value measured by VADC */
+-extern VAR(SftyDma_DataType, SFTY_DMA_VAR) SftyDmaVadcKL30PrMeasAData[SFTY_DMA_VADC_KL30_BUF_LEN];
+-
+-/*!This variable contains KL30 value measured by VADC, routed via SBC */
+-extern VAR(SftyDma_DataType, SFTY_DMA_VAR) SftyDmaVadcKL30PrMeasBData[SFTY_DMA_VADC_KL30_BUF_LEN];
+-/*!This variable contains crash VADC value */
++/*!This variable contains DMA crash data */
+ extern VAR(SftyDma_DataType, SFTYDMA_VAR) SftyDmaVadcCrashData[SFTY_DMA_VADC_ANALOG_CRASH_BUF_LEN];
+ 
+ /*!This variable contains DMA Interlock data */
+ extern VAR(SftyDma_DataType, SFTYDMA_VAR) SftyDmaVadcInterlockData[SFTY_DMA_VADC_INTERLOCK_BUF_LEN];
+ 
+-/*! This variable contains DMA-ringbuffer for CS Timestamp value */
++/*! This variable contains DMA-ring buffer for CS time stamp value */
+ extern VAR(SftyDma_DataType, SFTY_DMA_VAR) SftyDmaCsTimeStampData[SFTY_DMA_CS_TIMESTAMP_BUF_LEN];
+ 
+-/*!This variable contains P5_U value measured by VADC */
+-extern VAR(SftyDma_DataType, SFTY_DMA_VAR) SftyDmaVadcP5UData[SFTY_DMA_VADC_P5_U_BUF_LEN];
+-
+-#if SYSCON_FTR_PSM == 1 /* USE_IPMCTRL_CONTROL */
+-/*!This variable contains P5_ASC2 value measured by VADC */
+-//extern VAR(SftyDma_DataType, SFTY_DMA_VAR) SftyDmaVadcP5Asc2Data[SFTY_DMA_VADC_P5_ASC2_BUF_LEN];
+-#endif /* SYSCON_FTR_PSM == 1  USE_IPMCTRL_CONTROL */
+-
+-/*!This variable contains SEPIC_OUT value measured by VADC */
+-extern VAR(SftyDma_DataType, SFTY_DMA_VAR) SftyDmaVadcSepicOutData[SFTY_DMA_VADC_SEPIC_OUT_BUF_LEN];
+-
+-
+-/*!This variable contains P5_V value measured by VADC */
+-extern VAR(SftyDma_DataType, SFTY_DMA_VAR) SftyDmaVadcP5VData[SFTY_DMA_VADC_P5_V_BUF_LEN];
+-
+-/*!This variable contains P5_W value measured by VADC */
+-extern VAR(SftyDma_DataType, SFTY_DMA_VAR) SftyDmaVadcP5WData[SFTY_DMA_VADC_P5_W_BUF_LEN];
++/*!This variable contains the park lock voltage measurement of P channel to primary actuator. Diagnose half-bridge. */
++extern VAR(SftyDma_DataType, SFTYDMA_VAR) SftyDmaVadcPlcPosUData[SFTY_DMA_PLK_P_CHN_U_MEAS_BUF_LEN];
+ 
+-/*!This variable contains P15 value measured by VADC */
+-extern VAR(SftyDma_DataType, SFTY_DMA_VAR) SftyDmaVadcP15Data[SFTY_DMA_VADC_P15_BUF_LEN];
++/*!This variable contains the park lock voltage measurement of N channel to primary actuator. Diagnose half-bridge. */
++extern VAR(SftyDma_DataType, SFTYDMA_VAR) SftyDmaVadcPlcActrNegUData[SFTY_DMA_PLK_N_CHN_U_MEAS_BUF_LEN];
+ 
+-/*!This variable contains P15_RES value measured by VADC */
+-extern VAR(SftyDma_DataType, SFTY_DMA_VAR) SftyDmaVadcP15ResData[SFTY_DMA_VADC_P15_RES_BUF_LEN];
++/*!This variable contains the park lock current measurement of primary actuator. */
++extern VAR(SftyDma_DataType, SFTYDMA_VAR) SftyDmaVadcPlcActrIData[SFTY_DMA_PLK_P_ACT_I_MEAS_BUF_LEN];
+ 
+-/*!This variable contains P15_U value measured by VADC */
+-extern VAR(SftyDma_DataType, SFTY_DMA_VAR) SftyDmaVadcP15UData[SFTY_DMA_VADC_P15_U_BUF_LEN];
+-
+-/*!This variable contains P15_V value measured by VADC */
+-extern VAR(SftyDma_DataType, SFTY_DMA_VAR) SftyDmaVadcP15VData[SFTY_DMA_VADC_P15_V_BUF_LEN];
+-
+-/*!This variable contains P15_W value measured by VADC */
+-extern VAR(SftyDma_DataType, SFTY_DMA_VAR) SftyDmaVadcP15WData[SFTY_DMA_VADC_P15_W_BUF_LEN];
++/*!This variable contains KL30 value measured by VADC */
++extern VAR(SftyDma_DataType, SFTYDMA_VAR) SftyDmaVadcKl30UData[SFTYDMA_VADC_KL30_BUF_LEN];
+ 
+-/*!This variable contains P16 value measured by VADC */
+-extern VAR(SftyDma_DataType, SFTY_DMA_VAR) SftyDmaVadcP16Data[SFTY_DMA_VADC_P16_BUF_LEN];
++/*!This variable contains the park lock position sensor slow channel serial data from KMZ30 sensor */
++extern VAR(SftyDma_DataType, SFTYDMA_VAR) SftyDmaParkLockEvlnSENTStsInfoRx;
+ 
+-/*!This variable contains KL15 value measured by VADC */
+-extern VAR(SftyDma_DataType, SFTY_DMA_VAR) SftyDmaVadcKL15Data[SFTY_DMA_VADC_KL15_BUF_LEN];
++/*! This variable contains DMA-ring buffer for park lock time stamp and raw value */
++extern VAR(SftyDma_ParkLockSENTDataType, SFTY_DMA_VAR) SftyDmaParkLockPosnAcqnSENTSnrDataRx;
+ 
+-#define SFTY_DMA_QM_SHARE_STOP_SEC_VAR_FAST_NO_INIT_ALIGN_0x10
++#define SFTY_DMA_QM_SHARE_STOP_SEC_VAR_FAST_NO_INIT_ALIGN_HEX_10
+ #include "MemMap.h"
+ 
+ /*! \\endcond */
+ 
+ /*================== [declaration of global functions] ======================*/
+ 
+-/* ****************************** AREA 1 *********************************** */
+-/* ********************************** SLOW ********************************* */
+-
++/* ****************************** AREA 1 - SLOW *********************************** */
+ #define SFTY_DMA_AREA_1_START_SEC_CODE_SLOW
+ #include "MemMap.h"
+ 
+-/* EXTERNAL_ FUNC(void, SFTY_DMA_CODE) SftyDma_UpdateP5UAndTiStamp(void); */
+-
+-/* EXTERNAL_ FUNC(void, SFTY_DMA_CODE) SftyDma_UpdateP5VAndTiStamp(void); */
+-
+-/* EXTERNAL_ FUNC(void, SFTY_DMA_CODE) SftyDma_UpdateP5WAndTiStamp(void); */
+-
+-/* EXTERNAL_ FUNC(void, SFTY_DMA_CODE) SftyDma_UpdateP5Asc2AndTiStamp(void); */
+-
+-/* EXTERNAL_ FUNC(void, SFTY_DMA_CODE) SftyDma_UpdateP15RESAndTiStamp(void); */
+-
+-/* EXTERNAL_ FUNC(void, SFTY_DMA_CODE) SftyDma_UpdateP15UAndTiStamp(void); */
+-
+-/* EXTERNAL_ FUNC(void, SFTY_DMA_CODE) SftyDma_UpdateP15VAndTiStamp(void); */
+-
+-/* EXTERNAL_ FUNC(void, SFTY_DMA_CODE) SftyDma_UpdateP15WAndTiStamp(void); */
+-
+-/* EXTERNAL_ FUNC(void, SFTY_DMA_CODE) SftyDma_UpdateKL15AndTiStamp(void); */
+-
+-/* EXTERNAL_ FUNC(void, SFTY_DMA_CODE) SftyDma_UpdateSEPICOUTAndTiStamp(void); */
+-
+-#if SYSCON_FTR_PSM == 1 /* USE_IPMCTRL_CONTROL */
+-/* EXTERNAL_ FUNC(void, SFTY_DMA_CODE) SftyDma_UpdateP15AndTiStamp(void); */
+-
+-
+-/* EXTERNAL_ FUNC(void, SFTY_DMA_CODE) SftyDma_UpdateP14HVLVAndTiStamp(void); */
+-#endif /* SYSCON_FTR_PSM == 1  USE_IPMCTRL_CONTROL */
+-
+-
+-/* EXTERNAL_ FUNC(void, SFTY_DMA_CODE) SftyDmaUpdateVadcRawCuT2ValAndTiStamp(void); */
+-
+-/* EXTERNAL_ FUNC(void, SFTY_DMA_CODE) SftyDma_UpdateVadcRawCuT1ValAndTiStamp(void); */
+-
+-EXTERNAL_ FUNC(void, SFTY_DMA_CODE) SftyDma_UpdateVadcRawMotStatorValAndTiStamp(void);
++extern FUNC(void, SFTY_DMA_CODE) SftyDma_UpdateVadcRawMotStatorValAndTiStamp(void);
+ 
+ #define SFTY_DMA_AREA_1_STOP_SEC_CODE_SLOW
+ #include "MemMap.h"
+ 
+-/* ********************************** FAST ********************************* */
+-
++/* ********************************** AREA 1 - FAST ********************************* */
+ #define SFTY_DMA_AREA_1_START_SEC_CODE_FAST
+ #include "MemMap.h"
+ 
+-/* EXTERNAL_ FUNC(void, SFTY_DMA_CODE) SftyDma_UpdateKL30PrMeasAAndTiStamp(void); */
+-
+-/* EXTERNAL_ FUNC(void, SFTY_DMA_CODE) SftyDma_UpdatePwrMdlData(void); */
+-
+-/* EXTERNAL_ FUNC(void, SFTY_DMA_CODE) SftyDma_UpdateRawPhaIAndTiStamp(void); */
+-
+-/* EXTERNAL_ FUNC(void, SFTY_DMA_CODE) SftyDma_UpdateRawRslvrValAndTiStamp(void); */
+-
+-EXTERNAL_ FUNC(void, SFTY_DMA_CODE) SftyDma_UpdateRawCrashData(void);
++extern FUNC(void, SFTY_DMA_CODE) SftyDma_UpdateRawCrashData(void);
+ 
+ #define SFTY_DMA_AREA_1_STOP_SEC_CODE_FAST
+ #include "MemMap.h"
+ 
+-/* ****************************** AREA 2 *********************************** */
+-/* ********************************** FAST ********************************* */
+-
++/* ****************************** AREA 2 - FAST *********************************** */
+ #define SFTY_DMA_AREA_2_START_SEC_CODE_FAST
+ #include "MemMap.h"
+ 
+-/* EXTERNAL_ FUNC(void, SFTY_DMA_CODE) SftyDma_UpdateDsadcRawUdcAndTiStamp(void); */
++extern FUNC(void, SFTY_DMA_CODE) SftyDma_UpdateRawInterlockData(void);
+ 
+-/* EXTERNAL_ FUNC(void, SFTY_DMA_CODE) SftyDma_UpdateVadcRawUdcAndTiStamp(void); */
++extern FUNC(void, SFTYDMA_CODE) SftyDma_UpdateParkLockPrimActrPosChUAndTiStamp(void);
+ 
+-/* EXTERNAL_ FUNC(void, SFTY_DMA_CODE) SftyDma_UpdateKL30PrMeasBAndTiStamp(void); */
+-
+-EXTERNAL_ FUNC(void, SFTY_DMA_CODE) SftyDma_UpdateRawInterlockData(void);
++extern FUNC(void, SFTYDMA_CODE) SftyDma_UpdateParkLockPrimActrNegChUAndTiStamp(void);
+ 
+ #define SFTY_DMA_AREA_2_STOP_SEC_CODE_FAST
+ #include "MemMap.h"
+ 
+-/* ********************************** SLOW ********************************* */
++/* ********************************** AREA 2 - SLOW ********************************* */
+ #define SFTY_DMA_AREA_2_START_SEC_CODE_SLOW
+ #include "MemMap.h"
+ 
++extern FUNC(void, SFTYDMA_CODE) SftyDma_UpdateKl30AndTiStamp(void);
+ 
+ #define SFTY_DMA_AREA_2_STOP_SEC_CODE_SLOW
+ #include "MemMap.h"
+ 
+-/* ****************************** AREA CMN *********************************** */
+-/* ********************************** SLOW ********************************* */
+-
+-#define SFTY_DMA_AREA_CMN_START_SEC_CODE_SLOW
++/* ****************************** AREA 0 - FAST *********************************** */
++#define SFTY_DMA_AREA_0_START_SEC_CODE_FAST
+ #include "MemMap.h"
+ 
+-/* EXTERNAL_ FUNC(void, SFTY_DMA_CODE) SftyDma_UpdateQSpiRxMsg(uint8* rxBuf); */
++extern FUNC(void, SFTYDMA_CODE) SftyDma_UpdateParkLockPrimActrIAndTiStamp(void);
+ 
+-#define SFTY_DMA_AREA_CMN_STOP_SEC_CODE_SLOW
++#define SFTY_DMA_AREA_0_STOP_SEC_CODE_FAST
+ #include "MemMap.h"
+ 
++/* ****************************** AREA CMN - SLOW *********************************** */
++#define SFTY_DMA_AREA_CMN_START_SEC_CODE_SLOW
++#include "MemMap.h"
+ 
++#define SFTY_DMA_AREA_CMN_STOP_SEC_CODE_SLOW
++#include "MemMap.h"
+ 
++/* ****************************** AREA CMN - FAST *********************************** */
++#define SFTY_DMA_AREA_CMN_START_SEC_CODE_FAST
++#include "MemMap.h"
+ 
+ extern FUNC(void, SFTYDMA_CODE) SftyDma_UpdateIAcTiStamp(void);
+ 
++#define SFTY_DMA_AREA_CMN_STOP_SEC_CODE_FAST
++#include "MemMap.h"
++
+ 
+ /*================== [closure] ==============================================*/
+-/*! \\misra Warning No C2004:19.6 "Undefine EXTERNAL_ according to Coding Guideline." */
+-#undef EXTERNAL_ /* PRQA S 0841 */
+-/*! @} doxygen end of group definition */
+ #endif
+ /* ********************************************************************** */
+-/* Copyright (C) Siemens AG 2014 */
+-/* All Rights Reserved. Confidential */
++/* Copyright (C) Valeo Siemens eAutomotive Germany GmbH 2021              */
++/* All Rights Reserved. Confidential                                      */
+ /* ********************************************************************** */
+ /*==================[end of file]============================================*/
+diff --git a/src/fw_cu/Components/Safety/Sfty_Cmn/SftyDma/include/SftyDma_data.h b/src/fw_cu/Components/Safety/Sfty_Cmn/SftyDma/include/SftyDma_data.h
+index 7da2ce3a0..ff5707581 100644
+--- a/src/fw_cu/Components/Safety/Sfty_Cmn/SftyDma/include/SftyDma_data.h
++++ b/src/fw_cu/Components/Safety/Sfty_Cmn/SftyDma/include/SftyDma_data.h
+@@ -1,41 +1,18 @@
+ /* ***************************************************************** */
+ /* Sourcefile: SftyDma_data.h                                        */
+-/* ADD Container: SftyDma                                      */
+-/* ADD Container Version: 1.4.0                                    */
++/* ADD Container: SftyDma                                            */
++/* ADD Container Version: 1.0.0                                      */
++/* ***************************************************************** */
++/* Copyright (C) Valeo-Siemens eAutomotive GmbH 2021                 */
++/* All Rights Reserved. Confidential                                 */
+ /* ***************************************************************** */
+ #ifndef\tSFTYDMA_DATA_H
+ #define\tSFTYDMA_DATA_H
+ 
+-
+ #include "AddGlobalDefines.h"
+ #include "Platform_Types.h"
+ #include "Compiler.h"
+ 
+-#ifndef\t_online
+-#define\t_online
+-#endif
+-#ifndef\t_param
+-#define\t_param
+-#endif
+-#ifndef\t_axis
+-#define\t_axis
+-#endif
+-#ifndef\t_map
+-#define\t_map
+-#endif
+-
+-
+-#include\t"AddGlobalDefines.h"
+-
+-#ifndef SW_INTERFACE
+-
+-
+-
+-
+-
+-#endif
+-
+-
+ /* Begin: SFTYDMA_START_SEC_VAR_AREA_1_FAST_INIT_16 (online) */
+ #define SFTYDMA_START_SEC_VAR_AREA_1_FAST_INIT_16
+ #include "MemMap.h"
+@@ -688,6 +665,77 @@ extern VAR(uint32, SFTYDMA_VAR) SftyDmaCsTiStamp;
+ #include "MemMap.h"
+ /* End: SFTYDMA_STOP_SEC_VAR_AREA_CMN_FAST_INIT_32 (online) */
+ 
++/* Begin: SFTYDMA_START_SEC_VAR_AREA_2_FAST_INIT_16 (online) */
++#define SFTYDMA_START_SEC_VAR_AREA_2_FAST_INIT_16
++#include "MemMap.h"
++
++extern VAR(uint16, SFTYDMA_VAR) SftyDmaParkLockPrimActrPosChURawVal;
++#define SFTYDMA_STOP_SEC_VAR_AREA_2_FAST_INIT_16
++#include "MemMap.h"
++/* End: SFTYDMA_STOP_SEC_VAR_AREA_2_FAST_INIT_16 (online) */
++
++/* Begin: SFTYDMA_START_SEC_VAR_AREA_2_FAST_INIT_32 (online) */
++#define SFTYDMA_START_SEC_VAR_AREA_2_FAST_INIT_32
++#include "MemMap.h"
++
++extern VAR(uint32, SFTYDMA_VAR) SftyDmaParkLockPrimActrPosChUTiStamp;
++#define SFTYDMA_STOP_SEC_VAR_AREA_2_FAST_INIT_32
++#include "MemMap.h"
++/* End: SFTYDMA_STOP_SEC_VAR_AREA_2_FAST_INIT_32 (online) */
++
++/* Begin: SFTYDMA_START_SEC_VAR_AREA_2_FAST_INIT_16 (online) */
++#define SFTYDMA_START_SEC_VAR_AREA_2_FAST_INIT_16
++#include "MemMap.h"
++
++extern VAR(uint16, SFTYDMA_VAR) SftyDmaParkLockPrimActrNegChURawVal;
++#define SFTYDMA_STOP_SEC_VAR_AREA_2_FAST_INIT_16
++#include "MemMap.h"
++/* End: SFTYDMA_STOP_SEC_VAR_AREA_2_FAST_INIT_16 (online) */
++
++/* Begin: SFTYDMA_START_SEC_VAR_AREA_2_FAST_INIT_32 (online) */
++#define SFTYDMA_START_SEC_VAR_AREA_2_FAST_INIT_32
++#include "MemMap.h"
++
++extern VAR(uint32, SFTYDMA_VAR) SftyDmaParkLockPrimActrNegChUTiStamp;
++#define SFTYDMA_STOP_SEC_VAR_AREA_2_FAST_INIT_32
++#include "MemMap.h"
++/* End: SFTYDMA_STOP_SEC_VAR_AREA_2_FAST_INIT_32 (online) */
++
++/* Begin: SFTYDMA_START_SEC_VAR_AREA_0_FAST_INIT_16 (online) */
++#define SFTYDMA_START_SEC_VAR_AREA_0_FAST_INIT_16
++#include "MemMap.h"
++
++extern VAR(uint16, SFTYDMA_VAR) SftyDmaParkLockPrimActrIRawVal;
++#define SFTYDMA_STOP_SEC_VAR_AREA_0_FAST_INIT_16
++#include "MemMap.h"
++/* End: SFTYDMA_STOP_SEC_VAR_AREA_0_FAST_INIT_16 (online) */
++
++/* Begin: SFTYDMA_START_SEC_VAR_AREA_0_FAST_INIT_32 (online) */
++#define SFTYDMA_START_SEC_VAR_AREA_0_FAST_INIT_32
++#include "MemMap.h"
++
++extern VAR(uint32, SFTYDMA_VAR) SftyDmaParkLockPrimActrITiStamp;
++#define SFTYDMA_STOP_SEC_VAR_AREA_0_FAST_INIT_32
++#include "MemMap.h"
++/* End: SFTYDMA_STOP_SEC_VAR_AREA_0_FAST_INIT_32 (online) */
++
++/* Begin: SFTYDMA_START_SEC_VAR_AREA_CMN_SLOW_INIT_16 (online) */
++#define SFTYDMA_START_SEC_VAR_AREA_CMN_SLOW_INIT_16
++#include "MemMap.h"
++
++extern VAR(uint16, SFTYDMA_VAR) SftyDmaKl30RawVal;
++#define SFTYDMA_STOP_SEC_VAR_AREA_CMN_SLOW_INIT_16
++#include "MemMap.h"
++/* End: SFTYDMA_STOP_SEC_VAR_AREA_CMN_SLOW_INIT_16 (online) */
++
++/* Begin: SFTYDMA_START_SEC_VAR_AREA_CMN_SLOW_INIT_32 (online) */
++#define SFTYDMA_START_SEC_VAR_AREA_CMN_SLOW_INIT_32
++#include "MemMap.h"
++
++extern VAR(uint32, SFTYDMA_VAR) SftyDmaKl30TiStamp;
++#define SFTYDMA_STOP_SEC_VAR_AREA_CMN_SLOW_INIT_32
++#include "MemMap.h"
++/* End: SFTYDMA_STOP_SEC_VAR_AREA_CMN_SLOW_INIT_32 (online) */
+ 
+ 
+ /* Begin: SFTYDMA_START_SEC_CALIB_32 (calib) */
+@@ -755,4 +803,10 @@ extern CONST(uint32, SFTYDMA_CALIB) SftyDmaVadcRslvrTiStampOffs;
+ #include "MemMap.h"
+ /* End: SFTYDMA_STOP_SEC_CALIB_32 (calib) */
+ 
++/*================== [closure] ==============================================*/
+ #endif
++/* ***************************************************************** */
++/* Copyright (C) Valeo-Siemens eAutomotive GmbH 2021                 */
++/* All Rights Reserved. Confidential                                 */
++/* ***************************************************************** */
++/*==================[end of file]====================================*/
+diff --git a/src/fw_cu/Components/Safety/Sfty_Cmn/SftyDma/src/SftyDma.c b/src/fw_cu/Components/Safety/Sfty_Cmn/SftyDma/src/SftyDma.c
+index 0baf88722..d05b8bb42 100644
+--- a/src/fw_cu/Components/Safety/Sfty_Cmn/SftyDma/src/SftyDma.c
++++ b/src/fw_cu/Components/Safety/Sfty_Cmn/SftyDma/src/SftyDma.c
+@@ -1,5 +1,5 @@
+ /* ********************************************************************** */
+-/* Sourcefile:    SftyDma.c                                         */
++/* Sourcefile:    SftyDma.c                                               */
+ /*                                                                        */
+ /* Project:       100kw                                                   */
+ /* TriCore                                                                */
+@@ -20,19 +20,15 @@
+ */
+ 
+ 
+-#define MASTER_SFTY_DMA_
+-
+ /*================== [includes] =============================================*/
+ #include "Std_Types.h"
+ #include "Sfty_Types.h"
+ #include "SftyDma.h"
+ #include "SftyDma_data.h"
+ #include "Mathlib.h"
+-#include "IfxDma_reg.h"
+-#include "SftyDmaDrvr_cfg.h"/* PRQA S 0380 */
+-#include "SftyUtils.h"
+-#include "AddGlobalDefines.h"
+-#include "SftyReplcmt_data.h"
++#include "IfxDma_reg.h" /* PRQA S 0380 # header file necessary; inclusion of macros unavoidable */
++#include "SftyDmaDrvr_cfg.h"
++
+ #if defined(SWIT_FC_Active) || defined(SWIT_Active) || defined(SWIT_IT_Active)
+ #include "SWIT_Sfty.h" 
+ #endif
+@@ -44,226 +40,59 @@
+ 
+ /*================== [global variables] ===========================*/
+ 
+-#define SFTY_DMA_QM_SHARE_START_SEC_VAR_FAST_NO_INIT_ALIGN_0x20
++#define SFTY_DMA_QM_SHARE_START_SEC_VAR_FAST_NO_INIT_ALIGN_HEX_20
+ #include "MemMap.h"
+ 
+ VAR(uint32, SFTY_DMA_VAR) SftyDmaQSpiRxData[SFTY_DMA_Q_SPI_RX_BUF_LEN];
+ 
+-#define SFTY_DMA_QM_SHARE_STOP_SEC_VAR_FAST_NO_INIT_ALIGN_0x20
++#define SFTY_DMA_QM_SHARE_STOP_SEC_VAR_FAST_NO_INIT_ALIGN_HEX_20
+ #include "MemMap.h"
+ 
+-#define SFTY_DMA_QM_SHARE_START_SEC_VAR_FAST_NO_INIT_ALIGN_0x40 /* PRQA S 4800 */
++#define SFTY_DMA_QM_SHARE_START_SEC_VAR_FAST_NO_INIT_ALIGN_HEX_40
+ #include "MemMap.h"
+ 
+-/* This variable contains DMA-ring buffer for IGBT_BOT_U dutycycle measurement (TIM value) */
+-VAR(SftyDma_DataType, SFTY_DMA_VAR) SftyDmaTimCtrlIgbtBotUData[SFTY_DMA_CTRL_IGBT_FB];
+-
+-/* This variable contains DMA-ring buffer for IGBT_TOP_U dutycycle measurement (TIM value) */
+-VAR(SftyDma_DataType, SFTY_DMA_VAR) SftyDmaTimCtrlIgbtTopUData[SFTY_DMA_CTRL_IGBT_FB];
+-
+-/* This variable contains DMA-ring buffer for IGBT_TOP_V dutycycle measurement (TIM value) */
+-VAR(SftyDma_DataType, SFTY_DMA_VAR) SftyDmaTimCtrlIgbtTopVData[SFTY_DMA_CTRL_IGBT_FB];
+-
+-/* This variable contains DMA-ring buffer for IGBT_BOT_V dutycycle measurement (TIM value) */
+-VAR(SftyDma_DataType, SFTY_DMA_VAR) SftyDmaTimCtrlIgbtBotVData[SFTY_DMA_CTRL_IGBT_FB];
+-
+-/* This variable contains DMA-ring buffer for IGBT_TOP_W dutycycle measurement (TIM value) */
+-VAR(SftyDma_DataType, SFTY_DMA_VAR) SftyDmaTimCtrlIgbtTopWData[SFTY_DMA_CTRL_IGBT_FB];
+-
+-/* This variable contains DMA-ring buffer for IGBT_BOT_W dutycycle measurement (TIM value) */
+-VAR(SftyDma_DataType, SFTY_DMA_VAR) SftyDmaTimCtrlIgbtBotWData[SFTY_DMA_CTRL_IGBT_FB];
+-
+-/*
+-@@ INSTANCE = SftyDmaDsadcIuData._0_ SFTY_DMA_DSADC_I_U_DATA_0
+-@@ STRUCTURE = SftyDma_DataType
+-@@ END
+-@@ INSTANCE = SftyDmaDsadcIuData._1_ SFTY_DMA_DSADC_I_U_DATA_1
+-@@ STRUCTURE = SftyDma_DataType
+-@@ END
+-@@ INSTANCE = SftyDmaDsadcIuData._2_ SFTY_DMA_DSADC_I_U_DATA_2
+-@@ STRUCTURE = SftyDma_DataType
+-@@ END
+-@@ INSTANCE = SftyDmaDsadcIuData._3_ SFTY_DMA_DSADC_I_U_DATA_3
+-@@ STRUCTURE = SftyDma_DataType
+-@@ END
+-@@ INSTANCE = SftyDmaDsadcIuData._4_ SFTY_DMA_DSADC_I_U_DATA_4
+-@@ STRUCTURE = SftyDma_DataType
+-@@ END
+-@@ INSTANCE = SftyDmaDsadcIuData._5_ SFTY_DMA_DSADC_I_U_DATA_5
+-@@ STRUCTURE = SftyDma_DataType
+-@@ END
+-@@ INSTANCE = SftyDmaDsadcIuData._6_ SFTY_DMA_DSADC_I_U_DATA_6
+-@@ STRUCTURE = SftyDma_DataType
+-@@ END
+-@@ INSTANCE = SftyDmaDsadcIuData._7_ SFTY_DMA_DSADC_I_U_DATA_7
+-@@ STRUCTURE = SftyDma_DataType
+-@@ END
+-*/
+-/*! This variable contains DMA-ringbuffer for DSADC-Iu-Phase current values */
+-VAR(SftyDma_DataType, SFTY_DMA_VAR) SftyDmaDsadcIuData[SFTY_DMA_PHA_I_BUF_LEN];
+-
+-/*
+-@@ INSTANCE = SftyDmaDsadcIvData._0_ SFTY_DMA_DSADC_I_V_DATA_0
+-@@ STRUCTURE = SftyDma_DataType
+-@@ END
+-@@ INSTANCE = SftyDmaDsadcIvData._1_ SFTY_DMA_DSADC_I_V_DATA_1
+-@@ STRUCTURE = SftyDma_DataType
+-@@ END
+-@@ INSTANCE = SftyDmaDsadcIvData._2_ SFTY_DMA_DSADC_I_V_DATA_2
+-@@ STRUCTURE = SftyDma_DataType
+-@@ END
+-@@ INSTANCE = SftyDmaDsadcIvData._3_ SFTY_DMA_DSADC_I_V_DATA_3
+-@@ STRUCTURE = SftyDma_DataType
+-@@ END
+-@@ INSTANCE = SftyDmaDsadcIvData._4_ SFTY_DMA_DSADC_I_V_DATA_4
+-@@ STRUCTURE = SftyDma_DataType
+-@@ END
+-@@ INSTANCE = SftyDmaDsadcIvData._5_ SFTY_DMA_DSADC_I_V_DATA_5
+-@@ STRUCTURE = SftyDma_DataType
+-@@ END
+-@@ INSTANCE = SftyDmaDsadcIvData._6_ SFTY_DMA_DSADC_I_V_DATA_6
+-@@ STRUCTURE = SftyDma_DataType
+-@@ END
+-@@ INSTANCE = SftyDmaDsadcIvData._7_ SFTY_DMA_DSADC_I_V_DATA_7
+-@@ STRUCTURE = SftyDma_DataType
+-@@ END
+-*/
+-/*! This variable contains DMA-ringbuffer for DSADC-Iv-Phase current values */
+-VAR(SftyDma_DataType, SFTY_DMA_VAR) SftyDmaDsadcIvData[SFTY_DMA_PHA_I_BUF_LEN];
+-
+-/*
+-@@ INSTANCE = SftyDmaDsadcIwData._0_ SFTY_DMA_DSADC_I_W_DATA_0
+-@@ STRUCTURE = SftyDma_DataType
+-@@ END
+-@@ INSTANCE = SftyDmaDsadcIwData._1_ SFTY_DMA_DSADC_I_W_DATA_1
+-@@ STRUCTURE = SftyDma_DataType
+-@@ END
+-@@ INSTANCE = SftyDmaDsadcIwData._2_ SFTY_DMA_DSADC_I_W_DATA_2
+-@@ STRUCTURE = SftyDma_DataType
+-@@ END
+-@@ INSTANCE = SftyDmaDsadcIwData._3_ SFTY_DMA_DSADC_I_W_DATA_3
+-@@ STRUCTURE = SftyDma_DataType
+-@@ END
+-@@ INSTANCE = SftyDmaDsadcIwData._4_ SFTY_DMA_DSADC_I_W_DATA_4
+-@@ STRUCTURE = SftyDma_DataType
+-@@ END
+-@@ INSTANCE = SftyDmaDsadcIwData._5_ SFTY_DMA_DSADC_I_W_DATA_5
+-@@ STRUCTURE = SftyDma_DataType
+-@@ END
+-@@ INSTANCE = SftyDmaDsadcIwData._6_ SFTY_DMA_DSADC_I_W_DATA_6
+-@@ STRUCTURE = SftyDma_DataType
+-@@ END
+-@@ INSTANCE = SftyDmaDsadcIwData._7_ SFTY_DMA_DSADC_I_W_DATA_7
+-@@ STRUCTURE = SftyDma_DataType
+-@@ END
+-*/
+-/*! This variable contains DMA-ringbuffer for DSADC-Iw-Phase current values */
+-VAR(SftyDma_DataType, SFTY_DMA_VAR) SftyDmaDsadcIwData[SFTY_DMA_PHA_I_BUF_LEN];
+-
+-/*! This variable contains DMA-ringbuffer for VADC-Iu-Phase current values */
+-VAR(SftyDma_DataType, SFTY_DMA_VAR) SftyDmaVadcIuData[SFTY_DMA_PHA_I_BUF_LEN];
+-
+-/*! This variable contains DMA-ringbuffer for VADC-Iv-Phase current values */
+-VAR(SftyDma_DataType, SFTY_DMA_VAR) SftyDmaVadcIvData[SFTY_DMA_PHA_I_BUF_LEN];
+-
+-/*! This variable contains DMA-ringbuffer for VADC-Iw-Phase current values */
+-VAR(SftyDma_DataType, SFTY_DMA_VAR) SftyDmaVadcIwData[SFTY_DMA_PHA_I_BUF_LEN];
+-
+-/*! This variable contains DMA-ringbuffer for DSADC-Udc voltage values */
+-VAR(SftyDma_DataType, SFTY_DMA_VAR) SftyDmaDsadcUdcData[SFTY_DMA_U_DC_BUF_LEN];
+-
+-/*!This variable contains duty cycles that belong to measured phase currents */
+-
+-/*! This variable contains DMA-ring buffer for ADC-Temperature CU value */
+-VAR(SftyDma_DataType, SFTY_DMA_VAR) SftyDmaVadcATempCuData[SFTY_DMA_A_TEMP_CU_BUF_LEN];
+-
+-/*! This variable contains DMA-ring buffer for ADC value of CU Temperature sensor2 */
+-VAR(SftyDma_DataType, SFTY_DMA_VAR) SftyDmaVadcBTempCuData[SFTY_DMA_B_TEMP_CU_BUF_LEN];
+-
+-/*! This variable contains DMA-ring buffer for DC_U_1_M_MON Adc value */
+-VAR(SftyDma_DataType, SFTY_DMA_VAR) SftyDmaVadcDcU1MMonData[SFTY_DMA_VADC_DC_U_1_M_MON_BUF_LEN];
+-
+-/*! This variable contains DMA-ring buffer for DC_U_1_P_MON Adc value */
+-VAR(SftyDma_DataType, SFTY_DMA_VAR) SftyDmaVadcDcU1PMonData[SFTY_DMA_VADC_DC_U_1_P_MON_BUF_LEN];
+-
+-/*! This variable contains DMA-ringbuffer for VADC-CTP_MOT1 Temperature value */
++/*! This variable contains DMA-ring buffer for VADC-CTP_MOT1 Temperature value */
+ VAR(SftyDma_DataType, SFTY_DMA_VAR) SftyDmaMotStatorTData[SFTY_DMA_CTP_MOT1_BUF_LEN];
+ 
+-#define SFTY_DMA_QM_SHARE_STOP_SEC_VAR_FAST_NO_INIT_ALIGN_0x40 /* PRQA S 4800 */
++#define SFTY_DMA_QM_SHARE_STOP_SEC_VAR_FAST_NO_INIT_ALIGN_HEX_40
+ #include "MemMap.h"
+ 
+-#define SFTY_DMA_QM_SHARE_START_SEC_VAR_FAST_NO_INIT_ALIGN_0x10 /* PRQA S 4800 */
++#define SFTY_DMA_QM_SHARE_START_SEC_VAR_FAST_NO_INIT_ALIGN_HEX_10
+ #include "MemMap.h"
+ 
+-/*!This variable contains P5_U value measured by VADC */
+-VAR(SftyDma_DataType, SFTY_DMA_VAR) SftyDmaVadcP5UData[SFTY_DMA_VADC_P5_U_BUF_LEN];
+-
+-#if SYSCON_FTR_PSM == 1 /* USE_IPMCTRL_CONTROL */
+-/*!This variable contains P5_ASC2 value measured by VADC */
+-//VAR(SftyDma_DataType, SFTY_DMA_VAR) SftyDmaVadcP5Asc2Data[SFTY_DMA_VADC_P5_ASC2_BUF_LEN];
+-#endif /* SYSCON_FTR_PSM == 1  USE_IPMCTRL_CONTROL */
+-
+-/*!This variable contains SEPIC_OUT value measured by VADC */
+-VAR(SftyDma_DataType, SFTY_DMA_VAR) SftyDmaVadcSepicOutData[SFTY_DMA_VADC_SEPIC_OUT_BUF_LEN];
+-
+-
+-/*!This variable contains P5_V value measured by VADC */
+-VAR(SftyDma_DataType, SFTY_DMA_VAR) SftyDmaVadcP5VData[SFTY_DMA_VADC_P5_V_BUF_LEN];
+-
+-/*!This variable contains P5_W value measured by VADC */
+-VAR(SftyDma_DataType, SFTY_DMA_VAR) SftyDmaVadcP5WData[SFTY_DMA_VADC_P5_W_BUF_LEN];
+-
+-/*!This variable contains P15 value measured by VADC */
+-VAR(SftyDma_DataType, SFTY_DMA_VAR) SftyDmaVadcP15Data[SFTY_DMA_VADC_P15_BUF_LEN];
+-
+-/*!This variable contains P15_RES value measured by VADC */
+-VAR(SftyDma_DataType, SFTY_DMA_VAR) SftyDmaVadcP15ResData[SFTY_DMA_VADC_P15_RES_BUF_LEN];
+-
+-/*!This variable contains P15_U value measured by VADC */
+-VAR(SftyDma_DataType, SFTY_DMA_VAR) SftyDmaVadcP15UData[SFTY_DMA_VADC_P15_U_BUF_LEN];
+-
+-/*!This variable contains P15_V value measured by VADC */
+-VAR(SftyDma_DataType, SFTY_DMA_VAR) SftyDmaVadcP15VData[SFTY_DMA_VADC_P15_V_BUF_LEN];
+-
+-/*!This variable contains P15_W value measured by VADC */
+-VAR(SftyDma_DataType, SFTY_DMA_VAR) SftyDmaVadcP15WData[SFTY_DMA_VADC_P15_W_BUF_LEN];
+-
+-/*!This variable contains P16 value measured by VADC */
+-VAR(SftyDma_DataType, SFTY_DMA_VAR) SftyDmaVadcP16Data[SFTY_DMA_VADC_P16_BUF_LEN];
+-
+-/*!This variable contains KL15 value measured by VADC */
+-VAR(SftyDma_DataType, SFTY_DMA_VAR) SftyDmaVadcKL15Data[SFTY_DMA_VADC_KL15_BUF_LEN];
+-
+-/*!This variable contains KL30 value measured by VADC */
+-VAR(SftyDma_DataType, SFTY_DMA_VAR) SftyDmaVadcKL30PrMeasAData[SFTY_DMA_VADC_KL30_BUF_LEN];
+-
+-/*!This variable contains KL30 value measured by SBC */
+-VAR(SftyDma_DataType, SFTY_DMA_VAR) SftyDmaVadcKL30PrMeasBData[SFTY_DMA_VADC_KL30_BUF_LEN];
+-
+ /*!This variable contains DMA crash data */
+ VAR(SftyDma_DataType, SFTYDMA_VAR) SftyDmaVadcCrashData[SFTY_DMA_VADC_ANALOG_CRASH_BUF_LEN];
+ 
+ /*!This variable contains DMA Interlock data */
+ VAR(SftyDma_DataType, SFTYDMA_VAR) SftyDmaVadcInterlockData[SFTY_DMA_VADC_INTERLOCK_BUF_LEN];
+ 
+-/*! This variable contains DMA-ringbuffer for CS Timestamp value */
++/*! This variable contains DMA-ring buffer for CS time stamp value */
+ VAR(SftyDma_DataType, SFTY_DMA_VAR) SftyDmaCsTimeStampData[SFTY_DMA_CS_TIMESTAMP_BUF_LEN];
+ 
+-#define SFTY_DMA_QM_SHARE_STOP_SEC_VAR_FAST_NO_INIT_ALIGN_0x10 /* PRQA S 4800 */
+-#include "MemMap.h"
++/*!This variable contains the park lock voltage measurement of P channel to primary actuator. Diagnose half-bridge. */
++VAR(SftyDma_DataType, SFTYDMA_VAR) SftyDmaVadcPlcPosUData[SFTY_DMA_PLK_P_CHN_U_MEAS_BUF_LEN];
+ 
+-/*================== [prototype of local functions] =========================*/
+-/* ****************************** ASIL B *********************************** */
++/*!This variable contains the park lock voltage measurement of N channel to primary actuator. Diagnose half-bridge. */
++VAR(SftyDma_DataType, SFTYDMA_VAR) SftyDmaVadcPlcActrNegUData[SFTY_DMA_PLK_N_CHN_U_MEAS_BUF_LEN];
+ 
+-/* ********************************** FAST ********************************* */
++/*!This variable contains the park lock current measurement of primary actuator. */
++VAR(SftyDma_DataType, SFTYDMA_VAR) SftyDmaVadcPlcActrIData[SFTY_DMA_PLK_P_ACT_I_MEAS_BUF_LEN];
+ 
+-#define SFTY_DMA_AREA_1_START_SEC_CODE_FAST
+-#include "MemMap.h"
++/*!This variable contains KL30 value measured by VADC */
++VAR(SftyDma_DataType, SFTYDMA_VAR) SftyDmaVadcKl30UData[SFTYDMA_VADC_KL30_BUF_LEN];
+ 
++/*!This variable contains the park lock position sensor slow channel serial data from KMZ30 sensor */
++VAR(SftyDma_DataType, SFTYDMA_VAR) SftyDmaParkLockEvlnSENTStsInfoRx;
+ 
++/*! This variable contains DMA-ring buffer for park lock time stamp and raw value */
++VAR(SftyDma_ParkLockSENTDataType, SFTY_DMA_VAR) SftyDmaParkLockPosnAcqnSENTSnrDataRx;
+ 
+-#define SFTY_DMA_AREA_1_STOP_SEC_CODE_FAST
++#define SFTY_DMA_QM_SHARE_STOP_SEC_VAR_FAST_NO_INIT_ALIGN_HEX_10
+ #include "MemMap.h"
++
++/*================== [prototype of local functions] =========================*/
++
++
+ /*================== [definition of local functions] ========================*/
+ 
+ 
+@@ -297,7 +126,6 @@ if((SWIT_SftyDma_EN_KEY==SWIT_First_HookEnableKey))
+   return retVal;
+ }
+ 
+-
+ /******************************************************************/
+ /*!
+  * \\fn      uint8 SftyDma_GetCurrIdx(Dma_ChannelType dmaCh, const SftyDma_DataType* dataPtr)
+@@ -317,18 +145,13 @@ LOCAL_INLINE FUNC(uint8, SFTY_DMA_CODE) SftyDma_GetCurrIdx(Dma_ChannelType dmaCh
+    /* ************* Source code **************** */
+ 
+    /* Get pointer to last written data */
++   lstPtr = ((SftyDma_DataType*)(MODULE_DMA.CH[(uint16)dmaCh].DADR.U));
+ 
+-   /*! \\misra Warning No C2004:11.3 "Cast between a pointer to object and an integral type.
+-    *                                No other way to cast register value to a pointer. Behaviour is correct" */
+-   lstPtr = ((SftyDma_DataType*)(MODULE_DMA.CH[(uint16)dmaCh].DADR.U)); /* PRQA S 0306 */
+-
+-   /*! \\misra MISRA-C:2004 Rule 11.3 Warning No C0488:4 "Cast between a pointer to object and an integral type. Behavior is OK" */
+    /* Calculate memory offset */
+-   memDif = (uint32)lstPtr - (uint32)(dataPtr); /* PRQA S 0306 */
++   memDif = (uint32)lstPtr - (uint32)(dataPtr);
+ 
+-   /*! \\misra MISRA-C:2004 Rule 17.4 Warning No C0488:4 "Performing pointer arithmetic. Calculating Index. Behavior is OK" */
+    /* Calculate indexes of current destination data */
+-   idx = (uint8)(memDif / sizeof(SftyDma_DataType)); /* PRQA S 0488 */
++   idx = (uint8)(memDif / sizeof(SftyDma_DataType));
+ 
+    /* Decrement index, to be sure that this data is not being written right now */
+    idx = SftyDma_DecIdx(idx, (bufLen - 1U));
+@@ -337,25 +160,12 @@ LOCAL_INLINE FUNC(uint8, SFTY_DMA_CODE) SftyDma_GetCurrIdx(Dma_ChannelType dmaCh
+ }
+ 
+ 
+-
+-
+-
+-#define SFTY_DMA_AREA_1_START_SEC_CODE_FAST
+-#include "MemMap.h"
+-
+-
+-#define SFTY_DMA_AREA_1_STOP_SEC_CODE_FAST
+-#include "MemMap.h"
+-
+ /*================== [definition of global functions] =======================*/
+ 
+-/* ****************************** AREA 1 *********************************** */
+-/* ********************************** SLOW ********************************* */
++/* ****************************** AREA 1 - SLOW *********************************** */
+ #define SFTY_DMA_AREA_1_START_SEC_CODE_SLOW
+ #include "MemMap.h"
+ 
+-
+-
+ /******************************************************************/
+ /*!
+  * \\fn      boolean SftyDma_UpdateVadcRawMotStatorValAndTiStamp(void);
+@@ -388,7 +198,7 @@ FUNC(void, SFTY_DMA_CODE) SftyDma_UpdateVadcRawMotStatorValAndTiStamp(void)
+ #include "MemMap.h"
+ 
+ 
+-/* ********************************** FAST ********************************* */
++/* ********************************** AREA 1 - FAST ********************************* */
+ 
+ #define SFTY_DMA_AREA_1_START_SEC_CODE_FAST
+ #include "MemMap.h"
+@@ -437,8 +247,9 @@ FUNC(void, SFTYDMA_CODE) SftyDma_UpdateRawCrashData(void)
+ #include "MemMap.h"
+ 
+ 
+-/* ****************************** ASIL B *********************************** */
+-/* ********************************** FAST ********************************* */
++/* ****************************** AREA 2 - FAST *********************************** */
++#define SFTY_DMA_AREA_2_START_SEC_CODE_FAST
++#include "MemMap.h"
+ 
+ /******************************************************************/
+ /*!
+@@ -446,38 +257,22 @@ FUNC(void, SFTYDMA_CODE) SftyDma_UpdateRawCrashData(void)
+  * \\brief   This function gets Raw Interlock value and Timestamp value
+  */
+ /******************************************************************/
+-
+-#define SFTY_DMA_AREA_2_START_SEC_CODE_FAST
+-#include "MemMap.h"
+-
+ FUNC(void, SFTYDMA_CODE) SftyDma_UpdateRawInterlockData(void)
+-
+-/* This function provides last raw value and time stamp */
+-/* @MRTZ_pointOut SftyDma_UpdateRawInterlockData FFCC00 */
+ {
+-   /* @MRTZ_skip Variables_Declaration */
+-   /* @MRTZ_beginBlock */
+    /* ******** Variables declaration *********** */
+    uint8 dataIdx;
+-   /* @MRTZ_endBlock */
+ 
+-   /* @MRTZ_describe source_file */
+    /* ************* Source code **************** */
+ 
+-   /* @MRTZ_hideCommands */
+    /* Get newest written data */
+    dataIdx = SftyDma_GetCurrIdx(SFTY_DMA_DRVR_CH_IDX_VADC_INTERLOCK_DATA, SftyDmaVadcInterlockData, SFTY_DMA_VADC_INTERLOCK_BUF_LEN);
+ 
+-   /* @MRTZ_hideCommands */
+    /* Copy data */
+    SftyDmaVadcInterlock = (uint16)(SftyDmaVadcInterlockData[dataIdx].data);
+ 
+-   /* @MRTZ_hideCommands */
+    /* Copy timestamp */
+    SftyDmaVadcInterlockTi = SftyDmaVadcInterlockData[dataIdx].tiStamp;
+ 
+-
+-
+ #if  defined(SWIT_IT_Active)||defined(SWIT_Active)
+    SWIT_SftyDma_UpdateRawInterlockData_EndHook();
+ #endif
+@@ -485,32 +280,134 @@ FUNC(void, SFTYDMA_CODE) SftyDma_UpdateRawInterlockData(void)
+    return;
+ }
+ 
++/******************************************************************/
++/*!
++ * \\fn      void SftyDma_UpdateParkLockPrimActrPosChUAndTiStamp(void)
++ * \\brief   This function provides last primary actuator positive channel voltage
++ */
++/******************************************************************/
++FUNC(void, SFTYDMA_CODE) SftyDma_UpdateParkLockPrimActrPosChUAndTiStamp(void) /* PRQA S 1503 # This function will be used in SftyParkLockEvln module after integration */
++{
++   /* ******** Variables declaration *********** */
++   uint8 dataIdx;
++
++   /* ************* Source code **************** */
++
++   /* Get newest written data */
++   dataIdx = SftyDma_GetCurrIdx(SFTY_DMA_DRVR_CH_IDX_PLC_MOT_P_DIAG, SftyDmaVadcPlcPosUData, SFTY_DMA_PLK_P_CHN_U_MEAS_BUF_LEN);
++
++   /* Copy data */
++   SftyDmaParkLockPrimActrPosChURawVal = (uint16)(SftyDmaVadcPlcPosUData[dataIdx].data);
++
++   /* Copy timestamp */
++   SftyDmaParkLockPrimActrPosChUTiStamp = SftyDmaVadcPlcPosUData[dataIdx].tiStamp;
++
++   return;
++}
++
++/******************************************************************/
++/*!
++ * \\fn      void SftyDma_UpdateParkLockPrimActrNegChUAndTiStamp(void)
++ * \\brief   This function provides last primary actuator negative channel voltage
++ */
++/******************************************************************/
++FUNC(void, SFTYDMA_CODE) SftyDma_UpdateParkLockPrimActrNegChUAndTiStamp(void) /* PRQA S 1503 # This function will be used in SftyParkLockEvln module after integration */
++{
++   /* ******** Variables declaration *********** */
++   uint8 dataIdx;
++
++   /* ************* Source code **************** */
++
++   /* Get newest written data */
++   dataIdx = SftyDma_GetCurrIdx(SFTY_DMA_DRVR_CH_IDX_PLC_MOT_N_DIAG, SftyDmaVadcPlcActrNegUData, SFTY_DMA_PLK_N_CHN_U_MEAS_BUF_LEN);
++
++   /* Copy data */
++   SftyDmaParkLockPrimActrNegChURawVal = (uint16)(SftyDmaVadcPlcActrNegUData[dataIdx].data);
++
++   /* Copy timestamp */
++   SftyDmaParkLockPrimActrNegChUTiStamp = SftyDmaVadcPlcActrNegUData[dataIdx].tiStamp;
++
++   return;
++}
++
+ #define SFTY_DMA_AREA_2_STOP_SEC_CODE_FAST
+ #include "MemMap.h"
+ 
+ 
+-/* ****************************** ASIL B *********************************** */
+-/* ****************************** SLOW ************************************* */
++/* ****************************** ASIL 2 - SLOW *********************************** */
+ #define SFTY_DMA_AREA_2_START_SEC_CODE_SLOW
+ #include "MemMap.h"
+ 
++/******************************************************************/
++/*!
++ * \\fn      void SftyDma_UpdateKl30AndTiStamp(void)
++ * \\brief   This function provides last Kl30 voltage sensed over Vadc
++ * \\param   [out] outData - Current values will be saved over this pointer
++ */
++/******************************************************************/
++FUNC(void, SFTYDMA_CODE) SftyDma_UpdateKl30AndTiStamp(void) /* PRQA S 1503 # This function will be used in SftyLvSplyEvln module after integration */
++{
++   /* ******** Variables declaration *********** */
++   uint8 dataIdx;
++
++   /* ************* Source code **************** */
++
++   /* Get newest written data */
++   dataIdx = SftyDma_GetCurrIdx(SFTYDMADRVR_CH_IDX_VADC_KL30_DATA, SftyDmaVadcKl30UData, SFTYDMA_VADC_KL30_BUF_LEN);
++
++   /* Copy data */
++   SftyDmaKl30RawVal = (uint16)(SftyDmaVadcKl30UData[dataIdx].data);
++
++   /* Copy timestamp */
++   SftyDmaKl30TiStamp = SftyDmaVadcKl30UData[dataIdx].tiStamp;
++
++   return;
++}
+ 
+ #define SFTY_DMA_AREA_2_STOP_SEC_CODE_SLOW
+ #include "MemMap.h"
+ 
++/* ********************************** AREA 0 - FAST ********************************* */
++#define SFTY_DMA_AREA_0_START_SEC_CODE_FAST
++#include "MemMap.h"
++
++/******************************************************************/
++/*!
++ * \\fn      void SftyDma_UpdateParkLockPrimActrIAndTiStamp(void)
++ * \\brief   This function provides last primary actuator current
++ */
++/******************************************************************/
++FUNC(void, SFTYDMA_CODE) SftyDma_UpdateParkLockPrimActrIAndTiStamp(void) /* PRQA S 1503 # This function will be used in SftyParkLockEvln module after integration */
++{
++   /* ******** Variables declaration *********** */
++   uint8 dataIdx;
++
++   /* ************* Source code **************** */
+ 
++   /* Get newest written data */
++   dataIdx = SftyDma_GetCurrIdx(SFTY_DMA_DRVR_CH_IDX_PLC_CURRENT, SftyDmaVadcPlcActrIData, SFTY_DMA_PLK_P_ACT_I_MEAS_BUF_LEN);
+ 
+-#define SFTY_DMA_AREA_CMN_START_SEC_CODE_SLOW
+-#include "MemMap.h"
++   /* Copy data */
++   SftyDmaParkLockPrimActrIRawVal = (uint16)(SftyDmaVadcPlcActrIData[dataIdx].data);
+ 
++   /* Copy timestamp */
++   SftyDmaParkLockPrimActrITiStamp = SftyDmaVadcPlcActrIData[dataIdx].tiStamp;
+ 
++   return;
++}
+ 
+-#define SFTY_DMA_AREA_CMN_STOP_SEC_CODE_SLOW
++#define SFTY_DMA_AREA_0_STOP_SEC_CODE_FAST
+ #include "MemMap.h"
+ 
++/* ****************************** ASIL CMN - SLOW *********************************** */
++#define SFTY_DMA_AREA_CMN_START_SEC_CODE_SLOW
++#include "MemMap.h"
+ 
+-/* ********************************** FAST ********************************* */
+ 
++#define SFTY_DMA_AREA_CMN_STOP_SEC_CODE_SLOW
++#include "MemMap.h"
++
++/* ********************************** AREA CMN - FAST ********************************* */
+ #define SFTY_DMA_AREA_CMN_START_SEC_CODE_FAST
+ #include "MemMap.h"
+ 
+@@ -546,14 +443,9 @@ FUNC(void, SFTYDMA_CODE) SftyDma_UpdateIAcTiStamp(void)
+ #include "MemMap.h"
+ 
+ 
+-
+-
+ /*================== [closure] ==============================================*/
+-/*! \\misra Warning No C2004:19.6 "Using \'#undef\' for master c-file" */
+-#undef MASTER_SFTY_DMA_ /* PRQA S 0841 */
+-/*! @} doxygen end of group definition */
+ /* ********************************************************************** */
+-/* Copyright (C) Valeo Siemens AG 2021                                    */
++/* Copyright (C) Valeo Siemens eAutomotive Germany GmbH 2021              */
+ /* All Rights Reserved. Confidential                                      */
+ /* ********************************************************************** */
+ /*==================[end of file]============================================*/
+diff --git a/src/fw_cu/Components/Safety/Sfty_Cmn/SftyDma/src/SftyDma_data.c b/src/fw_cu/Components/Safety/Sfty_Cmn/SftyDma/src/SftyDma_data.c
+index fb1464710..d9c2dcc29 100644
+--- a/src/fw_cu/Components/Safety/Sfty_Cmn/SftyDma/src/SftyDma_data.c
++++ b/src/fw_cu/Components/Safety/Sfty_Cmn/SftyDma/src/SftyDma_data.c
+@@ -1,7 +1,10 @@
+ /* ***************************************************************** */
+ /* Sourcefile: SftyDma_data.c                                        */
+-/* ADD Container: SftyDma                                      */
+-/* ADD Container Version: 1.4.0                                    */
++/* ADD Container: SftyDma                                            */
++/* ADD Container Version: 1.0.0                                      */
++/* ***************************************************************** */
++/* Copyright (C) Valeo-Siemens eAutomotive GmbH 2021                 */
++/* All Rights Reserved. Confidential                                 */
+ /* ***************************************************************** */
+ 
+ #include "Std_Types.h"
+@@ -590,6 +593,86 @@ VAR(uint32, SFTYDMA_VAR) SftyDmaCsTiStamp = 0UL;
+ #include "MemMap.h"
+ /* End: SFTYDMA_STOP_SEC_VAR_AREA_CMN_FAST_INIT_32 (online) */
+ 
++/* Begin: SFTYDMA_START_SEC_VAR_AREA_2_FAST_INIT_16 (online) */
++#define SFTYDMA_START_SEC_VAR_AREA_2_FAST_INIT_16
++#include "MemMap.h"
++
++/*! \\cvar Parklock P channel voltage measured by VADC; unit \'-\' */
++VAR(uint16, SFTYDMA_VAR) SftyDmaParkLockPrimActrPosChURawVal = 0U;
++#define SFTYDMA_STOP_SEC_VAR_AREA_2_FAST_INIT_16
++#include "MemMap.h"
++/* End: SFTYDMA_STOP_SEC_VAR_AREA_2_FAST_INIT_16 (online) */
++
++/* Begin: SFTYDMA_START_SEC_VAR_AREA_2_FAST_INIT_32 (online) */
++#define SFTYDMA_START_SEC_VAR_AREA_2_FAST_INIT_32
++#include "MemMap.h"
++
++/*! \\cvar Parklock P channel voltage VADC time stamp; unit \'Ticks\' */
++VAR(uint32, SFTYDMA_VAR) SftyDmaParkLockPrimActrPosChUTiStamp = 0UL;
++#define SFTYDMA_STOP_SEC_VAR_AREA_2_FAST_INIT_32
++#include "MemMap.h"
++/* End: SFTYDMA_STOP_SEC_VAR_AREA_2_FAST_INIT_32 (online) */
++
++/* Begin: SFTYDMA_START_SEC_VAR_AREA_2_FAST_INIT_16 (online) */
++#define SFTYDMA_START_SEC_VAR_AREA_2_FAST_INIT_16
++#include "MemMap.h"
++
++/*! \\cvar Parklock N channel voltage measured by VADC; unit \'-\' */
++VAR(uint16, SFTYDMA_VAR) SftyDmaParkLockPrimActrNegChURawVal = 0U;
++#define SFTYDMA_STOP_SEC_VAR_AREA_2_FAST_INIT_16
++#include "MemMap.h"
++/* End: SFTYDMA_STOP_SEC_VAR_AREA_2_FAST_INIT_16 (online) */
++
++/* Begin: SFTYDMA_START_SEC_VAR_AREA_2_FAST_INIT_32 (online) */
++#define SFTYDMA_START_SEC_VAR_AREA_2_FAST_INIT_32
++#include "MemMap.h"
++
++/*! \\cvar Parklock N channel voltage VADC time stamp; unit \'Ticks\' */
++VAR(uint32, SFTYDMA_VAR) SftyDmaParkLockPrimActrNegChUTiStamp = 0UL;
++#define SFTYDMA_STOP_SEC_VAR_AREA_2_FAST_INIT_32
++#include "MemMap.h"
++/* End: SFTYDMA_STOP_SEC_VAR_AREA_2_FAST_INIT_32 (online) */
++
++/* Begin: SFTYDMA_START_SEC_VAR_AREA_0_FAST_INIT_16 (online) */
++#define SFTYDMA_START_SEC_VAR_AREA_0_FAST_INIT_16
++#include "MemMap.h"
++
++/*! \\cvar Parklock primary actuator current measured by VADC; unit \'-\' */
++VAR(uint16, SFTYDMA_VAR) SftyDmaParkLockPrimActrIRawVal = 0U;
++#define SFTYDMA_STOP_SEC_VAR_AREA_0_FAST_INIT_16
++#include "MemMap.h"
++/* End: SFTYDMA_STOP_SEC_VAR_AREA_0_FAST_INIT_16 (online) */
++
++/* Begin: SFTYDMA_START_SEC_VAR_AREA_0_FAST_INIT_32 (online) */
++#define SFTYDMA_START_SEC_VAR_AREA_0_FAST_INIT_32
++#include "MemMap.h"
++
++/*! \\cvar Parklock primary actuator current VADC time stamp; unit \'Ticks\' */
++VAR(uint32, SFTYDMA_VAR) SftyDmaParkLockPrimActrITiStamp = 0UL;
++#define SFTYDMA_STOP_SEC_VAR_AREA_0_FAST_INIT_32
++#include "MemMap.h"
++/* End: SFTYDMA_STOP_SEC_VAR_AREA_0_FAST_INIT_32 (online) */
++
++/* Begin: SFTYDMA_START_SEC_VAR_AREA_CMN_SLOW_INIT_16 (online) */
++#define SFTYDMA_START_SEC_VAR_AREA_CMN_SLOW_INIT_16
++#include "MemMap.h"
++
++/*! \\cvar KL30 ADC raw value; unit \'-\' */
++VAR(uint16, SFTYDMA_VAR) SftyDmaKl30RawVal = 0U;
++#define SFTYDMA_STOP_SEC_VAR_AREA_CMN_SLOW_INIT_16
++#include "MemMap.h"
++/* End: SFTYDMA_STOP_SEC_VAR_AREA_CMN_SLOW_INIT_16 (online) */
++
++/* Begin: SFTYDMA_START_SEC_VAR_AREA_CMN_SLOW_INIT_32 (online) */
++#define SFTYDMA_START_SEC_VAR_AREA_CMN_SLOW_INIT_32
++#include "MemMap.h"
++
++/*! \\cvar KL30 ADC time stamp; unit \'Ticks\' */
++VAR(uint32, SFTYDMA_VAR) SftyDmaKl30TiStamp = 0UL;
++#define SFTYDMA_STOP_SEC_VAR_AREA_CMN_SLOW_INIT_32
++#include "MemMap.h"
++/* End: SFTYDMA_STOP_SEC_VAR_AREA_CMN_SLOW_INIT_32 (online) */
++
+ 
+ 
+ /* Begin: SFTYDMA_START_SEC_CALIB_32 (calib) */
+@@ -656,3 +739,12 @@ CONST(uint32, SFTYDMA_CALIB) SftyDmaVadcRslvrTiStampOffs = 0UL;
+ #define SFTYDMA_STOP_SEC_CALIB_32
+ #include "MemMap.h"
+ /* End: SFTYDMA_STOP_SEC_CALIB_32 (calib) */
++
++
++/*================== [closure] ==============================================*/
++
++/* ***************************************************************** */
++/* Copyright (C) Valeo-Siemens eAutomotive GmbH 2021                 */
++/* All Rights Reserved. Confidential                                 */
++/* ***************************************************************** */
++/*==================[end of file]====================================*/
+diff --git a/src/fw_cu/Components/Safety/Sfty_Cmn/SftyDmaDrvr/include/SftyDmaDrvr_cfg.h b/src/fw_cu/Components/Safety/Sfty_Cmn/SftyDmaDrvr/include/SftyDmaDrvr_cfg.h
+index d3626f3d6..1b1893d17 100644
+--- a/src/fw_cu/Components/Safety/Sfty_Cmn/SftyDmaDrvr/include/SftyDmaDrvr_cfg.h
++++ b/src/fw_cu/Components/Safety/Sfty_Cmn/SftyDmaDrvr/include/SftyDmaDrvr_cfg.h
+@@ -69,43 +69,21 @@
+ /* === CU temperature sensor 2 ====== */
+ #define SFTY_DMA_DRVR_CH_IDX_B_TEMP_CU                            (DMA_CHANNEL16)
+ 
+-/* ==== P15_U ====== */
+-#define SFTY_DMA_DRVR_CH_IDX_VADC_P15_U_DATA                      (DMA_CHANNEL20)
++/* KL30 Voltage Measurement from VADC (AN_P12V_BATT_F) */
++#define SFTYDMADRVR_CH_IDX_VADC_KL30_DATA_TIMESTAMP               (DMA_CHANNEL20)
++#define SFTYDMADRVR_CH_IDX_VADC_KL30_DATA                         (DMA_CHANNEL21)
+ 
+-/* ==== P15_V ====== */
+-#define SFTY_DMA_DRVR_CH_IDX_VADC_P15_V_DATA                      (DMA_CHANNEL21)
+-
+-
+-
+-/* ==== P5_W ====== */
+-#define SFTY_DMA_DRVR_CH_IDX_VADC_P5_W_DATA                       (DMA_CHANNEL24)
+-
+-#if SYSCON_FTR_PSM == 1 /* USE_IPMCTRL_CONTROL */
+-/* ==== P5_ASC_2 ====== */
+-#define SFTY_DMA_DRVR_CH_IDX_VADC_P5_ASC2_DATA                    (DMA_CHANNEL25) /* This channel is used in Base Plus only. Not in Base Minus */
+-#endif /* SYSCON_FTR_PSM == 1  USE_IPMCTRL_CONTROL */
+-
+-/* KL15 DMA Channel */
+-#define SFTY_DMA_DRVR_CH_IDX_VADC_KL15_DATA                       (DMA_CHANNEL26)
+-
+-/*************** P16*****************/
+-#if SYSCON_FTR_PSM == 1 /* Feature use IPM motor */
+-#define SFTY_DMA_DRVR_CH_IDX_VADC_P16_DATA                        (DMA_CHANNEL27) /* This channel is used in Base Plus only. Not in Base Minus */
+-#endif/* SYSCON_FTR_PSM == 1 */
+-
+-#define SFTY_DMA_DRVR_CH_IDX_VADC_AN_P12V_BATT_F_TIMESTAMP     (DMA_CHANNEL20)
+-#define SFTY_DMA_DRVR_CH_IDX_VADC_AN_P12V_BATT_F               (DMA_CHANNEL21)
+-
+-#define SFTY_DMA_DRVR_CH_IDX_VADC_AN_PLC_MOT_N_DIAG_TIMESTAMP     (DMA_CHANNEL22)
+-#define SFTY_DMA_DRVR_CH_IDX_VADC_AN_PLC_MOT_N_DIAG               (DMA_CHANNEL23)
+-
+-#define SFTY_DMA_DRVR_CH_IDX_VADC_AN_PLC_MOT_P_DIAG_TIMESTAMP     (DMA_CHANNEL24)
+-#define SFTY_DMA_DRVR_CH_IDX_VADC_AN_PLC_MOT_P_DIAG               (DMA_CHANNEL25)
+-
+-#define SFTY_DMA_DRVR_CH_IDX_VADC_AN_PLC_CURRENT_MEAS_TIMESTAMP   (DMA_CHANNEL26)
+-#define SFTY_DMA_DRVR_CH_IDX_VADC_AN_PLC_CURRENT_MEAS             (DMA_CHANNEL27)
++/* PARKLOCK ACTUATOR MOT_N Voltage Feedback from VADC (AN_PLC_MOT_N_DIAG) */
++#define SFTY_DMA_DRVR_CH_IDX_PLC_MOT_N_DIAG_TIMESTAMP             (DMA_CHANNEL22)
++#define SFTY_DMA_DRVR_CH_IDX_PLC_MOT_N_DIAG                       (DMA_CHANNEL23)
+ 
++/* PARKLOCK ACTUATOR MOT_P Voltage Feedback from VADC (AN_PLC_MOT_P_DIAG) */
++#define SFTY_DMA_DRVR_CH_IDX_PLC_MOT_P_DIAG_TIMESTAMP             (DMA_CHANNEL24)
++#define SFTY_DMA_DRVR_CH_IDX_PLC_MOT_P_DIAG                       (DMA_CHANNEL25)
+ 
++/* PARKLOCK ACTUATOR Current Measurement from VADC (AN_PLC_CURRENT_MEAS) */
++#define SFTY_DMA_DRVR_CH_IDX_PLC_CURRENT_TIMESTAMP                (DMA_CHANNEL26)
++#define SFTY_DMA_DRVR_CH_IDX_PLC_CURRENT                          (DMA_CHANNEL27)
+ 
+ /* CTP_MOT1 DMA Channel */
+ #define SFTY_DMA_DRVR_CH_IDX_VADC_CTP_MOT1_TIMESTAMP              (DMA_CHANNEL28)
+@@ -182,21 +160,21 @@
+ #define SFTY_DMA_DRVR_CH_IDX_SIN_VADC_RSLVR                       (DMA_CHANNEL77)
+ 
+ /*****************CS TimeStamp CHANNEl ***********/
+-#define SFTY_DMA_DRVR_CH_IDX_CS_TIMESTMP_DMASTAMP            (DMA_CHANNEL78)
+-#define SFTY_DMA_DRVR_CH_IDX_CS_TIMESTMP                     (DMA_CHANNEL79)
++#define SFTY_DMA_DRVR_CH_IDX_CS_TIMESTMP_DMASTAMP                 (DMA_CHANNEL78)
++#define SFTY_DMA_DRVR_CH_IDX_CS_TIMESTMP                          (DMA_CHANNEL79)
+ 
+ /**************PHASE CURRENT CHANNELS from DSADC ******************/
+-#define SFTY_DMA_DRVR_CH_IDX_ACCURR_W_DSADC                        (DMA_CHANNEL90)
+-#define SFTY_DMA_DRVR_CH_IDX_ACCURR_V_DSADC                        (DMA_CHANNEL91)
+-#define SFTY_DMA_DRVR_CH_IDX_ACCURR_U_DSADC                        (DMA_CHANNEL92)
++#define SFTY_DMA_DRVR_CH_IDX_ACCURR_W_DSADC                       (DMA_CHANNEL90)
++#define SFTY_DMA_DRVR_CH_IDX_ACCURR_V_DSADC                       (DMA_CHANNEL91)
++#define SFTY_DMA_DRVR_CH_IDX_ACCURR_U_DSADC                       (DMA_CHANNEL92)
+ 
+ /**************UZK measurement from DSADC ******************/
+ #define SFTY_DMA_DRVR_CH_IDX_UZK_DSADC                            (DMA_CHANNEL93)
+ 
+ /**************PHASE CURRENT CHANNELS from VADC ******************/
+-#define SFTY_DMA_DRVR_CH_IDX_ACCURR_U_VADC                         (DMA_CHANNEL94)
+-#define SFTY_DMA_DRVR_CH_IDX_ACCURR_V_VADC                         (DMA_CHANNEL95)
+-#define SFTY_DMA_DRVR_CH_IDX_ACCURR_W_VADC                         (DMA_CHANNEL96)
++#define SFTY_DMA_DRVR_CH_IDX_ACCURR_U_VADC                        (DMA_CHANNEL94)
++#define SFTY_DMA_DRVR_CH_IDX_ACCURR_V_VADC                        (DMA_CHANNEL95)
++#define SFTY_DMA_DRVR_CH_IDX_ACCURR_W_VADC                        (DMA_CHANNEL96)
+ 
+ #define SFTYDMADRVR_CH_IDX_FPGA_SLAVE_SFTY_TRIG_TIMESTAMP         (DMA_CHANNEL110)
+ #define SFTYDMADRVR_CH_IDX_FPGA_SLAVE_SFTY_TRIG                   (DMA_CHANNEL111)
+@@ -207,6 +185,11 @@
+ 
+ #define SFTY_DMA_DRVR_ENDINIT_TIMEOUT                             (0xFFFFU)
+ 
++
++
++
++
++
+ /*================== [type definitions] =====================================*/
+ 
+ /*!
+diff --git a/src/fw_cu/Components/Safety/Sfty_Cmn/SftyDmaDrvr/src/SftyDmaDrvr_cfg.c b/src/fw_cu/Components/Safety/Sfty_Cmn/SftyDmaDrvr/src/SftyDmaDrvr_cfg.c
+index ed4dccbc2..0a1d1066c 100644
+--- a/src/fw_cu/Components/Safety/Sfty_Cmn/SftyDmaDrvr/src/SftyDmaDrvr_cfg.c
++++ b/src/fw_cu/Components/Safety/Sfty_Cmn/SftyDmaDrvr/src/SftyDmaDrvr_cfg.c
+@@ -59,12 +59,6 @@
+ 
+ /*================== [definition of global data] ============================*/
+ 
+-VAR(SftyRslvrDma_DataType, SFTY_RSLVRDMA_VAR) SftyDmaVadcKl30Udata[2];
+-VAR(SftyRslvrDma_DataType, SFTY_RSLVRDMA_VAR) SftyDmaVadcPlcActrlData[2];
+-VAR(SftyRslvrDma_DataType, SFTY_RSLVRDMA_VAR) SftyDmaVadcPlcActrPosUData[2];
+-VAR(SftyRslvrDma_DataType, SFTY_RSLVRDMA_VAR) SftyDmaVadcPlcActrNegUData[2];
+-
+-
+ #define SFTY_DMA_DRVR_START_SEC_CONST_AREA_0
+ #include "MemMap.h"
+ 
+@@ -894,7 +888,7 @@ CONST(SftyDmaDrvrChannelCfg_Type, SFTY_DMA_DRVR_CALIB) SftyDmaDrvrChannelCfg[] =
+ 
+ 
+    {/** RESOLVER SINE+ IN VADC */
+-      .ChIndex            =  SFTY_DMA_DRVR_CH_IDX_VADC_AN_PLC_MOT_N_DIAG,
++      .ChIndex            =  SFTY_DMA_DRVR_CH_IDX_PLC_MOT_N_DIAG,
+       .CH.SADR.U          = (uint32)(&EVADC_G8RES7.U),                              /* PRQA S 0303 */
+       .CH.DADR.U          = (uint32)(SftyDmaVadcPlcActrNegUData),                     /* PRQA S 0306 */
+       .CH.CHCFGR.B.PRSEL  = (uint32) SFTY_DMA_DRVR_PRSEL_DAISY_CHAIN,
+@@ -921,7 +915,7 @@ CONST(SftyDmaDrvrChannelCfg_Type, SFTY_DMA_DRVR_CALIB) SftyDmaDrvrChannelCfg[] =
+       .HRR.B.HRP          = (uint32) SFTY_DMA_DRVR_HWRES_PARTITION_0,              /*Hardware Resource Register*/
+    },
+    {/** RESOLVER SINE+ Timestamp IN VADC */
+-      .ChIndex            =  SFTY_DMA_DRVR_CH_IDX_VADC_AN_PLC_MOT_N_DIAG_TIMESTAMP,
++      .ChIndex            =  SFTY_DMA_DRVR_CH_IDX_PLC_MOT_N_DIAG_TIMESTAMP,
+       .CH.SADR.U          = (uint32)(&DMA_TIME),                              /* PRQA S 0303 */
+       .CH.DADR.U          = (uint32)(&(SftyDmaVadcPlcActrNegUData[0].tiStamp)),                     /* PRQA S 0306 */
+       .CH.CHCFGR.B.PRSEL  = (uint32) SFTY_DMA_DRVR_PRSEL_HW_TRIGGER,
+@@ -949,9 +943,9 @@ CONST(SftyDmaDrvrChannelCfg_Type, SFTY_DMA_DRVR_CALIB) SftyDmaDrvrChannelCfg[] =
+    },
+ 
+    {/** RESOLVER SINE+ IN VADC */
+-      .ChIndex            =  SFTY_DMA_DRVR_CH_IDX_VADC_AN_PLC_MOT_P_DIAG,
++      .ChIndex            =  SFTY_DMA_DRVR_CH_IDX_PLC_MOT_P_DIAG,
+       .CH.SADR.U          = (uint32)(&EVADC_G8RES12.U),                              /* PRQA S 0303 */
+-      .CH.DADR.U          = (uint32)(SftyDmaVadcPlcActrPosUData),                     /* PRQA S 0306 */
++      .CH.DADR.U          = (uint32)(SftyDmaVadcPlcPosUData),                     /* PRQA S 0306 */
+       .CH.CHCFGR.B.PRSEL  = (uint32) SFTY_DMA_DRVR_PRSEL_DAISY_CHAIN,
+       .CH.CHCFGR.B.RROAT  = (uint32) SFTY_DMA_DRVR_RROAT_TRANSFER,
+       .CH.CHCFGR.B.TREL   = 1U,                                                    /*Transfer Reload Counter*/
+@@ -976,9 +970,9 @@ CONST(SftyDmaDrvrChannelCfg_Type, SFTY_DMA_DRVR_CALIB) SftyDmaDrvrChannelCfg[] =
+       .HRR.B.HRP          = (uint32) SFTY_DMA_DRVR_HWRES_PARTITION_0,              /*Hardware Resource Register*/
+    },
+    {/** RESOLVER SINE+ Timestamp IN VADC */
+-      .ChIndex            =  SFTY_DMA_DRVR_CH_IDX_VADC_AN_PLC_MOT_P_DIAG_TIMESTAMP,
++      .ChIndex            =  SFTY_DMA_DRVR_CH_IDX_PLC_MOT_P_DIAG_TIMESTAMP,
+       .CH.SADR.U          = (uint32)(&DMA_TIME),                              /* PRQA S 0303 */
+-      .CH.DADR.U          = (uint32)(&(SftyDmaVadcPlcActrPosUData[0].tiStamp)),                     /* PRQA S 0306 */
++      .CH.DADR.U          = (uint32)(&(SftyDmaVadcPlcPosUData[0].tiStamp)),                     /* PRQA S 0306 */
+       .CH.CHCFGR.B.PRSEL  = (uint32) SFTY_DMA_DRVR_PRSEL_HW_TRIGGER,
+       .CH.CHCFGR.B.RROAT  = (uint32) SFTY_DMA_DRVR_RROAT_TRANSFER,
+       .CH.CHCFGR.B.TREL   = 1U,                                                    /*Transfer Reload Counter*/
+@@ -1005,9 +999,9 @@ CONST(SftyDmaDrvrChannelCfg_Type, SFTY_DMA_DRVR_CALIB) SftyDmaDrvrChannelCfg[] =
+ 
+ 
+    {/** RESOLVER SINE+ IN VADC */
+-      .ChIndex            =  SFTY_DMA_DRVR_CH_IDX_VADC_AN_PLC_CURRENT_MEAS,
++      .ChIndex            =  SFTY_DMA_DRVR_CH_IDX_PLC_CURRENT,
+       .CH.SADR.U          = (uint32)(&EVADC_G8RES14.U),                              /* PRQA S 0303 */
+-      .CH.DADR.U          = (uint32)(SftyDmaVadcPlcActrlData),                     /* PRQA S 0306 */
++      .CH.DADR.U          = (uint32)(SftyDmaVadcPlcActrIData),                     /* PRQA S 0306 */
+       .CH.CHCFGR.B.PRSEL  = (uint32) SFTY_DMA_DRVR_PRSEL_DAISY_CHAIN,
+       .CH.CHCFGR.B.RROAT  = (uint32) SFTY_DMA_DRVR_RROAT_TRANSFER,
+       .CH.CHCFGR.B.TREL   = 1U,                                                    /*Transfer Reload Counter*/
+@@ -1032,9 +1026,9 @@ CONST(SftyDmaDrvrChannelCfg_Type, SFTY_DMA_DRVR_CALIB) SftyDmaDrvrChannelCfg[] =
+       .HRR.B.HRP          = (uint32) SFTY_DMA_DRVR_HWRES_PARTITION_0,              /*Hardware Resource Register*/
+    },
+    {/** RESOLVER SINE+ Timestamp IN VADC */
+-      .ChIndex            =  SFTY_DMA_DRVR_CH_IDX_VADC_AN_PLC_CURRENT_MEAS_TIMESTAMP,
++      .ChIndex            =  SFTY_DMA_DRVR_CH_IDX_PLC_CURRENT_TIMESTAMP,
+       .CH.SADR.U          = (uint32)(&DMA_TIME),                              /* PRQA S 0303 */
+-      .CH.DADR.U          = (uint32)(&(SftyDmaVadcPlcActrlData[0].tiStamp)),                     /* PRQA S 0306 */
++      .CH.DADR.U          = (uint32)(&(SftyDmaVadcPlcActrIData[0].tiStamp)),                     /* PRQA S 0306 */
+       .CH.CHCFGR.B.PRSEL  = (uint32) SFTY_DMA_DRVR_PRSEL_HW_TRIGGER,
+       .CH.CHCFGR.B.RROAT  = (uint32) SFTY_DMA_DRVR_RROAT_TRANSFER,
+       .CH.CHCFGR.B.TREL   = 1U,                                                    /*Transfer Reload Counter*/
+@@ -1061,9 +1055,9 @@ CONST(SftyDmaDrvrChannelCfg_Type, SFTY_DMA_DRVR_CALIB) SftyDmaDrvrChannelCfg[] =
+ 
+ 
+    {/** RESOLVER SINE+ IN VADC */
+-      .ChIndex            =  SFTY_DMA_DRVR_CH_IDX_VADC_AN_P12V_BATT_F,
++      .ChIndex            =  SFTYDMADRVR_CH_IDX_VADC_KL30_DATA,
+       .CH.SADR.U          = (uint32)(&EVADC_G2RES3.U),                              /* PRQA S 0303 */
+-      .CH.DADR.U          = (uint32)(SftyDmaVadcKl30Udata),                     /* PRQA S 0306 */
++      .CH.DADR.U          = (uint32)(SftyDmaVadcKl30UData),                     /* PRQA S 0306 */
+       .CH.CHCFGR.B.PRSEL  = (uint32) SFTY_DMA_DRVR_PRSEL_DAISY_CHAIN,
+       .CH.CHCFGR.B.RROAT  = (uint32) SFTY_DMA_DRVR_RROAT_TRANSFER,
+       .CH.CHCFGR.B.TREL   = 1U,                                                    /*Transfer Reload Counter*/
+@@ -1088,9 +1082,9 @@ CONST(SftyDmaDrvrChannelCfg_Type, SFTY_DMA_DRVR_CALIB) SftyDmaDrvrChannelCfg[] =
+       .HRR.B.HRP          = (uint32) SFTY_DMA_DRVR_HWRES_PARTITION_0,              /*Hardware Resource Register*/
+    },
+    {/** RESOLVER SINE+ Timestamp IN VADC */
+-      .ChIndex            =  SFTY_DMA_DRVR_CH_IDX_VADC_AN_P12V_BATT_F_TIMESTAMP,
++      .ChIndex            =  SFTYDMADRVR_CH_IDX_VADC_KL30_DATA_TIMESTAMP,
+       .CH.SADR.U          = (uint32)(&DMA_TIME),                              /* PRQA S 0303 */
+-      .CH.DADR.U          = (uint32)(&(SftyDmaVadcKl30Udata[0].tiStamp)),                     /* PRQA S 0306 */
++      .CH.DADR.U          = (uint32)(&(SftyDmaVadcKl30UData[0].tiStamp)),                     /* PRQA S 0306 */
+       .CH.CHCFGR.B.PRSEL  = (uint32) SFTY_DMA_DRVR_PRSEL_HW_TRIGGER,
+       .CH.CHCFGR.B.RROAT  = (uint32) SFTY_DMA_DRVR_RROAT_TRANSFER,
+       .CH.CHCFGR.B.TREL   = 1U,                                                    /*Transfer Reload Counter*/
+diff --git a/src/fw_cu/build/a2l/Measurements-to-Timeslices-Mapping.csv b/src/fw_cu/build/a2l/Measurements-to-Timeslices-Mapping.csv
+index 5b3397427..68f8a14ba 100644
+--- a/src/fw_cu/build/a2l/Measurements-to-Timeslices-Mapping.csv
++++ b/src/fw_cu/build/a2l/Measurements-to-Timeslices-Mapping.csv
+@@ -5750,54 +5750,6 @@ RTE_TT_EXTDTQLIM_EXTDTQLIM_MAIN.T_duration.Tick_act,Core_0,C0_1ms_TimeTask,1,,,B
+ RTE_TT_EXTDTQLIM_EXTDTQLIM_MAIN.T_period.Tick_act,Core_0,C0_1ms_TimeTask,1,,,BSW
+ ServPrecond_List_Notfulfilled,Core_0,C0_10ms_Slow,10,,,BSW
+ ServPrecond_Num_Notfulfilled,Core_0,C0_10ms_Slow,10,,,BSW
+-SFTY_DMA_DSADC_I_U_DATA_0.data,Core_1,Core_1_200us,0.2,,,SSW
+-SFTY_DMA_DSADC_I_U_DATA_0.tiStamp,Core_1,Core_1_200us,0.2,,,SSW
+-SFTY_DMA_DSADC_I_U_DATA_1.data,Core_1,Core_1_200us,0.2,,,SSW
+-SFTY_DMA_DSADC_I_U_DATA_1.tiStamp,Core_1,Core_1_200us,0.2,,,SSW
+-SFTY_DMA_DSADC_I_U_DATA_2.data,Core_1,Core_1_200us,0.2,,,SSW
+-SFTY_DMA_DSADC_I_U_DATA_2.tiStamp,Core_1,Core_1_200us,0.2,,,SSW
+-SFTY_DMA_DSADC_I_U_DATA_3.data,Core_1,Core_1_200us,0.2,,,SSW
+-SFTY_DMA_DSADC_I_U_DATA_3.tiStamp,Core_1,Core_1_200us,0.2,,,SSW
+-SFTY_DMA_DSADC_I_U_DATA_4.data,Core_1,Core_1_200us,0.2,,,SSW
+-SFTY_DMA_DSADC_I_U_DATA_4.tiStamp,Core_1,Core_1_200us,0.2,,,SSW
+-SFTY_DMA_DSADC_I_U_DATA_5.data,Core_1,Core_1_200us,0.2,,,SSW
+-SFTY_DMA_DSADC_I_U_DATA_5.tiStamp,Core_1,Core_1_200us,0.2,,,SSW
+-SFTY_DMA_DSADC_I_U_DATA_6.data,Core_1,Core_1_200us,0.2,,,SSW
+-SFTY_DMA_DSADC_I_U_DATA_6.tiStamp,Core_1,Core_1_200us,0.2,,,SSW
+-SFTY_DMA_DSADC_I_U_DATA_7.data,Core_1,Core_1_200us,0.2,,,SSW
+-SFTY_DMA_DSADC_I_U_DATA_7.tiStamp,Core_1,Core_1_200us,0.2,,,SSW
+-SFTY_DMA_DSADC_I_V_DATA_0.data,Core_1,Core_1_200us,0.2,,,SSW
+-SFTY_DMA_DSADC_I_V_DATA_0.tiStamp,Core_1,Core_1_200us,0.2,,,SSW
+-SFTY_DMA_DSADC_I_V_DATA_1.data,Core_1,Core_1_200us,0.2,,,SSW
+-SFTY_DMA_DSADC_I_V_DATA_1.tiStamp,Core_1,Core_1_200us,0.2,,,SSW
+-SFTY_DMA_DSADC_I_V_DATA_2.data,Core_1,Core_1_200us,0.2,,,SSW
+-SFTY_DMA_DSADC_I_V_DATA_2.tiStamp,Core_1,Core_1_200us,0.2,,,SSW
+-SFTY_DMA_DSADC_I_V_DATA_3.data,Core_1,Core_1_200us,0.2,,,SSW
+-SFTY_DMA_DSADC_I_V_DATA_3.tiStamp,Core_1,Core_1_200us,0.2,,,SSW
+-SFTY_DMA_DSADC_I_V_DATA_4.data,Core_1,Core_1_200us,0.2,,,SSW
+-SFTY_DMA_DSADC_I_V_DATA_4.tiStamp,Core_1,Core_1_200us,0.2,,,SSW
+-SFTY_DMA_DSADC_I_V_DATA_5.data,Core_1,Core_1_200us,0.2,,,SSW
+-SFTY_DMA_DSADC_I_V_DATA_5.tiStamp,Core_1,Core_1_200us,0.2,,,SSW
+-SFTY_DMA_DSADC_I_V_DATA_6.data,Core_1,Core_1_200us,0.2,,,SSW
+-SFTY_DMA_DSADC_I_V_DATA_6.tiStamp,Core_1,Core_1_200us,0.2,,,SSW
+-SFTY_DMA_DSADC_I_V_DATA_7.data,Core_1,Core_1_200us,0.2,,,SSW
+-SFTY_DMA_DSADC_I_V_DATA_7.tiStamp,Core_1,Core_1_200us,0.2,,,SSW
+-SFTY_DMA_DSADC_I_W_DATA_0.data,Core_1,Core_1_200us,0.2,,,SSW
+-SFTY_DMA_DSADC_I_W_DATA_0.tiStamp,Core_1,Core_1_200us,0.2,,,SSW
+-SFTY_DMA_DSADC_I_W_DATA_1.data,Core_1,Core_1_200us,0.2,,,SSW
+-SFTY_DMA_DSADC_I_W_DATA_1.tiStamp,Core_1,Core_1_200us,0.2,,,SSW
+-SFTY_DMA_DSADC_I_W_DATA_2.data,Core_1,Core_1_200us,0.2,,,SSW
+-SFTY_DMA_DSADC_I_W_DATA_2.tiStamp,Core_1,Core_1_200us,0.2,,,SSW
+-SFTY_DMA_DSADC_I_W_DATA_3.data,Core_1,Core_1_200us,0.2,,,SSW
+-SFTY_DMA_DSADC_I_W_DATA_3.tiStamp,Core_1,Core_1_200us,0.2,,,SSW
+-SFTY_DMA_DSADC_I_W_DATA_4.data,Core_1,Core_1_200us,0.2,,,SSW
+-SFTY_DMA_DSADC_I_W_DATA_4.tiStamp,Core_1,Core_1_200us,0.2,,,SSW
+-SFTY_DMA_DSADC_I_W_DATA_5.data,Core_1,Core_1_200us,0.2,,,SSW
+-SFTY_DMA_DSADC_I_W_DATA_5.tiStamp,Core_1,Core_1_200us,0.2,,,SSW
+-SFTY_DMA_DSADC_I_W_DATA_6.data,Core_1,Core_1_200us,0.2,,,SSW
+-SFTY_DMA_DSADC_I_W_DATA_6.tiStamp,Core_1,Core_1_200us,0.2,,,SSW
+-SFTY_DMA_DSADC_I_W_DATA_7.data,Core_1,Core_1_200us,0.2,,,SSW
+-SFTY_DMA_DSADC_I_W_DATA_7.tiStamp,Core_1,Core_1_200us,0.2,,,SSW
+ SftyHvDcUEvlnDrvBdRawVal,Core_1,Core_1_200us,0.2,,,SSW
+ SftyHvDcUEvlnDrvBdRngErrCyclCntr,Core_1,Core_1_200us,0.2,,,SSW
+ SftyHvDcUEvlnCtrlBdRawVal,Core_1,Core_1_200us,0.2,,,SSW
+'

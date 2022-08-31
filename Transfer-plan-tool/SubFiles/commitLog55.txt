@@ -1,0 +1,115 @@
+b'commit e77c77ad954dce4d4aee9d572aa028eed568c293
+Author: Mohammed ANDALOUSSI (JV) <mohammed.andaloussi.jv@valeo.com>
+Date:   Mon Jan 24 09:57:43 2022 +0100
+
+    $100kW-51201$ QAC fix
+    
+    Change-Id: I43cbc7701f4c0696e9e93f639c15fc4de7060a21
+
+diff --git a/src/fw_cu/Components/Safety/Sfty_Cmn/SftyParkLockPosnAcqn/include/SftyParkLockPosnAcqn_data.h b/src/fw_cu/Components/Safety/Sfty_Cmn/SftyParkLockPosnAcqn/include/SftyParkLockPosnAcqn_data.h
+index 063465214..6f529fb71 100644
+--- a/src/fw_cu/Components/Safety/Sfty_Cmn/SftyParkLockPosnAcqn/include/SftyParkLockPosnAcqn_data.h
++++ b/src/fw_cu/Components/Safety/Sfty_Cmn/SftyParkLockPosnAcqn/include/SftyParkLockPosnAcqn_data.h
+@@ -56,7 +56,7 @@ extern VAR(uint32, SFTYPARKLOCKPOSNACQN_VAR) SftyParkLockPosnAcqnRawVal;
+ #define SFTYPARKLOCKPOSNACQN_START_SEC_CALIB_32
+ #include "MemMap.h"
+ 
+-extern CONST(uint32, SFTYPARKLOCKPOSNACQN_VAR)SftyParkLockPosnAcqnDeltaRtsTiStampThd;
++extern CONST(uint32, SFTYPARKLOCKPOSNACQN_VAR) SftyParkLockPosnAcqnDeltaRtsTiStampThd;
+ 
+ #define SFTYPARKLOCKPOSNACQN_STOP_SEC_CALIB_32
+ #include "MemMap.h"
+diff --git a/src/fw_cu/Components/Safety/Sfty_Cmn/SftyParkLockPosnAcqn/src/SftyParkLockPosnAcqn_data.c b/src/fw_cu/Components/Safety/Sfty_Cmn/SftyParkLockPosnAcqn/src/SftyParkLockPosnAcqn_data.c
+index 4c2a37af3..dc32a2d85 100644
+--- a/src/fw_cu/Components/Safety/Sfty_Cmn/SftyParkLockPosnAcqn/src/SftyParkLockPosnAcqn_data.c
++++ b/src/fw_cu/Components/Safety/Sfty_Cmn/SftyParkLockPosnAcqn/src/SftyParkLockPosnAcqn_data.c
+@@ -89,7 +89,7 @@ VAR(uint32, SFTYPARKLOCKPOSNACQN_VAR) SftyParkLockPosnAcqnRawVal = 0U;
+ @@ END
+ */
+ 
+-CONST(uint32, SFTYPARKLOCKPOSNACQN_VAR)SftyParkLockPosnAcqnDeltaRtsTiStampThd = 334U;
++CONST(uint32, SFTYPARKLOCKPOSNACQN_VAR) SftyParkLockPosnAcqnDeltaRtsTiStampThd = 334U;
+ 
+ #define SFTYPARKLOCKPOSNACQN_STOP_SEC_CALIB_32
+ #include "MemMap.h"
+diff --git a/src/fw_cu/Components/Safety/Sfty_Cmn/Sfty_Common/include/SftyReplcmt_data.h b/src/fw_cu/Components/Safety/Sfty_Cmn/Sfty_Common/include/SftyReplcmt_data.h
+index b59c29359..e298d7ee6 100644
+--- a/src/fw_cu/Components/Safety/Sfty_Cmn/Sfty_Common/include/SftyReplcmt_data.h
++++ b/src/fw_cu/Components/Safety/Sfty_Cmn/Sfty_Common/include/SftyReplcmt_data.h
+@@ -2833,7 +2833,7 @@ extern CONST(boolean, SFTYDCEVLN_CALIB) SftyReplcmtE2eFpgaOverVoltVBatFltSts;
+ #define SFTYREPLCMT_START_SEC_CALIB_8
+ #include "MemMap.h"
+ 
+-extern CONST(uint8, SFTYPARKLOCKPOSNACQN_VAR)SftyReplcmParkLockPosnAcqnEnaFlg;
++extern CONST(uint8, SFTYPARKLOCKPOSNACQN_VAR) SftyReplcmParkLockPosnAcqnEnaFlg;
+ #define SFTYREPLCMT_STOP_SEC_CALIB_8
+ #include "MemMap.h"
+ /* Stop: SFTYREPLCMT_STOP_SEC_CALIB_8 (calib) */
+@@ -2842,7 +2842,7 @@ extern CONST(uint8, SFTYPARKLOCKPOSNACQN_VAR)SftyReplcmParkLockPosnAcqnEnaFlg;
+ #define SFTYREPLCMT_START_SEC_CALIB_8
+ #include "MemMap.h"
+ 
+-extern CONST(uint8, SFTYPARKLOCKPOSNACQN_VAR)SftyReplcmParkLockActrPosSnsrSts;
++extern CONST(uint8, SFTYPARKLOCKPOSNACQN_VAR) SftyReplcmParkLockActrPosSnsrSts;
+ #define SFTYREPLCMT_STOP_SEC_CALIB_8
+ #include "MemMap.h"
+ /* Stop: SFTYREPLCMT_STOP_SEC_CALIB_8 (calib) */
+@@ -2851,7 +2851,7 @@ extern CONST(uint8, SFTYPARKLOCKPOSNACQN_VAR)SftyReplcmParkLockActrPosSnsrSts;
+ #define SFTYREPLCMT_START_SEC_CALIB_32
+ #include "MemMap.h"
+ 
+-extern CONST(uint32, SFTYPARKLOCKPOSNACQN_VAR)SftyReplcmParkLockPosnAcqnSENTSnrDataRxCrcVal;
++extern CONST(uint32, SFTYPARKLOCKPOSNACQN_VAR) SftyReplcmParkLockPosnAcqnSENTSnrDataRxCrcVal;
+ #define SFTYREPLCMT_STOP_SEC_CALIB_32
+ #include "MemMap.h"
+ /* Stop: SFTYREPLCMT_STOP_SEC_CALIB_32 (calib) */
+@@ -2860,7 +2860,7 @@ extern CONST(uint32, SFTYPARKLOCKPOSNACQN_VAR)SftyReplcmParkLockPosnAcqnSENTSnrD
+ #define SFTYREPLCMT_START_SEC_CALIB_32
+ #include "MemMap.h"
+ 
+-extern CONST(uint32, SFTYPARKLOCKPOSNACQN_VAR)SftyReplcmParkLockPosnAcqnSENTSnrDataRxSnsrDataVal;
++extern CONST(uint32, SFTYPARKLOCKPOSNACQN_VAR) SftyReplcmParkLockPosnAcqnSENTSnrDataRxSnsrDataVal;
+ 
+ #define SFTYREPLCMT_STOP_SEC_CALIB_32
+ #include "MemMap.h"
+@@ -2870,7 +2870,7 @@ extern CONST(uint32, SFTYPARKLOCKPOSNACQN_VAR)SftyReplcmParkLockPosnAcqnSENTSnrD
+ #define SFTYREPLCMT_START_SEC_CALIB_32
+ #include "MemMap.h"
+ 
+-extern CONST(uint32, SFTYPARKLOCKPOSNACQN_VAR)SftyReplcmParkLockPosnAcqnSENTSnrDataRxTiStampDmaVal;
++extern CONST(uint32, SFTYPARKLOCKPOSNACQN_VAR) SftyReplcmParkLockPosnAcqnSENTSnrDataRxTiStampDmaVal;
+ #define SFTYREPLCMT_STOP_SEC_CALIB_32
+ #include "MemMap.h"
+ /* Stop: SFTYREPLCMT_STOP_SEC_CALIB_32 (calib) */
+@@ -2879,7 +2879,7 @@ extern CONST(uint32, SFTYPARKLOCKPOSNACQN_VAR)SftyReplcmParkLockPosnAcqnSENTSnrD
+ #define SFTYREPLCMT_START_SEC_CALIB_32
+ #include "MemMap.h"
+ 
+-extern CONST(uint32, SFTYPARKLOCKPOSNACQN_VAR)SftyReplcmParkLockPosnAcqnSENTSnrDataRxTiStampRtsSVal;
++extern CONST(uint32, SFTYPARKLOCKPOSNACQN_VAR) SftyReplcmParkLockPosnAcqnSENTSnrDataRxTiStampRtsSVal;
+ 
+ #define SFTYREPLCMT_STOP_SEC_CALIB_32
+ #include "MemMap.h"
+@@ -2890,7 +2890,7 @@ extern CONST(uint32, SFTYPARKLOCKPOSNACQN_VAR)SftyReplcmParkLockPosnAcqnSENTSnrD
+ #include "MemMap.h"
+ 
+ 
+-extern CONST(uint32, SFTYPARKLOCKPOSNACQN_VAR)SftyReplcmParkLockPosnAcqnSENTSnrDataRxIntStatVal;
++extern CONST(uint32, SFTYPARKLOCKPOSNACQN_VAR) SftyReplcmParkLockPosnAcqnSENTSnrDataRxIntStatVal;
+ #define SFTYREPLCMT_STOP_SEC_CALIB_32
+ #include "MemMap.h"
+ /* Stop: SFTYREPLCMT_STOP_SEC_CALIB_32 (calib) */
+diff --git a/src/fw_cu/Components/Safety/Sfty_Cmn/Sfty_Common/src/SftyReplcmt_data.c b/src/fw_cu/Components/Safety/Sfty_Cmn/Sfty_Common/src/SftyReplcmt_data.c
+index 8061b42a2..c82d4184e 100644
+--- a/src/fw_cu/Components/Safety/Sfty_Cmn/Sfty_Common/src/SftyReplcmt_data.c
++++ b/src/fw_cu/Components/Safety/Sfty_Cmn/Sfty_Common/src/SftyReplcmt_data.c
+@@ -3219,7 +3219,7 @@ CONST(uint32, SFTYPARKLOCKPOSNACQN_VAR)SftyReplcmParkLockPosnAcqnSENTSnrDataRxTi
+ @@ END
+ */
+ 
+-CONST(uint32, SFTYPARKLOCKPOSNACQN_VAR)SftyReplcmParkLockPosnAcqnSENTSnrDataRxTiStampRtsSVal = 0U;
++CONST(uint32, SFTYPARKLOCKPOSNACQN_VAR) SftyReplcmParkLockPosnAcqnSENTSnrDataRxTiStampRtsSVal = 0U;
+ 
+ #define SFTYREPLCMT_STOP_SEC_CALIB_32
+ #include "MemMap.h"
+'

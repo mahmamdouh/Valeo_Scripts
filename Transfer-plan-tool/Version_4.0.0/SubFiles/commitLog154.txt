@@ -1,0 +1,2004 @@
+b'commit bc6b06b97f1c9edd709c8cb97baf4ff0d50f534e
+Author: Karthik CHIDAMBARAM (JV EXT) <karthik.chidambaram.jv@valeo.com>
+Date:   Tue Sep 28 10:48:10 2021 +0200
+
+    $100kW-41946$ Merge BSW change from A05 to Master
+    
+    $100kW-38737$DidUtil Unit Test
+    $100kW-40264$ -FCT_MngFaiSw (Update) - Implement SW Unit - SW BSW, fix 100kW-39802 - [SWT] DTCStatusMask is not generated in a2l
+    
+    Change-Id: Ie143a267486c569298a7bbc80c0a4a4d18eb579b
+
+diff --git a/src/fw_cu/Components/Cmn/Shared/Config/src/Eb_a2l.c b/src/fw_cu/Components/Cmn/Shared/Config/src/Eb_a2l.c
+index 3ae902aed..eea969421 100644
+--- a/src/fw_cu/Components/Cmn/Shared/Config/src/Eb_a2l.c
++++ b/src/fw_cu/Components/Cmn/Shared/Config/src/Eb_a2l.c
+@@ -177,7 +177,7 @@
+ @@ STRUCTURE = Dem_NvDataType
+ @@ A2L_TYPE = MEASURE
+ @@ DATA_TYPE = UBYTE
+-@@ DIMENSION = 2
++@@ DIMENSION = $DEM_NUMBER_OF_EVENTS$
+ @@ SPLIT USE_TEMPLATE "._%d_"
+ @@ DESCRIPTION = "Filter mask on DTC status"
+ @@ GROUP = Dem
+diff --git a/src/fw_cu/build/a2l/Measurements-to-Timeslices-Mapping.csv b/src/fw_cu/build/a2l/Measurements-to-Timeslices-Mapping.csv
+index e77826aa5..4bd8bedfe 100644
+--- a/src/fw_cu/build/a2l/Measurements-to-Timeslices-Mapping.csv
++++ b/src/fw_cu/build/a2l/Measurements-to-Timeslices-Mapping.csv
+@@ -665,6 +665,81 @@ Dem_EventMemoryPrimary._9_.OccOrder,Core_0,C0_2ms_SchMTask,10,,,BSW
+ Dem_EventMemoryPrimary._9_.SI30,Core_0,C0_2ms_SchMTask,10,,,BSW
+ Dem_NvData.DTCStatusMask._0_,Core_0,C0_2ms_SchMTask,10,,,BSW
+ Dem_NvData.DTCStatusMask.CAN_BUS_OFF,Core_0,C0_2ms_SchMTask,10,,,BSW
++Dem_NvData.DTCStatusMask.INV_HVDCU_RNG_HI_1,Core_0,C0_2ms_SchMTask,10,,,BSW
++Dem_NvData.DTCStatusMask.INV_HVDCU_RNG_HI_2,Core_0,C0_2ms_SchMTask,10,,,BSW
++Dem_NvData.DTCStatusMask.INV_HVDCU_RNG_LO_1,Core_0,C0_2ms_SchMTask,10,,,BSW
++Dem_NvData.DTCStatusMask.INV_HVDCU_RNG_LO_2,Core_0,C0_2ms_SchMTask,10,,,BSW
++Dem_NvData.DTCStatusMask.INV_HVDCU_OV_HWP,Core_0,C0_2ms_SchMTask,10,,,BSW
++Dem_NvData.DTCStatusMask.INV_HVDCU_PLAUS_HWP,Core_0,C0_2ms_SchMTask,10,,,BSW
++Dem_NvData.DTCStatusMask.INV_HVACI_OC_HWP_U,Core_0,C0_2ms_SchMTask,10,,,BSW
++Dem_NvData.DTCStatusMask.INV_HVACI_OC_HWP_V,Core_0,C0_2ms_SchMTask,10,,,BSW
++Dem_NvData.DTCStatusMask.INV_HVACI_OC_HWP_W,Core_0,C0_2ms_SchMTask,10,,,BSW
++Dem_NvData.DTCStatusMask.INV_HVACI_PLAUS_HWP,Core_0,C0_2ms_SchMTask,10,,,BSW
++Dem_NvData.DTCStatusMask.INV_HVACI_RNG_HI_U,Core_0,C0_2ms_SchMTask,10,,,BSW
++Dem_NvData.DTCStatusMask.INV_HVACI_RNG_LO_U,Core_0,C0_2ms_SchMTask,10,,,BSW
++Dem_NvData.DTCStatusMask.INV_HVACI_RNG_HI_V,Core_0,C0_2ms_SchMTask,10,,,BSW
++Dem_NvData.DTCStatusMask.INV_HVACI_RNG_LO_V,Core_0,C0_2ms_SchMTask,10,,,BSW
++Dem_NvData.DTCStatusMask.INV_HVACI_RNG_HI_W,Core_0,C0_2ms_SchMTask,10,,,BSW
++Dem_NvData.DTCStatusMask.INV_HVACI_RNG_LO_W,Core_0,C0_2ms_SchMTask,10,,,BSW
++Dem_NvData.DTCStatusMask.INV_HVACI_PLAUS_SUM,Core_0,C0_2ms_SchMTask,10,,,BSW
++Dem_NvData.DTCStatusMask.INV_RSLVR_SIN_ELEC_HI,Core_0,C0_2ms_SchMTask,10,,,BSW
++Dem_NvData.DTCStatusMask.INV_RSLVR_SIN_ELEC_LO,Core_0,C0_2ms_SchMTask,10,,,BSW
++Dem_NvData.DTCStatusMask.INV_RSLVR_SIN_ELEC_OPEN,Core_0,C0_2ms_SchMTask,10,,,BSW
++Dem_NvData.DTCStatusMask.INV_RSLVR_COS_ELEC_HI,Core_0,C0_2ms_SchMTask,10,,,BSW
++Dem_NvData.DTCStatusMask.INV_RSLVR_COS_ELEC_LO,Core_0,C0_2ms_SchMTask,10,,,BSW
++Dem_NvData.DTCStatusMask.INV_RSLVR_COS_ELEC_OPEN,Core_0,C0_2ms_SchMTask,10,,,BSW
++Dem_NvData.DTCStatusMask.INV_RSLVR_EXCT_ELEC_HI,Core_0,C0_2ms_SchMTask,10,,,BSW
++Dem_NvData.DTCStatusMask.INV_RSLVR_EXCT_ELEC_LO,Core_0,C0_2ms_SchMTask,10,,,BSW
++Dem_NvData.DTCStatusMask.INV_RSLVR_EXCT_ELEC_OPEN,Core_0,C0_2ms_SchMTask,10,,,BSW
++Dem_NvData.DTCStatusMask.INV_RSLVR_SIN_RNG_HI,Core_0,C0_2ms_SchMTask,10,,,BSW
++Dem_NvData.DTCStatusMask.INV_RSLVR_SIN_RNG_LO,Core_0,C0_2ms_SchMTask,10,,,BSW
++Dem_NvData.DTCStatusMask.INV_RSLVR_COS_RNG_HI,Core_0,C0_2ms_SchMTask,10,,,BSW
++Dem_NvData.DTCStatusMask.INV_RSLVR_COS_RNG_LO,Core_0,C0_2ms_SchMTask,10,,,BSW
++Dem_NvData.DTCStatusMask.INV_RSLVR_EXCT_RNG_HI,Core_0,C0_2ms_SchMTask,10,,,BSW
++Dem_NvData.DTCStatusMask.INV_RSLVR_EXCT_RNG_LO,Core_0,C0_2ms_SchMTask,10,,,BSW
++Dem_NvData.DTCStatusMask.INV_RSLVR_EXCT_PLAUS,Core_0,C0_2ms_SchMTask,10,,,BSW
++Dem_NvData.DTCStatusMask.INV_RSLVR_SIN_COS_PLAUS_AMP,Core_0,C0_2ms_SchMTask,10,,,BSW
++Dem_NvData.DTCStatusMask.INV_RSLVR_SIN_COS_PLAUS,Core_0,C0_2ms_SchMTask,10,,,BSW
++Dem_NvData.DTCStatusMask.MON_SPD_PLAUS,Core_0,C0_2ms_SchMTask,10,,,BSW
++Dem_NvData.DTCStatusMask.MON_ANG_PLAUS,Core_0,C0_2ms_SchMTask,10,,,BSW
++Dem_NvData.DTCStatusMask.INV_RSLVR_AURIX_HW_FLT,Core_0,C0_2ms_SchMTask,10,,,BSW
++Dem_NvData.DTCStatusMask.INV_RSLVR_SIN_OFFS,Core_0,C0_2ms_SchMTask,10,,,BSW
++Dem_NvData.DTCStatusMask.INV_RSLVR_SIN_AMP,Core_0,C0_2ms_SchMTask,10,,,BSW
++Dem_NvData.DTCStatusMask.INV_RSLVR_COS_OFFS,Core_0,C0_2ms_SchMTask,10,,,BSW
++Dem_NvData.DTCStatusMask.INV_RSLVR_COS_AMP,Core_0,C0_2ms_SchMTask,10,,,BSW
++Dem_NvData.DTCStatusMask.MID_POINT_U,Core_0,C0_2ms_SchMTask,10,,,BSW
++Dem_NvData.DTCStatusMask.MID_POINT_V,Core_0,C0_2ms_SchMTask,10,,,BSW
++Dem_NvData.DTCStatusMask.MID_POINT_W,Core_0,C0_2ms_SchMTask,10,,,BSW
++Dem_NvData.DTCStatusMask.INV_GATE_DRVR_HI_HWP,Core_0,C0_2ms_SchMTask,10,,,BSW
++Dem_NvData.DTCStatusMask.INV_GATE_DRVR_LO_HWP,Core_0,C0_2ms_SchMTask,10,,,BSW
++Dem_NvData.DTCStatusMask.INV_IGBT_TEMP_U_PLAUS,Core_0,C0_2ms_SchMTask,10,,,BSW
++Dem_NvData.DTCStatusMask.INV_IGBT_TEMP_U_RNG_HI,Core_0,C0_2ms_SchMTask,10,,,BSW
++Dem_NvData.DTCStatusMask.INV_IGBT_TEMP_U_RNG_LO,Core_0,C0_2ms_SchMTask,10,,,BSW
++Dem_NvData.DTCStatusMask.INV_IGBT_TEMP_V_PLAUS,Core_0,C0_2ms_SchMTask,10,,,BSW
++Dem_NvData.DTCStatusMask.INV_IGBT_TEMP_V_RNG_HI,Core_0,C0_2ms_SchMTask,10,,,BSW
++Dem_NvData.DTCStatusMask.INV_IGBT_TEMP_V_RNG_LO,Core_0,C0_2ms_SchMTask,10,,,BSW
++Dem_NvData.DTCStatusMask.INV_IGBT_TEMP_W_PLAUS,Core_0,C0_2ms_SchMTask,10,,,BSW
++Dem_NvData.DTCStatusMask.INV_IGBT_TEMP_W_RNG_HI,Core_0,C0_2ms_SchMTask,10,,,BSW
++Dem_NvData.DTCStatusMask.INV_IGBT_TEMP_W_RNG_LO,Core_0,C0_2ms_SchMTask,10,,,BSW
++Dem_NvData.DTCStatusMask.INV_IGBT_TEMP_HWP,Core_0,C0_2ms_SchMTask,10,,,BSW
++Dem_NvData.DTCStatusMask.INV_EM_STATOR_TEMP_RNG_HI,Core_0,C0_2ms_SchMTask,10,,,BSW
++Dem_NvData.DTCStatusMask.INV_EM_STATOR_TEMP_RNG_LO,Core_0,C0_2ms_SchMTask,10,,,BSW
++Dem_NvData.DTCStatusMask.INV_EM_STATOR_TEMP_STUCK,Core_0,C0_2ms_SchMTask,10,,,BSW
++Dem_NvData.DTCStatusMask.INV_EM_STATOR_TEMP_HWP,Core_0,C0_2ms_SchMTask,10,,,BSW
++Dem_NvData.DTCStatusMask.CAN_BUS_OFF,Core_0,C0_2ms_SchMTask,10,,,BSW
++Dem_NvData.DTCStatusMask.CAN_TOUT_GLB,Core_0,C0_2ms_SchMTask,10,,,BSW
++Dem_NvData.DTCStatusMask.CAN_E2E_TOUT,Core_0,C0_2ms_SchMTask,10,,,BSW
++Dem_NvData.DTCStatusMask.CAN_E2E_COUNTER,Core_0,C0_2ms_SchMTask,10,,,BSW
++Dem_NvData.DTCStatusMask.CAN_E2E_CRC,Core_0,C0_2ms_SchMTask,10,,,BSW
++Dem_NvData.DTCStatusMask.CAN_E2E_COMBINED,Core_0,C0_2ms_SchMTask,10,,,BSW
++Dem_NvData.DTCStatusMask.INV_CRASH_TI_STAMP,Core_0,C0_2ms_SchMTask,10,,,BSW
++Dem_NvData.DTCStatusMask.INV_CRASH_SERIOUS,Core_0,C0_2ms_SchMTask,10,,,BSW
++Dem_NvData.DTCStatusMask.INV_CRASH_RNG_HI,Core_0,C0_2ms_SchMTask,10,,,BSW
++Dem_NvData.DTCStatusMask.INV_IL_TI_STAMP,Core_0,C0_2ms_SchMTask,10,,,BSW
++Dem_NvData.DTCStatusMask.INV_IL_PASSIVE,Core_0,C0_2ms_SchMTask,10,,,BSW
++Dem_NvData.DTCStatusMask.INV_IL_ACTIVE,Core_0,C0_2ms_SchMTask,10,,,BSW
++Dem_NvData.DTCStatusMask.INV_IL_RNG_HI,Core_0,C0_2ms_SchMTask,10,,,BSW
++Dem_NvData.DTCStatusMask.INV_IL_RNG_LO,Core_0,C0_2ms_SchMTask,10,,,BSW
+ Dem_NvData.EventMemoryOBD.EventId,Core_0,C0_2ms_SchMTask,10,,,BSW
+ Dem_NvData.OBDWarmupCycleCtr,Core_0,C0_2ms_SchMTask,10,,,BSW
+ DrvCtrlC2cData.AcILimMaxSts,Core_2,C2_1ms,1,,,DRCO
+diff --git a/test/50_L5_Units_Parts/10_SWUT/40_BSW/30_packages/Diagc/DIAG.rtp b/test/50_L5_Units_Parts/10_SWUT/40_BSW/30_packages/Diagc/DIAG.rtp
+index f9de7aade..49a7ec3c4 100644
+--- a/test/50_L5_Units_Parts/10_SWUT/40_BSW/30_packages/Diagc/DIAG.rtp
++++ b/test/50_L5_Units_Parts/10_SWUT/40_BSW/30_packages/Diagc/DIAG.rtp
+@@ -24,7 +24,7 @@
+           <cppFlags></cppFlags>
+           <cflags>-Ctc27x -N0 -Z0 -t --source -O2R -OP --iso=99 --tradeoff=2 --language=+comments#comma#-gcc#comma#-volatile#comma#+strings --switch=auto --eabi=-half-word-align --align=4 --default-a0-size=0 --default-a1-size=0 -Wc-w529 -Wc-w544 -Wc-w581 -Wc-w588 -g</cflags>
+           <tcflags>_TASKING_C_TRICORE_#comma#TS_ARCH_FAMILY=TS_TRICORE#comma#TS_ARCH_DERIVATE=TS_TC277#comma#OS_TOOL=OS_tasking#comma#OS_ARCH=OS_TRICORE#comma#OS_CPU=OS_TC277#comma#OS_MEMMAP=0#comma#OS_DEVELOPMENT_SANITY_CHECKS=0#comma#OS_USE_CLZ_QUEUE_ALGORITHM=1#comma#OS_USE_TRACE=0#comma#OS_KERNEL_TYPE=OS_SYSTEM_CALL#comma#OS_MEMORY_MODEL=OS_MM_DEFAULT#comma#COM_DONT_PROVIDE_LEGACY_SYMBOLIC_NAMES#comma#TMM_MEASURE_GLOBAL=1#comma#__PROC_TC27X__#comma#__CPU_TC27X__#comma#USE_TASKING_INIT=1#comma#OS_RELEASE_SUFFIX=OS_AS403#comma#UNIT_TESTING#comma#BOARDTYPE=2#comma#IFXGTM_REGDEF_H#comma#GTM_H#comma#MCU_H#comma#__sfrbit16=int#comma#Ifx_Strict_32Bit=long#comma#OS_CONFIG_H#comma#OS_TOOL_TRICORE_TASKING_H#comma#OS_TOOL_H#comma#ATOMICS_TSPLATFORMS_H</tcflags>
+-          <ge_incdir>\\src\\fw_cu\\workspace\\Tresos\
+extgen\\output\\generated\\include,\\src\\fw_cu\\Components\\Extern\\AutoCore\\eclipse\\plugins\\Base_TS_TxDxM5I0R0\\generate\\include,\\src\\fw_cu\\Components\\Extern\\AutoCore\\eclipse\\plugins\\Base_TS_TxDxM5I0R0\\include,\\src\\fw_cu\\Components\\Extern\\AutoCore\\eclipse\\plugins\\Compiler_TS_TxDxM1I0R0\\include,\\src\\fw_cu\\Components\\Cmn\\Shared\\Config\\include,\\src\\fw_cu\\Components\\Extern\\AutoCore\\eclipse\\plugins\\Compiler_TS_TxDxM1I0R0\\include\\TRICORE\\tasking,\\src\\fw_cu\\Components\\Extern\\AutoCore\\eclipse\\plugins\\Platforms_TS_T19D1M3I0R0\\include,\\src\\fw_cu\\Components\\Extern\\AutoCore\\eclipse\\plugins\\Atomics_TS_TxDxM1I0R0\\include,\\src\\fw_cu\\Components\\Extern\\AutoCore\\eclipse\\plugins\\Rte_TS_TxDxM6I4R0\\include,\\src\\fw_cu\\Components\\Cmn\\Shared\\MemMap\\include,\\src\\fw_cu\\Components\\Extern\\AutoCore\\eclipse\\plugins\\Dem_TS_TxDxM6I3R0\\include,\\src\\fw_cu\\Components\\Extern\\AutoCore\\eclipse\\plugins\\NvM_TS_TxDxM6I17R0\\include,\\src\\fw_cu\\Components\\Extern\\AutoCore\\eclipse\\plugins\\Dcm_TS_TxDxM5I0R0\\include,\\src\\fw_cu\\Components\\Cmn\\Diagc\\include,\\src\\fw_cu\\Components\\Cmn\\Mem\\NvMSM\\include,\\src\\fw_cu\\Components\\Cmn\\MngFlts\\BswErrDeb\\include,\\src\\fw_cu\\Components\\Cmn\\MngFlts\\ErrDeb\\include,\\src\\fw_cu\\Components\\Cmn\\MngFlts\\RstHndlr\\include</ge_incdir>
++          <ge_incdir>\\src\\fw_cu\\workspace\\Tresos\
+extgen\\output\\generated\\include,\\src\\fw_cu\\Components\\Extern\\AutoCore\\eclipse\\plugins\\Base_TS_TxDxM5I0R0\\generate\\include,\\src\\fw_cu\\Components\\Extern\\AutoCore\\eclipse\\plugins\\Base_TS_TxDxM5I0R0\\include,\\src\\fw_cu\\Components\\Extern\\AutoCore\\eclipse\\plugins\\Compiler_TS_TxDxM1I0R0\\include,\\src\\fw_cu\\Components\\Cmn\\Shared\\Config\\include,\\src\\fw_cu\\Components\\Extern\\AutoCore\\eclipse\\plugins\\Compiler_TS_TxDxM1I0R0\\include\\TRICORE\\tasking,\\src\\fw_cu\\Components\\Extern\\AutoCore\\eclipse\\plugins\\Platforms_TS_T19D1M3I0R0\\include,\\src\\fw_cu\\Components\\Extern\\AutoCore\\eclipse\\plugins\\Atomics_TS_TxDxM1I0R0\\include,\\src\\fw_cu\\Components\\Extern\\AutoCore\\eclipse\\plugins\\Rte_TS_TxDxM6I4R0\\include,\\src\\fw_cu\\Components\\Cmn\\Shared\\MemMap\\include,\\src\\fw_cu\\Components\\Extern\\AutoCore\\eclipse\\plugins\\Dem_TS_TxDxM6I3R0\\include,\\src\\fw_cu\\Components\\Extern\\AutoCore\\eclipse\\plugins\\NvM_TS_TxDxM6I17R0\\include,\\src\\fw_cu\\Components\\Extern\\AutoCore\\eclipse\\plugins\\Dcm_TS_TxDxM5I0R0\\include,\\src\\fw_cu\\Components\\Cmn\\Diagc\\include,\\src\\fw_cu\\Components\\Cmn\\MngFlts\\BswErrDeb\\include,\\src\\fw_cu\\Components\\Cmn\\MngFlts\\ErrDeb\\include,\\src\\fw_cu\\Components\\Cmn\\MngFlts\\RstHndlr\\include,\\src\\fw_cu\\Components\\Cmn\\Shared\\MathLib\\include</ge_incdir>
+           <javaBootClasspath></javaBootClasspath>
+           <ldflags>-lrt -lcp -lcs_fpu --library=fp_fpu -OCLtxy -OY -lstlsx -lfp --munch --core=mpe:tc0 -L\\tools\\ots\\tasking\\ctc\\lib\\tc16x</ldflags>
+           <additionnalObjects></additionnalObjects>
+@@ -56,8 +56,8 @@
+         <test>
+           <node>
+             <data>
+-              <name>DemExt</name>
+-              <quid>682099551</quid>
++              <name>DidUtil</name>
++              <quid>684005521</quid>
+               <renameable>true</renameable>
+               <deletable>true</deletable>
+               <open>true</open>
+@@ -70,47 +70,47 @@
+             <outfilename_list>
+               <outfilename>
+                 <filetype>1563769615_#OK</filetype>
+-                <filepath>.\\14</filepath>
++                <filepath>.\\13</filepath>
+               </outfilename>
+               <outfilename>
+                 <filetype>1563769615_DUM</filetype>
+-                <filepath>.\\cwinAurixTrace32\\TP.o,.\\cwinAurixTrace32\\products.h,.\\cwinAurixTrace32\\DemExt.spt.bak,.\\cwinAurixTrace32\\atu.cio,.\\DemExt.atc.txt,.\\DemExt.summary.txt,.\\cwinAurixTrace32\\testreq_report.xsl</filepath>
++                <filepath>.\\cwinAurixTrace32\\TP.o,.\\cwinAurixTrace32\\products.h,.\\cwinAurixTrace32\\DidUtil.spt.bak,.\\cwinAurixTrace32\\atu.cio,.\\DidUtil.atc.txt,.\\DidUtil.summary.txt,.\\cwinAurixTrace32\\testreq_report.xsl</filepath>
+               </outfilename>
+               <outfilename>
+                 <filetype>1563769615_EXE</filetype>
+-                <filepath>.\\cwinAurixTrace32\\DemExt.elf</filepath>
++                <filepath>.\\cwinAurixTrace32\\DidUtil.elf</filepath>
+               </outfilename>
+               <outfilename>
+                 <filetype>1563769615_REQ</filetype>
+-                <filepath>.\\cwinAurixTrace32\\DemExt.req.xml</filepath>
++                <filepath>.\\cwinAurixTrace32\\DidUtil.req.xml</filepath>
+               </outfilename>
+               <outfilename>
+                 <filetype>1563769615_RI2</filetype>
+-                <filepath>.\\DemExt.ri2</filepath>
++                <filepath>.\\DidUtil.ri2</filepath>
+               </outfilename>
+               <outfilename>
+                 <filetype>1563769615_RIO</filetype>
+-                <filepath>.\\cwinAurixTrace32\\TDemExt.rio</filepath>
++                <filepath>.\\cwinAurixTrace32\\TDidUtil.rio</filepath>
+               </outfilename>
+               <outfilename>
+                 <filetype>1563769615_ROD</filetype>
+-                <filepath>.\\cwinAurixTrace32\\TDemExt.rod</filepath>
++                <filepath>.\\cwinAurixTrace32\\TDidUtil.rod</filepath>
+               </outfilename>
+               <outfilename>
+                 <filetype>1563769615_TIO</filetype>
+-                <filepath>.\\cwinAurixTrace32\\DemExt.tio</filepath>
++                <filepath>.\\cwinAurixTrace32\\DidUtil.tio</filepath>
+               </outfilename>
+               <outfilename>
+                 <filetype>1563769615_XRD</filetype>
+-                <filepath>.\\cwinAurixTrace32\\DemExt.xrd</filepath>
++                <filepath>.\\cwinAurixTrace32\\DidUtil.xrd</filepath>
+               </outfilename>
+             </outfilename_list>
+             <perlscript_after_child>UnitTesting.pl</perlscript_after_child>
+             <configuration_list>
+               <configuration>
+                 <name>C Aurix TC27x Tasking Compiler - Trace32 Debugger</name>
+-                <ge_user_incdir>..\\..\\..\\..\\..\\..\\src\\fw_cu\\Components\\Cmn\\Diagc\\src</ge_user_incdir>
+-                <tsf_selective_file>\\src\\fw_cu\\Components\\Cmn\\MngFlts\\ErrDeb\\include\\ErrDeb.h</tsf_selective_file>
++                <ge_user_incdir>C:\\Git\\Optimus_100KW_Software_old\\src\\fw_cu\\Components\\Cmn\\Diagc\\src</ge_user_incdir>
++                <exclude_dir>\\src\\fw_cu\\Components\\Cmn\\Shared\\MathLib\\include</exclude_dir>
+               </configuration>
+               <configuration>
+                 <name>C Aurix TC29x Tasking Compiler - Trace32 Debugger</name>
+@@ -123,8 +123,8 @@
+                 <nodefile_ref>
+                   <node>
+                     <data>
+-                      <name>DemExt.ptu</name>
+-                      <quid>682099592</quid>
++                      <name>DidUtil.ptu</name>
++                      <quid>684005557</quid>
+                       <renameable>false</renameable>
+                       <deletable>true</deletable>
+                       <open>true</open>
+@@ -137,15 +137,15 @@
+                     <outfilename_list>
+                       <outfilename>
+                         <filetype>1563769615_C  </filetype>
+-                        <filepath>.\\cwinAurixTrace32\\TDemExt.c,.\\cwinAurixTrace32\\TDemExt.ic</filepath>
++                        <filepath>.\\cwinAurixTrace32\\TDidUtil.c,.\\cwinAurixTrace32\\TDidUtil.ic</filepath>
+                       </outfilename>
+                       <outfilename>
+                         <filetype>1563769615_DUM</filetype>
+-                        <filepath>.\\cwinAurixTrace32\\TDemExt_aug.c,.\\cwinAurixTrace32\\TDemExt_aug.i,.\\cwinAurixTrace32\\stubs_rename.opt.bak</filepath>
++                        <filepath>.\\cwinAurixTrace32\\TDidUtil_aug.c,.\\cwinAurixTrace32\\TDidUtil_aug.i,.\\cwinAurixTrace32\\stubs_rename.opt.bak</filepath>
+                       </outfilename>
+                       <outfilename>
+                         <filetype>1563769615_FDC</filetype>
+-                        <filepath>.\\DEMEXT.C.fdc</filepath>
++                        <filepath>.\\DIDUTIL.H.fdc,.\\DIDUTIL.C.fdc</filepath>
+                       </outfilename>
+                       <outfilename>
+                         <filetype>1563769615_H  </filetype>
+@@ -153,7 +153,135 @@
+                       </outfilename>
+                       <outfilename>
+                         <filetype>1563769615_OBJ</filetype>
+-                        <filepath>.\\cwinAurixTrace32\\TDemExt.o</filepath>
++                        <filepath>.\\cwinAurixTrace32\\TDidUtil.o</filepath>
++                      </outfilename>
++                      <outfilename>
++                        <filetype>1563769615_TDC</filetype>
++                        <filepath>.\\cwinAurixTrace32\\TDidUtil.tdc</filepath>
++                      </outfilename>
++                    </outfilename_list>
++                    <perlscript_after_child>TestScript.pl</perlscript_after_child>
++                    <configuration_list>
++                      <configuration>
++                        <name>C Aurix TC27x Tasking Compiler - Trace32 Debugger</name>
++                      </configuration>
++                      <configuration>
++                        <name>C Aurix TC29x Tasking Compiler - Trace32 Debugger</name>
++                      </configuration>
++                    </configuration_list>
++                  </node>
++                  <filepath>.\\DidUtil.ptu</filepath>
++                </nodefile_ref>
++                <cas_all>
++                  <cas>Util_RawToPhysicalValue.Util_RawToPhysicalValue_1</cas>
++                  <cas>Util_PhysicalToRawValue.Util_PhysicalToRawValue_1</cas>
++                  <cas>Util_PhysicalToRawValue.Util_PhysicalToRawValue_2</cas>
++                  <cas>Util_SwapArrElements.1</cas>
++                  <cas>Util_WriteBuffer.Util_WriteBuffer_1</cas>
++                  <cas>Util_WriteBuffer.Util_WriteBuffer_2</cas>
++                  <cas>Util_ValueLimiter.Util_ValueLimiter_1</cas>
++                  <cas>Util_ValueLimiter.Util_ValueLimiter_2</cas>
++                  <cas>Util_ValueLimiter.Util_ValueLimiter_3</cas>
++                  <cas>Util_move_void_ptr.Util_move_void_ptr_1</cas>
++                  <cas>Util_MovePtr.Util_MovePtr_1</cas>
++                  <cas>Util_SwapBytes.Util_SwapBytes_1</cas>
++                  <cas>Util_SwapBytes.Util_SwapBytes_2</cas>
++                </cas_all>
++                <fam_all>
++                  <fam>nominal</fam>
++                </fam_all>
++                <cas_selection>
++                </cas_selection>
++                <fam_selection>
++                  <fam>nominal</fam>
++                </fam_selection>
++                <instance></instance>
++                <use_vtselection>true</use_vtselection>
++                <use_vtfamselection>true</use_vtfamselection>
++              </test_script>
++            </unittesting_script>
++            <source>
++              <nodefile_ref>
++                <node>
++                  <data>
++                    <name>DidUtil.c</name>
++                    <quid>684005555</quid>
++                    <renameable>false</renameable>
++                    <deletable>true</deletable>
++                    <open>true</open>
++                    <sorted>false</sorted>
++                    <executionResult>5</executionResult>
++                  </data>
++                  <current_configuration>C Aurix TC27x Tasking Compiler - Trace32 Debugger</current_configuration>
++                  <state>1</state>
++                  <background>false</background>
++                  <perlscript_after_child>Source.pl</perlscript_after_child>
++                  <configuration_list>
++                    <configuration>
++                      <name>C Aurix TC27x Tasking Compiler - Trace32 Debugger</name>
++                    </configuration>
++                    <configuration>
++                      <name>C Aurix TC29x Tasking Compiler - Trace32 Debugger</name>
++                    </configuration>
++                  </configuration_list>
++                </node>
++                <filepath>C:\\Git\\Optimus_100KW_Software_old\\src\\fw_cu\\Components\\Cmn\\Diagc\\src\\DidUtil.c</filepath>
++              </nodefile_ref>
++            <integrated>false</integrated>
++            <source_child>
++            </source_child>
++            </source>
++          </test_child>
++        </test>
++      </unit_testing>
++      <unit_testing>
++        <test>
++          <node>
++            <data>
++              <name>DemExt</name>
++              <quid>682099551</quid>
++              <renameable>true</renameable>
++              <deletable>true</deletable>
++              <open>true</open>
++              <sorted>false</sorted>
++              <executionResult>1</executionResult>
++            </data>
++            <current_configuration>C Aurix TC27x Tasking Compiler - Trace32 Debugger</current_configuration>
++            <state>0</state>
++            <background>false</background>
++            <perlscript_after_child>UnitTesting.pl</perlscript_after_child>
++            <configuration_list>
++              <configuration>
++                <name>C Aurix TC27x Tasking Compiler - Trace32 Debugger</name>
++                <ge_user_incdir>..\\..\\..\\..\\..\\..\\src\\fw_cu\\Components\\Cmn\\Diagc\\src</ge_user_incdir>
++                <tsf_selective_file>\\src\\fw_cu\\Components\\Cmn\\MngFlts\\ErrDeb\\include\\ErrDeb.h</tsf_selective_file>
++              </configuration>
++              <configuration>
++                <name>C Aurix TC29x Tasking Compiler - Trace32 Debugger</name>
++              </configuration>
++            </configuration_list>
++          </node>
++          <test_child>
++            <unittesting_script>
++              <test_script>
++                <nodefile_ref>
++                  <node>
++                    <data>
++                      <name>DemExt.ptu</name>
++                      <quid>682099592</quid>
++                      <renameable>false</renameable>
++                      <deletable>true</deletable>
++                      <open>true</open>
++                      <sorted>false</sorted>
++                      <executionResult>1</executionResult>
++                    </data>
++                    <current_configuration>C Aurix TC27x Tasking Compiler - Trace32 Debugger</current_configuration>
++                    <state>0</state>
++                    <background>false</background>
++                    <outfilename_list>
++                      <outfilename>
++                        <filetype>1563769615_C  </filetype>
++                        <filepath>.\\cwinAurixTrace32\\TDemExt.c,.\\cwinAurixTrace32\\TDemExt.ic</filepath>
+                       </outfilename>
+                       <outfilename>
+                         <filetype>1563769615_TDC</filetype>
+@@ -494,198 +622,6 @@
+           </test_child>
+         </test>
+       </unit_testing>
+-      <unit_testing>
+-        <test>
+-          <node>
+-            <data>
+-              <name>DidUtil</name>
+-              <quid>589916185</quid>
+-              <renameable>true</renameable>
+-              <deletable>true</deletable>
+-              <open>true</open>
+-              <sorted>false</sorted>
+-              <executionResult>0</executionResult>
+-            </data>
+-            <current_configuration>C Aurix TC27x Tasking Compiler - Trace32 Debugger</current_configuration>
+-            <state>0</state>
+-            <background>false</background>
+-            <outfilename_list>
+-              <outfilename>
+-                <filetype>1563769615_DUM</filetype>
+-                <filepath>.\\cwinAurixTrace32\\TP.o,.\\cwinAurixTrace32\\products.h,.\\cwinAurixTrace32\\atu.cio,.\\DidUtil.atc.txt,.\\DidUtil.summary.txt</filepath>
+-              </outfilename>
+-              <outfilename>
+-                <filetype>1563769615_EXE</filetype>
+-                <filepath>.\\cwinAurixTrace32\\DidUtil.elf</filepath>
+-              </outfilename>
+-              <outfilename>
+-                <filetype>1563769615_RI2</filetype>
+-                <filepath>.\\DidUtil.ri2</filepath>
+-              </outfilename>
+-              <outfilename>
+-                <filetype>1563769615_RIO</filetype>
+-                <filepath>.\\cwinAurixTrace32\\TDidUtil.rio</filepath>
+-              </outfilename>
+-              <outfilename>
+-                <filetype>1563769615_ROD</filetype>
+-                <filepath>.\\cwinAurixTrace32\\TDidUtil.rod</filepath>
+-              </outfilename>
+-              <outfilename>
+-                <filetype>1563769615_TIO</filetype>
+-                <filepath>.\\cwinAurixTrace32\\DidUtil.tio</filepath>
+-              </outfilename>
+-              <outfilename>
+-                <filetype>1563769615_XRD</filetype>
+-                <filepath>.\\cwinAurixTrace32\\DidUtil.xrd</filepath>
+-              </outfilename>
+-            </outfilename_list>
+-            <perlscript_after_child>UnitTesting.pl</perlscript_after_child>
+-            <configuration_list>
+-              <configuration>
+-                <name>C Aurix TC27x Tasking Compiler - Trace32 Debugger</name>
+-                <executionFlag>17215</executionFlag>
+-                <cflags>-Ctc27x -N0 -Z0 -t --source -O2R -OP --iso=99 --tradeoff=2 --language=+comments#comma#-gcc#comma#-volatile#comma#+strings --switch=auto --eabi=-half-word-align --align=4 --default-a0-size=0 --default-a1-size=0 -Wc-w529 -Wc-w544 -Wc-w581 -Wc-w588 -g</cflags>
+-                <tcflags>_TASKING_C_TRICORE_#comma#TS_ARCH_FAMILY=TS_TRICORE#comma#TS_ARCH_DERIVATE=TS_TC277#comma#OS_TOOL=OS_tasking#comma#OS_ARCH=OS_TRICORE#comma#OS_CPU=OS_TC277#comma#OS_MEMMAP=0#comma#OS_DEVELOPMENT_SANITY_CHECKS=0#comma#OS_USE_CLZ_QUEUE_ALGORITHM=1#comma#OS_USE_TRACE=0#comma#OS_KERNEL_TYPE=OS_SYSTEM_CALL#comma#OS_MEMORY_MODEL=OS_MM_DEFAULT#comma#COM_DONT_PROVIDE_LEGACY_SYMBOLIC_NAMES#comma#TMM_MEASURE_GLOBAL=1#comma#__PROC_TC27X__#comma#__CPU_TC27X__#comma#USE_TASKING_INIT=1#comma#OS_RELEASE_SUFFIX=OS_AS403#comma#UNIT_TESTING#comma#BOARDTYPE=2#comma#IFXGTM_REGDEF_H#comma#GTM_H#comma#MCU_H#comma#__sfrbit16=int#comma#Ifx_Strict_32Bit=long#comma#OS_CONFIG_H#comma#OS_TOOL_TRICORE_TASKING_H#comma#OS_TOOL_H#comma#ATOMICS_TSPLATFORMS_H</tcflags>
+-                <ge_incdir>"\\test\\50_L5_Units_Parts\\10_SWUT\\40_BSW\\10_configurations\\include","\\test\\50_L5_Units_Parts\\10_SWUT\\40_BSW\\30_packages\\Diagc\\include","\\src\\fw_cu\\Components\\Cmn\\Shared\\MathLib\\include","\\src\\fw_cu\\Components\\Extern\\AutoCore\\eclipse\\plugins\\Compiler_TS_TxDxM1I0R0\\include\\TRICORE","\\src\\fw_cu\\workspace\\Tresos\
+extgen\\output\\generated\\include","\\src\\fw_cu\\Components\\Cmn\\Shared\\Config\\include","\\src\\fw_cu\\Components\\Cmn\\Shared\\MemMap\\include","\\src\\fw_cu\\Components\\Cmn\\Diagc\\Diagc\\include","\\src\\fw_cu\\Components\\Extern\\AutoCore\\eclipse\\plugins\\Compiler_TS_TxDxM1I0R0\\include\\TRICORE\\tasking","\\src\\fw_cu\\Components\\Extern\\AutoCore\\eclipse\\plugins\\Base_TS_TxDxM5I0R0\\include"</ge_incdir>
+-                <ge_user_incdir></ge_user_incdir>
+-                <tsf_selective_file>\\src\\fw_cu\\Components\\Cmn\\Diagc\\Diagc\\include\\DidUtil.h</tsf_selective_file>
+-                <exclude_dir>\\src\\fw_cu\\Components\\Cmn\\Shared\\MathLib\\include</exclude_dir>
+-                <nowarning>true</nowarning>
+-                <atc_instr_blocks>1</atc_instr_blocks>
+-              </configuration>
+-            </configuration_list>
+-          </node>
+-          <test_child>
+-            <unittesting_script>
+-              <test_script>
+-                <nodefile_ref>
+-                  <node>
+-                    <data>
+-                      <name>DidUtil.ptu</name>
+-                      <quid>589916213</quid>
+-                      <renameable>false</renameable>
+-                      <deletable>true</deletable>
+-                      <open>true</open>
+-                      <sorted>false</sorted>
+-                      <executionResult>0</executionResult>
+-                    </data>
+-                    <current_configuration>C Aurix TC27x Tasking Compiler - Trace32 Debugger</current_configuration>
+-                    <state>0</state>
+-                    <background>false</background>
+-                    <outfilename_list>
+-                      <outfilename>
+-                        <filetype>1563769615_C  </filetype>
+-                        <filepath>.\\cwinAurixTrace32\\TDidUtil.c,.\\cwinAurixTrace32\\TDidUtil.ic</filepath>
+-                      </outfilename>
+-                      <outfilename>
+-                        <filetype>1563769615_DUM</filetype>
+-                        <filepath>.\\cwinAurixTrace32\\TDidUtil_aug.c,.\\cwinAurixTrace32\\TDidUtil_aug.i</filepath>
+-                      </outfilename>
+-                      <outfilename>
+-                        <filetype>1563769615_FDC</filetype>
+-                        <filepath>.\\DIDUTIL.C.fdc</filepath>
+-                      </outfilename>
+-                      <outfilename>
+-                        <filetype>1563769615_H  </filetype>
+-                        <filepath>.\\cwinAurixTrace32\\attol_cfg.h</filepath>
+-                      </outfilename>
+-                      <outfilename>
+-                        <filetype>1563769615_OBJ</filetype>
+-                        <filepath>.\\cwinAurixTrace32\\TDidUtil.o</filepath>
+-                      </outfilename>
+-                      <outfilename>
+-                        <filetype>1563769615_TDC</filetype>
+-                        <filepath>.\\cwinAurixTrace32\\TDidUtil.tdc</filepath>
+-                      </outfilename>
+-                    </outfilename_list>
+-                    <perlscript_after_child>TestScript.pl</perlscript_after_child>
+-                    <configuration_list>
+-                      <configuration>
+-                        <name>C Aurix TC27x Tasking Compiler - Trace32 Debugger</name>
+-                      </configuration>
+-                    </configuration_list>
+-                  </node>
+-                  <filepath>.\\DidUtil.ptu</filepath>
+-                </nodefile_ref>
+-                <cas_all>
+-                  <cas>Util_RawToPhysicalValue.Util_RawToPhysicalValue_BVA_MIN.1</cas>
+-                  <cas>Util_RawToPhysicalValue.Util_RawToPhysicalValue_BVA_MAX.2</cas>
+-                  <cas>Util_RawToPhysicalValue.Util_RawToPhysicalValue_FUNC.3</cas>
+-                  <cas>Util_PhysicalToRawValue.Util_PhysicalToRawValue_BVA_MIN.1</cas>
+-                  <cas>Util_PhysicalToRawValue.Util_PhysicalToRawValue_BVA_MAX.2</cas>
+-                  <cas>Util_PhysicalToRawValue.Util_PhysicalToRawValue_FUNC.3</cas>
+-                  <cas>Util_PhysicalToRawValue.Util_PhysicalToRawValue_FUNC.4</cas>
+-                  <cas>Util_SwapArrElements.Util_SwapArrElements_BVA_MIN.1</cas>
+-                  <cas>Util_SwapArrElements.Util_SwapArrElements_BVA_MAX.2</cas>
+-                  <cas>Util_SwapArrElements.Util_SwapArrElements_FUNC.3</cas>
+-                  <cas>Util_WriteBuffer.Util_WriteBuffer_BVA_MIN.1</cas>
+-                  <cas>Util_WriteBuffer.Util_WriteBuffer_BVA_MAX.2</cas>
+-                  <cas>Util_WriteBuffer.Util_WriteBuffer_FUNC.3</cas>
+-                  <cas>Util_WriteBuffer.Util_WriteBuffer_FUNC.4</cas>
+-                  <cas>Util_ValueLimiter.Util_ValueLimiter_BVA_MIN.1</cas>
+-                  <cas>Util_ValueLimiter.Util_ValueLimiter_BVA_MAX.2</cas>
+-                  <cas>Util_ValueLimiter.Util_ValueLimiter_FUNC.3</cas>
+-                  <cas>Util_ValueLimiter.Util_ValueLimiter_FUNC.4</cas>
+-                  <cas>Util_ValueLimiter.Util_ValueLimiter_FUNC.5</cas>
+-                  <cas>Util_MovePtr.Util_MovePtr_BVA_MIN.1</cas>
+-                  <cas>Util_MovePtr.Util_MovePtr_BVA_MAX.2</cas>
+-                  <cas>Util_MovePtr.Util_MovePtr_FUNC.3</cas>
+-                  <cas>Util_SwapBytes.Util_SwapBytes_BVA_MIN.1</cas>
+-                  <cas>Util_SwapBytes.Util_SwapBytes_BVA_MAX.2</cas>
+-                  <cas>Util_SwapBytes.Util_SwapBytes_FUNC.3</cas>
+-                  <cas>Util_SwapBytes.Util_SwapBytes_FUNC.4</cas>
+-                </cas_all>
+-                <fam_all>
+-                  <fam>nominal</fam>
+-                </fam_all>
+-                <cas_selection>
+-                  <cas>Util_RawToPhysicalValue</cas>
+-                  <cas>Util_PhysicalToRawValue</cas>
+-                  <cas>Util_SwapArrElements</cas>
+-                  <cas>Util_WriteBuffer</cas>
+-                  <cas>Util_ValueLimiter</cas>
+-                  <cas>Util_MovePtr</cas>
+-                  <cas>Util_SwapBytes</cas>
+-                </cas_selection>
+-                <fam_selection>
+-                  <fam>nominal</fam>
+-                </fam_selection>
+-                <instance></instance>
+-                <use_vtselection>true</use_vtselection>
+-                <use_vtfamselection>true</use_vtfamselection>
+-              </test_script>
+-            </unittesting_script>
+-            <source>
+-              <nodefile_ref>
+-                <node>
+-                  <data>
+-                    <name>DidUtil.c</name>
+-                    <quid>589916211</quid>
+-                    <renameable>false</renameable>
+-                    <deletable>true</deletable>
+-                    <open>true</open>
+-                    <sorted>false</sorted>
+-                    <executionResult>5</executionResult>
+-                  </data>
+-                  <current_configuration>C Aurix TC27x Tasking Compiler - Trace32 Debugger</current_configuration>
+-                  <state>1</state>
+-                  <background>false</background>
+-                  <perlscript_after_child>Source.pl</perlscript_after_child>
+-                  <configuration_list>
+-                    <configuration>
+-                      <name>C Aurix TC27x Tasking Compiler - Trace32 Debugger</name>
+-                    </configuration>
+-                  </configuration_list>
+-                </node>
+-                <filepath>..\\..\\..\\src\\DidUtil.c</filepath>
+-              </nodefile_ref>
+-            <integrated>false</integrated>
+-            <source_child>
+-            </source_child>
+-            </source>
+-          </test_child>
+-        </test>
+-      </unit_testing>
+       <unit_testing>
+         <test>
+           <node>
+diff --git a/test/50_L5_Units_Parts/10_SWUT/40_BSW/30_packages/Diagc/DidUtil.ptu b/test/50_L5_Units_Parts/10_SWUT/40_BSW/30_packages/Diagc/DidUtil.ptu
+index 5cb7f0e9e..e6c6de233 100644
+--- a/test/50_L5_Units_Parts/10_SWUT/40_BSW/30_packages/Diagc/DidUtil.ptu
++++ b/test/50_L5_Units_Parts/10_SWUT/40_BSW/30_packages/Diagc/DidUtil.ptu
+@@ -1,40 +1,22 @@
+ --********************************************************************************
+--- tool : C Source Code Parser VERSION 8.0.0.0.303.011
++-- tool : C Source Code Parser VERSION 8.3.0.1.342.020
+ --*                                                                              *
+---%c attolstart "D:\\GIT\\VW_MEB_Software\\src\\fw_cu\\Components\\Cmn\\Diagc\\Diagc\\src\\DidUtil.c" "D:\\GIT\\VW_MEB_Software\\test\\50_L5_Units_Parts\\10_SWUT\\40_BSW\\30_packages\\Diagc\\DidUtil.ptu" /INSERT /INCL="\\GIT\\VW_MEB_Software\\test\\50_L5_Units_Parts\\10_SWUT\\40_BSW\\10_configurations\\include,\\GIT\\VW_MEB_Software\\test\\50_L5_Units_Parts\\10_SWUT\\40_BSW\\30_packages\\Diagc\\include,\\GIT\\VW_MEB_Software\\src\\fw_cu\\Components\\Cmn\\Shared\\MathLib\\include,\\GIT\\VW_MEB_Software\\src\\fw_cu\\Components\\Extern\\AutoCore\\eclipse\\plugins\\Compiler_TS_TxDxM1I0R0\\include\\TRICORE,\\GIT\\VW_MEB_Software\\src\\fw_cu\\workspace\\Tresos\
+extgen\\output\\generated\\include,\\GIT\\VW_MEB_Software\\src\\fw_cu\\Components\\Cmn\\Shared\\Config\\include,\\GIT\\VW_MEB_Software\\src\\fw_cu\\Components\\Cmn\\Shared\\MemMap\\include,\\GIT\\VW_MEB_Software\\src\\fw_cu\\Components\\Cmn\\Diagc\\Diagc\\include,\\GIT\\VW_MEB_Software\\src\\fw_cu\\Components\\Extern\\AutoCore\\eclipse\\plugins\\Compiler_TS_TxDxM1I0R0\\include\\TRICORE\\tasking,\\GIT\\VW_MEB_Software\\src\\fw_cu\\Components\\Extern\\AutoCore\\eclipse\\plugins\\Base_TS_TxDxM5I0R0\\include" /DEFINE="_TASKING_C_TRICORE_,TS_ARCH_FAMILY=TS_TRICORE,TS_ARCH_DERIVATE=TS_TC277,OS_TOOL=OS_tasking,OS_ARCH=OS_TRICORE,OS_CPU=OS_TC277,OS_MEMMAP=0,OS_DEVELOPMENT_SANITY_CHECKS=0,OS_USE_CLZ_QUEUE_ALGORITHM=1,OS_USE_TRACE=0,OS_KERNEL_TYPE=OS_SYSTEM_CALL,OS_MEMORY_MODEL=OS_MM_DEFAULT,COM_DONT_PROVIDE_LEGACY_SYMBOLIC_NAMES,TMM_MEASURE_GLOBAL=1,__PROC_TC27X__,__CPU_TC27X__,USE_TASKING_INIT=1,OS_RELEASE_SUFFIX=OS_AS403,UNIT_TESTING,BOARDTYPE=2,IFXGTM_REGDEF_H,GTM_H,MCU_H,__sfrbit16=int,Ifx_Strict_32Bit=long,OS_CONFIG_H,OS_TOOL_TRICORE_TASKING_H,OS_TOOL_H,ATOMICS_TSPLATFORMS_H,_ATL_PREPRO_ONLY"
++--%c attolstart "C:\\Git\\Optimus_100KW_Software_old\\src\\fw_cu\\Components\\Cmn\\Diagc\\src\\DidUtil.c" "F:/test/50_L5_Units_Parts/10_SWUT/40_BSW/30_packages/Diagc\\DidUtil2.ptu" /INSERT /INCL="C:/Git/Optimus_100KW_Software_old/src/fw_cu/Components/Cmn/Diagc/src,/src/fw_cu/workspace/Tresos/nextgen/output/generated/include,/src/fw_cu/Components/Extern/AutoCore/eclipse/plugins/Base_TS_TxDxM5I0R0/generate/include,/src/fw_cu/Components/Extern/AutoCore/eclipse/plugins/Base_TS_TxDxM5I0R0/include,/src/fw_cu/Components/Extern/AutoCore/eclipse/plugins/Compiler_TS_TxDxM1I0R0/include,/src/fw_cu/Components/Cmn/Shared/Config/include,/src/fw_cu/Components/Extern/AutoCore/eclipse/plugins/Compiler_TS_TxDxM1I0R0/include/TRICORE/tasking,/src/fw_cu/Components/Extern/AutoCore/eclipse/plugins/Platforms_TS_T19D1M3I0R0/include,/src/fw_cu/Components/Extern/AutoCore/eclipse/plugins/Atomics_TS_TxDxM1I0R0/include,/src/fw_cu/Components/Extern/AutoCore/eclipse/plugins/Rte_TS_TxDxM6I4R0/include,/src/fw_cu/Components/Cmn/Shared/MemMap/include,/src/fw_cu/Components/Extern/AutoCore/eclipse/plugins/Dem_TS_TxDxM6I3R0/include,/src/fw_cu/Components/Extern/AutoCore/eclipse/plugins/NvM_TS_TxDxM6I17R0/include,/src/fw_cu/Components/Extern/AutoCore/eclipse/plugins/Dcm_TS_TxDxM5I0R0/include,/src/fw_cu/Components/Cmn/Diagc/include,/src/fw_cu/Components/Cmn/MngFlts/BswErrDeb/include,/src/fw_cu/Components/Cmn/MngFlts/ErrDeb/include,/src/fw_cu/Components/Cmn/MngFlts/RstHndlr/include,/src/fw_cu/Components/Cmn/Shared/MathLib/include" /DEFINE="_TASKING_C_TRICORE_,TS_ARCH_FAMILY=TS_TRICORE,TS_ARCH_DERIVATE=TS_TC277,OS_TOOL=OS_tasking,OS_ARCH=OS_TRICORE,OS_CPU=OS_TC277,OS_MEMMAP=0,OS_DEVELOPMENT_SANITY_CHECKS=0,OS_USE_CLZ_QUEUE_ALGORITHM=1,OS_USE_TRACE=0,OS_KERNEL_TYPE=OS_SYSTEM_CALL,OS_MEMORY_MODEL=OS_MM_DEFAULT,COM_DONT_PROVIDE_LEGACY_SYMBOLIC_NAMES,TMM_MEASURE_GLOBAL=1,__PROC_TC27X__,__CPU_TC27X__,USE_TASKING_INIT=1,OS_RELEASE_SUFFIX=OS_AS403,UNIT_TESTING,BOARDTYPE=2,IFXGTM_REGDEF_H,GTM_H,MCU_H,__sfrbit16=int,Ifx_Strict_32Bit=long,OS_CONFIG_H,OS_TOOL_TRICORE_TASKING_H,OS_TOOL_H,ATOMICS_TSPLATFORMS_H" /STD_DEFINE="C:\\tools\\IBM\\TestRealTime\\targets\\cwinAurixTrace32\\ana\\atus_c.def"
+ --*                                                                              *
+--- File : D:\\GIT\\VW_MEB_Software\\test\\50_L5_Units_Parts\\10_SWUT\\40_BSW\\30_packages\\Diagc\\DidUtil.ptu
++-- File : F:\\test\\50_L5_Units_Parts\\10_SWUT\\40_BSW\\30_packages\\Diagc\\DidUtil2.ptu
++--%f 
+ --*                                                                              *
+---%d DATE : Fri May 24 13:09:43 2019
++--%d DATE : Wed Sep 01 13:22:40 2021
+ --*                                                                              *
+ --********************************************************************************
+-COMMENT **************************************************************************
+-COMMENT ****    Author (evonada0)
+-COMMENT ****    Modifier (evovada0)
+-COMMENT ****    PTU creation date (22.01.2019)
+-COMMENT ****    PTU last run on software release (VW_MEB_P260)
+-COMMENT ****    PTU last modificaton date (24.05.2019)
+-COMMENT **************************************************************************
+-COMMENT ****    Source files :
+-COMMENT ****    - DidUtil.c
+-COMMENT **************************************************************************
+-COMMENT ****    General Comment: -
+-COMMENT **************************************************************************
+-HEADER DidUtil,DetailedDesign_Version,01.01
++HEADER DidUtil, , 
+ 
+ --------------------------------------------------------------------------------
+ --
+ -- INCLUDED FILE DECLARATIONS (-INCLUDED OPTION)
+ --
+ --------------------------------------------------------------------------------
+-
+-##include "\\src\\fw_cu\\Components\\Cmn\\Diagc\\Diagc\\src\\DidUtil.c"
+-##include "\\src\\fw_cu\\Components\\Cmn\\Shared\\MathLib\\include\\Mathlib.h"
+-##define FLOAT64_MAX         1.7976931348623158e+308 /* Double max value */
+-##define FLOAT64_MIN         2.2250738585072014e-308 /* Double min positive value */
+-##define FLOAT32_MAX         3.402823466e+37F        /* Float max value */
+-##define FLOAT32_MIN          1.175494351e-37F        /*  1.175494351e-38F*/        /* Float min positive value */
+-
++##include "C:\\Git\\Optimus_100KW_Software_old\\src\\fw_cu\\Components\\Cmn\\Diagc\\src\\DidUtil.c"
+ --------------------------------------------------------------------------------
+ 
+ BEGIN
+@@ -46,7 +28,7 @@ BEGIN
+ --------------------------------------------------------------------------------
+ 
+ DEFINE STUB DidUtil_c
+---    #void __asm(); /* no prototype */
++   -- #void __asm(); /* no prototype */
+ END DEFINE
+ 
+ --------------------------------------------------------------------------------
+@@ -77,153 +59,18 @@ SERVICE_TYPE extern
+     -- By function returned type declaration
+     #float32 ret_Util_RawToPhysicalValue;
+ 
+-    ENVIRONMENT ENV_Util_RawToPhysicalValue
+-    VAR uintval,\t\tinit = 0,\t\tev = init
+-    VAR offset,\t\tinit = 0.0,\t\tev = init
+-    VAR factor,\t\tinit = 0.0,\t\tev = init
+-    VAR ret_Util_RawToPhysicalValue,\t\tinit = 0.0,\t\tev = init
+-    END ENVIRONMENT -- ENV_Util_RawToPhysicalValue
+-    USE ENV_Util_RawToPhysicalValue
+-
+-    TEST Util_RawToPhysicalValue_BVA_MIN.1
++    TEST Util_RawToPhysicalValue_1
+     FAMILY nominal
+ 
+         ELEMENT
+-        COMMENT *******************************************************************************
+-        COMMENT **  Author (evonada0)
+-        COMMENT **  sw release (VW_MEB_P260)
+-        COMMENT **  Test Case modification date (22.01.2019)
+-        COMMENT **
+-        COMMENT **  Test Technique:
+-        COMMENT **    Boundary Value Analysis
+-        COMMENT **
+-        COMMENT **  Description:
+-        COMMENT **     
+-        COMMENT **     test with minimum values
+-\t\tCOMMENT ** - Minimum values of \'uintval\', \'offset\' and \'factor\' are received 
+-\t\tCOMMENT ** - Calculated retval must be minimum too
+-        COMMENT **     
+-        COMMENT **   
+-        COMMENT **
+-        COMMENT ******************************************************************************
+-        COMMENT **  Global variables
+-        COMMENT ******************************************************************************
+-        COMMENT **  Tester defined variables
+-        COMMENT ******************************************************************************
+-        COMMENT None
+-        COMMENT ******************************************************************************
+-        COMMENT **  Function parameters
+-        COMMENT ******************************************************************************
+-\t\tVAR uintval,\t\tinit = UINT32_MIN, \t\tev = init
+-\t\tVAR offset,\t\t\tinit = FLOAT32_MIN, \tev = init
+-\t\tVAR factor,\t\t\tinit = FLOAT32_MIN, \tev = init
+-        COMMENT ******************************************************************************
+-        COMMENT **  STUB definitions
+-        COMMENT ******************************************************************************
+-\t\tCOMMENT None
+-        COMMENT ******************************************************************************
+-        COMMENT **  Return value
+-        COMMENT ******************************************************************************
+-\t\tVAR ret_Util_RawToPhysicalValue, \tinit ==, \tev = FLOAT32_MIN
+-\t\tCOMMENT None
++        VAR uintval,\t\tinit = 1,\t\tev = init
++        VAR offset,\t\tinit = 1.0,\t\tev = init
++        VAR factor,\t\tinit = 2.5,\t\tev = init
++        VAR ret_Util_RawToPhysicalValue,\t\tinit = 0.0,\t\tev = 3.5
+         #ret_Util_RawToPhysicalValue = Util_RawToPhysicalValue(uintval, offset, factor);
+         END ELEMENT
+ 
+-    END TEST -- Util_RawToPhysicalValue_BVA_MIN.1
+-
+-
+-    TEST Util_RawToPhysicalValue_BVA_MAX.2
+-    FAMILY nominal
+-
+-        ELEMENT
+-        COMMENT *******************************************************************************
+-        COMMENT **  Author (evonada0)
+-        COMMENT **  sw release (VW_MEB_P260)
+-        COMMENT **  Test Case modification date (22.01.2019)
+-        COMMENT **
+-        COMMENT **  Test Technique:
+-        COMMENT **    Boundary Value Analysis
+-        COMMENT **
+-        COMMENT **  Description:
+-        COMMENT **     
+-        COMMENT **     test with maximum values
+-\t\tCOMMENT ** - Maximum values of \'uintval\', \'offset\' and \'factor\' are received 
+-\t\tCOMMENT ** - Calculated retval must be maximum too 
+-\t\tCOMMENT ** - There is an overflow problem with \'retval\', since \'uintval\' is multiplied by \'factor\'
+-        COMMENT **     
+-        COMMENT **   
+-        COMMENT **
+-        COMMENT ******************************************************************************
+-        COMMENT **  Global variables
+-        COMMENT ******************************************************************************
+-        COMMENT **  Tester defined variables
+-        COMMENT ******************************************************************************
+-        COMMENT None
+-        COMMENT ******************************************************************************
+-        COMMENT **  Function parameters
+-        COMMENT ******************************************************************************
+-\t\tVAR uintval,\t\tinit = UINT32_MAX, \t\tev = init
+-\t\tVAR offset,\t\t\tinit = FLOAT32_MAX, \tev = init
+-\t\tVAR factor,\t\t\tinit = FLOAT32_MAX, \tev = init
+-        COMMENT ******************************************************************************
+-        COMMENT **  STUB definitions
+-        COMMENT ******************************************************************************
+-\t\tCOMMENT None
+-        COMMENT ******************************************************************************
+-        COMMENT **  Return value
+-        COMMENT ******************************************************************************
+-\t\tVAR ret_Util_RawToPhysicalValue, \tinit ==, \tev = FLOAT32_MAX
+-\t\tCOMMENT None
+-        #ret_Util_RawToPhysicalValue = Util_RawToPhysicalValue(uintval, offset, factor);
+-        END ELEMENT
+-
+-    END TEST -- Util_RawToPhysicalValue_BVA_MAX.2
+-
+-    TEST Util_RawToPhysicalValue_FUNC.3
+-    FAMILY nominal
+-
+-        ELEMENT
+-        COMMENT *******************************************************************************
+-        COMMENT **  Author (evonada0)
+-        COMMENT **  sw release (VW_MEB_P260)
+-        COMMENT **  Test Case modification date (22.01.2019)
+-        COMMENT **
+-        COMMENT **  Test Technique:
+-        COMMENT **    Functional
+-        COMMENT **
+-        COMMENT **  Description:
+-        COMMENT **     
+-        COMMENT **     test with middle values
+-\t\tCOMMENT ** - Values of \'uintval\', \'offset\' and \'factor\' are received 
+-\t\tCOMMENT ** - Test to check the calculated return value
+-        COMMENT **     
+-        COMMENT **   
+-        COMMENT **
+-        COMMENT ******************************************************************************
+-        COMMENT **  Global variables
+-        COMMENT ******************************************************************************
+-        COMMENT **  Tester defined variables
+-        COMMENT ******************************************************************************
+-        COMMENT None
+-        COMMENT ******************************************************************************
+-        COMMENT **  Function parameters
+-        COMMENT ******************************************************************************
+-\t\tVAR uintval,\t\tinit = 255, \tev = init
+-\t\tVAR offset,\t\t\tinit = 28.0f, \tev = init
+-\t\tVAR factor,\t\t\tinit =100.0f, \tev = init
+-        COMMENT ******************************************************************************
+-        COMMENT **  STUB definitions
+-        COMMENT ******************************************************************************
+-\t\tCOMMENT None
+-        COMMENT ******************************************************************************
+-        COMMENT **  Return value
+-        COMMENT ******************************************************************************
+-\t\tVAR ret_Util_RawToPhysicalValue, \tinit ==, \tev = 25528.0f
+-\t\tCOMMENT None
+-        #ret_Util_RawToPhysicalValue = Util_RawToPhysicalValue(uintval, offset, factor);
+-        END ELEMENT
+-
+-    END TEST -- Util_RawToPhysicalValue_FUNC.3
++    END TEST -- TEST 1
+ 
+ END SERVICE -- Util_RawToPhysicalValue
+ 
+@@ -241,196 +88,31 @@ SERVICE_TYPE extern
+     -- By function returned type declaration
+     #uint32 ret_Util_PhysicalToRawValue;
+ 
+-    ENVIRONMENT ENV_Util_PhysicalToRawValue
+-    VAR origVal,\t\tinit = 0.0,\t\tev = init
+-    VAR offset,\t\tinit = 0.0,\t\tev = init
+-    VAR factor,\t\tinit = 0.0,\t\tev = init
+-    VAR ret_Util_PhysicalToRawValue,\t\tinit = 0,\t\tev = init
+-    END ENVIRONMENT -- ENV_Util_PhysicalToRawValue
+-    USE ENV_Util_PhysicalToRawValue
+-
+-    TEST Util_PhysicalToRawValue_BVA_MIN.1
+-    FAMILY nominal
+-
+-        ELEMENT
+-        COMMENT *******************************************************************************
+-        COMMENT **  Author (evonada0)
+-        COMMENT **  sw release (VW_MEB_P260)
+-        COMMENT **  Test Case modification date (22.01.2019)
+-        COMMENT **
+-        COMMENT **  Test Technique:
+-        COMMENT **    Boundary Value Analysis
+-        COMMENT **
+-        COMMENT **  Description:
+-        COMMENT **     
+-        COMMENT **     test with minimum values
+-\t\tCOMMENT ** - Minimum values of \'origVal\', \'offset\' and \'factor\' are received 
+-\t\tCOMMENT ** - Calculated return value must be minimum too
+-        COMMENT **     
+-        COMMENT **   
+-        COMMENT **
+-        COMMENT ******************************************************************************
+-        COMMENT **  Global variables
+-        COMMENT ******************************************************************************
+-        COMMENT **  Tester defined variables
+-        COMMENT ******************************************************************************
+-        COMMENT None
+-        COMMENT ******************************************************************************
+-        COMMENT **  Function parameters
+-        COMMENT ******************************************************************************
+-\t\tVAR origVal,\t\tinit = UINT32_MIN, \t\tev = init
+-\t\tVAR offset,\t\t\tinit = FLOAT32_MIN, \tev = init
+-\t\tVAR factor,\t\t\tinit = FLOAT32_MIN, \tev = init
+-        COMMENT ******************************************************************************
+-        COMMENT **  STUB definitions
+-        COMMENT ******************************************************************************
+-\t\tCOMMENT None
+-        COMMENT ******************************************************************************
+-        COMMENT **  Return value
+-        COMMENT ******************************************************************************
+-\t\tVAR ret_Util_PhysicalToRawValue, \tinit ==, \tev = FLOAT32_MIN
+-\t\tCOMMENT None
+-         #ret_Util_PhysicalToRawValue = Util_PhysicalToRawValue(origVal, offset, factor);
+-        END ELEMENT
+-
+-    END TEST -- Util_PhysicalToRawValue_BVA_MIN.1
+-
+-
+-    TEST Util_PhysicalToRawValue_BVA_MAX.2
+-    FAMILY nominal
+-
+-        ELEMENT
+-        COMMENT *******************************************************************************
+-        COMMENT **  Author (evonada0)
+-        COMMENT **  sw release (VW_MEB_P260)
+-        COMMENT **  Test Case modification date (22.01.2019)
+-        COMMENT **
+-        COMMENT **  Test Technique:
+-        COMMENT **    Boundary Value Analysis
+-        COMMENT **
+-        COMMENT **  Description:
+-        COMMENT **     
+-        COMMENT **     test with maximum values
+-\t\tCOMMENT ** - Maximum values of \'origVal\', \'offset\' and \'factor\' are received 
+-\t\tCOMMENT ** - Calculated return value must be minimum too
+-        COMMENT **     
+-        COMMENT **   
+-        COMMENT **
+-        COMMENT ******************************************************************************
+-        COMMENT **  Global variables
+-        COMMENT ******************************************************************************
+-        COMMENT **  Tester defined variables
+-        COMMENT ******************************************************************************
+-        COMMENT None
+-        COMMENT ******************************************************************************
+-        COMMENT **  Function parameters
+-        COMMENT ******************************************************************************
+-\t\tVAR origVal,\t\tinit = UINT32_MAX, \t\tev = init
+-\t\tVAR offset,\t\t\tinit = FLOAT32_MAX, \tev = init
+-\t\tVAR factor,\t\t\tinit = FLOAT32_MAX, \tev = init
+-        COMMENT ******************************************************************************
+-        COMMENT **  STUB definitions
+-        COMMENT ******************************************************************************
+-\t\tCOMMENT None
+-        COMMENT ******************************************************************************
+-        COMMENT **  Return value
+-        COMMENT ******************************************************************************
+-\t\tVAR ret_Util_PhysicalToRawValue, \tinit ==, \tev = FLOAT32_MAX
+-\t\tCOMMENT None
+-         #ret_Util_PhysicalToRawValue = Util_PhysicalToRawValue(origVal, offset, factor);
+-        END ELEMENT
+-
+-    END TEST -- Util_PhysicalToRawValue_BVA_MAX.2
+-
+-    TEST Util_PhysicalToRawValue_FUNC.3
++    TEST Util_PhysicalToRawValue_1
+     FAMILY nominal
+ 
+         ELEMENT
+-        COMMENT *******************************************************************************
+-        COMMENT **  Author (evonada0)
+-        COMMENT **  sw release (VW_MEB_P260)
+-        COMMENT **  Test Case modification date (22.01.2019)
+-        COMMENT **
+-        COMMENT **  Test Technique:
+-        COMMENT **    Functional
+-        COMMENT **
+-        COMMENT **  Description:
+-        COMMENT **     
+-        COMMENT **     test with middle values
+-\t\tCOMMENT ** - Test when \'factor\' value is not zero
+-        COMMENT **     
+-        COMMENT **   
+-        COMMENT **
+-        COMMENT ******************************************************************************
+-        COMMENT **  Global variables
+-        COMMENT ******************************************************************************
+-        COMMENT **  Tester defined variables
+-        COMMENT ******************************************************************************
+-        COMMENT None
+-        COMMENT ******************************************************************************
+-        COMMENT **  Function parameters
+-        COMMENT ******************************************************************************
+-\t\tVAR origVal,\t\tinit = 255.0f, \tev = init
+-\t\tVAR offset,\t\t\tinit = 28.0f, \tev = init
+-\t\tVAR factor,\t\t\tinit = 100.0f, \tev = init
+-        COMMENT ******************************************************************************
+-        COMMENT **  STUB definitions
+-        COMMENT ******************************************************************************
+-\t\tCOMMENT None
+-        COMMENT ******************************************************************************
+-        COMMENT **  Return value
+-        COMMENT ******************************************************************************
+-\t\tVAR ret_Util_PhysicalToRawValue, \tinit ==, \tev = 2.27f
+-\t\tCOMMENT None
+-         #ret_Util_PhysicalToRawValue = Util_PhysicalToRawValue(origVal, offset, factor);
++        VAR origVal,\t\tinit = 5.0,\t\tev = init
++        VAR offset,\t\tinit = 0.0,\t\tev = init
++        VAR factor,\t\tinit = 2.5,\t\tev = init
++        VAR ret_Util_PhysicalToRawValue,\t\tinit = 0,\t\tev = 2
++        #ret_Util_PhysicalToRawValue = Util_PhysicalToRawValue(origVal, offset, factor);
+         END ELEMENT
+ 
+-    END TEST -- Util_PhysicalToRawValue_FUNC.3
++    END TEST -- TEST 1
+ 
+-    TEST Util_PhysicalToRawValue_FUNC.4
++    TEST Util_PhysicalToRawValue_2
+     FAMILY nominal
+ 
+         ELEMENT
+-        COMMENT *******************************************************************************
+-        COMMENT **  Author (evonada0)
+-        COMMENT **  sw release (VW_MEB_P260)
+-        COMMENT **  Test Case modification date (22.01.2019)
+-        COMMENT **
+-        COMMENT **  Test Technique:
+-        COMMENT **    Functional
+-        COMMENT **
+-        COMMENT **  Description:
+-        COMMENT **     
+-        COMMENT **     test with middle values
+-\t\tCOMMENT ** - Test when \'factor\' value is zero
+-        COMMENT **     
+-        COMMENT **   
+-        COMMENT **
+-        COMMENT ******************************************************************************
+-        COMMENT **  Global variables
+-        COMMENT ******************************************************************************
+-        COMMENT **  Tester defined variables
+-        COMMENT ******************************************************************************
+-        COMMENT None
+-        COMMENT ******************************************************************************
+-        COMMENT **  Function parameters
+-        COMMENT ******************************************************************************
+-\t\tVAR origVal,\t\tinit = 255.0f, \tev = init
+-\t\tVAR offset,\t\t\tinit = 28.0f, \tev = init
+-\t\tVAR factor,\t\t\tinit = 0.0f, \tev = init
+-        COMMENT ******************************************************************************
+-        COMMENT **  STUB definitions
+-        COMMENT ******************************************************************************
+-\t\tCOMMENT None
+-        COMMENT ******************************************************************************
+-        COMMENT **  Return value
+-        COMMENT ******************************************************************************
+-\t\tVAR ret_Util_PhysicalToRawValue, \tinit ==, \tev = 227.0f
+-\t\tCOMMENT None
+-         #ret_Util_PhysicalToRawValue = Util_PhysicalToRawValue(origVal, offset, factor);
++        VAR origVal,\t\tinit = 5.0,\t\tev = init
++        VAR offset,\t\tinit = 0.0,\t\tev = init
++        VAR factor,\t\tinit = 0.0,\t\tev = init
++        VAR ret_Util_PhysicalToRawValue,\t\tinit = 0,\t\tev = 5
++        #ret_Util_PhysicalToRawValue = Util_PhysicalToRawValue(origVal, offset, factor);
+         END ELEMENT
+ 
+-    END TEST -- Util_PhysicalToRawValue_FUNC.4
++    END TEST -- TEST 1
+ 
+ END SERVICE -- Util_PhysicalToRawValue
+ 
+@@ -442,151 +124,21 @@ SERVICE Util_SwapArrElements
+ SERVICE_TYPE extern
+ 
+     -- Tested service parameters declarations
+-    #uint32 Array_a;
++    #uint8 Array_a[5];
+     #uint32 ElementCount_u32;
+     #uint8 ElementSize_u8;
+ 
+-    ENVIRONMENT ENV_Util_SwapArrElements
+-    VAR Array_a,\t\tinit = 0,\t\tev = init
+-    VAR ElementCount_u32,\t\tinit = 0,\t\tev = init
+-    VAR ElementSize_u8,\t\tinit = 0,\t\tev = init
+-    END ENVIRONMENT -- ENV_Util_SwapArrElements
+-    USE ENV_Util_SwapArrElements
+-
+-    TEST Util_SwapArrElements_BVA_MIN.1
++    TEST Util_SwapArrElements_1
+     FAMILY nominal
+ 
+         ELEMENT
+-        COMMENT *******************************************************************************
+-        COMMENT **  Author (evonada0)
+-        COMMENT **  sw release (VW_MEB_P260)
+-        COMMENT **  Test Case modification date (23.01.2019)
+-        COMMENT **
+-        COMMENT **  Test Technique:
+-        COMMENT **    Boundary Value Analysis
+-        COMMENT **
+-        COMMENT **  Description:
+-        COMMENT **     
+-        COMMENT **     test with min values
+-\t\tCOMMENT ** - Minimum values of \'Array_a\', \'ElementCount_u32\' and \'ElementSize_u8\' are received 
+-\t\tCOMMENT ** - Calculated return value must be minimum too
+-        COMMENT **     
+-        COMMENT **   
+-        COMMENT **
+-        COMMENT ******************************************************************************
+-        COMMENT **  Global variables
+-        COMMENT ******************************************************************************
+-        COMMENT **  Tester defined variables
+-        COMMENT ******************************************************************************
+-        COMMENT None
+-        COMMENT ******************************************************************************
+-        COMMENT **  Function parameters
+-        COMMENT ******************************************************************************
+-\t\tVAR Array_a,\t\t\t\t\tinit = UINT32_MIN,\t\tev = UINT32_MIN
+-\t\tVAR ElementCount_u32,\t\tinit = UINT32_MIN,\t\tev = UINT32_MIN
+-\t\tVAR ElementSize_u8,\t\t\tinit = UINT8_MIN,\t\tev = UINT8_MIN
+-        COMMENT ******************************************************************************
+-        COMMENT **  STUB definitions
+-        COMMENT ******************************************************************************
+-\t\tCOMMENT None
+-        COMMENT ******************************************************************************
+-        COMMENT **  Return value
+-        COMMENT ******************************************************************************
+-\t\tCOMMENT None
+-\t #Util_SwapArrElements(Array_a, ElementCount_u32, ElementSize_u8);
++        ARRAY Array_a,\t\tinit = {others=>0},\t\tev = init
++        VAR ElementCount_u32,\t\tinit = 2,\t\tev = init
++        VAR ElementSize_u8,\t\tinit = 2,\t\tev = init
++        #Util_SwapArrElements(Array_a, ElementCount_u32, ElementSize_u8);
+         END ELEMENT
+ 
+-    END TEST -- Util_SwapArrElements_BVA_MIN.1
+-
+-
+-    TEST Util_SwapArrElements_BVA_MAX.2
+-    FAMILY nominal
+-
+-        ELEMENT
+-        COMMENT *******************************************************************************
+-        COMMENT **  Author (evonada0)
+-        COMMENT **  sw release (VW_MEB_P260)
+-        COMMENT **  Test Case modification date (23.01.2019)
+-        COMMENT **
+-        COMMENT **  Test Technique:
+-        COMMENT **    Boundary Value Analysis
+-        COMMENT **
+-        COMMENT **  Description:
+-        COMMENT **     
+-        COMMENT **     test with max values
+-\t\tCOMMENT ** - Maximum values of \'Array_a\', \'ElementCount_u32\' and \'ElementSize_u8\' are received 
+-\t\tCOMMENT ** - Calculated return value must be maximum too
+-        COMMENT **     
+-        COMMENT **   
+-        COMMENT **
+-        COMMENT ******************************************************************************
+-        COMMENT **  Global variables
+-        COMMENT ******************************************************************************
+-        COMMENT **  Tester defined variables
+-        COMMENT ******************************************************************************
+-        COMMENT None
+-        COMMENT ******************************************************************************
+-        COMMENT **  Function parameters
+-        COMMENT ******************************************************************************
+-\t\tVAR Array_a,\t\t\t\tinit = UINT32_MAX,\t\tev = UINT32_MAX
+-\t\tVAR ElementCount_u32,\t\tinit = 0xFFF,\t\t\tev = 0xFFF
+-\t\tVAR ElementSize_u8,\t\t\tinit = UINT8_MAX,\t\tev = UINT8_MAX
+-        COMMENT ******************************************************************************
+-        COMMENT **  STUB definitions
+-        COMMENT ******************************************************************************
+-\t\tCOMMENT None
+-        COMMENT ******************************************************************************
+-        COMMENT **  Return value
+-        COMMENT ******************************************************************************
+-\t\tCOMMENT None
+-\t #Util_SwapArrElements(Array_a, ElementCount_u32, ElementSize_u8);
+-        END ELEMENT
+-
+-    END TEST -- Util_SwapArrElements_BVA_MAX.2
+-
+-    TEST Util_SwapArrElements_FUNC.3
+-    FAMILY nominal
+-
+-        ELEMENT
+-        COMMENT *******************************************************************************
+-        COMMENT **  Author (evonada0)
+-        COMMENT **  sw release (VW_MEB_P260)
+-        COMMENT **  Test Case modification date (23.01.2019)
+-        COMMENT **
+-        COMMENT **  Test Technique:
+-        COMMENT **    Functional
+-        COMMENT **
+-        COMMENT **  Description:
+-        COMMENT **     
+-        COMMENT **     test with middle values
+-\t\tCOMMENT ** - The function swaps the bytes in all \'2\' elements of \'Array_a\' with a size of \'2\'
+-        COMMENT **     
+-        COMMENT **   
+-        COMMENT **
+-        COMMENT ******************************************************************************
+-        COMMENT **  Global variables
+-        COMMENT ******************************************************************************
+-        COMMENT **  Tester defined variables
+-        COMMENT ******************************************************************************
+-        COMMENT None
+-        COMMENT ******************************************************************************
+-        COMMENT **  Function parameters
+-        COMMENT ******************************************************************************
+-\t\tVAR Array_a,\t\t\t\tinit = 0x12345678,\t\t\tev = 0x34127856
+-\t\tVAR ElementCount_u32,\t\tinit = 3,\t\t\t\t\t\tev = 3
+-\t\tVAR ElementSize_u8,\t\t\tinit = 2,\t\t\t\t\t\tev = 2
+-        COMMENT ******************************************************************************
+-        COMMENT **  STUB definitions
+-        COMMENT ******************************************************************************
+-\t\tCOMMENT None
+-        COMMENT ******************************************************************************
+-        COMMENT **  Return value
+-        COMMENT ******************************************************************************
+-\t\tCOMMENT None
+-\t #Util_SwapArrElements(&Array_a, ElementCount_u32, ElementSize_u8);
+-        END ELEMENT
+-
+-    END TEST -- Util_SwapArrElements_FUNC.3
++    END TEST -- TEST 1
+ 
+ END SERVICE -- Util_SwapArrElements
+ 
+@@ -598,186 +150,34 @@ SERVICE Util_WriteBuffer
+ SERVICE_TYPE extern
+ 
+     -- Tested service parameters declarations
+-    # Util_HistBufferType Buff_st;
+-    # uint8 Data_p;
+-
+-    ENVIRONMENT ENV_Util_WriteBuffer
+-    STRUCTURE Buff_st,\t\tinit = { Buffer_p => NIL, FifoLen_u16 => 0, DataBitLen_u8 => 0 },\t\tev = init
+-    VAR Data_p,\t\tinit = 0,\t\tev = init
+-    END ENVIRONMENT -- ENV_Util_WriteBuffer
+-    USE ENV_Util_WriteBuffer
++    #Util_HistBufferType Buff_st;
++    #uint8 Data_p;
++    #uint8 sofa[5];
++    #uint8 sofa_pre[5];
+ 
+-
+-    TEST Util_WriteBuffer_BVA_MIN.1
++    TEST Util_WriteBuffer_1
+     FAMILY nominal
+ 
+         ELEMENT
+-        COMMENT *******************************************************************************
+-        COMMENT **  Author (evonada0)
+-        COMMENT **  sw release (VW_MEB_P260)
+-        COMMENT **  Test Case modification date (23.01.2019)
+-        COMMENT **
+-        COMMENT **  Test Technique:
+-        COMMENT **    Boundary Value Analysis
+-        COMMENT **
+-        COMMENT **  Description:
+-        COMMENT **     
+-        COMMENT **     test with min values
+-\t\tCOMMENT ** - Minimum values of \'Buff_st\' and \'Data_p\' are received
+-        COMMENT **     
+-        COMMENT **   
+-        COMMENT **
+-        COMMENT ******************************************************************************
+-        COMMENT **  Global variables
+-        COMMENT ******************************************************************************
+-        COMMENT **  Tester defined variables
+-        COMMENT ******************************************************************************
+-        COMMENT None
+-        COMMENT ******************************************************************************
+-        COMMENT **  Function parameters
+-        COMMENT ******************************************************************************
+-\t\tSTRUCTURE Buff_st,\t\tinit = { Buffer_p => UINT8_MIN, FifoLen_u16 => UINT16_MIN, DataBitLen_u8 => UINT8_MIN },\t\tev = init
+-\t\tVAR Data_p,\t\t\t\tinit = UINT8_MIN,\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\tev = init
+-        COMMENT ******************************************************************************
+-        COMMENT **  STUB definitions
+-        COMMENT ******************************************************************************
+-\t\tCOMMENT None
+-        COMMENT ******************************************************************************
+-        COMMENT **  Return value
+-        COMMENT ******************************************************************************
+-\t\tCOMMENT None
+-\t  #Util_WriteBuffer(&Buff_st, &Data_p);
++\t VAR sofa,        init = {others=>0xFF},        ev = init
++        STRUCTURE Buff_st,\t\tinit = { Buffer_p => &sofa_pre, FifoLen_u16 => 2, DataBitLen_u8 => 2 },\t\tev = init
++        VAR Data_p,\t\tinit = sofa[0],\t\tev = init
++        #Util_WriteBuffer(&Buff_st, &Data_p);
+         END ELEMENT
+ 
+-    END TEST -- Util_WriteBuffer_BVA_MIN.1
++    END TEST -- TEST 1
+ 
+-    TEST Util_WriteBuffer_BVA_MAX.2
++    TEST Util_WriteBuffer_2
+     FAMILY nominal
+ 
+         ELEMENT
+-        COMMENT *******************************************************************************
+-        COMMENT **  Author (evonada0)
+-        COMMENT **  sw release (VW_MEB_P260)
+-        COMMENT **  Test Case modification date (12.02.2019)
+-        COMMENT **
+-        COMMENT **  Test Technique:
+-        COMMENT **    Boundary Value Analysis
+-        COMMENT **
+-        COMMENT **  Description:
+-        COMMENT **     
+-        COMMENT **     test with max values
+-\t\tCOMMENT ** - Maximum value of \'Buffer_P\' and a high enough value of \'FifoLen_u16\' and \'DataBitLen_u8\' are received 
+-\t\tCOMMENT ** - Maximum value of \'Data_p\' are received
+-        COMMENT **     
+-        COMMENT **   
+-        COMMENT **
+-        COMMENT ******************************************************************************
+-        COMMENT **  Global variables
+-        COMMENT ******************************************************************************
+-        COMMENT **  Tester defined variables
+-        COMMENT ******************************************************************************
+-        COMMENT None
+-        COMMENT ******************************************************************************
+-        COMMENT **  Function parameters
+-        COMMENT ******************************************************************************
+-\t\tSTRUCTURE Buff_st,\t\tinit = { Buffer_p => UINT8_MAX, FifoLen_u16 => 0xFFF, DataBitLen_u8 => 0xFFF },\t\tev = init
+-\t\tVAR Data_p,\t\t\t\tinit = UINT8_MAX,\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\tev = init
+-        COMMENT ******************************************************************************
+-        COMMENT **  STUB definitions
+-        COMMENT ******************************************************************************
+-\t\tCOMMENT None
+-        COMMENT ******************************************************************************
+-        COMMENT **  Return value
+-        COMMENT ******************************************************************************
+-\t\tCOMMENT None
+-\t  #Util_WriteBuffer(&Buff_st, &Data_p);
++        VAR sofa,        init = {others=>0xFF},        ev = init
++        STRUCTURE Buff_st,\t\tinit = { Buffer_p => &sofa_pre, FifoLen_u16 => 1, DataBitLen_u8 => 12 },\t\tev = init
++        VAR Data_p,\t\tinit = sofa[0],\t\tev = init
++        #Util_WriteBuffer(&Buff_st, &Data_p);
+         END ELEMENT
+ 
+-    END TEST -- Util_WriteBuffer_BVA_MAX.2
+-
+-    TEST Util_WriteBuffer_FUNC.3
+-    FAMILY nominal
+-
+-        ELEMENT
+-        COMMENT *******************************************************************************
+-        COMMENT **  Author (evonada0)
+-        COMMENT **  sw release (VW_MEB_P260)
+-        COMMENT **  Test Case modification date (12.02.2019)
+-        COMMENT **
+-        COMMENT **  Test Technique:
+-        COMMENT **    Functional
+-        COMMENT **
+-        COMMENT **  Description:
+-        COMMENT **     
+-        COMMENT **     test with middle values
+-        COMMENT **     
+-        COMMENT **   
+-        COMMENT **
+-        COMMENT ******************************************************************************
+-        COMMENT **  Global variables
+-        COMMENT ******************************************************************************
+-        COMMENT **  Tester defined variables
+-        COMMENT ******************************************************************************
+-        COMMENT None
+-        COMMENT ******************************************************************************
+-        COMMENT **  Function parameters
+-        COMMENT ******************************************************************************
+-\t\tSTRUCTURE Buff_st,\tinit = { Buffer_p => NIL, FifoLen_u16 => 2, DataBitLen_u8 => 2},\tev = init
+-\t\tVAR Data_p,\t\t\tinit = 2,\t\t\t\t\t\t\t\t\t\t\t\t\t\t\tev = init
+-        COMMENT ******************************************************************************
+-        COMMENT **  STUB definitions
+-        COMMENT ******************************************************************************
+-\t\tCOMMENT None
+-        COMMENT ******************************************************************************
+-        COMMENT **  Return value
+-        COMMENT ******************************************************************************
+-\t\tCOMMENT None
+-\t  #Util_WriteBuffer(&Buff_st, &Data_p);
+-        END ELEMENT
+-
+-    END TEST -- Util_WriteBuffer_BVA_FUNC.3
+-
+-    TEST Util_WriteBuffer_FUNC.4
+-    FAMILY nominal
+-
+-        ELEMENT
+-        COMMENT *******************************************************************************
+-        COMMENT **  Author (evonada0)
+-        COMMENT **  sw release (VW_MEB_P260)
+-        COMMENT **  Test Case modification date (12.02.2019)
+-        COMMENT **
+-        COMMENT **  Test Technique:
+-        COMMENT **    Functional
+-        COMMENT **
+-        COMMENT **  Description:
+-        COMMENT **     
+-        COMMENT **     test with middle values
+-        COMMENT **     
+-        COMMENT **   
+-        COMMENT **
+-        COMMENT ******************************************************************************
+-        COMMENT **  Global variables
+-        COMMENT ******************************************************************************
+-        COMMENT **  Tester defined variables
+-        COMMENT ******************************************************************************
+-        COMMENT None
+-        COMMENT ******************************************************************************
+-        COMMENT **  Function parameters
+-        COMMENT ******************************************************************************
+-\t\tSTRUCTURE Buff_st,\tinit = { Buffer_p => NIL, FifoLen_u16 => 0, DataBitLen_u8 => 9},\tev = init
+-\t\tVAR Data_p,\t\t\tinit = 4,\t\t\t\t\t\t\t\t\t\t\t\t\t\t\tev = init
+-        COMMENT ******************************************************************************
+-        COMMENT **  STUB definitions
+-        COMMENT ******************************************************************************
+-\t\tCOMMENT None
+-        COMMENT ******************************************************************************
+-        COMMENT **  Return value
+-        COMMENT ******************************************************************************
+-\t\tCOMMENT None
+-\t  #Util_WriteBuffer(&Buff_st, &Data_p);
+-        END ELEMENT
+-
+-    END TEST -- Util_WriteBuffer_BVA_FUNC.4
++    END TEST -- TEST 1
+ 
+ END SERVICE -- Util_WriteBuffer
+ 
+@@ -795,246 +195,74 @@ SERVICE_TYPE extern
+     -- By function returned type declaration
+     #float32 ret_Util_ValueLimiter;
+ 
+-    ENVIRONMENT ENV_Util_ValueLimiter
+-    VAR valueToBeChecked,\t\tinit = 0.0,\t\tev = init
+-    VAR upperThreshold,\t\tinit = 0.0,\t\tev = init
+-    VAR lowerThreshold,\t\tinit = 0.0,\t\tev = init
+-    VAR ret_Util_ValueLimiter,\t\tinit = 0.0,\t\tev = init
+-    END ENVIRONMENT -- ENV_Util_ValueLimiter
+-    USE ENV_Util_ValueLimiter
+-
+-    TEST Util_ValueLimiter_BVA_MIN.1
++    TEST Util_ValueLimiter_1
+     FAMILY nominal
+ 
+         ELEMENT
+-        COMMENT *******************************************************************************
+-        COMMENT **  Author (evonada0)
+-        COMMENT **  sw release (VW_MEB_P260)
+-        COMMENT **  Test Case modification date (22.01.2019)
+-        COMMENT **
+-        COMMENT **  Test Technique:
+-        COMMENT **    Boundary Value Analysis
+-        COMMENT **
+-        COMMENT **  Description:
+-        COMMENT **     
+-        COMMENT **     test with min values
+-\t\tCOMMENT ** - Minimum values are received 
+-\t\tCOMMENT ** - Return value must be minimum too
+-        COMMENT **     
+-        COMMENT **   
+-        COMMENT **
+-        COMMENT ******************************************************************************
+-        COMMENT **  Global variables
+-        COMMENT ******************************************************************************
+-        COMMENT **  Tester defined variables
+-        COMMENT ******************************************************************************
+-        COMMENT None
+-        COMMENT ******************************************************************************
+-        COMMENT **  Function parameters
+-        COMMENT ******************************************************************************
+-\t\tVAR valueToBeChecked,\t\tinit = FLOAT32_MIN, \t\tev = init
+-\t\tVAR upperThreshold,\t\t\tinit = FLOAT32_MIN, \t\tev = init
+-\t\tVAR lowerThreshold,\t\t\tinit = FLOAT32_MIN, \t\tev = init
+-        COMMENT ******************************************************************************
+-        COMMENT **  STUB definitions
+-        COMMENT ******************************************************************************
+-\t\tCOMMENT None
+-        COMMENT ******************************************************************************
+-        COMMENT **  Return value
+-        COMMENT ******************************************************************************
+-\t\tVAR ret_Util_ValueLimiter, \tinit ==, \tev = FLOAT32_MIN
+-\t\tCOMMENT None
++        VAR valueToBeChecked,\t\tinit = 5.5,\t\tev = init
++        VAR upperThreshold,\t\tinit = 4.0,\t\tev = init
++        VAR lowerThreshold,\t\tinit = 0.0,\t\tev = init
++        VAR ret_Util_ValueLimiter,\t\tinit = 0.0,\t\tev = 4.0
+         #ret_Util_ValueLimiter = Util_ValueLimiter(valueToBeChecked, upperThreshold, lowerThreshold);
+         END ELEMENT
+ 
+-    END TEST -- Util_ValueLimiter_BVA_MIN.1
++    END TEST -- TEST 1
+ 
+ 
+-    TEST Util_ValueLimiter_BVA_MAX.2
++    TEST Util_ValueLimiter_2
+     FAMILY nominal
+ 
+         ELEMENT
+-        COMMENT *******************************************************************************
+-        COMMENT **  Author (evonada0)
+-        COMMENT **  sw release (VW_MEB_P260)
+-        COMMENT **  Test Case modification date (22.01.2019)
+-        COMMENT **
+-        COMMENT **  Test Technique:
+-        COMMENT **    Boundary Value Analysis
+-        COMMENT **
+-        COMMENT **  Description:
+-        COMMENT **     
+-        COMMENT **     test with max values
+-\t\tCOMMENT ** - Maximum values are received 
+-\t\tCOMMENT ** - Return value must be maximum too
+-        COMMENT **     
+-        COMMENT **   
+-        COMMENT **
+-        COMMENT ******************************************************************************
+-        COMMENT **  Global variables
+-        COMMENT ******************************************************************************
+-        COMMENT **  Tester defined variables
+-        COMMENT ******************************************************************************
+-        COMMENT None
+-        COMMENT ******************************************************************************
+-        COMMENT **  Function parameters
+-        COMMENT ******************************************************************************
+-\t\tVAR valueToBeChecked,\t\tinit = FLOAT32_MAX, \t\tev = init
+-\t\tVAR upperThreshold,\t\t\tinit = FLOAT32_MAX, \t\tev = init
+-\t\tVAR lowerThreshold,\t\t\tinit = FLOAT32_MAX, \t\tev = init
+-        COMMENT ******************************************************************************
+-        COMMENT **  STUB definitions
+-        COMMENT ******************************************************************************
+-\t\tCOMMENT None
+-        COMMENT ******************************************************************************
+-        COMMENT **  Return value
+-        COMMENT ******************************************************************************
+-\t\tVAR ret_Util_ValueLimiter, \tinit ==, \tev = FLOAT32_MAX
+-\t\tCOMMENT None
++        VAR valueToBeChecked,\t\tinit = 5.5,\t\tev = init
++        VAR upperThreshold,\t\tinit = 6.0,\t\tev = init
++        VAR lowerThreshold,\t\tinit = 0.0,\t\tev = init
++        VAR ret_Util_ValueLimiter,\t\tinit = 0.0,\t\tev = 5.5
+         #ret_Util_ValueLimiter = Util_ValueLimiter(valueToBeChecked, upperThreshold, lowerThreshold);
+         END ELEMENT
+ 
+-    END TEST -- Util_ValueLimiter_BVA_MAX.2
++    END TEST -- TEST 1
+ 
+-    TEST Util_ValueLimiter_FUNC.3
++    TEST Util_ValueLimiter_3
+     FAMILY nominal
+ 
+         ELEMENT
+-        COMMENT *******************************************************************************
+-        COMMENT **  Author (evonada0)
+-        COMMENT **  sw release (VW_MEB_P260)
+-        COMMENT **  Test Case modification date (23.01.2019)
+-        COMMENT **
+-        COMMENT **  Test Technique:
+-        COMMENT **    Functional
+-        COMMENT **
+-        COMMENT **  Description:
+-        COMMENT **     
+-        COMMENT **     test with middle values
+-\t\tCOMMENT ** - Test when \'valueToBeChecked\' is higher than the \'upperThreshold\' 
+-\t\tCOMMENT ** - Return value must be\xa0\'upperThreshold\'
+-        COMMENT **     
+-        COMMENT **   
+-        COMMENT **
+-        COMMENT ******************************************************************************
+-        COMMENT **  Global variables
+-        COMMENT ******************************************************************************
+-        COMMENT **  Tester defined variables
+-        COMMENT ******************************************************************************
+-        COMMENT None
+-        COMMENT ******************************************************************************
+-        COMMENT **  Function parameters
+-        COMMENT ******************************************************************************
+-\t\tVAR valueToBeChecked,\t\tinit = 10000.0, \t\tev = init
+-\t\tVAR upperThreshold,\t\t\tinit = 5000.0, \t\t\tev = init
+-\t\tVAR lowerThreshold,\t\t\tinit = 1000.0, \t\t\tev = init
+-        COMMENT ******************************************************************************
+-        COMMENT **  STUB definitions
+-        COMMENT ******************************************************************************
+-\t\tCOMMENT None
+-        COMMENT ******************************************************************************
+-        COMMENT **  Return value
+-        COMMENT ******************************************************************************
+-\t\tVAR ret_Util_ValueLimiter, \tinit ==, \tev = 5000.0
+-\t\tCOMMENT None
++        VAR valueToBeChecked,\t\tinit = 5.5,\t\tev = init
++        VAR upperThreshold,\t\tinit = 6.0,\t\tev = init
++        VAR lowerThreshold,\t\tinit = 5.6,\t\tev = init
++        VAR ret_Util_ValueLimiter,\t\tinit = 0.0,\t\tev = 5.6
+         #ret_Util_ValueLimiter = Util_ValueLimiter(valueToBeChecked, upperThreshold, lowerThreshold);
+         END ELEMENT
+ 
+-    END TEST -- Util_ValueLimiter_FUNC.3
++    END TEST -- TEST 1
+ 
+-    TEST Util_ValueLimiter_FUNC.4
+-    FAMILY nominal
++END SERVICE -- Util_ValueLimiter
+ 
+-        ELEMENT
+-        COMMENT *******************************************************************************
+-        COMMENT **  Author (evonada0)
+-        COMMENT **  sw release (VW_MEB_P260)
+-        COMMENT **  Test Case modification date (23.01.2019)
+-        COMMENT **
+-        COMMENT **  Test Technique:
+-        COMMENT **    Functional
+-        COMMENT **
+-        COMMENT **  Description:
+-        COMMENT **     
+-        COMMENT **     test with middle values
+-\t\tCOMMENT ** - Test when \'valueToBeChecked\' is lower than the \'lowerThreshold\' 
+-\t\tCOMMENT ** - Return value must be\xa0\'lowerThreshold\'
+-        COMMENT **     
+-        COMMENT **   
+-        COMMENT **
+-        COMMENT ******************************************************************************
+-        COMMENT **  Global variables
+-        COMMENT ******************************************************************************
+-        COMMENT **  Tester defined variables
+-        COMMENT ******************************************************************************
+-        COMMENT None
+-        COMMENT ******************************************************************************
+-        COMMENT **  Function parameters
+-        COMMENT ******************************************************************************
+-\t\tVAR valueToBeChecked,\t\tinit = 5000.0, \t\t\tev = init
+-\t\tVAR upperThreshold,\t\t\tinit = 100000.0, \t\tev = init
+-\t\tVAR lowerThreshold,\t\t\tinit = 10000.0, \t\tev = init
+-        COMMENT ******************************************************************************
+-        COMMENT **  STUB definitions
+-        COMMENT ******************************************************************************
+-\t\tCOMMENT None
+-        COMMENT ******************************************************************************
+-        COMMENT **  Return value
+-        COMMENT ******************************************************************************
+-\t\tVAR ret_Util_ValueLimiter, \tinit ==, \tev = 10000.0
+-\t\tCOMMENT None
+-        #ret_Util_ValueLimiter = Util_ValueLimiter(valueToBeChecked, upperThreshold, lowerThreshold);
+-        END ELEMENT
+ 
+-    END TEST -- Util_ValueLimiter_FUNC.4
++--------------------------------------------------------------------------------
++-- Declaration of the service Util_move_void_ptr
++--------------------------------------------------------------------------------
++SERVICE Util_move_void_ptr
++SERVICE_TYPE inline
++
++    -- Tested service parameters declarations
++    #void *Ptr_p;
++    #sint32 Offset_s32;
++    #uint8 sofa[2];
+ 
+-    TEST Util_ValueLimiter_FUNC.5
++    TEST Util_move_void_ptr_1
+     FAMILY nominal
+ 
+         ELEMENT
+-        COMMENT *******************************************************************************
+-        COMMENT **  Author (evonada0)
+-        COMMENT **  sw release (VW_MEB_P260)
+-        COMMENT **  Test Case modification date (23.01.2019)
+-        COMMENT **
+-        COMMENT **  Test Technique:
+-        COMMENT **    Functional
+-        COMMENT **
+-        COMMENT **  Description:
+-        COMMENT **     
+-        COMMENT **     test with middle values
+-\t\tCOMMENT ** - Test when \'valueToBeChecked\' is between the thresholds 
+-\t\tCOMMENT ** - Return value must be\xa0\'valueToBeChecked\'
+-        COMMENT **     
+-        COMMENT **   
+-        COMMENT **
+-        COMMENT ******************************************************************************
+-        COMMENT **  Global variables
+-        COMMENT ******************************************************************************
+-        COMMENT **  Tester defined variables
+-        COMMENT ******************************************************************************
+-        COMMENT None
+-        COMMENT ******************************************************************************
+-        COMMENT **  Function parameters
+-        COMMENT ******************************************************************************
+-\t\tVAR valueToBeChecked,\t\t\tinit = 5000.0, \t\t\tev = init
+-\t\tVAR upperThreshold,\t\t\t\tinit = 100000.0, \t\tev = init
+-\t\tVAR lowerThreshold,\t\t\t\tinit = 1000.0, \t\t\tev = init
+-\t\tCOMMENT ******************************************************************************
+-        COMMENT **  STUB definitions
+-        COMMENT ******************************************************************************
+-\t\tCOMMENT None
+-        COMMENT ******************************************************************************
+-        COMMENT **  Return value
+-        COMMENT ******************************************************************************
+-\t\tVAR ret_Util_ValueLimiter, \tinit ==, \tev = 5000.0
+-\t\tCOMMENT None
+-        #ret_Util_ValueLimiter = Util_ValueLimiter(valueToBeChecked, upperThreshold, lowerThreshold);
++        ARRAY sofa,        init = {others=>0},        ev = init
++        VAR Ptr_p,\t\tinit = &sofa,\t\tev = &sofa[1]
++        VAR Offset_s32,\t\tinit = 1,\t\tev = init
++        #Util_move_void_ptr(&Ptr_p, Offset_s32);
+         END ELEMENT
+ 
+-    END TEST -- Util_ValueLimiter_FUNC.5
++    END TEST -- TEST 1
++
++END SERVICE -- Util_move_void_ptr
+ 
+-END SERVICE -- Util_ValueLimiter
+ 
+ --------------------------------------------------------------------------------
+ -- Declaration of the service Util_MovePtr
+@@ -1043,142 +271,21 @@ SERVICE Util_MovePtr
+ SERVICE_TYPE extern
+ 
+     -- Tested service parameters declarations
+-    #uint8 Ptr_p;
++    #void *Ptr_p;
+     #sint32 Offset_s32;
++    #uint8 sofa[5];
+ 
+-    ENVIRONMENT ENV_Util_MovePtr
+-    --VAR Ptr_p,\t\tinit = NIL,\t\tev = init
+-    VAR Offset_s32,\t\tinit = 0,\t\tev = init
+-    END ENVIRONMENT -- ENV_Util_MovePtr
+-    USE ENV_Util_MovePtr
+-
+-    TEST Util_MovePtr_BVA_MIN.1
++    TEST Util_MovePtr_1
+     FAMILY nominal
+ 
+         ELEMENT
+-        COMMENT *******************************************************************************
+-        COMMENT **  Author (evonada0)
+-        COMMENT **  sw release (VW_MEB_P260)
+-        COMMENT **  Test Case modification date (12.02.2019)
+-        COMMENT **
+-        COMMENT **  Test Technique:
+-        COMMENT **    Boundary Value Analysis
+-        COMMENT **
+-        COMMENT **  Description:
+-        COMMENT **     
+-        COMMENT **     test with min values
+-\t\tCOMMENT ** - Minimum values of \'Ptr_p\' and \'Offset_s32\' are received 
+-\t\tCOMMENT ** - Calculated return value must be minimum too
+-        COMMENT **     
+-        COMMENT **   
+-        COMMENT **
+-        COMMENT ******************************************************************************
+-        COMMENT **  Global variables
+-        COMMENT ******************************************************************************
+-        COMMENT **  Tester defined variables
+-        COMMENT ******************************************************************************
+-        COMMENT None
+-        COMMENT ******************************************************************************
+-        COMMENT **  Function parameters
+-        COMMENT ******************************************************************************
+-\t\tVAR Ptr_p,\t\t\t\tinit = UINT8_MIN,\t\tev = UINT8_MIN
+-    \tVAR Offset_s32,\t\t\tinit = SINT32_MIN,\t\tev = init
+-        COMMENT ******************************************************************************
+-        COMMENT **  STUB definitions
+-        COMMENT ******************************************************************************
+-\t\tCOMMENT None
+-        COMMENT ******************************************************************************
+-        COMMENT **  Return value
+-        COMMENT ******************************************************************************
+-\t\tCOMMENT None
+-        #Util_MovePtr(Ptr_p, Offset_s32);
+-        END ELEMENT
+-
+-    END TEST -- Util_MovePtr_BVA_MIN.1
+-
+-    TEST Util_MovePtr_BVA_MAX.2
+-    FAMILY nominal
+-
+-        ELEMENT
+-        COMMENT *******************************************************************************
+-        COMMENT **  Author (evonada0)
+-        COMMENT **  sw release (VW_MEB_P260)
+-        COMMENT **  Test Case modification date (12.02.2019)
+-        COMMENT **
+-        COMMENT **  Test Technique:
+-        COMMENT **    Boundary Value Analysis
+-        COMMENT **
+-        COMMENT **  Description:
+-        COMMENT **     
+-        COMMENT **     test with max values
+-\t\tCOMMENT ** - Maximum values of \'Ptr_p\' and \'Offset_s32\' are received 
+-\t\tCOMMENT ** - Calculated return value must be maximum too
+-        COMMENT **     
+-        COMMENT **   
+-        COMMENT **
+-        COMMENT ******************************************************************************
+-        COMMENT **  Global variables
+-        COMMENT ******************************************************************************
+-        COMMENT **  Tester defined variables
+-        COMMENT ******************************************************************************
+-        COMMENT None
+-        COMMENT ******************************************************************************
+-        COMMENT **  Function parameters
+-        COMMENT ******************************************************************************
+-\t\tVAR Ptr_p,\t\t\t\tinit = UINT8_MAX,\t\tev = UINT8_MAX
+-    \tVAR Offset_s32,\t\t\tinit = SINT32_MAX,\t\tev = init
+-        COMMENT ******************************************************************************
+-        COMMENT **  STUB definitions
+-        COMMENT ******************************************************************************
+-\t\tCOMMENT None
+-        COMMENT ******************************************************************************
+-        COMMENT **  Return value
+-        COMMENT ******************************************************************************
+-\t\tCOMMENT None
+-        #Util_MovePtr(Ptr_p, Offset_s32);
+-        END ELEMENT
+-
+-    END TEST -- Util_MovePtr_BVA_MAX.2
+-
+-    TEST Util_MovePtr_FUNC.3
+-    FAMILY nominal
+-        ELEMENT
+-        COMMENT *******************************************************************************
+-        COMMENT **  Author (evonada0)
+-        COMMENT **  sw release (VW_MEB_P260)
+-        COMMENT **  Test Case modification date (12.02.2019)
+-        COMMENT **
+-        COMMENT **  Test Technique:
+-        COMMENT **    Boundary Value Analysis
+-        COMMENT **
+-        COMMENT **  Description:
+-        COMMENT **     
+-        COMMENT **     test with middle values
+-\t\tCOMMENT ** - Calculate return value by adding pointer and offset value
+-        COMMENT **     
+-        COMMENT **   
+-        COMMENT **
+-        COMMENT ******************************************************************************
+-        COMMENT **  Global variables
+-        COMMENT ******************************************************************************
+-        COMMENT **  Tester defined variables
+-        COMMENT ******************************************************************************
+-        COMMENT ******************************************************************************
+-        COMMENT **  Function parameters
+-        COMMENT ******************************************************************************
+-\t\tVAR Ptr_p,\t\t\t\tinit =3,\t\tev =5
+-    \tVAR Offset_s32,\t\t\tinit = 2,\t\tev = init
+-        COMMENT ******************************************************************************
+-        COMMENT **  STUB definitions
+-        COMMENT ******************************************************************************
+-\t\tCOMMENT None
+-        COMMENT ******************************************************************************
+-        COMMENT **  Return value
+-        COMMENT ******************************************************************************
++\t ARRAY sofa,        init = {others=>0},         ev = init
++        VAR Ptr_p,\t\tinit = &sofa,\t\tev = &sofa[2]
++        VAR Offset_s32,\t\tinit = 2,\t\tev = init
+         #Util_MovePtr(&Ptr_p, Offset_s32);
+         END ELEMENT
+ 
+-    END TEST -- Util_MovePtr_FUNC.3
++    END TEST -- TEST 1
+ 
+ END SERVICE -- Util_MovePtr
+ 
+@@ -1190,192 +297,45 @@ SERVICE Util_SwapBytes
+ SERVICE_TYPE extern
+ 
+     -- Tested service parameters declarations
+-    #uint32 Bytes;
++    #void *Bytes;
+     #uint8 ByteCount;
+-\t\t
+-    ENVIRONMENT ENV_Util_SwapBytes
+-    VAR Bytes,\t\t\tinit = 0,\t\tev = init
+-    VAR ByteCount,\t\tinit = 0,\t\tev = init
+-    END ENVIRONMENT -- ENV_Util_SwapBytes
+-    USE ENV_Util_SwapBytes
+-
++    #uint16 sofa;
+ 
+-    TEST Util_SwapBytes_BVA_MIN.1
++    TEST Util_SwapBytes_1
+     FAMILY nominal
+ 
+         ELEMENT
+-        COMMENT *******************************************************************************
+-        COMMENT **  Author (evonada0)
+-        COMMENT **  sw release (VW_MEB_P260)
+-        COMMENT **  Test Case modification date (23.01.2019)
+-        COMMENT **
+-        COMMENT **  Test Technique:
+-        COMMENT **    Boundary Value Analysis
+-        COMMENT **
+-        COMMENT **  Description:
+-        COMMENT **     
+-        COMMENT **     test with min values
+-\t\tCOMMENT ** - Minimum values of \'Bytes\' and \'ByteCount\' are received 
+-\t\tCOMMENT ** - Calculated return value must be minimum too
+-        COMMENT **     
+-        COMMENT **   
+-        COMMENT **
+-        COMMENT ******************************************************************************
+-        COMMENT **  Global variables
+-        COMMENT ******************************************************************************
+-        COMMENT **  Tester defined variables
+-        COMMENT ******************************************************************************
+-        COMMENT None
+-        COMMENT ******************************************************************************
+-        COMMENT **  Function parameters
+-        COMMENT ******************************************************************************
+-\t\tVAR Bytes,\t\t\tinit = UINT32_MIN,\t\tev = UINT32_MIN
+-\t\tVAR ByteCount,\t\tinit = UINT8_MIN,\t\tev = UINT8_MIN
+-        COMMENT ******************************************************************************
+-        COMMENT **  STUB definitions
+-        COMMENT ******************************************************************************
+-\t\tCOMMENT None
+-        COMMENT ******************************************************************************
+-        COMMENT **  Return value
+-        COMMENT ******************************************************************************
+-\t\tCOMMENT None
+-       #Util_SwapBytes(Bytes, ByteCount);
++        VAR sofa,        init = 0x0826,        ev=0x2608
++        VAR Bytes,\t\tinit = &sofa,\t\tev = init
++        VAR ByteCount,\t\tinit = 2,\t\tev = init
++        #Util_SwapBytes(Bytes, ByteCount);
+         END ELEMENT
+ 
+-    END TEST -- Util_SwapBytes_BVA_MIN.1
++    END TEST -- TEST 1
+ 
+-    TEST Util_SwapBytes_BVA_MAX.2
++
++    TEST Util_SwapBytes_2
+     FAMILY nominal
+ 
+         ELEMENT
+-        COMMENT *******************************************************************************
+-        COMMENT **  Author (evonada0)
+-        COMMENT **  sw release (VW_MEB_P260)
+-        COMMENT **  Test Case modification date (23.01.2019)
+-        COMMENT **
+-        COMMENT **  Test Technique:
+-        COMMENT **    Boundary Value Analysis
+-        COMMENT **
+-        COMMENT **  Description:
+-        COMMENT **     
+-        COMMENT **     test with max values
+-\t\tCOMMENT ** - Maximum values of \'Bytes\' and \'ByteCount\' are received 
+-\t\tCOMMENT ** - Calculated return value must be maximum too
+-        COMMENT **     
+-        COMMENT **   
+-        COMMENT **
+-        COMMENT ******************************************************************************
+-        COMMENT **  Global variables
+-        COMMENT ******************************************************************************
+-        COMMENT **  Tester defined variables
+-        COMMENT ******************************************************************************
+-        COMMENT None
+-        COMMENT ******************************************************************************
+-        COMMENT **  Function parameters
+-        COMMENT ******************************************************************************
+-\t\tVAR Bytes,\t\t\tinit = UINT32_MAX,\t\tev = UINT32_MAX
+-\t\tVAR ByteCount,\t\tinit = UINT8_MAX,\t\tev = UINT8_MAX
+-        COMMENT ******************************************************************************
+-        COMMENT **  STUB definitions
+-        COMMENT ******************************************************************************
+-\t\tCOMMENT None
+-        COMMENT ******************************************************************************
+-        COMMENT **  Return value
+-        COMMENT ******************************************************************************
+-\t\tCOMMENT None
+-       #Util_SwapBytes(Bytes, ByteCount);
++        VAR sofa,        init = 0,        ev = init
++        VAR Bytes,\t\tinit = &sofa,\t\tev = init
++        VAR ByteCount,\t\tinit = 5,\t\tev = 5
++        #Util_SwapBytes(Bytes, ByteCount);
+         END ELEMENT
+ 
+-    END TEST -- Util_SwapBytes_BVA_MAX.2
++    END TEST -- TEST 1
++
++
++END SERVICE -- Util_SwapBytes
++
+ 
+-    TEST Util_SwapBytes_FUNC.3
+-    FAMILY nominal
+ 
+-        ELEMENT
+-        COMMENT *******************************************************************************
+-        COMMENT **  Author (evonada0)
+-        COMMENT **  sw release (VW_MEB_P260)
+-        COMMENT **  Test Case modification date (23.01.2019)
+-        COMMENT **
+-        COMMENT **  Test Technique:
+-        COMMENT **    Functional
+-        COMMENT **
+-        COMMENT **  Description:
+-        COMMENT **     
+-\t\tCOMMENT ** \t\tTest with middle values,\xa0
+-\t\tCOMMENT ** \t\tthe reason for this expected value is little endian byte order 
+-\t\tCOMMENT ** - Testing if the function swaps the bytes in a 2 byte type
+-        COMMENT **     
+-        COMMENT **   
+-        COMMENT **
+-        COMMENT ******************************************************************************
+-        COMMENT **  Global variables
+-        COMMENT ******************************************************************************
+-        COMMENT **  Tester defined variables
+-        COMMENT ******************************************************************************
+-        COMMENT None
+-        COMMENT ******************************************************************************
+-        COMMENT **  Function parameters
+-        COMMENT ******************************************************************************
+-\t\tVAR Bytes,\t\t\tinit=0x1234,\t\tev=0x3412
+-\t\tVAR ByteCount,\t\tinit = 2,\t\t\tev = 2
+-        COMMENT ******************************************************************************
+-        COMMENT **  STUB definitions
+-        COMMENT ******************************************************************************
+-\t\tCOMMENT None
+-        COMMENT ******************************************************************************
+-        COMMENT **  Return value
+-        COMMENT ******************************************************************************
+-\t\tCOMMENT None
+-       #Util_SwapBytes(&Bytes, ByteCount);
+-        END ELEMENT
+ 
+-    END TEST -- Util_SwapBytes_FUNC.3
+ 
+ 
+-    TEST Util_SwapBytes_FUNC.4
+-    FAMILY nominal
+ 
+-        ELEMENT
+-        COMMENT *******************************************************************************
+-        COMMENT **  Author (evonada0)
+-        COMMENT **  sw release (VW_MEB_P260)
+-        COMMENT **  Test Case modification date (23.01.2019)
+-        COMMENT **
+-        COMMENT **  Test Technique:
+-        COMMENT **    Functional
+-        COMMENT **
+-        COMMENT **  Description:
+-        COMMENT **     
+-\t\tCOMMENT **\t\tTest with middle values, the reason for this expected value is little endian byte order 
+-\t\tCOMMENT **\t- Testing if the function swaps the bytes in a 3 byte type
+-        COMMENT **     
+-        COMMENT **   
+-        COMMENT **
+-        COMMENT ******************************************************************************
+-        COMMENT **  Global variables
+-        COMMENT ******************************************************************************
+-        COMMENT **  Tester defined variables
+-        COMMENT ******************************************************************************
+-        COMMENT None
+-        COMMENT ******************************************************************************
+-        COMMENT **  Function parameters
+-        COMMENT ******************************************************************************
+-\t\tVAR Bytes,\t\t\tinit=0x12345678,\t\tev=0x12785634
+-\t\tVAR ByteCount,\t\tinit = 3,\t\t\t\tev = 3
+-        COMMENT ******************************************************************************
+-        COMMENT **  STUB definitions
+-        COMMENT ******************************************************************************
+-\t\tCOMMENT None
+-        COMMENT ******************************************************************************
+-        COMMENT **  Return value
+-        COMMENT ******************************************************************************
+-\t\tCOMMENT None
+-       #Util_SwapBytes(&Bytes, ByteCount);
+-        END ELEMENT
+ 
+-    END TEST -- Util_SwapBytes_FUNC.4
+ 
+-END SERVICE -- Util_SwapBytes
+ 
+ 
+'

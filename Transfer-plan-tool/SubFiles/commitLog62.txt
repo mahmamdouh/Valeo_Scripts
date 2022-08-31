@@ -1,0 +1,22 @@
+b'commit 5ac023de23eb32723e1c1af0a614a51773eb3f1e
+Author: Mohab MOSTAFA <mohab.mostafa@valeo.com>
+Date:   Wed Jan 19 15:41:21 2022 +0200
+
+    $100kW-50856$ update hook for detect interlock
+    
+    Change-Id: I2f0bd162c97da54e0b17a2d947e1e5e6df512542
+
+diff --git a/src/fw_cu/Components/Cmn/SWIT/SWIT_SFTY/src/SWIT_SFTY_Area2.c b/src/fw_cu/Components/Cmn/SWIT/SWIT_SFTY/src/SWIT_SFTY_Area2.c
+index 012e0a789..c19f155c9 100644
+--- a/src/fw_cu/Components/Cmn/SWIT/SWIT_SFTY/src/SWIT_SFTY_Area2.c
++++ b/src/fw_cu/Components/Cmn/SWIT/SWIT_SFTY/src/SWIT_SFTY_Area2.c
+@@ -262,7 +262,7 @@ void SWIT_SftyDma_UpdateRawInterlockData_EndHook(void)
+ 
+    if(SWIT_Interface_Input_key==SftyHvInterlockVadcLstTiStamp_Input_KEY)
+    {
+-      SftyDmaVadcInterlockTi=SWIT_Sfty_Input_hook_uint32;
++      SftyDmaVadcInterlockTi=SWIT_Sfty_Output_hook_uint32_Calib;
+ 
+    }
+ 
+'

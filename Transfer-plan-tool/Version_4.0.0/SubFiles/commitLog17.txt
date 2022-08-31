@@ -1,0 +1,119 @@
+b'commit 137f53f30052cac048fd5900dd78eb84d0474be3
+Author: mbahaa1 <mohamed.bahaa@valeo.com>
+Date:   Sun Mar 27 18:50:28 2022 +0200
+
+    $100kW-56836$ SWIT Interface Test Hooks for ActvDischarge
+    
+    Change-Id: I651332dfc364b2756e7c863828c58ceae5cfa0d7
+
+diff --git a/src/fw_cu/Components/Cmn/Diagc/src/Tdp.c b/src/fw_cu/Components/Cmn/Diagc/src/Tdp.c
+index 907b682e9..0ef7a2c73 100644
+--- a/src/fw_cu/Components/Cmn/Diagc/src/Tdp.c
++++ b/src/fw_cu/Components/Cmn/Diagc/src/Tdp.c
+@@ -506,6 +506,10 @@ FUNC(Std_ReturnType, RTE_CODE) Tdp_xA10E_Actv_Dcha_St (P2VAR(uint8, AUTOMATIC, R
+       /* copy data into the result buffer */
+       TS_MemCpy(Data, &(Active_Discharge_State), byteCount);/* PRQA S 4471 */ /* PRQA S 0315 *//*The TS_MemCpy can handle this conversion*/
+       Util_SwapBytes(Data, byteCount);/* PRQA S 0315 *//*The Util_SwapBytes can handle this conversion*/
++
++#ifdef SWIT_IT_Active
++   SWIT_Tdp_xA10E_Actv_Dcha_St_EndHook();
++#endif
+    return retStatus;
+ } /* FUNC(Std_ReturnType, RTE_CODE) Tdp_xA10E_Actv_Dcha_St (P2VAR(uint8, AUTOMATIC, RTE_APPL_DATA) Data) */
+ 
+diff --git a/src/fw_cu/Components/Cmn/SWIT/SWIT_SFTY/include/SWIT_Sfty.h b/src/fw_cu/Components/Cmn/SWIT/SWIT_SFTY/include/SWIT_Sfty.h
+index c447e5ae6..662a5ad87 100644
+--- a/src/fw_cu/Components/Cmn/SWIT/SWIT_SFTY/include/SWIT_Sfty.h
++++ b/src/fw_cu/Components/Cmn/SWIT/SWIT_SFTY/include/SWIT_Sfty.h
+@@ -2367,6 +2367,21 @@
+ #define SWIT_AlvCntrChk_InjectError_KEY 30792
+ #define SWIT_ModPlaus_InjectError_KEY 30791
+ #define SWIT_FpgaLossCom_InjectError_KEY 30790
++
++
++
++/*Discharge System Keys*/
++
++
++#define SftyActvDchaCtrlActvDchaReqViaR_Output_KEY  40300
++#define SftyActvDchaCtrlActvErrMonrSt_Output_KEY    40301
++#define SftyActvDchaCtrlInactvErrMonrSt_Output_KEY  40302
++#define SftyC2cData_ActvDchaSts_Output_KEY          40303
++#define SftyActvDchaCtrlActvDchaSts_Output_KEY      40304
++#define SftyActvDchaCtrlEfcErrMonrSt_Output_KEY     40305
++#define SftyActvDchaCtrlFltErrMonrSt_Output_KEY     40306
++#define SftyC2cData_ActvDchaSts_Input_KEY           40203
++
+ #endif
+ 
+ 
+@@ -3635,6 +3650,7 @@ extern void SWIT_SftyHvInterlock_UpdtCanSts_EndHook(void);
+ #include "SWIT_MemMap.h"
+ extern void SWIT_SftyE2eTx_Main_BeginHook(void);
+ extern void SWIT_SftyActvDchaCtrl_MainFunction_BgnHook (void);
++extern void SWIT_SftyActvDchaCtrl_MainFunction_EndHook (void);
+ extern void SWIT_SftyAcEvln_MainFunctionAreaCmn_BgnHook(void);
+ extern void SWIT_SftyAcEvln_PlausReinitMonrData_EndHook(void);
+ extern void SWIT_SftyAcEvln_PlausReinitMonrData_BgnHook(void);
+@@ -3703,6 +3719,14 @@ if((SWIT_SFTY_Interfaces_Main_key==1)&&(SWIT_First_HookEnableKey==500))\\
+    DrvCtrlC2cData.StsInvSafeStFild=2;\\
+ }\\
+ }while(0)
++
++#define SWIT_Tdp_xA10E_Actv_Dcha_St_EndHook()\\
++do{\\
++if((SWIT_SFTY_Interfaces_Main_key==1)&&(SWIT_Interface_Input_key==SftyC2cData_ActvDchaSts_Input_KEY))\\
++{\\
++\tSWIT_Sfty_Input_hook_uint8 = Active_Discharge_State;\\
++}\\
++}while(0)
+ ///********Genral use Inline functions*********/
+ 
+ LOCAL_INLINE void SWIT_Sfty_Check_Input(void *value,uint16 key,uint8 type)
+diff --git a/src/fw_cu/Components/Cmn/SWIT/SWIT_SFTY/src/SWIT_SFTY_AreaCMN.c b/src/fw_cu/Components/Cmn/SWIT/SWIT_SFTY/src/SWIT_SFTY_AreaCMN.c
+index a1168a3d5..7e9f46857 100644
+--- a/src/fw_cu/Components/Cmn/SWIT/SWIT_SFTY/src/SWIT_SFTY_AreaCMN.c
++++ b/src/fw_cu/Components/Cmn/SWIT/SWIT_SFTY/src/SWIT_SFTY_AreaCMN.c
+@@ -1278,6 +1278,16 @@ void SWIT_SftyE2eTx_Main_BeginHook(void){
+    }
+ }
+ 
++void SWIT_SftyActvDchaCtrl_MainFunction_EndHook (void){
++   SWIT_Sfty_Set(&SftyActvDchaCtrlActvDchaReqViaR, SftyActvDchaCtrlActvDchaReqViaR_Output_KEY, SWIT_UINT8);
++   SWIT_Sfty_Set(&SftyActvDchaCtrlActvErrMonrSt, SftyActvDchaCtrlActvErrMonrSt_Output_KEY, SWIT_UINT8);
++   SWIT_Sfty_Set(&SftyActvDchaCtrlInactvErrMonrSt, SftyActvDchaCtrlInactvErrMonrSt_Output_KEY, SWIT_UINT8);
++   SWIT_Sfty_Set(&SftyC2cData.ActvDchaSts, SftyC2cData_ActvDchaSts_Output_KEY, SWIT_UINT8);
++   SWIT_Sfty_Set(&SftyActvDchaCtrlActvDchaSts, SftyActvDchaCtrlActvDchaSts_Output_KEY, SWIT_UINT8);
++   SWIT_Sfty_Set(&SftyActvDchaCtrlEfcErrMonrSt, SftyActvDchaCtrlEfcErrMonrSt_Output_KEY, SWIT_UINT8);
++   SWIT_Sfty_Set(&SftyActvDchaCtrlFltErrMonrSt, SftyActvDchaCtrlFltErrMonrSt_Output_KEY, SWIT_UINT8);
++}
++
+ void SWIT_SftyActvDchaCtrl_MainFunction_BgnHook (void){
+    if(SftyErrDebFctInhbnSts_B_FctIdActvDcha_Input_KEY==SWIT_Interface_Input_key)
+    {
+@@ -1293,6 +1303,7 @@ void SWIT_SftyActvDchaCtrl_MainFunction_BgnHook (void){
+    }
+ }
+ 
++
+ void SWIT_SftyAcEvln_MainFunctionAreaCmn_BgnHook(void)
+ {
+    SWIT_Sfty_Check_Input(&SftyE2eFpgaOverUnderCurWFltSts, SftyE2eFpgaOverUnderCurWFltSts_Input_KEY, SWIT_UINT8);
+diff --git a/src/fw_cu/Components/Safety/Sfty_Inv/SftyActvDchaCtrl/src/SftyActvDchaCtrl.c b/src/fw_cu/Components/Safety/Sfty_Inv/SftyActvDchaCtrl/src/SftyActvDchaCtrl.c
+index 42d60d2fe..142c553e7 100644
+--- a/src/fw_cu/Components/Safety/Sfty_Inv/SftyActvDchaCtrl/src/SftyActvDchaCtrl.c
++++ b/src/fw_cu/Components/Safety/Sfty_Inv/SftyActvDchaCtrl/src/SftyActvDchaCtrl.c
+@@ -1091,8 +1091,11 @@ FUNC(void, SFTYACTVDCHACTRL) SftyActvDchaCtrl_MainFunction(void)
+       /* Do Nothing! */
+    }
+ 
+-   return;
++#ifdef SWIT_IT_Active
++   SWIT_SftyActvDchaCtrl_MainFunction_EndHook();
++#endif
+ 
++   return;
+ }
+ 
+ /***************************************************************************************/
+'

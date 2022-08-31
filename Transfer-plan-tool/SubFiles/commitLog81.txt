@@ -1,0 +1,195 @@
+b'commit b3ce6a77cdd644b0b7f844349e8ce01fa26cb07f
+Author: Adi GODAVARTHI (JV) <adi.godavarthi.jv@valeo.com>
+Date:   Mon Jan 10 11:14:41 2022 +0100
+
+    $100kW-49971$ - SftyE2EFpga - LlswFpga Unit Implementation
+    
+    Change-Id: Ie2460e84a2b3c5619f16753b9e20b57ea1333737
+
+diff --git a/src/fw_cu/Components/Cmn/Sys/GtmDrv/src/LlswGtm_TimCfg.c b/src/fw_cu/Components/Cmn/Sys/GtmDrv/src/LlswGtm_TimCfg.c
+index 32b63b55c..0e1b19d02 100644
+--- a/src/fw_cu/Components/Cmn/Sys/GtmDrv/src/LlswGtm_TimCfg.c
++++ b/src/fw_cu/Components/Cmn/Sys/GtmDrv/src/LlswGtm_TimCfg.c
+@@ -553,7 +553,7 @@ const LlswGtm_TimCh_CfgType Tim_RE_M_CS_OND =
+       .CTRL.B.TIM_MODE           = (uint32) GTM_TIM_CH_CTRL_TIM_MODE_TIEM,              /* input event mode (TIEM) */
+       .CTRL.B.TIM_EN             = (uint32) GTM_TIM_CH_CTRL_TIM_EN_ENABLE,              /* enables the channel, resets registers ECNT, CNT, GPR0 and GPR1 */
+ 
+-      .FLT_RE.B.FLT_RE           = 50U,   /*deglitch time for rising edge */
++      .FLT_RE.B.FLT_RE           = 100U,   /*deglitch time for rising edge */
+       .FLT_FE.B.FLT_FE           = 0U,    /*deglitch time for falling edge */
+ 
+       .IRQ_EN.B.NEWVAL_IRQ_EN    = (uint32) GTM_TIM_CH_IRQ_EN_NEWVAL_IRQ_EN_ENABLE,  /* newval interrupt of CH0 visible outside GTM */
+diff --git a/src/fw_cu/Components/Inv/ValMeasAndProc/LlswFpgaIf/include/LlswFpgaIf.h b/src/fw_cu/Components/Inv/ValMeasAndProc/LlswFpgaIf/include/LlswFpgaIf.h
+index 1ccb89856..84f061107 100644
+--- a/src/fw_cu/Components/Inv/ValMeasAndProc/LlswFpgaIf/include/LlswFpgaIf.h
++++ b/src/fw_cu/Components/Inv/ValMeasAndProc/LlswFpgaIf/include/LlswFpgaIf.h
+@@ -354,10 +354,7 @@ EXTERNAL_ CONST(uint16, FPGA_CONST) SftyCrc_Tbl16_333F[CRC_16_TBL_SIZE];
+ #include <MemMap.h>
+ EXTERNAL_ VAR(FpgaRxData_Type, FPGA_VAR) FpgaRxData;
+ EXTERNAL_ VAR(FpgaTxData_Type, FPGA_VAR) FpgaTxData;
+-EXTERNAL_ VAR(uint32,FPGA_VAR) LlswFpgaIfCalcTxProdSpi;
+-EXTERNAL_ VAR(uint32,FPGA_VAR) LlswFpgaIfCalcRxProdSpi;
+-EXTERNAL_ VAR(boolean,FPGA_VAR) LlswFpgaIfTxStsSpi;
+-EXTERNAL_ VAR(boolean,FPGA_VAR) LlswFpgaIfRxStsSpi;
++
+ #define ISW_STOP_SEC_VAR_FAST_CLEARED
+ #include <MemMap.h>
+ 
+@@ -408,6 +405,7 @@ EXTERNAL_ FUNC(void, FPGA_CODE) LlswFpgaIf_Init(void);
+ EXTERNAL_ FUNC(void, FPGA_CODE) LlswFpgaIf_Main(void);
+ EXTERNAL_ void LlswFpgaIf_Tx(void);
+ EXTERNAL_ void LlswFpgaIf_RxNotif(void);
++EXTERNAL_ void LlswFpgaIf_MonrHndlrSwTreat_core2(void);
+ 
+ #define SFTYQSPI_AREA_CMN_STOP_SEC_CODE_SLOW
+ //#define FPGA_STOP_SEC_CODE_SLOW
+diff --git a/src/fw_cu/Components/Inv/ValMeasAndProc/LlswFpgaIf/src/LlswFpgaIf.c b/src/fw_cu/Components/Inv/ValMeasAndProc/LlswFpgaIf/src/LlswFpgaIf.c
+index 72c8d5f90..9f411684b 100644
+--- a/src/fw_cu/Components/Inv/ValMeasAndProc/LlswFpgaIf/src/LlswFpgaIf.c
++++ b/src/fw_cu/Components/Inv/ValMeasAndProc/LlswFpgaIf/src/LlswFpgaIf.c
+@@ -38,6 +38,10 @@
+ #include "BswFpgaIf.h"
+ #include "SftyDmaDrvr_cfg.h"
+ 
++#include "DrvCtrlErrDeb.h"
++#include "DrvCtrlSeqr.h"
++#include "PwmSpMux_Wrpr.h"
++
+ /* #include "Dio.h" */
+ /* #include "Port_Cfg.h" */
+ 
+@@ -153,6 +157,51 @@ STATIC VAR(uint16, FPGA_VAR) Calc_CRC_RxS;
+ STATIC VAR(boolean, FPGA_VAR) RxA_CRC_correct;
+ STATIC VAR(boolean, FPGA_VAR) RxS_CRC_correct;
+ 
++
++/*
++@@ SYMBOL = LlswFpgaIfCalcTxProdSpi
++@@ A2L_TYPE = MEASURE
++@@ DATA_TYPE = ULONG
++@@ DESCRIPTION = "Calculation Value of SPI Tx Periodicity"
++@@ GROUP = LlswFpgaIf
++@@ END
++*/
++/*! \\cvar Calculation Value of SPI Tx Periodicity; unit \'-\' */
++STATIC VAR(uint32,FPGA_VAR) LlswFpgaIfCalcTxProdSpi;
++
++/*
++@@ SYMBOL = LlswFpgaIfCalcRxProdSpi
++@@ A2L_TYPE = MEASURE
++@@ DATA_TYPE = ULONG
++@@ DESCRIPTION = "Calculation Value of SPI Rx Periodicity"
++@@ GROUP = LlswFpgaIf
++@@ END
++*/
++/*! \\cvar Calculation Value of SPI Rx Periodicity; unit \'-\' */
++STATIC VAR(uint32,FPGA_VAR) LlswFpgaIfCalcRxProdSpi;
++
++/*
++@@ SYMBOL = LlswFpgaIfTxStsSpi
++@@ A2L_TYPE = MEASURE
++@@ DATA_TYPE = UBYTE [0 ... 1]
++@@ DESCRIPTION = "State of SPI Tx frame"
++@@ GROUP = LlswFpgaIf
++@@ END
++*/
++/*! \\cvar State of SPI Tx frame; unit \'-\' */
++STATIC VAR(boolean,FPGA_VAR) LlswFpgaIfTxStsSpi;
++
++/*
++@@ SYMBOL = LlswFpgaIfRxStsSpi
++@@ A2L_TYPE = MEASURE
++@@ DATA_TYPE = UBYTE [0 ... 1]
++@@ DESCRIPTION = "State of SPI Rx frame"
++@@ GROUP = LlswFpgaIf
++@@ END
++*/
++/*! \\cvar State of SPI Rx frame; unit \'-\' */
++STATIC VAR(boolean,FPGA_VAR) LlswFpgaIfRxStsSpi;
++
+ #define ISW_STOP_SEC_VAR_FAST_CLEARED
+ #include <MemMap.h>
+ 
+@@ -186,6 +235,7 @@ volatile boolean qspi_Rx2Tx_runtime_measure_enable = FALSE;
+ 
+ #define ISW_STOP_SEC_VAR_FAST_INIT
+ #include <MemMap.h>
++
+ /*================== [prototype of local functions] =========================*/
+ 
+ /*================== [definition of local functions] ========================*/
+@@ -215,7 +265,8 @@ void __interrupt( ISR_GTM_FPGA_RXDMA_TIMEOUT ) __vector_table(VTABLE_CPU2) __ena
+       /* QSPI_Transmit() */
+       LLSWQSpi_Transmit(LLSWQSPI_SEQ_ID_FPGA_INIT);
+ 
+-      /* TODO: QSPI Error monitoring by Application*/
++      /* QSPI Error monitoring by Application*/
++      LlswFpgaIf_MonrHndlrSwTreat_core2();
+    }
+    else
+    {
+@@ -248,12 +299,13 @@ FUNC(void, FPGA_CODE) LlswFpgaIf_Init(void)
+ void LlswFpgaIf_Tx(void)
+ {
+    volatile uint32 qspi_tx_Current_timestamp = 0;
+-  
++
+    /*assign buffer */
+ #if 0  /* TODO Check if required and if the buffers change from DrcoIf */
+    LLSWQSpi_AssignChanBuffers(LLSWQSPI_CH_ID_FPGA_INIT, (void*) llswqspi_slavetest_slave_outdata, (void*) llswqspi_slavetest_slave_indata);  */
+ #endif
+ 
++   /*This functionality is used to calculate the periodicity for debug purpose.*/
+    qspi_tx_Current_timestamp = STM1_TIM0.U;
+    LlswFpgaIfCalcTxProdSpi = (uint16) qspi_tx_Current_timestamp - (uint16) qspi_tx_Prev_timestamp;
+    qspi_tx_Prev_timestamp = qspi_tx_Current_timestamp;
+@@ -294,11 +346,12 @@ void LlswFpgaIf_Tx(void)
+ void LlswFpgaIf_RxNotif(void)
+ {
+    volatile uint32 qspi_rx_current_timestamp = 0;
+-  
++
+ #ifdef FPGA_QSPI_RUNTIME_MEASUREMENT_ENABLE
+    qspi_rx_timestamp = STM1_TIM0.U;
+ #endif
+ 
++   /*this is for the periodicity calculation for debug purpose*/
+    qspi_rx_current_timestamp = STM1_TIM0.U;
+    LlswFpgaIfCalcRxProdSpi = (uint16) qspi_rx_current_timestamp - (uint16) qspi_rx_Prev_timestamp;
+    qspi_rx_Prev_timestamp = qspi_rx_current_timestamp;
+@@ -325,6 +378,22 @@ FUNC(void, FPGA_CODE) LlswFpgaIf_Main(void)
+    LlswFpgaDecodeRx();
+    LlswFpgaUpdateTx();
+ }
++void LlswFpgaIf_MonrHndlrSwTreat_core2(void)
++{
++
++   /*Set the event status to Failed for TREAT*/
++   DrvCtrlErrDeb_SetEventStatus(ERR_ID_VSI_TI_OUT_TREAT, ERR_DEB_MONR_STS_FAILED);
++
++   /*Call the main run function of drvCtrlSeqr to execute the fault reaction*/
++   DrvCtrlSeqr_Run();
++
++   /*Call the main RunA function of PwmSpMux to execute the PWM duty cycle*/
++   PwmSpMux_RunA();
++
++   /*update the duty cycle into frame TxIpdu frame*/
++   BswFpgaIf_SetTxSyncData();
++
++}
+ 
+ STATIC FUNC(void, FPGA_CODE) LlswFpgaDecodeRx(void)
+ {
+diff --git a/src/fw_cu/build/a2l/Measurements-to-Timeslices-Mapping.csv b/src/fw_cu/build/a2l/Measurements-to-Timeslices-Mapping.csv
+index 7cb1bf8e7..b9947eff3 100644
+--- a/src/fw_cu/build/a2l/Measurements-to-Timeslices-Mapping.csv
++++ b/src/fw_cu/build/a2l/Measurements-to-Timeslices-Mapping.csv
+@@ -8829,3 +8829,7 @@ SftySdlRunTiNormRun_SftyParkLockActr_MainSlow.RunTi,Core_1,Core_1_200us,0.2,,,SS
+ SftySdlRunTiNormRun_SftyParkLockActr_MainSlow.TickStart,Core_1,Core_1_200us,0.2,,,SSW
+ disengStopDetnCycCntr,Core_1,Core_1_200us,0.2,,,SSW
+ engStopDetnCycCntr,Core_1,Core_1_200us,0.2,,,SSW
++LlswFpgaIfCalcTxProdSpi,Core_0,C0_1ms_TimeTask,10,,,LLSW
++LlswFpgaIfCalcRxProdSpi,Core_0,C0_1ms_TimeTask,10,,,LLSW
++LlswFpgaIfTxStsSpi,Core_0,C0_1ms_TimeTask,10,,,LLSW
++LlswFpgaIfRxStsSpi,Core_0,C0_1ms_TimeTask,10,,,LLSW
+'

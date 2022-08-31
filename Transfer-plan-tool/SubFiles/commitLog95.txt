@@ -1,0 +1,89 @@
+b'commit 3c9f155a68de7e09cbb239ac1fe8cf1e8c85d39d
+Author: BOXU <xb-bo.xu.jv@valeo.com>
+Date:   Thu Dec 23 10:46:10 2021 +0800
+
+    $100kW-48755$ - [CR] FCT_DetmnStatorTempSw - fix findings found in review
+    
+    Change-Id: I4facbf1b60b439e6adce7eff629d580134d49caa
+
+diff --git a/src/fw_cu/Components/Safety/Sfty_Inv/SftyTempEvln/src/SftyTempEvln.c b/src/fw_cu/Components/Safety/Sfty_Inv/SftyTempEvln/src/SftyTempEvln.c
+index f6c75a9a1..64e78d873 100644
+--- a/src/fw_cu/Components/Safety/Sfty_Inv/SftyTempEvln/src/SftyTempEvln.c
++++ b/src/fw_cu/Components/Safety/Sfty_Inv/SftyTempEvln/src/SftyTempEvln.c
+@@ -69,7 +69,7 @@
+ @@ GROUP = SftyTempEvln
+ @@ END
+ */
+-/*! \\cvar Raw IGBT Temperature Value; unit \'-\' */
++/*! \\cvar Raw IGBT Temperature Value; unit \'\xc2\xb0C\' */
+ STATIC VAR(uint16, SFTYTEMPEVLN_VAR) SftyTempEvlnIgbtTRawVal[SYSDEF_EM_PHA_CNT_MAX];
+ 
+ /*
+@@ -81,7 +81,7 @@ STATIC VAR(uint16, SFTYTEMPEVLN_VAR) SftyTempEvlnIgbtTRawVal[SYSDEF_EM_PHA_CNT_M
+ @@ GROUP = SftyTempEvln
+ @@ END
+ */
+-/*! \\cvar Physical IGBT Temperature Value; unit \'-\' */
++/*! \\cvar Physical IGBT Temperature Value; unit \'\xc2\xb0C\' */
+ STATIC VAR(float32, SFTYTEMPEVLN_VAR) SftyTempEvlnIGBTPhyVal[SYSDEF_EM_PHA_CNT_MAX];
+ 
+ /*
+@@ -92,7 +92,7 @@ STATIC VAR(float32, SFTYTEMPEVLN_VAR) SftyTempEvlnIGBTPhyVal[SYSDEF_EM_PHA_CNT_M
+ @@ GROUP = SftyTempEvln
+ @@ END
+ */
+-/*! \\cvar Max Physical IGBT Temperature Value; unit \'-\' */
++/*! \\cvar Max Physical IGBT Temperature Value; unit \'\xc2\xb0C\' */
+ STATIC VAR(float32, SFTYTEMPEVLN_VAR) SftyTempEvlnIgbtTMaxPhyVal;
+ 
+ /*! \\cvar Counter for Plausibility Check; unit \'-\' */
+@@ -106,7 +106,7 @@ STATIC VAR(uint32, SFTYTEMPEVLN_VAR) SftyTempEvlnPlausCntr;
+ @@ GROUP = SftyTempEvln
+ @@ END
+ */
+-/*! \\cvar DC bus bar local Temperature Value; unit \'-\' */
++/*! \\cvar DC bus bar local Temperature Value; unit \'\xc2\xb0C\' */
+ 
+ STATIC VAR(float32, SFTYTEMPEVLN_VAR) SftyTempEvlnDcBusBarTemp;
+ 
+@@ -118,7 +118,7 @@ STATIC VAR(float32, SFTYTEMPEVLN_VAR) SftyTempEvlnDcBusBarTemp;
+ @@ GROUP = SftyTempEvln
+ @@ END
+ */
+-/*! \\cvar DC bus capcitor local Temperature Value; unit \'-\' */
++/*! \\cvar DC bus capcitor local Temperature Value; unit \'\xc2\xb0C\' */
+ 
+ STATIC VAR(float32, SFTYTEMPEVLN_VAR) SftyTempEvlnDcDcLinkCpTemp;
+ 
+diff --git a/src/fw_cu/Components/Safety/Sfty_Inv/SftyTempEvln/src/SftyTempEvln_data.c b/src/fw_cu/Components/Safety/Sfty_Inv/SftyTempEvln/src/SftyTempEvln_data.c
+index 5a7dcd9a3..16a5bc16b 100644
+--- a/src/fw_cu/Components/Safety/Sfty_Inv/SftyTempEvln/src/SftyTempEvln_data.c
++++ b/src/fw_cu/Components/Safety/Sfty_Inv/SftyTempEvln/src/SftyTempEvln_data.c
+@@ -258,7 +258,7 @@ VAR(uint8, SFTYTEMPEVLN_VAR) SftyTempEvlnIgbtTempWPlausErrMonrSt = 0U;
+ #define SFTYTEMPEVLN_START_SEC_CALIB_32
+ #include "MemMap.h"
+ 
+-/*! Safety Motor temperature sensor characteristic input temperature values; unit \'degree C\' */
++/*! Safety Motor temperature sensor characteristic input temperature values; unit \'\xc2\xb0C\' */
+ _map CONST(float32, SFTYTEMPEVLN_CALIB) SftyTempEvlnMotStatorTSnsrLoChartcTPrmL[21] =
+    {210.f,197.f,184.f,171.f,158.f,145.f,132.f,119.f,106.f,93.f,80.f,67.f,54.f,41.f,
+    28.f,15.f,2.f,-11.f,-24.f,-37.f,-50.f};
+@@ -324,7 +324,7 @@ CONST(float32, SFTYTEMPEVLN_CALIB) SftyTempEvlnIgbtTempPlauRngThd =  15.f;
+ @@ GROUP = SftyTempEvln
+ @@ END
+ */
+-/*! \\cpar DC bus High threshold for temperature; unit \'-\' */
++/*! \\cpar DC bus High threshold for temperature; unit \'\xc2\xb0C\' */
+ CONST(float32, SFTYTEMPEVLN_CALIB) SftyTempEvlnDcLinkTempHWPRngPassThd =  110.f;
+ 
+ /*
+@@ -335,7 +335,7 @@ CONST(float32, SFTYTEMPEVLN_CALIB) SftyTempEvlnDcLinkTempHWPRngPassThd =  110.f;
+ @@ GROUP = SftyTempEvln
+ @@ END
+ */
+-/*! \\cpar DC bus High threshold for temperature; unit \'-\' */
++/*! \\cpar DC bus High threshold for temperature; unit \'\xc2\xb0C\' */
+ CONST(float32, SFTYTEMPEVLN_CALIB) SftyTempEvlnDcLinkTempHWPRngFailThd =  115.f;
+ 
+ #define SFTYTEMPEVLN_STOP_SEC_CALIB_32
+'

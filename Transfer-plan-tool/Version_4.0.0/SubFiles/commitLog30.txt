@@ -1,0 +1,362 @@
+b'commit 5b14ffc53cb34f965a2617325e9dfb067cd1831f
+Author: Karthik CHIDAMBARAM (JV EXT) <karthik.chidambaram.jv@valeo.com>
+Date:   Wed Mar 16 16:12:10 2022 +0100
+
+    $100kW-55472$ - Fix for IvtrThermMngt: reverse coolant direction, post-integration fixes, phase current calc for standstilll
+    
+    Change-Id: I69798b6587a33f4ef6aa5270f4a22f7e62c459af
+
+diff --git a/src/fw_cu/Components/Cmn/Com/C2cCom/src/C2cComDrvCtrl.c b/src/fw_cu/Components/Cmn/Com/C2cCom/src/C2cComDrvCtrl.c
+index 9b19b0dde..f509a775f 100644
+--- a/src/fw_cu/Components/Cmn/Com/C2cCom/src/C2cComDrvCtrl.c
++++ b/src/fw_cu/Components/Cmn/Com/C2cCom/src/C2cComDrvCtrl.c
+@@ -73,6 +73,7 @@
+ #include "IvtrHvAcI2tDrtg_WrprData.h"
+ #include "ResApp_Outputs.h"
+ #include "HvAcIMeas_data.h"
++#include "HvAcILimCalcn_data.h"
+ #include "filter_phi_TL_Outputs.h"
+ #include "PerfIndcrCalcn_WrprData.h"
+ #include "HvAcIFndmtlCptAmpCalcn_WrprData.h"
+@@ -124,6 +125,9 @@ FUNC(void, DRVCTRL_C2C_COM_CODE) DrvCtrlC2c_Send1ms(void)
+    /* AC current */
+    DrvCtrlC2cData.HvAcICalcnIAbsFild1Sum = HvAcICalcnIAbsFild1Sum;
+ 
++   /* Status of max current allowed from the HV AC derating  */
++   DrvCtrlC2cData.AcILimMaxSts = HvAcILimCalcnIMaxLimnSts[0];
++
+    /* DC voltage */
+    DrvCtrlC2cData.UDcActFild1 = HvDcUMeasUDcFild1; /* Measured DC link voltage (filtered for 1 ms time slices) */
+    DrvCtrlC2cData.UDcActFild2 = HvDcUMeasUDcFild2;  /* Measured DC link voltage (filtered for 2 ms time slices) */
+@@ -140,6 +144,9 @@ FUNC(void, DRVCTRL_C2C_COM_CODE) DrvCtrlC2c_Send1ms(void)
+    /* Coolant inlet Temperature */
+    DrvCtrlC2cData.IvtrCooltInlTemp = IvtrThermMdlCooltInlTemp;
+ 
++   /* Coolant flow rate */
++   DrvCtrlC2cData.CooltRateFlowEstimd = CooltFlowActCalcnCooltFlowAct;
++
+    /* Max current allowed from the DC I2T derating */
+    DrvCtrlC2cData.HvDcI2tDrtgIMax = IvtrHvDcI2tDrtgIMax;
+ 
+diff --git a/src/fw_cu/Components/Inv/LimAndDrt/HvAcILimCalcn/src/HvAcILimCalcn.c b/src/fw_cu/Components/Inv/LimAndDrt/HvAcILimCalcn/src/HvAcILimCalcn.c
+index 5e437fbd0..c12dbbcf4 100644
+--- a/src/fw_cu/Components/Inv/LimAndDrt/HvAcILimCalcn/src/HvAcILimCalcn.c
++++ b/src/fw_cu/Components/Inv/LimAndDrt/HvAcILimCalcn/src/HvAcILimCalcn.c
+@@ -245,6 +245,7 @@ FUNC(void, HVACILIMCALCN_CODE) HvAcILimCalcn_Run(void)
+    RotorAgSpdMgrHvAcIMaxLimnFac = RotorAgSpdMgrHvAcIMaxLimnFacRplcmnt;
+    ErrDebFctInhbnHvAcIMaxLim1 = DrvCtrlErrDebFctInhbnSts.B.FctIdIacMaxLim20;
+    ErrDebFctInhbnHvAcIMaxLim2 = DrvCtrlErrDebFctInhbnSts.B.FctIdIacMaxLim50;
++   ErrDebFctInhbnHvAcIMaxLim3 = DrvCtrlErrDebFctInhbnSts.B.FctIdIacMaxLim0;
+    ExtdTqLimMgrActvnSts = BswC2cData.ExtdTqLimReq;
+    RaceStrtMgrActvnSts = RaceStrtMgrActvnStsRplcmnt;
+ 
+diff --git a/src/fw_cu/Components/Inv/LimAndDrt/IvtrHvAcI2tDrtg/src/IvtrHvAcI2tDrtg_Wrpr.c b/src/fw_cu/Components/Inv/LimAndDrt/IvtrHvAcI2tDrtg/src/IvtrHvAcI2tDrtg_Wrpr.c
+index 82347885f..b82bb637e 100644
+--- a/src/fw_cu/Components/Inv/LimAndDrt/IvtrHvAcI2tDrtg/src/IvtrHvAcI2tDrtg_Wrpr.c
++++ b/src/fw_cu/Components/Inv/LimAndDrt/IvtrHvAcI2tDrtg/src/IvtrHvAcI2tDrtg_Wrpr.c
+@@ -87,15 +87,16 @@ FUNC(void, IVTRHVACI2TDRTG_CODE) IvtrHvAcI2tDrtg_Run(void)
+    IvtrHvAcI2tDrtg_InputData.FidIvtrHvAcI2tDrtgErrHvOff = DrvCtrlErrDebFctInhbnSts.B.FctIdHvOffTiInvld; /* Error status of the HV off time signal (1 = Not valid, 0 = Valid) */
+    IvtrHvAcI2tDrtg_InputData.FidIvtrHvAcI2tDrtgErrVehPrkg = DrvCtrlErrDebFctInhbnSts.B.FctIdVehPrkgTiInvld; /* Error status of the vehicle parking time signal (1 = Not valid, 0 = Valid) */
+ #else
+-   IvtrHvAcI2tDrtg_InputData.FidIvtrHvAcI2tDrtgInhbn = FALSE;  /* Inhibition handling flag (1 = Function inhibited, 0 = Normal operation) */
+-   IvtrHvAcI2tDrtg_InputData.FidIvtrHvAcI2tDrtgIniHvOff = FALSE; /* Initialization status of the HV off time signal (1 = Not Initialized, 0 = Initialized) */
+-   IvtrHvAcI2tDrtg_InputData.FidIvtrHvAcI2tDrtgIniVehPrkg = FALSE; /* Initialization status of the vehicle parking time signal (1 = Not Initialized, 0 = Initialized) */
+-   IvtrHvAcI2tDrtg_InputData.FidIvtrHvAcI2tDrtgErrHvOff = FALSE; /* Error status of the HV off time signal (1 = Not valid, 0 = Valid) */
+-   IvtrHvAcI2tDrtg_InputData.FidIvtrHvAcI2tDrtgErrVehPrkg = FALSE; /* Error status of the vehicle parking time signal (1 = Not valid, 0 = Valid) */
++   IvtrHvAcI2tDrtg_InputData.FidIvtrHvAcI2tDrtgInhbn = TRUE; /* keep i2t init stubbed, (1 = Function inhibited, 0 = Normal operation) */
++   IvtrHvAcI2tDrtg_InputData.FidIvtrHvAcI2tDrtgIniHvOff = TRUE; /* keep i2t init stubbed, (1 = Not Initialized, 0 = Initialized) */
++   IvtrHvAcI2tDrtg_InputData.FidIvtrHvAcI2tDrtgIniVehPrkg = TRUE; /* keep i2t init stubbed, (1 = Not Initialized, 0 = Initialized) */
++   IvtrHvAcI2tDrtg_InputData.FidIvtrHvAcI2tDrtgErrHvOff = TRUE; /* keep i2t init stubbed, (1 = Not valid, 0 = Valid) */
++   IvtrHvAcI2tDrtg_InputData.FidIvtrHvAcI2tDrtgErrVehPrkg = TRUE; /* keep i2t init stubbed, (1 = Not valid, 0 = Valid) */
+ #endif
+-   IvtrHvAcI2tDrtg_InputData.FidIvtrHvAcI2tDrtgIniNvm = FALSE;
++   IvtrHvAcI2tDrtg_InputData.FidIvtrHvAcI2tDrtgIniNvm = TRUE; /* keep i2t init stubbed */
+    IvtrHvAcI2tDrtg_InputData.FidIvtrHvAcI2tDrtgErrNvm = (BswC2cData.InvTempNvm.AcI2tCntrVld^1U); /* Validity Bit which denotes validity of variables stored NVM (0: Not Valid 1: Signal Valid ) */
+  
++   /* since all the corresponding FIDs are activated, these signal connections are not effective at all for the model: */
+    IvtrHvAcI2tDrtg_InputData.HvOffTi = BswC2cData.HvOffTi; /* High Voltage Off time */
+    IvtrHvAcI2tDrtg_InputData.VehPrkgTi = BswC2cData.VehPrkgTi; /* Vehicle parking time */
+    /* comments code for new FM v1.1.0*/
+@@ -104,7 +105,6 @@ FUNC(void, IVTRHVACI2TDRTG_CODE) IvtrHvAcI2tDrtg_Run(void)
+ #else
+    IvtrHvAcI2tDrtg_InputData.IgbtTempMaxVld = FALSE;
+ #endif
+- 
+    IvtrHvAcI2tDrtg_InputData.IgbtTempMax = SftyC2cData.IgbtTempMax; /* Maximum IGBT temperature (based directly on sensor values) */
+    IvtrHvAcI2tDrtg_InputData.NvmI2tCntrVal1 = BswC2cData.InvTempNvm.AcI2tCntr1; /* I2t counter value stored in NVM (derating 1) */
+    IvtrHvAcI2tDrtg_InputData.NvmI2tCntrVal2 = BswC2cData.InvTempNvm.AcI2tCntr2; /* I2t counter value stored in NVM (derating 2) */
+diff --git a/src/fw_cu/Components/Inv/LimAndDrt/IvtrHvDcI2tDrtg/src/IvtrHvDcI2tDrtg_Wrpr.c b/src/fw_cu/Components/Inv/LimAndDrt/IvtrHvDcI2tDrtg/src/IvtrHvDcI2tDrtg_Wrpr.c
+index c27803cee..c3a615cb2 100644
+--- a/src/fw_cu/Components/Inv/LimAndDrt/IvtrHvDcI2tDrtg/src/IvtrHvDcI2tDrtg_Wrpr.c
++++ b/src/fw_cu/Components/Inv/LimAndDrt/IvtrHvDcI2tDrtg/src/IvtrHvDcI2tDrtg_Wrpr.c
+@@ -86,20 +86,21 @@ FUNC(void, IVTRHVDCI2TDRTG_CODE) IvtrHvDcI2tDrtg_Run(void)
+    IvtrHvDcI2tDrtg_InputData.FidIvtrHvDcI2tDrtgErrHvOff = DrvCtrlErrDebFctInhbnSts.B.FctIdHvOffTiInvld; /* FID handling Err Hv Off: 1=Not Valid, 0=Valid */
+    IvtrHvDcI2tDrtg_InputData.FidIvtrHvDcI2tDrtgErrVehPrkg = DrvCtrlErrDebFctInhbnSts.B.FctIdVehPrkgTiInvld; /* FID handling Veh Hv Off: 1=Not Valid, 0=Valid */
+ #else
+-   IvtrHvDcI2tDrtg_InputData.FidIvtrHvDcI2tDrtgInhbn = FALSE; /* FID input to turn off the function */
+-   IvtrHvDcI2tDrtg_InputData.FidIvtrHvDcI2tDrtgIniHvOff = FALSE; /* FID handling Hv Off: 1=Not Initialized, 0=Initialized */
+-   IvtrHvDcI2tDrtg_InputData.FidIvtrHvDcI2tDrtgIniVehPrkg = FALSE; /* FID handling Veh Off: 1=Not Initialized, 0=Initialized */
+-   IvtrHvDcI2tDrtg_InputData.FidIvtrHvDcI2tDrtgErrHvOff = FALSE; /* FID handling Err Hv Off: 1=Not Valid, 0=Valid */
+-   IvtrHvDcI2tDrtg_InputData.FidIvtrHvDcI2tDrtgErrVehPrkg = FALSE; /* FID handling Veh Hv Off: 1=Not Valid, 0=Valid */
++   IvtrHvDcI2tDrtg_InputData.FidIvtrHvDcI2tDrtgInhbn = TRUE; /* keep i2t init stubbed */
++   IvtrHvDcI2tDrtg_InputData.FidIvtrHvDcI2tDrtgIniHvOff = TRUE; /* keep i2t init stubbed, Hv Off: 1=Not Initialized, 0=Initialized */
++   IvtrHvDcI2tDrtg_InputData.FidIvtrHvDcI2tDrtgIniVehPrkg = TRUE; /* keep i2t init stubbed, Veh Off: 1=Not Initialized, 0=Initialized */
++   IvtrHvDcI2tDrtg_InputData.FidIvtrHvDcI2tDrtgErrHvOff = TRUE; /* keep i2t init stubbed, Err Hv Off: 1=Not Valid, 0=Valid */
++   IvtrHvDcI2tDrtg_InputData.FidIvtrHvDcI2tDrtgErrVehPrkg = TRUE; /* keep i2t init stubbed, Veh Hv Off: 1=Not Valid, 0=Valid */
+ #endif
+-   IvtrHvDcI2tDrtg_InputData.FidIvtrHvDcI2tDrtgIniNvm = FALSE;
++   IvtrHvDcI2tDrtg_InputData.FidIvtrHvDcI2tDrtgIniNvm = TRUE; /* keep i2t init stubbed */
+ 
+    IvtrHvDcI2tDrtg_InputData.FidIvtrHvDcI2tDrtgErrNvm = (BswC2cData.InvTempNvm.DcLinkI2tCntrVld^1U); /* Validity Bit which denotes validity of variables stored NVM (0: Not Valid 1: Signal Valid ) */
+    IvtrHvDcI2tDrtg_InputData.IgbtTempMaxVld = DrvCtrlErrDebFctInhbnSts.B.FctIdFltGrp4; /* FID handling Sensor valid: 1=Not Valid, 0=Valid */
+ 
++   IvtrHvDcI2tDrtg_InputData.IgbtTempMax = SftyC2cData.IgbtTempMax; /* Maximum NTC temperature */
++   /* since all the corresponding FIDs are activated, these signal connections are not effective at all for the model: */
+    IvtrHvDcI2tDrtg_InputData.HvOffTi = BswC2cData.HvOffTi; /* High Voltage Off time */
+    IvtrHvDcI2tDrtg_InputData.VehPrkgTi = BswC2cData.VehPrkgTi; /* Vehicle off time */
+-   IvtrHvDcI2tDrtg_InputData.IgbtTempMax = SftyC2cData.IgbtTempMax; /* Maximum NTC temperature */
+    IvtrHvDcI2tDrtg_InputData.NvmI2tCntrVal1 = BswC2cData.InvTempNvm.DcLinkI2tCntr1; /* Stored NVM data 1 */
+    IvtrHvDcI2tDrtg_InputData.NvmI2tCntrVal2 = BswC2cData.InvTempNvm.DcLinkI2tCntr2; /* Stored NVM data 2 */
+ 
+diff --git a/src/fw_cu/Components/Inv/ValMeasAndProc/IvtrDcLinkThermMdl/src/IvtrDcLinkThermMdl.c b/src/fw_cu/Components/Inv/ValMeasAndProc/IvtrDcLinkThermMdl/src/IvtrDcLinkThermMdl.c
+index bfb753a19..2564fc59f 100644
+--- a/src/fw_cu/Components/Inv/ValMeasAndProc/IvtrDcLinkThermMdl/src/IvtrDcLinkThermMdl.c
++++ b/src/fw_cu/Components/Inv/ValMeasAndProc/IvtrDcLinkThermMdl/src/IvtrDcLinkThermMdl.c
+@@ -52,20 +52,11 @@
+ /*================== [type definitions] =====================================*/
+ 
+ /*================== [local data] ===========================================*/
+-/* Begin: HVACICALCN_START_SEC_VAR_CLEARED_32 (online) */
+-#define HVACICALCN_START_SEC_VAR_CLEARED_32
+-#include "MemMap.h"
+-
+-extern VAR(float32, HVACICALCN_VAR) HvAcICalcnIAbsFild10Sum;
+-#define HVACICALCN_STOP_SEC_VAR_CLEARED_32
+-#include "MemMap.h"
+-/* End: HVACICALCN_STOP_SEC_VAR_CLEARED_32 (online) */
+-
+ /* Begin: IVTRDCLINKTHERMMDL_START_SEC_VAR_CLEARED_32 (online) */
+ #define IVTRDCLINKTHERMMDL_START_SEC_VAR_CLEARED_32
+ #include "MemMap.h"
+ 
+-VAR(float32, IVTRDCLINKTHERMMDL_VAR) HvAcICalcnIAbsFild10SumRms;
++extern VAR(float32, IVTRDCLINKTHERMMDL_VAR) HvAcICalcnIAbsFild10SumRms;
+ #define IVTRDCLINKTHERMMDL_STOP_SEC_VAR_CLEARED_32
+ #include "MemMap.h"
+ /* End: IVTRDCLINKTHERMMDL_STOP_SEC_VAR_CLEARED_32 (online) */
+@@ -133,7 +124,6 @@ FUNC(void, IVTRDCLINKTHERMMDL_CODE) IvtrDcLinkThermMdl_Run(void)
+    NvmHndlrDcBusBarTemp = BswC2cData.InvTempNvm.DcBusBarTemp; /* Last stored capcacitor temperature value in NvM*/
+    NvmHndlrDcLinkCpTemp = BswC2cData.InvTempNvm.DcLinkCpTemp; /* Last stored busbar temperature value in NvM */
+    NvmHndlrDcLinkTempVld = BswC2cData.InvTempNvm.DcLinkTempVld; /*NVM init temp data validity (0: NVM data invalid, 1: NVM data valid) */
+-   HvAcICalcnIAbsFild10SumRms = HvAcICalcnIAbsFild10Sum * SYSCON_1_DIV_SQRT2;
+ 
+    /* Call the matlab generated code */
+    IvtrDcLinkThermMdl(
+diff --git a/src/fw_cu/Components/Inv/ValMeasAndProc/IvtrHvAcBusBarThermMdl/src/IvtrHvAcBusBarThermMdl.c b/src/fw_cu/Components/Inv/ValMeasAndProc/IvtrHvAcBusBarThermMdl/src/IvtrHvAcBusBarThermMdl.c
+index 06a6c87a8..aaecda893 100644
+--- a/src/fw_cu/Components/Inv/ValMeasAndProc/IvtrHvAcBusBarThermMdl/src/IvtrHvAcBusBarThermMdl.c
++++ b/src/fw_cu/Components/Inv/ValMeasAndProc/IvtrHvAcBusBarThermMdl/src/IvtrHvAcBusBarThermMdl.c
+@@ -27,6 +27,7 @@
+ #include "Std_Types.h"
+ #include "Platform_Types.h"
+ #include "AddGlobalDefines.h"
++#include "Mathlib.h"
+ 
+ #include "IvtrHvAcBusBarThermMdl.h"
+ #include "IvtrHvAcBusBarThermMdl_data.h"
+@@ -52,14 +53,89 @@
+ /*================== [type definitions] =====================================*/
+ 
+ /*================== [local data] ===========================================*/
++/* Begin: HVACICALCN_START_SEC_VAR_CLEARED_32 (online) */
++#define HVACICALCN_START_SEC_VAR_CLEARED_32
++#include "MemMap.h"
++
++extern VAR(float32, HVACICALCN_VAR) HvAcICalcnIAbsFild10Sum;
++#define HVACICALCN_STOP_SEC_VAR_CLEARED_32
++#include "MemMap.h"
++/* End: HVACICALCN_STOP_SEC_VAR_CLEARED_32 (online) */
++
++/* Begin: IVTRDCLINKTHERMMDL_START_SEC_VAR_CLEARED_32 (online) */
++#define IVTRDCLINKTHERMMDL_START_SEC_VAR_CLEARED_32
++#include "MemMap.h"
++
++VAR(float32, IVTRDCLINKTHERMMDL_VAR) HvAcICalcnIAbsFild10SumRms;
++#define IVTRDCLINKTHERMMDL_STOP_SEC_VAR_CLEARED_32
++#include "MemMap.h"
++/* End: IVTRDCLINKTHERMMDL_STOP_SEC_VAR_CLEARED_32 (online) */
++
++/* Begin: IVTRHVACBUSBARTHERMMDL_START_SEC_VAR_CLEARED_32 (online) */
++#define IVTRHVACBUSBARTHERMMDL_START_SEC_VAR_CLEARED_32
++#include "MemMap.h"
++
++STATIC VAR(uint8, IVTRHVACBUSBARTHERMMDL_VAR) IvtrThermMdlCooltTempAvlAcBb;
++#define IVTRHVACBUSBARTHERMMDL_STOP_SEC_VAR_CLEARED_32
++#include "MemMap.h"
++/* End: IVTRHVACBUSBARTHERMMDL_STOP_SEC_VAR_CLEARED_32 (online) */
++
++/* Begin: HVACICALCN_START_SEC_VAR_INIT_32 (online) */
++#define HVACICALCN_START_SEC_VAR_INIT_32
++#include "MemMap.h"
++
++extern VAR(float32, HVACICALCN_VAR) HvAcICalcnIAbsFild;
++#define HVACICALCN_STOP_SEC_VAR_INIT_32
++#include "MemMap.h"
++/* End: HVACICALCN_STOP_SEC_VAR_INIT_32 (online) */
++
+ /* Begin: IVTRHVACBUSBARTHERMMDL_START_SEC_VAR_CLEARED_32 (online) */
+ #define IVTRHVACBUSBARTHERMMDL_START_SEC_VAR_CLEARED_32
+ #include "MemMap.h"
+ 
+-VAR(uint8, IVTRHVACBUSBARTHERMMDL_VAR) IvtrThermMdlCooltTempAvlAcBb;
++STATIC VAR(float32, IVTRHVACBUSBARTHERMMDL_VAR) IvtrHvAcBbIAbsSpdRange;
+ #define IVTRHVACBUSBARTHERMMDL_STOP_SEC_VAR_CLEARED_32
+ #include "MemMap.h"
+ /* End: IVTRHVACBUSBARTHERMMDL_STOP_SEC_VAR_CLEARED_32 (online) */
++
++/* Begin: IVTRHVACBUSBARTHERMMDL_START_SEC_CALIB_32 (calib) */
++#define IVTRHVACBUSBARTHERMMDL_START_SEC_CALIB_32
++#include "MemMap.h"
++
++/*
++@@ SYMBOL = IvtrHvAcBbIAbsSpdThdHi
++@@ A2L_TYPE = PARAMETER
++@@ DATA_TYPE = FLOAT
++@@ DESCRIPTION = "High speed threshold for rms calc. of the phase current"
++@@ GROUP = IvtrHvAcBusBarThermMdl_NoAdd
++@@ END
++*/
++STATIC CONST(float32, IVTRHVACBUSBARTHERMMDL_CALIB) IvtrHvAcBbIAbsSpdThdHi = 2.F;
++/*
++@@ SYMBOL = IvtrHvAcBbIAbsSpdThdLo
++@@ A2L_TYPE = PARAMETER
++@@ DATA_TYPE = FLOAT
++@@ DESCRIPTION = "Low speed threshold for rms calc. of the phase current"
++@@ GROUP = IvtrHvAcBusBarThermMdl_NoAdd
++@@ END
++*/
++STATIC CONST(float32, IVTRHVACBUSBARTHERMMDL_CALIB) IvtrHvAcBbIAbsSpdThdLo = 1.F;
++
++#define IVTRHVACBUSBARTHERMMDL_STOP_SEC_CALIB_32
++#include "MemMap.h"
++/* End: IVTRHVACBUSBARTHERMMDL_STOP_SEC_CALIB_32 (calib) */
++
++/* Begin: IVTRHVACBUSBARTHERMMDL_START_SEC_VAR_CLEARED_32 (online) */
++#define IVTRHVACBUSBARTHERMMDL_START_SEC_VAR_CLEARED_32
++#include "MemMap.h"
++
++STATIC VAR(float32, IVTRHVACBUSBARTHERMMDL_VAR) IvtrHvAcBbIAbsFild10SumRmsHi;
++STATIC VAR(float32, IVTRHVACBUSBARTHERMMDL_VAR) IvtrHvAcBbIAbsFild10SumRmsLo;
++STATIC VAR(float32, IVTRHVACBUSBARTHERMMDL_VAR) IvtrHvAcBbRotAgSpdElecAbsFild10;
++#define IVTRHVACBUSBARTHERMMDL_STOP_SEC_VAR_CLEARED_32
++#include "MemMap.h"
++/* End: IVTRHVACBUSBARTHERMMDL_STOP_SEC_VAR_CLEARED_32 (online) */
++
+ /*================== [prototype of local functions] =========================*/
+ 
+ /*================== [definition of local functions] ========================*/
+@@ -82,6 +158,28 @@ FUNC(void, IVTRHVACBUSBARTHERMMDL_CODE) IvtrHvAcBusBarThermMdl_Run(void)
+             /* CZ: FIXME: Rework mechanism */
+             ~(DrvCtrlErrDebFctInhbnSts.B.FctIdFltGrp2 | (BswC2cData.MotTempIni^1U));
+ 
++   IvtrHvAcBbIAbsFild10SumRmsHi = HvAcICalcnIAbsFild10Sum * SYSCON_1_DIV_SQRT2;
++   IvtrHvAcBbIAbsFild10SumRmsLo = HvAcICalcnIAbsFild10Sum;
++   IvtrHvAcBbRotAgSpdElecAbsFild10 = MLIB_F32AbsF32(RotorAgSpdCalcnSpdElecFild10);
++   if (IvtrHvAcBbRotAgSpdElecAbsFild10 > IvtrHvAcBbIAbsSpdThdHi)
++   {
++      HvAcICalcnIAbsFild10SumRms = IvtrHvAcBbIAbsFild10SumRmsHi;
++   }
++   else if (IvtrHvAcBbRotAgSpdElecAbsFild10 < IvtrHvAcBbIAbsSpdThdLo)
++   {
++      HvAcICalcnIAbsFild10SumRms = IvtrHvAcBbIAbsFild10SumRmsLo;
++   }
++   else
++   {
++      IvtrHvAcBbIAbsSpdRange = (IvtrHvAcBbIAbsSpdThdHi - IvtrHvAcBbIAbsSpdThdLo);
++      /* protection against div by zero and Lo >= Hi */
++      if (IvtrHvAcBbIAbsSpdRange < .01f) {IvtrHvAcBbIAbsSpdRange = .01f;}
++      HvAcICalcnIAbsFild10SumRms = ((IvtrHvAcBbIAbsFild10SumRmsHi - IvtrHvAcBbIAbsFild10SumRmsLo) *
++                                    (IvtrHvAcBbRotAgSpdElecAbsFild10 - IvtrHvAcBbIAbsSpdThdLo))
++                                   / IvtrHvAcBbIAbsSpdRange
++                                   + IvtrHvAcBbIAbsFild10SumRmsLo;
++   }
++
+    /* comments code for new FM v1.1.0*/
+ #if FTR_SNG_PWM_INTRPT == 0
+    IvtrThermMdlCooltTempAvlAcBb =
+diff --git a/src/fw_cu/Components/Inv/ValMeasAndProc/IvtrThermMdl/src/IvtrThermMdl.c b/src/fw_cu/Components/Inv/ValMeasAndProc/IvtrThermMdl/src/IvtrThermMdl.c
+index a2bdb4d2b..5a59abd91 100644
+--- a/src/fw_cu/Components/Inv/ValMeasAndProc/IvtrThermMdl/src/IvtrThermMdl.c
++++ b/src/fw_cu/Components/Inv/ValMeasAndProc/IvtrThermMdl/src/IvtrThermMdl.c
+@@ -55,19 +55,19 @@ VAR(float32, COOLTFLOWACTCALCN_VAR) CooltFlowActCalcnCooltFlowAct;
+ #include "MemMap.h"
+ /* End: COOLTFLOWACTCALCN_STOP_SEC_VAR_CLEARED_32 (online) */
+ 
+-#define IVTRDCLINKTHERMMDL_START_SEC_CALIB_8
++#define IVTRTHERMMDL_START_SEC_CALIB_8
+ #include "MemMap.h"
+ /*
+ @@ SYMBOL = CoolTempAvlRplcmtVal
+ @@ A2L_TYPE = PARAMETER
+ @@ DATA_TYPE = UBYTE
+-@@ GROUP = IvtrDcLinkThermMdl
++@@ GROUP = CooltTempReqCalcn
+ @@ DESCRIPTION = "Replacement value for coolant temperature available"
+ @@ END
+ */
+-CONST(boolean, IVTRDCLINKTHERMMDL_CALIB) CoolTempAvlRplcmtVal = 0;
++CONST(boolean, IVTRTHERMMDL_CALIB) CoolTempAvlRplcmtVal = 1U;
+ 
+-#define IVTRDCLINKTHERMMDL_STOP_SEC_CALIB_8
++#define IVTRTHERMMDL_STOP_SEC_CALIB_8
+ #include "MemMap.h"
+ 
+ 
+@@ -83,7 +83,11 @@ VAR(float32, IVTRTHERMMDL_VAR) SftyTEvlnAIgbtTPhaU;
+ #define IVTRTHERMMDL_START_SEC_VAR_CLEARED_32
+ #include "MemMap.h"
+ 
+-VAR(float32, IVTRTHERMMDL_VAR) CooltFlowActCalcnCooltFlowAct;
++VAR(float32, IVTRTHERMMDL_VAR) HvAcICalcnIPhaRev[SYSDEF_EM_PHA_CNT_MAX];
++
++VAR(float32, IVTRTHERMMDL_VAR) Mod3PhaDutyCycPhaRev[SYSDEF_EM_PHA_CNT_MAX];
++
++VAR(uint32, IVTRTHERMMDL_VAR) cklCnt;
+ 
+ #define IVTRTHERMMDL_STOP_SEC_VAR_CLEARED_32
+ #include "MemMap.h"
+@@ -96,6 +100,7 @@ VAR(float32, IVTRTHERMMDL_VAR) CooltFlowActCalcnCooltFlowAct;
+ #define IVTRTHERMMDL_START_SEC_CODE
+ #include "MemMap.h"
+ 
++
+ /******************************************************************/
+ /*!
+  * \\fn      void IvtrThermMdl_Run(void)
+@@ -106,7 +111,14 @@ FUNC(void, IVTRTHERMMDL_CODE) IvtrThermMdl_Run(void)
+ {
+ 
+    CooltFlowActCalcnCooltFlowAct = BswC2cData.CooltFlowNom;
+-   SftyTEvlnAIgbtTPhaU = SftyC2cData.IgbtTempU;
++
++   /* workaround for reverse direction of the coolant: W->V->U */
++   SftyTEvlnAIgbtTPhaU = SftyC2cData.IgbtTempW;
++   for(cklCnt=1; cklCnt <= SYSDEF_EM_PHA_CNT_MAX; cklCnt++)
++   {
++      HvAcICalcnIPhaRev[cklCnt-1] = HvAcICalcnIPha[SYSDEF_EM_PHA_CNT_MAX-cklCnt];
++      Mod3PhaDutyCycPhaRev[cklCnt-1] = Mod3PhaDutyCycPha[SYSDEF_EM_PHA_CNT_MAX-cklCnt];
++   }
+ 
+    /* Call the matlab generated code */
+    IvtrThermMdl(
+diff --git a/src/fw_cu/build/Parfiles/P2_100kW/Testbench/Software/Delta.par b/src/fw_cu/build/Parfiles/P2_100kW/Testbench/Software/Delta.par
+index 2bccf882b..723e8503c 100644
+--- a/src/fw_cu/build/Parfiles/P2_100kW/Testbench/Software/Delta.par
++++ b/src/fw_cu/build/Parfiles/P2_100kW/Testbench/Software/Delta.par
+@@ -1 +1,4 @@
+ CANape PAR V3.2: DeltaFile 1 0 Delta.par
++CoolTempAvlRplcmtVal [UINT(8)] 1 ; added new parameters $100kW-55472$
++IvtrHvAcBbIAbsSpdThdHi [FLOAT] 2 ; added new parameters $100kW-55472$
++IvtrHvAcBbIAbsSpdThdLo [FLOAT] 1 ; added new parameters $100kW-55472$
+\\ No newline at end of file
+'

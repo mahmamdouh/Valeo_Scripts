@@ -1,0 +1,52 @@
+b'commit 6520aadea16d3ed3d66d9d3df0ed2e13f838c390
+Author: David VARGA <david.varga.jv.ext@valeo.com>
+Date:   Tue Oct 26 11:24:57 2021 +0200
+
+    $100kW-42940$ - B01 - ExternalDeratingLimitations - HVDC Voltage Derating : Max avl Tq is stuck at 0.
+    
+    Change-Id: I1e4c46ba68a700bcf40596bd227cf2db646927c2
+
+diff --git a/src/fw_cu/Components/Inv/LimAndDrt/HvDcULimn/src/HvDcULimn_Wrpr.c b/src/fw_cu/Components/Inv/LimAndDrt/HvDcULimn/src/HvDcULimn_Wrpr.c
+index 5855f9ec2..fac539379 100644
+--- a/src/fw_cu/Components/Inv/LimAndDrt/HvDcULimn/src/HvDcULimn_Wrpr.c
++++ b/src/fw_cu/Components/Inv/LimAndDrt/HvDcULimn/src/HvDcULimn_Wrpr.c
+@@ -136,13 +136,22 @@ FUNC(void, HVDCULIMN_CODE) HvDcULimn_Run (void)
+    HvDcULimn_InputData.TqMaxMot      = SysPrmTqLimMotMecl; /* Description: System torque maximum */
+    HvDcULimn_InputData.TqMinGen      = SysPrmTqLimGenMecl; /* Description: System torque minimum */
+ 
+-   /* Calculate maximum and minimum Limits of Inverter Dc Link Voltage */
+ 
++   /* Calculate maximum and minimum Limits of Inverter Dc Link Voltage */
+    /* Description: Maximum external limit  between internal and CAN volatage values */
+-   HvDcULimnUMax = MinVal(BswC2cData.HvDcULimMax, HvDcULimnMaxInt);
++#if 0
++   HvDcULimnUMax = MinVal(BswC2cData.HvDcULimMax, HvDcULimnMaxInt);   /*This project currently does not use voltage limits from CAN*/
++#else
++   HvDcULimnUMax = HvDcULimnMaxInt;
++#endif
+ 
+    /* Description: Minimum voltage limit between internal and CAN volatage values */
+-   HvDcULimnUMin = MaxVal(BswC2cData.HvDcULimMin, HvDcULimnMinInt);
++#if 0
++   HvDcULimnUMin = MaxVal(BswC2cData.HvDcULimMin, HvDcULimnMinInt);   /*This project currently does not use voltage limits from CAN*/
++#else
++   HvDcULimnUMin = HvDcULimnMinInt;
++#endif
++
+ 
+    HvDcULimn_InputData.HvDcULimMax   = HvDcULimnUMax;
+    HvDcULimn_InputData.HvDcULimMin   = HvDcULimnUMin;
+diff --git a/src/fw_cu/build/Parfiles/P2_100kW/Testbench/VW310E_76_49_A274_0028_VEH_200901.par b/src/fw_cu/build/Parfiles/P2_100kW/Testbench/VW310E_76_49_A274_0028_VEH_200901.par
+index 559deaacf..ae95eaea3 100644
+--- a/src/fw_cu/build/Parfiles/P2_100kW/Testbench/VW310E_76_49_A274_0028_VEH_200901.par
++++ b/src/fw_cu/build/Parfiles/P2_100kW/Testbench/VW310E_76_49_A274_0028_VEH_200901.par
+@@ -16579,7 +16579,7 @@ TqMgrEmSpdLimnHndlAsDrtg [UINT(8)]  1 ; ENABLE
+ TqMgrHvDcILimnEna [UINT(8)]  0 ; DISABLE
+ TqMgrHvDcILimnHndlAsDrtg [UINT(8)]  0 ; DISABLE
+ TqMgrHvDcILimnIntHndlAsDrtg [UINT(8)]  1 ; ENABLE
+-TqMgrHvDcULimnEna [UINT(8)]  0 ; DISABLE
++TqMgrHvDcULimnEna [UINT(8)]  1 ; ENABLE
+ TqMgrHvDcULimnHndlAsDrtg [UINT(8)]  0 ; DISABLE
+ TqMgrPwrLimnIntEna [UINT(8)]  0 ; DISABLE
+ TqMgrPwrLimnIntHndlAsDrtg [UINT(8)]  1 ; ENABLE
+'

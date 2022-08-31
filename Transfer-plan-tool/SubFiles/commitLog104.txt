@@ -1,0 +1,972 @@
+b'commit 1ebcaac1c1eea91f5af4e6cb460378fe376cbb13
+Author: Muhammad HARIS (JV) <muhammad.haris.jv@valeo.com>
+Date:   Thu Oct 28 14:58:01 2021 +0200
+
+    $100kW-44832$ - Traceability update  - Wrapper Quality for B02 release
+    
+    Change-Id: If14c8c206607e704ef691bcab288318a6bc8bd50
+
+diff --git a/src/fw_cu/Components/Cmn/Com/C2cCom/src/C2cComDrvCtrl.c b/src/fw_cu/Components/Cmn/Com/C2cCom/src/C2cComDrvCtrl.c
+index e9a6a8f9b..28a4275cb 100644
+--- a/src/fw_cu/Components/Cmn/Com/C2cCom/src/C2cComDrvCtrl.c
++++ b/src/fw_cu/Components/Cmn/Com/C2cCom/src/C2cComDrvCtrl.c
+@@ -1,11 +1,13 @@
+ /* ********************************************************************** */
+ /* Sourcefile: DrvCtrlC2cCom.c                                            */
+ /*                                                                        */
+-/* Project: NextGen                                                       */
+-/* Aurix                                                                  */
++/* Project: 100kW                                                         */
+ /*                                                                        */
+-/* Department: SIEMENS AG                                                 */
+-/* I DT EC R&D                                                            */
++/* Major SW Version : 01                                                  */
++/* Minor SW Version : 01                                                  */
++/* 100kW-46793 - DRCO C2cComDrvCtrl 01                                    */
++/* Department:      Valeo-Siemens eAutomotive GmbH                        */
++/*                  VSeA R&D INV ASW DRCO                                 */
+ /*                                                                        */
+ /* First author: Christian Zebelein                                       */
+ /* Other authors: Thiagraj Perinatraj                                     */
+@@ -94,7 +96,7 @@
+ 
+ /*================== [global functions] =======================================*/
+ 
+-
++/* 100kW-46794 - DrvCtrlC2c_Send1ms                             */
+ #define C2C_CORE2_START_SEC_CODE_SLOW
+ #include "MemMap.h"
+ FUNC(void, DRVCTRL_C2C_COM_CODE) DrvCtrlC2c_Send1ms(void)
+@@ -252,7 +254,7 @@ FUNC(void, DRVCTRL_C2C_COM_CODE) DrvCtrlC2c_Send1ms(void)
+    SWIT_DrvCtrlC2c_Send1ms_EndHook();
+ #endif
+ }
+-
++/* 100kW-46795 - DrvCtrlC2c_Send10ms */
+ FUNC(void, DRVCTRL_C2C_COM_CODE) DrvCtrlC2c_Send10ms(void)
+ {
+ 
+@@ -307,11 +309,11 @@ FUNC(void, DRVCTRL_C2C_COM_CODE) DrvCtrlC2c_Send10ms(void)
+   SWIT_DrvCtrlC2c_Send10ms_EndHook();
+ #endif
+ }
+-
++/* 100kW-46796 - DrvCtrlC2c_Send128ms                               */
+ FUNC(void, DRVCTRL_C2C_COM_CODE) DrvCtrlC2c_Send128ms(void)
+ {
+ }
+-
++/* 100kW-46797 - DrvCtrlC2c_Recv1ms                                */
+ FUNC(void, DRVCTRL_C2C_COM_CODE) DrvCtrlC2c_Recv1ms(void)
+ {
+ #ifdef SWIT_Active
+diff --git a/src/fw_cu/Components/Inv/LimAndDrt/EmRotorTempDrtg/src/EmRotorTempDrtg_Wrpr.c b/src/fw_cu/Components/Inv/LimAndDrt/EmRotorTempDrtg/src/EmRotorTempDrtg_Wrpr.c
+index 1bb2cddf4..7aba48159 100644
+--- a/src/fw_cu/Components/Inv/LimAndDrt/EmRotorTempDrtg/src/EmRotorTempDrtg_Wrpr.c
++++ b/src/fw_cu/Components/Inv/LimAndDrt/EmRotorTempDrtg/src/EmRotorTempDrtg_Wrpr.c
+@@ -1,17 +1,17 @@
+ /* ********************************************************************** */
+ /* Sourcefile:      EmRotorTempDrtg_Wrpr.c                                */
+ /*                                                                        */
+-/* Project:         eCar project                                          */
+-/*                  TriCore Aurix                                         */
++/* Project:       100kW                                                   */
+ /*                                                                        */
+-/* Major SW Version : 01                                                  */
+-/* Minor SW Version : 01                                                  */
+ /*                                                                        */
++/* Major SW Version : 01                                                  */
++/* Minor SW Version : 03                                                  */
++/* 100kW-24521 - DRCO EmRotorTempDrtg 01                                                                       */
+ /* Department:      Valeo-Siemens eAutomotive GmbH                        */
+ /*                  VSeA R&D INV ASW DRCO                                 */
+ /*                                                                        */
+ /* First author:    Juri Benke                                            */
+-/* Other authors:   -                                                     */
++/* Other authors:   Gergo Csollak                                                    */
+ /* ********************************************************************** */
+ /* Copyright (C) Valeo-Siemens eAutomotive GmbH 2021                      */
+ /* All Rights Reserved. Confidential                                      */
+@@ -61,7 +61,7 @@
+  */
+ /******************************************************************/
+ 
+-/* GLIB-56044  -  EmRotorTempDrtg                                 */
++/* 100kW-24522 - DRCO EmRotorTempDrtg_Wrpr                                */
+ FUNC(void, EMROTORTEMPDRTG_CODE) EmRotorTempDrtg_Run(void)
+ {
+    /* comments code for new FM v1.1.0*/
+diff --git a/src/fw_cu/Components/Inv/LimAndDrt/EmSpdLimn/src/EmSpdLimn_Wrpr.c b/src/fw_cu/Components/Inv/LimAndDrt/EmSpdLimn/src/EmSpdLimn_Wrpr.c
+index 89a2327d2..9db96eeb4 100644
+--- a/src/fw_cu/Components/Inv/LimAndDrt/EmSpdLimn/src/EmSpdLimn_Wrpr.c
++++ b/src/fw_cu/Components/Inv/LimAndDrt/EmSpdLimn/src/EmSpdLimn_Wrpr.c
+@@ -1,12 +1,12 @@
+ /* ********************************************************************** */
+ /* Sourcefile:      EmSpdLimn_Wrpr.c                                      */
+ /*                                                                        */
+-/* Project:         eCar project                                          */
+-/*                  TriCore Aurix                                         */
++/* Project:         100kW                                                 */
++/*                                                                        */
+ /*                                                                        */
+ /* Major SW Version : 02                                                  */
+ /* Minor SW Version : 01                                                  */
+-/* VWMEB-Inv-232319 - DRCO EmSpdLimn 01                                   */
++/* 100kW-45715 - DRCO EmSpdLimn 02                                        */
+ /*                                                                        */
+ /* Department:      Valeo-Siemens eAutomotive GmbH                        */
+ /*                  VSeA R&D INV ASW DRCO                                 */
+@@ -67,7 +67,7 @@
+  */
+ /******************************************************************/
+ 
+-/*VWMEB-Inv-232320 - DRCO EmSpdLimn                                   */
++/* 100kW-45716 - DRCO EmSpdLimn                                   */
+ FUNC(void, EMSPDLIMN_CODE) MotSpdLimn_Main(void) /*PRQA S 1503*/
+ {
+    /* !\\misraWarningNo2012: Rule 2.2 "This initialization is redundant. The value of this object is never used before being modified."*/
+diff --git a/src/fw_cu/Components/Inv/LimAndDrt/EmStatorTempDrtg/src/EmStatorTempDrtg_Wrpr.c b/src/fw_cu/Components/Inv/LimAndDrt/EmStatorTempDrtg/src/EmStatorTempDrtg_Wrpr.c
+index 6b731defe..40e107efc 100644
+--- a/src/fw_cu/Components/Inv/LimAndDrt/EmStatorTempDrtg/src/EmStatorTempDrtg_Wrpr.c
++++ b/src/fw_cu/Components/Inv/LimAndDrt/EmStatorTempDrtg/src/EmStatorTempDrtg_Wrpr.c
+@@ -1,11 +1,11 @@
+ /* ********************************************************************** */
+ /* Sourcefile:      EmStatorTempDrtg_Wrpr.c                               */
+ /*                                                                        */
+-/* Project:         eCar project                                          */
+-/*                  TriCore Aurix                                         */
++/* Project:         100kW                                                 */
++/*                                                                        */
+ /*                                                                        */
+ /* Major SW Version : 01                                                  */
+-/* Minor SW Version : 01                                                  */
++/* Minor SW Version : 03                                                  */
+ /*                                                                        */
+ /* Department:      Valeo-Siemens eAutomotive GmbH                        */
+ /*                  VSeA R&D INV ASW DRCO                                 */
+diff --git a/src/fw_cu/Components/Inv/LimAndDrt/HvDcULimn/src/HvDcULimn_Wrpr.c b/src/fw_cu/Components/Inv/LimAndDrt/HvDcULimn/src/HvDcULimn_Wrpr.c
+index b5c3b0828..687e42b23 100644
+--- a/src/fw_cu/Components/Inv/LimAndDrt/HvDcULimn/src/HvDcULimn_Wrpr.c
++++ b/src/fw_cu/Components/Inv/LimAndDrt/HvDcULimn/src/HvDcULimn_Wrpr.c
+@@ -1,12 +1,12 @@
+ /* ********************************************************************** */
+ /* Sourcefile:      HvDcULimn_Wrpr.c                                      */
+ /*                                                                        */
+-/* Project:         eCar project                                          */
+-/*                  TriCore Aurix                                         */
++/* Project:         100kW                                                */
++/*                                                                       */
+ /*                                                                        */
+ /* Major SW Version : 01                                                  */
+ /* Minor SW Version : 04                                                  */
+-/* VWMEB-Inv-136011 - DRCO HvDcULimn 01                                   */
++/* 100kW-26885 - DRCO HvDcULimn 01                                        */
+ /*                                                                        */
+ /* Department:      Valeo-Siemens eAutomotive GmbH                        */
+ /*                  VSeA R&D INV ASW DRCO                                 */
+@@ -60,7 +60,7 @@
+ #define RTE_START_SEC_APPL_CODE
+ #include "MemMap.h"
+ 
+-/* VWMEB-Inv-136012 - HvDcULimn_Wrpr                                         */
++/* 100kW-26886 - DRCO HvDcULimn_Wrpr                                         */
+ 
+ /******************************************************************/
+ /*!
+@@ -69,7 +69,7 @@
+  */
+ /******************************************************************/
+ 
+-/* VWMEB-Inv-309974 - HvDcULim_Main                                   */
++/* 100kW-47676 - HvDcULim_Main                                   */
+ void HvDcULim_Main (void)/*TODO SigWr: New interfaces are available in "HvDcUlimn_Template.c" (after make_fw_cu.cmd --generate).*/ /*PRQA S 1503*/
+ {
+    float32 HvDcULimMaxLoc;
+@@ -96,7 +96,7 @@ void HvDcULim_Main (void)/*TODO SigWr: New interfaces are available in "HvDcUlim
+  * \\brief   Minimum value between two values
+  */
+ /******************************************************************/
+-
++/* 100kW-47678 - MinVal                                 */
+ LOCAL_INLINE float32 MinVal(float32 a, float32 b)
+ {
+    return (a < b) ? a : b;
+@@ -108,6 +108,7 @@ LOCAL_INLINE float32 MinVal(float32 a, float32 b)
+  * \\brief   Maximum value between two values
+  */
+ /******************************************************************/
++/* 100kW-47679 - MaxVal                                 */
+ LOCAL_INLINE float32 MaxVal(float32 a, float32 b)
+ {
+    return (a > b )? a : b;
+@@ -120,7 +121,7 @@ LOCAL_INLINE float32 MaxVal(float32 a, float32 b)
+  */
+ /******************************************************************/
+ 
+-/* VWMEB-Inv-136013 - HvDcULimn_Run                                  */
++/* 100kW-47677 - HvDcULimn_Run                                 */
+ FUNC(void, HVDCULIMN_CODE) HvDcULimn_Run (void)
+ {
+ /* Commented because hook implementation is already commented */
+diff --git a/src/fw_cu/Components/Inv/LimAndDrt/IvtrHvAcI2tDrtg/src/IvtrHvAcI2tDrtg_Wrpr.c b/src/fw_cu/Components/Inv/LimAndDrt/IvtrHvAcI2tDrtg/src/IvtrHvAcI2tDrtg_Wrpr.c
+index 082e6ab0c..52c73f13a 100644
+--- a/src/fw_cu/Components/Inv/LimAndDrt/IvtrHvAcI2tDrtg/src/IvtrHvAcI2tDrtg_Wrpr.c
++++ b/src/fw_cu/Components/Inv/LimAndDrt/IvtrHvAcI2tDrtg/src/IvtrHvAcI2tDrtg_Wrpr.c
+@@ -1,12 +1,12 @@
+ /* ********************************************************************** */
+ /* Sourcefile:      IvtrHvAcI2tDrtg_Wrpr.c                                */
+ /*                                                                        */
+-/* Project:         eCar project                                          */
+-/*                  TriCore Aurix                                         */
++/* Project:         100kW                                                */
++/*                                                                       */
+ /*                                                                        */
+ /* Major SW Version : 01                                                  */
+ /* Minor SW Version : 04                                                  */
+-/* VWMEB-Inv-198145 - DRCO IvtrHvAcI2tDrtg 01                             */
++/* 100kW-47327 - DRCO IvtrHvAcI2tDrtg 01                             */
+ /*                                                                        */
+ /* Department:      Valeo-Siemens eAutomotive GmbH                        */
+ /*                  VSeA R&D INV ASW DRCO                                 */
+@@ -63,7 +63,7 @@
+  */
+ /******************************************************************/
+ 
+-/* VWMEB-Inv-198146 - DRCO IvtrHvAcI2tDrtg_Wrpr                               */
++/* 100kW-47328 - DRCO IvtrHvAcI2tDrtg_Wrpr                               */
+ FUNC(void, IVTRHVACI2TDRTG_CODE) IvtrHvAcI2tDrtg_Run(void)
+ {
+    /*Todo : change the input assignments later*/
+diff --git a/src/fw_cu/Components/Inv/LimAndDrt/IvtrHvDcI2tDrtg/src/IvtrHvDcI2tDrtg_Wrpr.c b/src/fw_cu/Components/Inv/LimAndDrt/IvtrHvDcI2tDrtg/src/IvtrHvDcI2tDrtg_Wrpr.c
+index 833208b3e..0c42ab096 100644
+--- a/src/fw_cu/Components/Inv/LimAndDrt/IvtrHvDcI2tDrtg/src/IvtrHvDcI2tDrtg_Wrpr.c
++++ b/src/fw_cu/Components/Inv/LimAndDrt/IvtrHvDcI2tDrtg/src/IvtrHvDcI2tDrtg_Wrpr.c
+@@ -5,8 +5,8 @@
+ /*                  TriCore Aurix                                         */
+ /*                                                                        */
+ /* Major SW Version : 01                                                  */
+-/* Minor SW Version : 05                                                  */
+-/* VWMEB-Inv-198167 - DRCO IvtrHvDcI2tDrtg 01                             */
++/* Minor SW Version : 07                                                  */
++/* 100kW-47842 - DRCO IvtrHvDcI2tDrtg 01                             */
+ /*                                                                        */
+ /* Department:      Valeo-Siemens eAutomotive GmbH                        */
+ /*                  VSeA R&D INV ASW DRCO                                 */
+@@ -63,7 +63,7 @@
+  */
+ /******************************************************************/
+ 
+-/* VWMEB-Inv-198168 - DRCO IvtrHvDcI2tDrtg_Wrpr                                 */
++/* 100kW-47843 - DRCO IvtrHvDcI2tDrtg_Wrpr                                 */
+ FUNC(void, IVTRHVDCI2TDRTG_CODE) IvtrHvDcI2tDrtg_Run(void)
+ {
+    /*Todo : change the input assignments later*/
+diff --git a/src/fw_cu/Components/Inv/LimAndDrt/IvtrIgbtTempEvln/src/IvtrIgbtTempEvln_Wrpr.c b/src/fw_cu/Components/Inv/LimAndDrt/IvtrIgbtTempEvln/src/IvtrIgbtTempEvln_Wrpr.c
+index 0f73c74c7..05ec50a81 100644
+--- a/src/fw_cu/Components/Inv/LimAndDrt/IvtrIgbtTempEvln/src/IvtrIgbtTempEvln_Wrpr.c
++++ b/src/fw_cu/Components/Inv/LimAndDrt/IvtrIgbtTempEvln/src/IvtrIgbtTempEvln_Wrpr.c
+@@ -5,7 +5,7 @@
+ /*                  TriCore Aurix                                         */
+ /*                                                                        */
+ /* Major SW Version : 01                                                  */
+-/* Minor SW Version : 01                                                  */
++/* Minor SW Version : 04                                                  */
+ /*                                                                        */
+ /* Department:      Valeo-Siemens eAutomotive GmbH                        */
+ /*                  VSeA R&D INV ASW DRCO                                 */
+diff --git a/src/fw_cu/Components/Inv/LimAndDrt/TqMgr/src/TqMgr.c b/src/fw_cu/Components/Inv/LimAndDrt/TqMgr/src/TqMgr.c
+index ec802e605..3521e16d8 100644
+--- a/src/fw_cu/Components/Inv/LimAndDrt/TqMgr/src/TqMgr.c
++++ b/src/fw_cu/Components/Inv/LimAndDrt/TqMgr/src/TqMgr.c
+@@ -6,7 +6,7 @@
+ /*                                                                        */
+ /* Major SW Version : 01                                                  */
+ /* Minor SW Version : 09                                                  */
+-/* VWMEB-Inv-174597 - TqMgr 01                                            */
++/* 100kW-44736 - TqMgr 01                                                 */
+ /*                                                                        */
+ /* Department:      Valeo-Siemens eAutomotive GmbH                        */
+ /*                  VSeA R&D INV ASW DRCO                                 */
+@@ -59,7 +59,7 @@
+ #include "SWIT_Sfty.h"
+ #endif
+ 
+-/*   VWMEB-Inv-174598 - TqMgr                                                                     */
++/*   100kW-44737 - TqMgr                                                                     */
+ 
+ /*================== [defines] ==============================================*/
+ #define TQMGR_TQ_THD (1.0e-6F)
+@@ -89,19 +89,19 @@ static const float32 GearRatFac = 11.97f;
+ 
+ /*================== [definition of local inline functions] ========================*/
+ 
+-/* VWMEB-Inv-174599 - Minimum  function (TqMgr_Min)                               */
++/* 100kW-44739 - Minimum  function (TqMgr_Min)                               */
+ LOCAL_INLINE float32 TqMgr_Min(float32 a, float32 b)
+ {
+  return (a < b )? a : b;
+ }
+ 
+-/* VWMEB-Inv-174600 - Maximum  function (TqMgr_Max)                        */
++/* 100kW-44740 - Maximum  function (TqMgr_Max)                       */
+ LOCAL_INLINE float32 TqMgr_Max(float32 a, float32 b)
+ {
+  return (a > b )? a : b;
+ }
+ 
+-/* VWMEB-Inv-174601 - Limitation function (TqMgr_Limit)                     */
++/* 100kW-44741 - Limitation function (TqMgr_Limit)                    */
+ LOCAL_INLINE float32 TqMgr_Limit(float32 value, float32 minVal, float32 maxVal)
+ {
+  float32 returnValue = value;
+@@ -121,19 +121,19 @@ else
+  return returnValue;
+ }
+ 
+-/* VWMEB-Inv-174603 - Function for the calculation of minimal torque value (TqMgr_CalcTqMin)         */
++/* 100kW-44743 - Function for the calculation of minimal torque value (TqMgr_CalcTqMin)         */
+ LOCAL_INLINE float32 TqMgr_CalcTqMin(float32 TqMot, float32 TqGen, float32 Alpha)
+ {
+    return ((1.0F - Alpha) * (-TqMot)) + (Alpha * TqGen);
+ }
+ 
+-/* VWMEB-Inv-174604 - Function for the calculation of maximal torque value (TqMgr_CalcTqMax)       */
++/* 100kW-44744 - Function for the calculation of maximal torque value (TqMgr_CalcTqMax)       */
+ LOCAL_INLINE float32 TqMgr_CalcTqMax(float32 TqMot, float32 TqGen, float32 Alpha)
+ {
+    return ((1.0F - Alpha) * (-TqGen)) + (Alpha * TqMot);
+ }
+ 
+-/* VWMEB-Inv-174602 - Alpha calculation function (TqMgr_CalcAlpha)                */
++/* 100kW-44742 - Alpha calculation function (TqMgr_CalcAlpha)                */
+ LOCAL_INLINE float32 TqMgr_CalcAlpha(float32 SpdAct, float32 SpdLo, float32 SpdHi)
+ {
+    float32 Alpha;
+@@ -167,7 +167,7 @@ LOCAL_INLINE float32 TqMgr_CalcAlpha(float32 SpdAct, float32 SpdLo, float32 SpdH
+  */
+ /******************************************************************/
+ 
+-/* VWMEB-Inv-174616 - TqMgr_Run4ms (I2tDcLinkTqMaxMinCalc)                */
++/* 100kW-44756 - TqMgr_Run4ms (I2tDcLinkTqMaxMinCalc)                */
+ FUNC(void, TQMGR_CORE2_CODE) TqMgr_Run4ms(void)
+ {
+    /* CZ HvDcILimn functionality was moved to HvDcILimn wrapper */
+@@ -181,7 +181,7 @@ FUNC(void, TQMGR_CORE2_CODE) TqMgr_Run4ms(void)
+  */
+ /******************************************************************/
+ 
+-/* VWMEB-Inv-174617 - TqMgr_Run10ms (ExtdTqLimCalc)                        */
++/* 100kW-44757 - TqMgr_Run10ms (ExtdTqLimCalc)                        */
+ FUNC(void, TQMGR_CORE2_CODE) TqMgr_Run10ms(void)
+ {
+    if(FALSE == BswC2cData.ExtdTqLimReq)
+@@ -210,7 +210,7 @@ FUNC(void, TQMGR_CORE2_CODE) TqMgr_Run10ms(void)
+  */
+ /******************************************************************/
+ 
+-/* VWMEB-Inv-211383 - TqMgr_Run                                     */
++/* 100kW-44753 - TqMgr_Run                                     */
+ FUNC(void, TQMGR_CORE2_CODE) TqMgr_Run(void)
+ {
+    float32 TqSetptDelta;
+@@ -556,7 +556,7 @@ FUNC(void, TQMGR_CORE2_CODE) TqMgr_Run(void)
+  */
+ /******************************************************************/
+ 
+-/* VWMEB-Inv-211382 - TqMgr_Main                                     */
++/* 100kW-44746 - TqMgr_Main                                     */
+ FUNC(void, TQMGR_CORE0_CODE) TqMgr_Main(void) /*PRQA S 1503*/
+ {
+    float32 CanNm;
+@@ -947,7 +947,7 @@ FUNC(void, TQMGR_CORE0_CODE) TqMgr_Main(void) /*PRQA S 1503*/
+  */
+ /******************************************************************/
+ 
+-/* VWMEB-Inv-174613 - TqMgr_AntiRuckel (TqSpSel)                                */
++/* 100kW-44751 - TqMgr_AntiRuckel (TqSpSel)                                */
+ FUNC(void, TQMGR_CORE0_CODE) TqMgr_AntiRuckel (void) /*PRQA S 1503*/
+ {
+    float32 TqSetptLoc;
+diff --git a/src/fw_cu/Components/Inv/LimAndDrt/TqPrednIpmPwrLoss/src/TqPrednIpmPwrLoss_Wrpr.c b/src/fw_cu/Components/Inv/LimAndDrt/TqPrednIpmPwrLoss/src/TqPrednIpmPwrLoss_Wrpr.c
+index 12e552fd4..7d3a95178 100644
+--- a/src/fw_cu/Components/Inv/LimAndDrt/TqPrednIpmPwrLoss/src/TqPrednIpmPwrLoss_Wrpr.c
++++ b/src/fw_cu/Components/Inv/LimAndDrt/TqPrednIpmPwrLoss/src/TqPrednIpmPwrLoss_Wrpr.c
+@@ -5,7 +5,7 @@
+ /*                  TriCore Aurix                                         */
+ /*                                                                        */
+ /* Major SW Version : 01                                                  */
+-/* Minor SW Version : 01                                                  */
++/* Minor SW Version : 02                                                  */
+ /*                                                                        */
+ /* Department:      Valeo-Siemens eAutomotive GmbH                        */
+ /*                  VSeA R&D INV ASW DRCO                                 */
+diff --git a/src/fw_cu/Components/Inv/RslvrCal/RslvrOffsDetn/src/RslvrOffsDetn_Wrpr.c b/src/fw_cu/Components/Inv/RslvrCal/RslvrOffsDetn/src/RslvrOffsDetn_Wrpr.c
+index f5e395367..641206d09 100644
+--- a/src/fw_cu/Components/Inv/RslvrCal/RslvrOffsDetn/src/RslvrOffsDetn_Wrpr.c
++++ b/src/fw_cu/Components/Inv/RslvrCal/RslvrOffsDetn/src/RslvrOffsDetn_Wrpr.c
+@@ -1,12 +1,12 @@
+ /* ********************************************************************** */
+ /* Sourcefile:      RslvrOffsDetn_Wrpr.c                                  */
+ /*                                                                        */
+-/* Project:         eCar project                                          */
+-/*                  TriCore Aurix                                         */
++/* Project:         100kW                                                */
++/*                                                                       */
+ /*                                                                        */
+ /* Major SW Version : 01                                                  */
+-/* Minor SW Version : 02                                                  */
+-/*                                                                        */
++/* Minor SW Version : 06                                                  */
++/* 100kW-33160 - DRCO RslvrOffsDetn 01                                    */
+ /* Department:      Valeo-Siemens eAutomotive GmbH                        */
+ /*                  VSeA R&D INV ASW DRCO                                 */
+ /*                                                                        */
+@@ -75,7 +75,7 @@
+  */
+ /******************************************************************/
+ 
+-/* GLIB-72149  -  RslvrOffsDetn                                   */
++/* 100kW-33161 - DRCO RslvrOffsDetn_Run                                   */
+ FUNC(void, RSLVROFFSDETN_CODE) RslvrOffsDetn_Run(void)
+ {
+ /* Commented because hook implementation is already commented */
+diff --git a/src/fw_cu/Components/Inv/RtEnv/DrvCtrlSeqr/src/DrvCtrlSeqr.c b/src/fw_cu/Components/Inv/RtEnv/DrvCtrlSeqr/src/DrvCtrlSeqr.c
+index e0f49181b..c560c5ba3 100644
+--- a/src/fw_cu/Components/Inv/RtEnv/DrvCtrlSeqr/src/DrvCtrlSeqr.c
++++ b/src/fw_cu/Components/Inv/RtEnv/DrvCtrlSeqr/src/DrvCtrlSeqr.c
+@@ -1,11 +1,11 @@
+ /* ********************************************************************** */
+ /* Sourcefile:      DrvCtrlSeqr.c                                         */
+ /*                                                                        */
+-/* Project:         eCar project                                          */
+-/*                  TriCore Aurix                                         */
++/* Project:         100kW                                                 */
++/*                                                                        */
+ /*                                                                        */
+ /* Major SW Version : 01                                                  */
+-/* Minor SW Version : 01                                                  */
++/* Minor SW Version : 12                                                  */
+ /*                                                                        */
+ /* Department:      Valeo-Siemens eAutomotive GmbH                        */
+ /*                  VSeA R&D INV ASW DRCO                                 */
+@@ -307,7 +307,7 @@ LOCAL_INLINE float32 DrvCtrlSeqr_Max(float32 a, float32 b)
+  */
+ /******************************************************************/
+ 
+-/* GLIB-73509  -  DrvCtrlSeqr_Run                                 */
++/* 100kW-22953 - DRCO DrvCtrlSeqr                                 */
+ FUNC(void, DRVCTRLSEQR_CODE) DrvCtrlSeqr_Run(void)
+ {
+ #ifdef SWIT_Active
+@@ -914,7 +914,7 @@ FUNC(void, DRVCTRLSEQR_CODE) DrvCtrlSeqr_Run(void)
+  */
+ /******************************************************************/
+ 
+-/* GLIB-73638  -  DrvCtrlSeqr_Run1ms                                 */
++/* 100kW-22954 - DRCO DrvCtrlSeqr_Run1ms                                 */
+ FUNC(void, DRVCTRLSEQR_CODE) DrvCtrlSeqr_Run1ms(void)
+ {
+    /* Provide a 1ms counter for the PWM runnable */
+diff --git a/src/fw_cu/Components/Inv/TqCtrl/IpmCtrl/src/IpmCtrl.c b/src/fw_cu/Components/Inv/TqCtrl/IpmCtrl/src/IpmCtrl.c
+index 00a75e62e..57f3a48de 100644
+--- a/src/fw_cu/Components/Inv/TqCtrl/IpmCtrl/src/IpmCtrl.c
++++ b/src/fw_cu/Components/Inv/TqCtrl/IpmCtrl/src/IpmCtrl.c
+@@ -1,12 +1,12 @@
+ /* ********************************************************************** */
+ /* Sourcefile:      IpmCtrl.c                                             */
+ /*                                                                        */
+-/* Project:         eCar project                                          */
+-/*                  TriCore Aurix                                         */
++/* Project:         100kW                                                 */
++/*                                                                        */
+ /*                                                                        */
+ /* Major SW Version : 01                                                  */
+ /* Minor SW Version : 11                                                  */
+-/* VWMEB-Inv-208669 - DRCO IpmCtrl 01                                     */
++/* 100kW-44621 - DRCO IpmCtrl 01                                          */
+ /*                                                                        */
+ /* Department:      Valeo-Siemens eAutomotive GmbH                        */
+ /*                  VSeA R&D INV ASW DRCO                                 */
+@@ -391,7 +391,7 @@ LOCAL_INLINE FUNC(void, IPMCTRL_CODE) IpmCtrl_RunCalcOutps(void)
+  */
+ /******************************************************************/
+ 
+-/*   VWMEB-Inv-208670 - DRCO IpmCtrl_Run                                */
++/*   100kW-44622 - DRCO IpmCtrl_Run                                */
+ FUNC(void, IPMCTRL_CODE) IpmCtrl_Run(void)
+ {
+ 
+@@ -445,7 +445,7 @@ FUNC(void, IPMCTRL_CODE) IpmCtrl_Run(void)
+  */
+ /******************************************************************/
+ 
+-/* VWMEB-Inv-208671 - DRCO IpmCtrl_Run1ms                                 */
++/* 100kW-44623 - DRCO IpmCtrl_Run1ms                                 */
+ FUNC(void, IPMCTRL_CODE) IpmCtrl_Run1ms(void)
+ {
+ /* Commented because hook implementation is already commented */
+@@ -559,7 +559,7 @@ FUNC(void, IPMCTRL_CODE) IpmCtrl_Run1ms(void)
+  */
+ /******************************************************************/
+ 
+-/* VWMEB-Inv-208672 - DRCO IpmCtrl_Run4ms                                 */
++/* 100kW-44624 - DRCO IpmCtrl_Run4ms                                 */
+ FUNC(void, IPMCTRL_CODE) IpmCtrl_Run4ms(void)
+ {
+    /* IpmCtrlAdpnStatorTemp, formerly: IPMAdapn */
+@@ -594,7 +594,7 @@ FUNC(void, IPMCTRL_CODE) IpmCtrl_Run4ms(void)
+  */
+ /******************************************************************/
+ 
+-/* VWMEB-Inv-208673 - DRCO IpmCtrl_Run10ms                               */
++/* 100kW-44625 - DRCO IpmCtrl_Run10ms                               */
+ FUNC(void, IPMCTRL_CODE) IpmCtrl_Run10ms(void)
+ {
+    /* Calculate torque available for nominal current and maximal current after thermal derating.
+diff --git a/src/fw_cu/Components/Inv/TqCtrl/IpmPwrLossCalcn/src/IpmPwrLossCalcn_Wrpr.c b/src/fw_cu/Components/Inv/TqCtrl/IpmPwrLossCalcn/src/IpmPwrLossCalcn_Wrpr.c
+index 00436db97..ddaa653fb 100644
+--- a/src/fw_cu/Components/Inv/TqCtrl/IpmPwrLossCalcn/src/IpmPwrLossCalcn_Wrpr.c
++++ b/src/fw_cu/Components/Inv/TqCtrl/IpmPwrLossCalcn/src/IpmPwrLossCalcn_Wrpr.c
+@@ -1,12 +1,12 @@
+ /* ********************************************************************** */
+ /* Sourcefile:      IpmPwrLossCalcn_Wrpr.c                                */
+ /*                                                                        */
+-/* Project:         eCar project                                          */
+-/*                  TriCore Aurix                                         */
++/* Project:        100kW                                                  */
++/*                                                                        */
+ /*                                                                        */
+ /* Major SW Version : 01                                                  */
+ /* Minor SW Version : 03                                                  */
+-/* VWMEB-Inv-317108 - DRCO IpmPwrLossCalcn_Wrpr 01                        */
++/* 100kW-41600 - DRCO IpmPwrLossCalcn 01                                  */
+ /*                                                                        */
+ /* Department:      Valeo-Siemens eAutomotive GmbH                        */
+ /*                  VSeA R&D SWENG OPS 1 OP APP DRCO                      */
+@@ -60,7 +60,7 @@
+  */
+ /******************************************************************/
+ 
+-/*  VWMEB-Inv-317109 - DRCO IpmPwrLossCalcn                                  */
++/*  100kW-41601 - DRCO IpmPwrLossCalcn                                  */
+ FUNC(void, IPMPWRLOSSCALCN_CODE) IpmPwrLossCalcn_Run(void)
+ {
+    /* Description: Sample time of IpmCtrlSlow */
+diff --git a/src/fw_cu/Components/Inv/ValMeasAndProc/CooltFlowReqCalcn/src/CooltFlowReqCalcn_Wrpr.c b/src/fw_cu/Components/Inv/ValMeasAndProc/CooltFlowReqCalcn/src/CooltFlowReqCalcn_Wrpr.c
+index bf0d33dca..92ecb343d 100644
+--- a/src/fw_cu/Components/Inv/ValMeasAndProc/CooltFlowReqCalcn/src/CooltFlowReqCalcn_Wrpr.c
++++ b/src/fw_cu/Components/Inv/ValMeasAndProc/CooltFlowReqCalcn/src/CooltFlowReqCalcn_Wrpr.c
+@@ -5,7 +5,7 @@
+ /*                  TriCore Aurix                                         */
+ /*                                                                        */
+ /* Major SW Version : 01                                                  */
+-/* Minor SW Version : 01                                                  */
++/* Minor SW Version : 03                                                  */
+ /*                                                                        */
+ /* Department:      Valeo Siemens eAutomotive Germany GmbH                */
+ /*                  VSeA R&D INV ASW DRCO                                 */
+diff --git a/src/fw_cu/Components/Inv/ValMeasAndProc/EncCalcn/src/EncCalcn_Wrpr.c b/src/fw_cu/Components/Inv/ValMeasAndProc/EncCalcn/src/EncCalcn_Wrpr.c
+index d35b5e300..06717633e 100644
+--- a/src/fw_cu/Components/Inv/ValMeasAndProc/EncCalcn/src/EncCalcn_Wrpr.c
++++ b/src/fw_cu/Components/Inv/ValMeasAndProc/EncCalcn/src/EncCalcn_Wrpr.c
+@@ -1,12 +1,12 @@
+ /* ********************************************************************** */
+ /* Sourcefile:      EncCalcn.c                                            */
+ /*                                                                        */
+-/* Project:         eCar project                                          */
+-/*                  TriCore Aurix                                         */
++/* Project:         100kW                                          */
++/*                                                                        */
+ /*                                                                        */
+ /* Major SW Version : 01                                                  */
+ /* Minor SW Version : 04                                                  */
+-/* VWMEB-Inv-134747 - DRCO EncCalcn 01                                    */
++/* 100kW-20394 - DRCO EncCalcn 01                                   */
+ /*                                                                       */
+ /* Department:      Valeo-Siemens eAutomotive GmbH                        */
+ /*                  VSeA R&D INV ASW DRCO                                 */
+@@ -60,7 +60,7 @@
+  */
+ /******************************************************************/
+ 
+-/*VWMEB-Inv-189264 - DRCO EncCalcn_Wrpr                           */
++/* 100kW-20395 - DRCO EncCalcn_Wrpr                               */
+ FUNC(void, ENCCALCN_CODE) EncCalcn_Run(void)
+ {
+    EncCalcnInpAgMeclRslvr \t= RslvrCalcnAgMeclRslvr;
+diff --git a/src/fw_cu/Components/Inv/ValMeasAndProc/EncFil/src/EncFil.c b/src/fw_cu/Components/Inv/ValMeasAndProc/EncFil/src/EncFil.c
+index 3ff279db3..f511960ee 100644
+--- a/src/fw_cu/Components/Inv/ValMeasAndProc/EncFil/src/EncFil.c
++++ b/src/fw_cu/Components/Inv/ValMeasAndProc/EncFil/src/EncFil.c
+@@ -1,12 +1,12 @@
+ /* ********************************************************************** */
+ /* Sourcefile:      EncFil.c                                              */
+ /*                                                                        */
+-/* Project:         eCar project                                          */
+-/*                  TriCore Aurix                                         */
++/* Project:         100kw                                                 */
++/*                                                                        */
+ /*                                                                        */
+ /* Major SW Version : 01                                                  */
+ /* Minor SW Version : 05                                                  */
+-/* VWMEB-Inv-134757 - DRCO EncFil 01                                      */
++/* 100kW-20466 - DRCO EncFil 01                                           */
+ /*                                                                        */
+ /* Department:      Valeo-Siemens eAutomotive GmbH                        */
+ /*                  VSeA R&D INV ASW DRCO                                 */
+@@ -78,7 +78,7 @@ STATIC VAR(boolean, ENCFIL_VAR) EncFilResetReq = FALSE;
+  */
+ /******************************************************************/
+ 
+-/* VWMEB-Inv-189245 - DRCO EncFil                                          */
++/* 100kW-20467 - DRCO EncFil                                        */
+ FUNC(void, ENCFIL_CODE) EncFil_Run(void)
+ {
+    sint32  locAgMecl;
+diff --git a/src/fw_cu/Components/Inv/ValMeasAndProc/HvAcICalcn/src/HvAcICalcn.c b/src/fw_cu/Components/Inv/ValMeasAndProc/HvAcICalcn/src/HvAcICalcn.c
+index 1767027df..0570b55fe 100644
+--- a/src/fw_cu/Components/Inv/ValMeasAndProc/HvAcICalcn/src/HvAcICalcn.c
++++ b/src/fw_cu/Components/Inv/ValMeasAndProc/HvAcICalcn/src/HvAcICalcn.c
+@@ -1,12 +1,12 @@
+ /* ********************************************************************** */
+ /* Sourcefile:      HvAcICalcn.c                                          */
+ /*                                                                        */
+-/* Project:         eCar project                                          */
+-/*                  TriCore Aurix                                         */
++/* Project:         100kw                                                 */
++/*                                                                        */
+ /*                                                                        */
+ /* Major SW Version : 01                                                  */
+ /* Minor SW Version : 06                                                 */
+-/* VWMEB-Inv-135814 - DRCO HvAcICalcn 01                                  */                                     
++/* 100kW-20298 - DRCO HvAcICalcn 01                                      */
+ /*                                                                        */
+ /* Department:      Valeo-Siemens eAutomotive GmbH                        */
+ /*                  VSeA R&D INV ASW DRCO                                 */
+@@ -68,7 +68,7 @@ STATIC FUNC(void, HVACICALCN_CODE) HvAcICalcn_IAcValCalcn(void);
+ #define HVACICALCN_START_SEC_CODE
+ #include "MemMap.h"
+ 
+-/* VWMEB-Inv-189321 - DRCO HvAcICalcn                                 */ 
++/* 100kW-20299 - DRCO HvAcICalcn                                 */
+ 
+ /******************************************************************/
+ /*!
+@@ -77,7 +77,7 @@ STATIC FUNC(void, HVACICALCN_CODE) HvAcICalcn_IAcValCalcn(void);
+  */
+ /******************************************************************/
+ 
+-/*  VWMEB-Inv-318897 - HvAcICalcn_SaveOldIAcVal                               */
++/*  100kW-45898 - DRCO HvAcICalcn_SaveOldIAcVal                   */
+ STATIC FUNC(void, HVACICALCN_CODE) HvAcICalcn_SaveOldIAcVal(void)
+ {
+    /* AC current phase U */
+@@ -101,7 +101,7 @@ STATIC FUNC(void, HVACICALCN_CODE) HvAcICalcn_SaveOldIAcVal(void)
+  */
+ /******************************************************************/
+ 
+-/*  VWMEB-Inv-318898 - HvAcICalcn_IAcValCalcn                               */
++/*  100kW-45899 - DRCO HvAcICalcn_IAcValCalcn                     */
+ STATIC FUNC(void, HVACICALCN_CODE) HvAcICalcn_IAcValCalcn(void)
+ {
+    /* !\\misraWarningNo2012: Rule 2.2 "This initialization is redundant. The value of this object is never used before being modified."*/
+@@ -184,7 +184,7 @@ STATIC FUNC(void, HVACICALCN_CODE) HvAcICalcn_IAcValCalcn(void)
+  */
+ /******************************************************************/
+ 
+-/*  VWMEB-Inv-318896 - HvAcICalcn_RunDblUpd                               */
++/*  100kW-45897 - DRCO HvAcICalcn_RunDblUpd                               */
+ FUNC(void, HVACICALN_CODE) HvAcICalcn_RunDblUpd(void)
+ {
+    /* Mittelung der Phasenstroeme im double update mode */
+@@ -237,7 +237,7 @@ FUNC(void, HVACICALN_CODE) HvAcICalcn_RunDblUpd(void)
+  */
+ /******************************************************************/
+ 
+-/* VWMEB-Inv-208961 - HvAcICalcn_RunSngUpdRisng                          */
++/* 100kW-20300 - DRCO HvAcICalcn_RunSngUpdRisng                         */
+ FUNC(void, HVACICALN_CODE) HvAcICalcn_RunSngUpdRisng(void)
+ {
+ #if FTR_SNG_PWM_INTRPT == 0
+@@ -285,7 +285,7 @@ FUNC(void, HVACICALN_CODE) HvAcICalcn_RunSngUpdRisng(void)
+  */
+ /******************************************************************/
+ 
+-/* VWMEB-Inv-208962 - HvAcICalcn_RunSngUpdFall                           */
++/* 100kW-20301 - DRCO HvAcICalcn_RunSngUpdFall                            */
+ FUNC(void, HVACICALN_CODE) HvAcICalcn_RunSngUpdFall(void)
+ {
+    HvAcICalcn_SaveOldIAcVal();
+diff --git a/src/fw_cu/Components/Inv/ValMeasAndProc/HvAcIFndmtlCptAmpCalcn/src/HvAcIFndmtlCptAmpCalcn_Wrpr.c b/src/fw_cu/Components/Inv/ValMeasAndProc/HvAcIFndmtlCptAmpCalcn/src/HvAcIFndmtlCptAmpCalcn_Wrpr.c
+index 4a5f95438..74d7cc1ef 100644
+--- a/src/fw_cu/Components/Inv/ValMeasAndProc/HvAcIFndmtlCptAmpCalcn/src/HvAcIFndmtlCptAmpCalcn_Wrpr.c
++++ b/src/fw_cu/Components/Inv/ValMeasAndProc/HvAcIFndmtlCptAmpCalcn/src/HvAcIFndmtlCptAmpCalcn_Wrpr.c
+@@ -1,12 +1,12 @@
+ /* ********************************************************************** */
+ /* Sourcefile:      HvAcIFndmtlCptAmpCalcn_Wrpr.c                         */
+ /*                                                                        */
+-/* Project:         eCar project                                          */
+-/*                  TriCore Aurix                                         */
++/* Project:         100kW                                                 */
++/*                                                                        */
+ /*                                                                        */
+ /* Major SW Version : 01                                                  */
+ /* Minor SW Version : 07                                                  */
+-/* VWMEB-Inv-138879 - DRCO HvAcIFndmtlCptAmpCalcn 01                      */                                                 
++/* 100kW-47872 - DRCO HvAcIFndmtlCptAmpCalcn 01                           */
+ /*                                                                        */
+ /* Department:      Valeo-Siemens eAutomotive GmbH                        */
+ /*                  VSeA R&D INV ASW DRCO                                 */
+@@ -51,7 +51,7 @@
+ #define HVACIFNDMTLCPTAMPCALCN_START_SEC_CODE
+ #include "MemMap.h"
+ 
+-/*  VWMEB-Inv-182337 - DRCO HvAcIFndmtlCptAmpCalcn_Wrpr                        */   
++/*  100kW-47873 - DRCO HvAcIFndmtlCptAmpCalcn_Wrpr                       */
+ 
+ /******************************************************************/
+ /*!
+diff --git a/src/fw_cu/Components/Inv/ValMeasAndProc/HvAcIMeas/src/HvAcIMeas.c b/src/fw_cu/Components/Inv/ValMeasAndProc/HvAcIMeas/src/HvAcIMeas.c
+index c79a3eaef..169b00a5c 100644
+--- a/src/fw_cu/Components/Inv/ValMeasAndProc/HvAcIMeas/src/HvAcIMeas.c
++++ b/src/fw_cu/Components/Inv/ValMeasAndProc/HvAcIMeas/src/HvAcIMeas.c
+@@ -1,12 +1,12 @@
+ /* ********************************************************************** */
+ /* Sourcefile:      HvAcIMeas.c                                           */
+ /*                                                                        */
+-/* Project:         eCar project                                          */
+-/*                  TriCore Aurix                                         */
++/* Project:         100kW                                                 */
++/*                                                                        */
+ /*                                                                        */
+ /* Major SW Version : 01                                                  */
+ /* Minor SW Version : 04                                                  */
+-/* VWMEB-Inv-135249 - DRCO HvAcIMeas 01                                   */
++/* 100kW-20368 - DRCO HvAcIMeas 03                                        */
+ /*                                                                        */
+ /* Department:      Valeo-Siemens eAutomotive GmbH                        */
+ /*                  VSeA R&D INV ASW DRCO                                 */
+@@ -60,7 +60,7 @@
+ #define HVACIMEAS_START_SEC_CODE
+ #include "MemMap.h"
+ 
+-/*  VWMEB-Inv-319336 - HvAcIMeas                                              */
++/*  100kW-45136 - HvAcIMeas                                              */
+ 
+ /******************************************************************/
+ /*!
+@@ -68,7 +68,7 @@
+  * \\brief   local run function for slow ac-current measurement
+  */
+ /******************************************************************/
+-/* 100kW-20369  - DRCO HvAcIMeas */
++/* 100kW-20369  - HvAcIMeas_RunA */
+ LOCAL_INLINE FUNC(void, HVACIMEAS_CODE) HvAcIMeas_GetElFrqAndProcLut(void)
+ {
+    /* Passing freq input to IAcMeasAdapt */
+@@ -102,7 +102,7 @@ LOCAL_INLINE FUNC(void, HVACIMEAS_CODE) HvAcIMeas_GetElFrqAndProcLut(void)
+  * \\brief   local run function for fast ac-current measurement
+  */
+ /******************************************************************/
+-/* 100kW-20369  - DRCO HvAcIMeas */
++/* 100kW-20369  - HvAcIMeas_RunA  */
+ LOCAL_INLINE FUNC(void, HVACIMEAS_CODE) HvAcIMeas_GetAndProcHvAcI(void)
+ {
+    /* fetch the raw values of phase currents*/
+@@ -165,7 +165,7 @@ LOCAL_INLINE FUNC(void, HVACIMEAS_CODE) HvAcIMeas_GetAndProcHvAcI(void)
+  */
+ /******************************************************************/
+ 
+-/* 100kW-20370  - DRCO HvAcIMeas_RunA */
++/* 100kW-20369  - HvAcIMeas_RunA  */
+ FUNC(void, HVACIMEAS_CODE) HvAcIMeas_RunA(void)
+ {
+ #if FTR_SNG_PWM_INTRPT == 0
+@@ -188,7 +188,7 @@ FUNC(void, HVACIMEAS_CODE) HvAcIMeas_RunA(void)
+  */
+ /******************************************************************/
+ 
+-/* 100kW-20370  - DRCO HvAcIMeas_Run4ms */
++/* 100kW-20370  - HvAcIMeas_Run4ms */
+ FUNC(void, HVACIMEAS_CODE) HvAcIMeas_Run4ms(void)
+ {
+    HvAcIMeas_GetElFrqAndProcLut();
+diff --git a/src/fw_cu/Components/Inv/ValMeasAndProc/HvDcICalcn/src/HvDcICalcn_Wrpr.c b/src/fw_cu/Components/Inv/ValMeasAndProc/HvDcICalcn/src/HvDcICalcn_Wrpr.c
+index cdcf68892..84b1590eb 100644
+--- a/src/fw_cu/Components/Inv/ValMeasAndProc/HvDcICalcn/src/HvDcICalcn_Wrpr.c
++++ b/src/fw_cu/Components/Inv/ValMeasAndProc/HvDcICalcn/src/HvDcICalcn_Wrpr.c
+@@ -1,12 +1,12 @@
+ /* ********************************************************************** */
+ /* Sourcefile:      HvDcICalcn_Wrpr.c                                     */
+ /*                                                                        */
+-/* Project:         eCar project                                          */
+-/*                  TriCore Aurix                                         */
++/* Project:         100kW                                                 */
++/*                                                                        */
+ /*                                                                        */
+ /* Major SW Version : 01                                                  */
+ /* Minor SW Version : 07                                                  */
+-/* VWMEB-Inv-142241 - DRCO HvDcICalcn 01                                  */
++/* 100kW-21252 - DRCO HvDcICalcn 01                                       */
+ /*                                                                        */
+ /* Department:      Valeo-Siemens eAutomotive GmbH                        */
+ /*                  VSeA R&D INV ASW DRCO                                 */
+@@ -66,7 +66,7 @@
+  */
+ /******************************************************************/
+ 
+-/* VWMEB-Inv-189337 - DRCO HvDcICalcn_Wrpr                        */
++/* 100kW-21253 - DRCO HvDcICalcn_Wrpr                        */
+ FUNC(void, HVDCICALCN_CODE) HvDcICalcn_Run(void)
+ {
+ /* Commented because hook implementation is already commented */
+diff --git a/src/fw_cu/Components/Inv/ValMeasAndProc/HvDcUMeas/src/HvDcUMeas_Wrpr.c b/src/fw_cu/Components/Inv/ValMeasAndProc/HvDcUMeas/src/HvDcUMeas_Wrpr.c
+index 246a61dc9..981964dbd 100644
+--- a/src/fw_cu/Components/Inv/ValMeasAndProc/HvDcUMeas/src/HvDcUMeas_Wrpr.c
++++ b/src/fw_cu/Components/Inv/ValMeasAndProc/HvDcUMeas/src/HvDcUMeas_Wrpr.c
+@@ -1,12 +1,12 @@
+ /* ********************************************************************** */
+ /* Sourcefile:      HvDcUMeas_Wrpr.c                                      */
+ /*                                                                        */
+-/* Project:         eCar project                                          */
+-/*                  TriCore Aurix                                         */
++/* Project:         100kW                                                 */
++/*                                                                        */
+ /*                                                                        */
+ /* Major SW Version : 01                                                  */
+ /* Minor SW Version : 05                                                  */
+-/* VWMEB-Inv-132951 - DRCO HvDcUMeas 01                                   */
++/* 100kW-20348 - DRCO HvDcUMeas 01                                        */
+ /*                                                                        */
+ /* Department:      Valeo-Siemens eAutomotive GmbH                        */
+ /*                  VSeA R&D INV ASW DRCO                                 */
+@@ -70,7 +70,7 @@
+  */
+ /******************************************************************/
+ 
+-/* VWMEB-Inv-132952 - DRCO HvDcUMeas_Wrpr                                      */
++/* 100kW-20349 - DRCO HvDcUMeas_Wrpr                                      */
+ FUNC(void, HVDCUMEAS_CODE) HvDcUMeas_Run(void)
+ {
+ #ifdef SWIT_Active
+diff --git a/src/fw_cu/Components/Inv/ValMeasAndProc/RotorAgSpdCalcn/src/RotorAgSpdCalcn.c b/src/fw_cu/Components/Inv/ValMeasAndProc/RotorAgSpdCalcn/src/RotorAgSpdCalcn.c
+index c450becda..add21fbd3 100644
+--- a/src/fw_cu/Components/Inv/ValMeasAndProc/RotorAgSpdCalcn/src/RotorAgSpdCalcn.c
++++ b/src/fw_cu/Components/Inv/ValMeasAndProc/RotorAgSpdCalcn/src/RotorAgSpdCalcn.c
+@@ -1,12 +1,12 @@
+ /* ********************************************************************** */
+ /* Sourcefile:      RotorAgSpdCalcn.c                                     */
+ /*                                                                        */
+-/* Project:         eCar project                                          */
+-/*                  TriCore Aurix                                         */
++/* Project:         100kW                                                 */
++/*                                                                        */
+ /*                                                                        */
+ /* Major SW Version : 01                                                  */
+ /* Minor SW Version : 05                                                  */
+-/* VWMEB-Inv-177928 - DRCO RotorAgSpdCalcn 01                             */
++/* 100kW-21279 - DRCO RotorAgSpdCalcn 01                             */
+ /*                                                                        */
+ /* Department:      Valeo-Siemens eAutomotive GmbH                        */
+ /*                  VSeA R&D INV ASW DRCO                                 */
+@@ -72,7 +72,7 @@ STATIC VAR(float32, ROTORAGSPDCALCN_VAR) RotorAgSpdCalcnSimnSetAg = 0.F; /* simu
+  */
+ /******************************************************************/
+ 
+-/* VWMEB-Inv-177929 - DRCO RotorAgSpdCalcn_Run                                */
++/* 100kW-21280 - DRCO RotorAgSpdCalcn                               */
+ FUNC(void, ROTORAGSPDCALCN_CODE) RotorAgSpdCalcn_Run(void)
+ {
+    /* !\\misraWarningNo2012: Rule 2.2 "This initialization is redundant. The value of this object is never used before being modified."*/
+diff --git a/src/fw_cu/Components/Inv/ValMeasAndProc/RslvrCalcn/src/RslvrCalcn.c b/src/fw_cu/Components/Inv/ValMeasAndProc/RslvrCalcn/src/RslvrCalcn.c
+index 0bf4646c6..20ab82531 100644
+--- a/src/fw_cu/Components/Inv/ValMeasAndProc/RslvrCalcn/src/RslvrCalcn.c
++++ b/src/fw_cu/Components/Inv/ValMeasAndProc/RslvrCalcn/src/RslvrCalcn.c
+@@ -1,17 +1,17 @@
+ /* ********************************************************************** */
+ /* Sourcefile:      RslvrCalcn.c                                       */
+ /*                                                                        */
+-/* Project:         eCar project                                          */
+-/*                  TriCore Aurix                                         */
++/* Project:         100kW                                                */
++/*                                                                       */
+ /*                                                                        */
+ /* Major SW Version : 01                                                  */
+ /* Minor SW Version : 07                                                  */
+-/* VWMEB-Inv-134782 - DRCO RslvrCalcn 01                                  */
++/* 100kW-20416 - DRCO RslvrCalcn 01                                       */
+ /*                                                                        */
+ /* Department:      Valeo-Siemens eAutomotive GmbH                        */
+ /*                  VSeA R&D INV ASW DRCO                                 */
+ /*                                                                        */
+-/* First author:    Robert Nowak                                         */
++/* First author:    Robert Nowak                                          */
+ /* Other authors:   -                                                     */
+ /* ********************************************************************** */
+ /* Copyright (C) Valeo-Siemens eAutomotive GmbH 2021                      */
+@@ -138,14 +138,14 @@ STATIC FUNC(void, RSLVRCALCN_CODE) RslvrCalcn_Extrapolate(void);
+ #define RSLVRCALCN_START_SEC_CODE
+ #include "MemMap.h"
+ 
+-/*    VWMEB-Inv-189142 - DRCO RslvrCalcn_Wrpr                                */
++/* 100kW-20417 - DRCO RslvrCalcn */
+ /******************************************************************/
+ /*!
+  * \\fn      void RslvrCalcn_Extrapolate(void)
+  * \\brief   Angle extrapolation
+  */
+ /******************************************************************/
+-/*   VWMEB-Inv-318885 - RslvrCalcn_Extrapolate                               */
++/*   100kW-45434 - RslvrCalcn_Extrapolate                              */
+ STATIC FUNC(void, RSLVRCALCN_CODE) RslvrCalcn_Extrapolate(void)
+ {
+    /* Check extrapolation activation/deactivation conditions */
+@@ -197,7 +197,7 @@ STATIC FUNC(void, RSLVRCALCN_CODE) RslvrCalcn_Extrapolate(void)
+  */
+ /******************************************************************/
+ 
+-/* VWMEB-Inv-318884 - RslvrCalcn_Init                                */
++/* 100kW-45433 - RslvrCalcn_Init                                */
+ FUNC(void, RSLVRCALCN_CODE) RslvrCalcn_Init(void)
+ {
+    /* Resolver */
+@@ -230,7 +230,7 @@ FUNC(void, RSLVRCALCN_CODE) RslvrCalcn_Init(void)
+  */
+ /******************************************************************/
+ 
+-/* VWMEB-Inv-190426 - RslvrCalcn_Run                                 */
++/* 100kW-20418 - RslvrCalcn_Run                                 */
+ FUNC(void, RSLVRCALCN_CODE) RslvrCalcn_Run(void)
+ {
+ #if RSLVRCALCN_USE_DSADC == 0U
+diff --git a/src/fw_cu/Components/Inv/ValMeasAndProc/SigColl/src/SigColl_Wrpr.c b/src/fw_cu/Components/Inv/ValMeasAndProc/SigColl/src/SigColl_Wrpr.c
+index 05b0d42fe..9cedbe5eb 100644
+--- a/src/fw_cu/Components/Inv/ValMeasAndProc/SigColl/src/SigColl_Wrpr.c
++++ b/src/fw_cu/Components/Inv/ValMeasAndProc/SigColl/src/SigColl_Wrpr.c
+@@ -1,12 +1,12 @@
+ /* ********************************************************************** */
+ /* Sourcefile:      SigColl_Wrpr.c                                        */
+ /*                                                                        */
+-/* Project:         eCar project                                          */
+-/*                  TriCore Aurix                                         */
++/* Project:         100kW                                                */
++/*                                                                       */
+ /*                                                                        */
+ /* Major SW Version : 01                                                  */
+-/* Minor SW Version : 01                                                  */
+-/*                                                                        */
++/* Minor SW Version : 06                                                  */
++/* 100kW-33219 - DRCO SigColl 01                                          */
+ /* Department:      Valeo-Siemens eAutomotive GmbH                        */
+ /*                  VSeA R&D INV ASW DRCO                                 */
+ /*                                                                        */
+@@ -76,7 +76,7 @@
+  */
+ /******************************************************************/
+ 
+-/* GLIB-72172  -  SigColl                                         */
++/* 100kW-33220 - DRCO SigColl_Run                                         */
+ FUNC(void, SIGCOLL_CODE) SigColl_Run(void)
+ {
+ 
+'

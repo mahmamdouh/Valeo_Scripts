@@ -1,0 +1,306 @@
+b'commit 29c031295e00707c6be60c5eded1db12343a639a
+Author: jilles <jozsef.illes.jv.ext@valeo.com>
+Date:   Mon Mar 21 12:38:22 2022 +0100
+
+    $100kW-56296$ - I2t wrapper quality, avl signal fixes
+    
+    Change-Id: I816a424b50bcf6388eaa6ca4b92b88a0d6dbfae2
+
+diff --git a/src/fw_cu/Components/Inv/LimAndDrt/IvtrHvAcI2tDrtg/src/IvtrHvAcI2tDrtg_Wrpr.c b/src/fw_cu/Components/Inv/LimAndDrt/IvtrHvAcI2tDrtg/src/IvtrHvAcI2tDrtg_Wrpr.c
+index 02eda5345..322e6074a 100644
+--- a/src/fw_cu/Components/Inv/LimAndDrt/IvtrHvAcI2tDrtg/src/IvtrHvAcI2tDrtg_Wrpr.c
++++ b/src/fw_cu/Components/Inv/LimAndDrt/IvtrHvAcI2tDrtg/src/IvtrHvAcI2tDrtg_Wrpr.c
+@@ -1,20 +1,20 @@
+ /* ********************************************************************** */
+ /* Sourcefile:      IvtrHvAcI2tDrtg_Wrpr.c                                */
+ /*                                                                        */
+-/* Project:         100kW                                                */
+-/*                                                                       */
++/* Project:         100kW                                                 */
++/*                                                                        */
+ /*                                                                        */
+ /* Major SW Version : 01                                                  */
+-/* Minor SW Version : 04                                                  */
+-/* 100kW-47327 - DRCO IvtrHvAcI2tDrtg 01                             */
++/* Minor SW Version : 05                                                  */
++/* 100kW-47327 - DRCO IvtrHvAcI2tDrtg 01                                  */
+ /*                                                                        */
+ /* Department:      Valeo-Siemens eAutomotive GmbH                        */
+ /*                  VSeA R&D INV ASW DRCO                                 */
+ /*                                                                        */
+-/* First author:    Deepak Purushothaman                                  */
++/* First author:    Jozsef Illes                                          */
+ /* Other authors:   -                                                     */
+ /* ********************************************************************** */
+-/* Copyright (C) Valeo-Siemens eAutomotive GmbH 2021                      */
++/* Copyright (C) Valeo-Siemens eAutomotive GmbH 2022                      */
+ /* All Rights Reserved. Confidential                                      */
+ /* ********************************************************************** */
+ 
+@@ -78,7 +78,7 @@ FUNC(void, IVTRHVACI2TDRTG_CODE) IvtrHvAcI2tDrtg_Run(void)
+    IvtrHvAcI2tDrtg_InputData.HvAcIMaxDurn1= IvtrHvAcI2tDrtgIMaxDurn1; /* Time duration in which the maximum HV AC current is allowed (derating 1) */
+    IvtrHvAcI2tDrtg_InputData.HvAcIMaxDurn2= IvtrHvAcI2tDrtgIMaxDurn2; /* Time duration in which the maximum HV AC current is allowed (derating 2) */
+ 
+-   IvtrHvAcI2tDrtg_InputData.IvtrThermMdlCooltInlTemp = IvtrThermMdlCooltInlTemp; /* Filtered coolant inlet temperature */
++   IvtrHvAcI2tDrtg_InputData.IvtrThermMdlCooltInlTemp = 65.F; /* keep i2t init stubbed, filtered coolant inlet temperature */
+    /* comments code for new FM v1.1.0*/
+ #if FTR_SNG_PWM_INTRPT == 0
+    IvtrHvAcI2tDrtg_InputData.FidIvtrHvAcI2tDrtgInhbn = DrvCtrlErrDebFctInhbnSts.B.FctIdDrtgHvacI2t;  /* Inhibition handling flag (1 = Function inhibited, 0 = Normal operation) */
+@@ -94,20 +94,22 @@ FUNC(void, IVTRHVACI2TDRTG_CODE) IvtrHvAcI2tDrtg_Run(void)
+    IvtrHvAcI2tDrtg_InputData.FidIvtrHvAcI2tDrtgErrVehPrkg = TRUE; /* keep i2t init stubbed, (1 = Not valid, 0 = Valid) */
+ #endif
+    IvtrHvAcI2tDrtg_InputData.FidIvtrHvAcI2tDrtgIniNvm = TRUE; /* keep i2t init stubbed */
+-   IvtrHvAcI2tDrtg_InputData.FidIvtrHvAcI2tDrtgErrNvm = (BswC2cData.InvTempNvm.AcI2tCntrVld^1U); /* Validity Bit which denotes validity of variables stored NVM (0: Not Valid 1: Signal Valid ) */
++   IvtrHvAcI2tDrtg_InputData.FidIvtrHvAcI2tDrtgErrNvm = FALSE; /* keep i2t init stubbed */
+  
+    /* since all the corresponding FIDs are activated, these signal connections are not effective at all for the model: */
+-   IvtrHvAcI2tDrtg_InputData.HvOffTi = BswC2cData.HvOffTi; /* High Voltage Off time */
+-   IvtrHvAcI2tDrtg_InputData.VehPrkgTi = BswC2cData.VehPrkgTi; /* Vehicle parking time */
++   IvtrHvAcI2tDrtg_InputData.HvOffTi = 0.F;      /* keep i2t init stubbed, High Voltage Off time */
++   IvtrHvAcI2tDrtg_InputData.VehPrkgTi = 0.F;    /* keep i2t init stubbed, Vehicle off time */
++
+    /* comments code for new FM v1.1.0*/
+ #if FTR_SNG_PWM_INTRPT == 0
+    IvtrHvAcI2tDrtg_InputData.IgbtTempMaxVld = DrvCtrlErrDebFctInhbnSts.B.FctIdFltGrp4; /* Status flag for IgbtTempMax input signal (1 = Not valid, 0 = Valid) */
+ #else
+-   IvtrHvAcI2tDrtg_InputData.IgbtTempMaxVld = FALSE;
++   IvtrHvAcI2tDrtg_InputData.IgbtTempMaxVld = TRUE; /* keep i2t init stubbed, FID handling Sensor valid: 1=Not Valid, 0=Valid */
+ #endif
+-   IvtrHvAcI2tDrtg_InputData.IgbtTempMax = SftyC2cData.IgbtTempMax; /* Maximum IGBT temperature (based directly on sensor values) */
+-   IvtrHvAcI2tDrtg_InputData.NvmI2tCntrVal1 = BswC2cData.InvTempNvm.AcI2tCntr1; /* I2t counter value stored in NVM (derating 1) */
+-   IvtrHvAcI2tDrtg_InputData.NvmI2tCntrVal2 = BswC2cData.InvTempNvm.AcI2tCntr2; /* I2t counter value stored in NVM (derating 2) */
++   IvtrHvAcI2tDrtg_InputData.IgbtTempMax = 0.F; /* keep i2t init stubbed, Maximum NTC temperature */
++
++   IvtrHvAcI2tDrtg_InputData.NvmI2tCntrVal1 = 0.F; /* keep i2t init stubbed, Stored NVM data 1 */
++   IvtrHvAcI2tDrtg_InputData.NvmI2tCntrVal2 = 0.F; /* keep i2t init stubbed, Stored NVM data 2 */
+ 
+    /* Call the cyclic function */
+    IvtrHvAcI2tDrtg();
+@@ -145,7 +147,7 @@ FUNC(void, IVTRHVACI2TDRTG_CODE) IvtrHvAcI2tDrtg_Run(void)
+ #undef IVTRHVACI2TDRTG_WRPR_ /* PRQA S 0841 */
+ /*! @} doxygen end of group definition                                       */
+ /* ************************************************************************* */
+-/* Copyright (C) Valeo-Siemens eAutomotive GmbH 2021                         */
++/* Copyright (C) Valeo-Siemens eAutomotive GmbH 2022                         */
+ /* All Rights Reserved. Confidential                                         */
+ /* ************************************************************************* */
+ /*==================[end of file]============================================*/
+diff --git a/src/fw_cu/Components/Inv/LimAndDrt/IvtrHvAcI2tDrtg/src/IvtrHvAcI2tDrtg_WrprData.c b/src/fw_cu/Components/Inv/LimAndDrt/IvtrHvAcI2tDrtg/src/IvtrHvAcI2tDrtg_WrprData.c
+index 7a8591e11..ee21a5f15 100644
+--- a/src/fw_cu/Components/Inv/LimAndDrt/IvtrHvAcI2tDrtg/src/IvtrHvAcI2tDrtg_WrprData.c
++++ b/src/fw_cu/Components/Inv/LimAndDrt/IvtrHvAcI2tDrtg/src/IvtrHvAcI2tDrtg_WrprData.c
+@@ -135,7 +135,7 @@ CONST(float32, IVTRHVACI2TDRTG_CALIB) IvtrHvAcI2tDrtgIMaxNom2 = 400.f;
+ #define IVTRHVACI2TDRTG_START_SEC_CALIB_32
+ #include "MemMap.h"
+ 
+-extern CONST(uint32, IVTRHVACI2TDRTG_CALIB) IvtrHvAcI2tDrtgId = 7U;
++CONST(uint32, IVTRHVACI2TDRTG_CALIB) IvtrHvAcI2tDrtgId = 7U;
+ #define IVTRHVACI2TDRTG_STOP_SEC_CALIB_32
+ #include "MemMap.h"
+ /* End: IVTRHVACI2TDRTG_STOP_SEC_CALIB_32 (calib) */
+diff --git a/src/fw_cu/Components/Inv/LimAndDrt/IvtrHvDcI2tDrtg/src/IvtrHvDcI2tDrtg_Wrpr.c b/src/fw_cu/Components/Inv/LimAndDrt/IvtrHvDcI2tDrtg/src/IvtrHvDcI2tDrtg_Wrpr.c
+index 85baae324..3ce7fc1a7 100644
+--- a/src/fw_cu/Components/Inv/LimAndDrt/IvtrHvDcI2tDrtg/src/IvtrHvDcI2tDrtg_Wrpr.c
++++ b/src/fw_cu/Components/Inv/LimAndDrt/IvtrHvDcI2tDrtg/src/IvtrHvDcI2tDrtg_Wrpr.c
+@@ -5,16 +5,16 @@
+ /*                  TriCore Aurix                                         */
+ /*                                                                        */
+ /* Major SW Version : 01                                                  */
+-/* Minor SW Version : 07                                                  */
+-/* 100kW-47842 - DRCO IvtrHvDcI2tDrtg 01                             */
++/* Minor SW Version : 06                                                  */
++/* 100kW-47842 - DRCO IvtrHvDcI2tDrtg 01                                  */
+ /*                                                                        */
+ /* Department:      Valeo-Siemens eAutomotive GmbH                        */
+ /*                  VSeA R&D INV ASW DRCO                                 */
+ /*                                                                        */
+-/* First author:    Deepak Purushothaman                                  */
++/* First author:    Jozsef Illes                                          */
+ /* Other authors:   -                                                     */
+ /* ********************************************************************** */
+-/* Copyright (C) Valeo-Siemens eAutomotive GmbH 2021                      */
++/* Copyright (C) Valeo-Siemens eAutomotive GmbH 2022                      */
+ /* All Rights Reserved. Confidential                                      */
+ /* ********************************************************************** */
+ 
+@@ -77,7 +77,7 @@ FUNC(void, IVTRHVDCI2TDRTG_CODE) IvtrHvDcI2tDrtg_Run(void)
+    IvtrHvDcI2tDrtg_InputData.HvDcIMaxDurn1 = IvtrHvDcI2tDrtgIMaxDurn1; /* Time duration in which the maximum HV DC current is allowed (derating 1) */
+    IvtrHvDcI2tDrtg_InputData.HvDcIMaxDurn2 = IvtrHvDcI2tDrtgIMaxDurn2; /* Time duration in which the maximum HV DC current is allowed (derating 2) */
+ 
+-   IvtrHvDcI2tDrtg_InputData.IvtrThermMdlCooltInlTemp = IvtrThermMdlCooltInlTemp; /* Filtered coolant inlet temperature */
++   IvtrHvDcI2tDrtg_InputData.IvtrThermMdlCooltInlTemp = 65.F; /* keep i2t init stubbed, filtered coolant inlet temperature */
+    /* comments code for new FM v1.1.0*/
+ #if FTR_SNG_PWM_INTRPT == 0
+    IvtrHvDcI2tDrtg_InputData.FidIvtrHvDcI2tDrtgInhbn = DrvCtrlErrDebFctInhbnSts.B.FctIdDrtgHvdcI2t; /* FID input to turn off the function */
+@@ -93,16 +93,16 @@ FUNC(void, IVTRHVDCI2TDRTG_CODE) IvtrHvDcI2tDrtg_Run(void)
+    IvtrHvDcI2tDrtg_InputData.FidIvtrHvDcI2tDrtgErrVehPrkg = TRUE; /* keep i2t init stubbed, Veh Hv Off: 1=Not Valid, 0=Valid */
+ #endif
+    IvtrHvDcI2tDrtg_InputData.FidIvtrHvDcI2tDrtgIniNvm = TRUE; /* keep i2t init stubbed */
++   IvtrHvDcI2tDrtg_InputData.FidIvtrHvDcI2tDrtgErrNvm = FALSE; /* keep i2t init stubbed */
+ 
+-   IvtrHvDcI2tDrtg_InputData.FidIvtrHvDcI2tDrtgErrNvm = (BswC2cData.InvTempNvm.DcLinkI2tCntrVld^1U); /* Validity Bit which denotes validity of variables stored NVM (0: Not Valid 1: Signal Valid ) */
+-   IvtrHvDcI2tDrtg_InputData.IgbtTempMaxVld = DrvCtrlErrDebFctInhbnSts.B.FctIdFltGrp4; /* FID handling Sensor valid: 1=Not Valid, 0=Valid */
+-
+-   IvtrHvDcI2tDrtg_InputData.IgbtTempMax = SftyC2cData.IgbtTempMax; /* Maximum NTC temperature */
+    /* since all the corresponding FIDs are activated, these signal connections are not effective at all for the model: */
+-   IvtrHvDcI2tDrtg_InputData.HvOffTi = BswC2cData.HvOffTi; /* High Voltage Off time */
+-   IvtrHvDcI2tDrtg_InputData.VehPrkgTi = BswC2cData.VehPrkgTi; /* Vehicle off time */
+-   IvtrHvDcI2tDrtg_InputData.NvmI2tCntrVal1 = BswC2cData.InvTempNvm.DcLinkI2tCntr1; /* Stored NVM data 1 */
+-   IvtrHvDcI2tDrtg_InputData.NvmI2tCntrVal2 = BswC2cData.InvTempNvm.DcLinkI2tCntr2; /* Stored NVM data 2 */
++   IvtrHvDcI2tDrtg_InputData.IgbtTempMaxVld = TRUE; /* keep i2t init stubbed, FID handling Sensor valid: 1=Not Valid, 0=Valid */
++   IvtrHvDcI2tDrtg_InputData.IgbtTempMax = 0.F; /* keep i2t init stubbed, Maximum NTC temperature */
++
++   IvtrHvDcI2tDrtg_InputData.HvOffTi = 0.F;      /* keep i2t init stubbed, High Voltage Off time */
++   IvtrHvDcI2tDrtg_InputData.VehPrkgTi = 0.F;    /* keep i2t init stubbed, Vehicle off time */
++   IvtrHvDcI2tDrtg_InputData.NvmI2tCntrVal1 = 0.F; /* keep i2t init stubbed, Stored NVM data 1 */
++   IvtrHvDcI2tDrtg_InputData.NvmI2tCntrVal2 = 0.F; /* keep i2t init stubbed, Stored NVM data 2 */
+ 
+    /* Call the cyclic function */
+    IvtrHvDcI2tDrtg();
+@@ -140,7 +140,7 @@ FUNC(void, IVTRHVDCI2TDRTG_CODE) IvtrHvDcI2tDrtg_Run(void)
+ #undef IVTRHVDCI2TDRTG_WRPR_ /* PRQA S 0841 */
+ /*! @} doxygen end of group definition                                       */
+ /* ************************************************************************* */
+-/* Copyright (C) Valeo-Siemens eAutomotive GmbH 2021                         */
++/* Copyright (C) Valeo-Siemens eAutomotive GmbH 2022                         */
+ /* All Rights Reserved. Confidential                                         */
+ /* ************************************************************************* */
+ /*==================[end of file]============================================*/
+diff --git a/src/fw_cu/Components/Inv/ValMeasAndProc/IvtrDcLinkThermMdl/src/IvtrDcLinkThermMdl.c b/src/fw_cu/Components/Inv/ValMeasAndProc/IvtrDcLinkThermMdl/src/IvtrDcLinkThermMdl.c
+index 2564fc59f..284eb3418 100644
+--- a/src/fw_cu/Components/Inv/ValMeasAndProc/IvtrDcLinkThermMdl/src/IvtrDcLinkThermMdl.c
++++ b/src/fw_cu/Components/Inv/ValMeasAndProc/IvtrDcLinkThermMdl/src/IvtrDcLinkThermMdl.c
+@@ -79,15 +79,6 @@ VAR(float32, IVTRDCLINKTHERMMDL_VAR) SftyTEvlnMotStatorTMax = 100.0f;
+ #include "MemMap.h"
+ /* End: SFTYTEVLN_STOP_SEC_VAR_AREA_CMN_SLOW_INIT_32 (online) */
+ 
+-/* Begin: IVTRDCLINKTHERMMDL_START_SEC_VAR_CLEARED_32 (online) */
+-#define IVTRDCLINKTHERMMDL_START_SEC_VAR_CLEARED_32
+-#include "MemMap.h"
+-
+-VAR(uint8, IVTRDCLINKTHERMMDL_VAR) IvtrThermMdlCooltTempAvlDcLink;
+-#define IVTRDCLINKTHERMMDL_STOP_SEC_VAR_CLEARED_32
+-#include "MemMap.h"
+-/* End: IVTRDCLINKTHERMMDL_STOP_SEC_VAR_CLEARED_32 (online) */
+-
+ /*================== [prototype of local functions] =========================*/
+ 
+ /*================== [definition of local functions] ========================*/
+@@ -105,21 +96,7 @@ VAR(uint8, IVTRDCLINKTHERMMDL_VAR) IvtrThermMdlCooltTempAvlDcLink;
+ FUNC(void, IVTRDCLINKTHERMMDL_CODE) IvtrDcLinkThermMdl_Run(void)
+ {
+    SftyTEvlnMotStatorTMax = SftyC2cData.MotStatorTVal; /* Actual measured winding sensor temperature */
+-
+-   SftyTEvlnMotStatorTAvl =
+-           /* CZ: FIXME: Rework mechanism */
+-           ~(DrvCtrlErrDebFctInhbnSts.B.FctIdFltGrp2 | (BswC2cData.MotTempIni^1u));
+-
+-   /* comments code for new FM v1.1.0*/
+-#if FTR_SNG_PWM_INTRPT == 0
+-   IvtrThermMdlCooltTempAvlDcLink =
+-            /* CZ: FIXME: Rework mechanism */
+-            ~(DrvCtrlErrDebFctInhbnSts.B.FctIdCanSigInvldEmxTemperaturPwr |
+-            (IvtrThermMdlCooltTempAvl^1u));
+-#else
+-   IvtrThermMdlCooltTempAvlDcLink = TRUE;
+-#endif
+-
++   SftyTEvlnMotStatorTAvl = SftyC2cData.MotStatorTAvl; /* Actual availibility of winding sensor temperature */
+ 
+    NvmHndlrDcBusBarTemp = BswC2cData.InvTempNvm.DcBusBarTemp; /* Last stored capcacitor temperature value in NvM*/
+    NvmHndlrDcLinkCpTemp = BswC2cData.InvTempNvm.DcLinkCpTemp; /* Last stored busbar temperature value in NvM */
+@@ -134,7 +111,7 @@ FUNC(void, IVTRDCLINKTHERMMDL_CODE) IvtrDcLinkThermMdl_Run(void)
+ \t\tIvtrSleepTiCalcnSleepTi,
+ \t\tIvtrSleepTiCalcnSleepTiSts,
+ \t\tIvtrThermMdlCooltInlTemp,
+-\t\tIvtrThermMdlCooltTempAvlDcLink,
++\t\tIvtrThermMdlCooltTempAvl,
+ \t\tMod3PhaModlnModAct,
+ \t\tNvmHndlrDcBusBarTemp,
+ \t\tNvmHndlrDcLinkCpTemp,
+diff --git a/src/fw_cu/Components/Inv/ValMeasAndProc/IvtrHvAcBusBarThermMdl/src/IvtrHvAcBusBarThermMdl.c b/src/fw_cu/Components/Inv/ValMeasAndProc/IvtrHvAcBusBarThermMdl/src/IvtrHvAcBusBarThermMdl.c
+index aaecda893..4455fbec9 100644
+--- a/src/fw_cu/Components/Inv/ValMeasAndProc/IvtrHvAcBusBarThermMdl/src/IvtrHvAcBusBarThermMdl.c
++++ b/src/fw_cu/Components/Inv/ValMeasAndProc/IvtrHvAcBusBarThermMdl/src/IvtrHvAcBusBarThermMdl.c
+@@ -71,15 +71,6 @@ VAR(float32, IVTRDCLINKTHERMMDL_VAR) HvAcICalcnIAbsFild10SumRms;
+ #include "MemMap.h"
+ /* End: IVTRDCLINKTHERMMDL_STOP_SEC_VAR_CLEARED_32 (online) */
+ 
+-/* Begin: IVTRHVACBUSBARTHERMMDL_START_SEC_VAR_CLEARED_32 (online) */
+-#define IVTRHVACBUSBARTHERMMDL_START_SEC_VAR_CLEARED_32
+-#include "MemMap.h"
+-
+-STATIC VAR(uint8, IVTRHVACBUSBARTHERMMDL_VAR) IvtrThermMdlCooltTempAvlAcBb;
+-#define IVTRHVACBUSBARTHERMMDL_STOP_SEC_VAR_CLEARED_32
+-#include "MemMap.h"
+-/* End: IVTRHVACBUSBARTHERMMDL_STOP_SEC_VAR_CLEARED_32 (online) */
+-
+ /* Begin: HVACICALCN_START_SEC_VAR_INIT_32 (online) */
+ #define HVACICALCN_START_SEC_VAR_INIT_32
+ #include "MemMap.h"
+@@ -152,11 +143,8 @@ STATIC VAR(float32, IVTRHVACBUSBARTHERMMDL_VAR) IvtrHvAcBbRotAgSpdElecAbsFild10;
+ /******************************************************************/
+ FUNC(void, IVTRHVACBUSBARTHERMMDL_CODE) IvtrHvAcBusBarThermMdl_Run(void)
+ {
+-   SftyTEvlnMotStatorTMax = SftyC2cData.MotStatorTVal; /* EM stator temperature */
+-
+-   SftyTEvlnMotStatorTAvl =
+-            /* CZ: FIXME: Rework mechanism */
+-            ~(DrvCtrlErrDebFctInhbnSts.B.FctIdFltGrp2 | (BswC2cData.MotTempIni^1U));
++   SftyTEvlnMotStatorTMax = SftyC2cData.MotStatorTVal; /* Actual measured winding sensor temperature */
++   SftyTEvlnMotStatorTAvl = SftyC2cData.MotStatorTAvl; /* Actual availibility of winding sensor temperature */
+ 
+    IvtrHvAcBbIAbsFild10SumRmsHi = HvAcICalcnIAbsFild10Sum * SYSCON_1_DIV_SQRT2;
+    IvtrHvAcBbIAbsFild10SumRmsLo = HvAcICalcnIAbsFild10Sum;
+@@ -180,15 +168,6 @@ FUNC(void, IVTRHVACBUSBARTHERMMDL_CODE) IvtrHvAcBusBarThermMdl_Run(void)
+                                    + IvtrHvAcBbIAbsFild10SumRmsLo;
+    }
+ 
+-   /* comments code for new FM v1.1.0*/
+-#if FTR_SNG_PWM_INTRPT == 0
+-   IvtrThermMdlCooltTempAvlAcBb =
+-               /* CZ: FIXME: Rework mechanism */
+-               DrvCtrlErrDebFctInhbnSts.B.FctIdCanSigInvldEmxTemperaturPwr |  (IvtrThermMdlCooltTempAvl^1);
+-#else
+-   IvtrThermMdlCooltTempAvlAcBb = FALSE;
+-#endif
+-
+    /* NVM not configured yet for the AcBusBar Signals */
+    NvmHndlrAcBusBarTempIgbt = BswC2cData.InvTempNvm.AcBusBarTempIgbt; /* Last stored busbar temperature (IGBT side) value in NvM*/
+    NvmHndlrAcBusBarTempEm = BswC2cData.InvTempNvm.AcBusBarTempEm; /* Last stored busbar temperature value (EM side) in NvM */
+@@ -201,7 +180,7 @@ FUNC(void, IVTRHVACBUSBARTHERMMDL_CODE) IvtrHvAcBusBarThermMdl_Run(void)
+       IvtrSleepTiCalcnSleepTi,
+       IvtrSleepTiCalcnSleepTiSts,
+       IvtrThermMdlCooltInlTemp,
+-      IvtrThermMdlCooltTempAvlAcBb,
++      IvtrThermMdlCooltTempAvl,
+       NvmHndlrAcBusBarTempEm,
+       NvmHndlrAcBusBarTempIgbt,
+       NvmHndlrAcBusBarTempVld,
+diff --git a/src/fw_cu/Components/Inv/ValMeasAndProc/IvtrThermMdl/src/IvtrThermMdl.c b/src/fw_cu/Components/Inv/ValMeasAndProc/IvtrThermMdl/src/IvtrThermMdl.c
+index 5a59abd91..62d7bdbaa 100644
+--- a/src/fw_cu/Components/Inv/ValMeasAndProc/IvtrThermMdl/src/IvtrThermMdl.c
++++ b/src/fw_cu/Components/Inv/ValMeasAndProc/IvtrThermMdl/src/IvtrThermMdl.c
+@@ -34,6 +34,7 @@
+ #include "C2cComBswData.h"
+ #include "C2cComSftyData.h"
+ #include "C2cComDrvCtrlData.h"
++#include "DrvCtrlErrDeb.h"
+ 
+ #ifdef SWIT_Active
+ #include "SWIT_DRCO.h"
+@@ -139,7 +140,13 @@ FUNC(void, IVTRTHERMMDL_CODE) IvtrThermMdl_Run(void)
+ \t\tTqCtrlPwrFacAct);
+ 
+ \t/* workaround for missing input */
++#if FTR_SNG_PWM_INTRPT == 0
++   IvtrThermMdlCooltTempAvl =
++            ~(DrvCtrlErrDebFctInhbnSts.B.FctIdCanSigInvldEmxTemperaturPwr |
++            (CoolTempAvlRplcmtVal^1u));
++#else
+    IvtrThermMdlCooltTempAvl = CoolTempAvlRplcmtVal;
++#endif
+ 
+ #ifdef SWIT_Active
+    SWIT_IvtrThermMdl_Run_EndHook();
+'

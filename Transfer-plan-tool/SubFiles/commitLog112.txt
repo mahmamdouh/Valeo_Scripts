@@ -1,0 +1,832 @@
+b'commit 6aed74b689c299bfdfe7d168dac7b65b9ae01b03
+Author: Alexander APPEL (JV) <alexander.appel.jv@valeo.com>
+Date:   Thu Dec 2 14:52:19 2021 +0100
+
+    $100kW-38879$ Mod3Pha
+    Modulator changes to work properly in single update
+    
+    Change-Id: I225b877952f6e561ff6d7d9405836ab099e90954
+
+diff --git a/src/fw_cu/Components/Inv/ModSwtSig/Mod3Pha/a2l/Mod3PhTL.a2l b/src/fw_cu/Components/Inv/ModSwtSig/Mod3Pha/a2l/Mod3PhTL.a2l
+index c59e6500b..05eb0982e 100644
+--- a/src/fw_cu/Components/Inv/ModSwtSig/Mod3Pha/a2l/Mod3PhTL.a2l
++++ b/src/fw_cu/Components/Inv/ModSwtSig/Mod3Pha/a2l/Mod3PhTL.a2l
+@@ -5,7 +5,7 @@
+     ""\t/* LongIdentifier */
+     /begin HEADER
+         "General project description"\t/* Comment */
+-        VERSION "2021-09-22 08:01:05"
++        VERSION "2021-12-02 14:42:16"
+         PROJECT_NO PRJ1
+     /end HEADER
+ 
+@@ -34,6 +34,19 @@
+             DEPOSIT ABSOLUTE
+         /end MOD_COMMON 
+ 
++        /begin CHARACTERISTIC
++            Mod3PhTL_CalibParam.FPlsLimn1st\t/* Name */
++            "force to only one pulse limitation for each PWM period (keep the first strategy that adapts with single update mode)"\t/* LongIdentifier */
++            VALUE\t/* Type */
++            0x0000\t/* Address */
++            UBYTE_COL_DIRECT\t/* Deposit */
++            0\t/* MaxDiff */
++            Mod3PhTL_VOID_SCALING___c\t/* Conversion */
++            0\t/* LowerLimit */
++            1\t/* UpperLimit */
++            BYTE_ORDER MSB_LAST
++        /end CHARACTERISTIC
++
+         /begin CHARACTERISTIC
+             Mod3PhTL_CalibParam.FrqDpwmMin\t/* Name */
+             "minimum PWM frequency for automatic modulation mode transition in linear modulation range (actual pwm frequency has to be greater than FrqDwmMin)"\t/* LongIdentifier */
+@@ -73,19 +86,6 @@
+             BYTE_ORDER MSB_LAST
+         /end CHARACTERISTIC
+ 
+-        /begin CHARACTERISTIC
+-            Mod3PhTL_CalibParam.NrVersSho\t/* Name */
+-            "number of short GIT hash ID (version management)"\t/* LongIdentifier */
+-            VALUE\t/* Type */
+-            0x0000\t/* Address */
+-            UBYTE_COL_DIRECT\t/* Deposit */
+-            0\t/* MaxDiff */
+-            Mod3PhTL_VOID_SCALING___b\t/* Conversion */
+-            0\t/* LowerLimit */
+-            255\t/* UpperLimit */
+-            BYTE_ORDER MSB_LAST
+-        /end CHARACTERISTIC
+-
+         /begin CHARACTERISTIC
+             Mod3PhTL_CalibParam.OverModlnCorrnCoeff0\t/* Name */
+             "overmodulation correction polynomial coefficient 0"\t/* LongIdentifier */
+@@ -114,7 +114,7 @@
+ 
+         /begin CHARACTERISTIC
+             Mod3PhTL_CalibParam.OverModlnCorrnMin\t/* Name */
+-            "minimum magnitude of additive square wave duty cycles in order of duty cycle correction in overmodulation"\t/* LongIdentifier */
++            "overmodulation correction minimum value"\t/* LongIdentifier */
+             VALUE\t/* Type */
+             0x0000\t/* Address */
+             FLOAT32_IEEE_COL_DIRECT\t/* Deposit */
+@@ -126,31 +126,135 @@
+         /end CHARACTERISTIC
+ 
+         /begin CHARACTERISTIC
+-            Mod3PhTL_CalibParam.RPhaIvtrSca\t/* Name */
+-            "scale factor for inverter phase resistance (input RPhaIvtr)"\t/* LongIdentifier */
++            Mod3PhTL_CalibParam.OverModlnIdxSqThd\t/* Name */
++            "squared modulation index threshold to detect the transition into overmodulation"\t/* LongIdentifier */
+             VALUE\t/* Type */
+             0x0000\t/* Address */
+             FLOAT32_IEEE_COL_DIRECT\t/* Deposit */
+             0\t/* MaxDiff */
+             Mod3PhTL_VOID_SCALING___a\t/* Conversion */
+             0\t/* LowerLimit */
+-            1\t/* UpperLimit */
++            2\t/* UpperLimit */
+             BYTE_ORDER MSB_LAST
+         /end CHARACTERISTIC
+ 
+         /begin CHARACTERISTIC
+-            Mod3PhTL_CalibParam.SixStepSqModlnIdxThd\t/* Name */
+-            "threshold value of squared modulation index to force six-step modulation"\t/* LongIdentifier */
++            Mod3PhTL_CalibParam.SixStepSqModlnIdxThdHysOff\t/* Name */
++            "squared modulation index threshold to switch off hard six step hysteresis"\t/* LongIdentifier */
+             VALUE\t/* Type */
+             0x0000\t/* Address */
+             FLOAT32_IEEE_COL_DIRECT\t/* Deposit */
+             0\t/* MaxDiff */
+             Mod3PhTL_VOID_SCALING___a\t/* Conversion */
+-            1\t/* LowerLimit */
++            0\t/* LowerLimit */
+             4\t/* UpperLimit */
+             BYTE_ORDER MSB_LAST
+         /end CHARACTERISTIC
+ 
++        /begin CHARACTERISTIC
++            Mod3PhTL_CalibParam.SixStepSqModlnIdxThdHysOn\t/* Name */
++            "squared modulation index threshold to switch on hard six step hysteresis"\t/* LongIdentifier */
++            VALUE\t/* Type */
++            0x0000\t/* Address */
++            FLOAT32_IEEE_COL_DIRECT\t/* Deposit */
++            0\t/* MaxDiff */
++            Mod3PhTL_VOID_SCALING___a\t/* Conversion */
++            0\t/* LowerLimit */
++            4\t/* UpperLimit */
++            BYTE_ORDER MSB_LAST
++        /end CHARACTERISTIC
++
++        /begin CHARACTERISTIC
++            Mod3PhTL_CalibParam.SixStepUCmpLowrFac0\t/* Name */
++            "Feedback voltage calculation compensation factor for lower modulation index region offset"\t/* LongIdentifier */
++            VALUE\t/* Type */
++            0x0000\t/* Address */
++            FLOAT32_IEEE_COL_DIRECT\t/* Deposit */
++            0\t/* MaxDiff */
++            Mod3PhTL_VOID_SCALING___a\t/* Conversion */
++            -50\t/* LowerLimit */
++            50\t/* UpperLimit */
++            BYTE_ORDER MSB_LAST
++        /end CHARACTERISTIC
++
++        /begin CHARACTERISTIC
++            Mod3PhTL_CalibParam.SixStepUCmpLowrFac1\t/* Name */
++            "Feedback voltage calculation compensation factor for lower modulation index linear coefficient"\t/* LongIdentifier */
++            VALUE\t/* Type */
++            0x0000\t/* Address */
++            FLOAT32_IEEE_COL_DIRECT\t/* Deposit */
++            0\t/* MaxDiff */
++            Mod3PhTL_VOID_SCALING___a\t/* Conversion */
++            -50\t/* LowerLimit */
++            50\t/* UpperLimit */
++            BYTE_ORDER MSB_LAST
++        /end CHARACTERISTIC
++
++        /begin CHARACTERISTIC
++            Mod3PhTL_CalibParam.SixStepUCmpSqdModlnIdxThd\t/* Name */
++            "Feedback voltage calculation compensation squared modulation index threshold to switch between lower and upper region"\t/* LongIdentifier */
++            VALUE\t/* Type */
++            0x0000\t/* Address */
++            FLOAT32_IEEE_COL_DIRECT\t/* Deposit */
++            0\t/* MaxDiff */
++            Mod3PhTL_VOID_SCALING___a\t/* Conversion */
++            0\t/* LowerLimit */
++            50\t/* UpperLimit */
++            BYTE_ORDER MSB_LAST
++        /end CHARACTERISTIC
++
++        /begin CHARACTERISTIC
++            Mod3PhTL_CalibParam.SixStepUCmpUpprFac0\t/* Name */
++            "Feedback voltage calculation compensation factor for upper modulation index region offset"\t/* LongIdentifier */
++            VALUE\t/* Type */
++            0x0000\t/* Address */
++            FLOAT32_IEEE_COL_DIRECT\t/* Deposit */
++            0\t/* MaxDiff */
++            Mod3PhTL_VOID_SCALING___a\t/* Conversion */
++            -50\t/* LowerLimit */
++            50\t/* UpperLimit */
++            BYTE_ORDER MSB_LAST
++        /end CHARACTERISTIC
++
++        /begin CHARACTERISTIC
++            Mod3PhTL_CalibParam.SixStepUCmpUpprFac1\t/* Name */
++            "Feedback voltage calculation compensation factor for upper modulation index linear coefficient"\t/* LongIdentifier */
++            VALUE\t/* Type */
++            0x0000\t/* Address */
++            FLOAT32_IEEE_COL_DIRECT\t/* Deposit */
++            0\t/* MaxDiff */
++            Mod3PhTL_VOID_SCALING___a\t/* Conversion */
++            -50\t/* LowerLimit */
++            50\t/* UpperLimit */
++            BYTE_ORDER MSB_LAST
++        /end CHARACTERISTIC
++
++        /begin CHARACTERISTIC
++            Mod3PhTL_CalibParam.SixStepUCmpUpprFac2\t/* Name */
++            "Feedback voltage calculation compensation factor for upper modulation index quadratic coefficient"\t/* LongIdentifier */
++            VALUE\t/* Type */
++            0x0000\t/* Address */
++            FLOAT32_IEEE_COL_DIRECT\t/* Deposit */
++            0\t/* MaxDiff */
++            Mod3PhTL_VOID_SCALING___a\t/* Conversion */
++            -50\t/* LowerLimit */
++            50\t/* UpperLimit */
++            BYTE_ORDER MSB_LAST
++        /end CHARACTERISTIC
++
++        /begin CHARACTERISTIC
++            Mod3PhTL_CalibParam.SixStepUCmpUpprFac3\t/* Name */
++            "Feedback voltage calculation compensation factor for upper modulation index cubic coefficient"\t/* LongIdentifier */
++            VALUE\t/* Type */
++            0x0000\t/* Address */
++            FLOAT32_IEEE_COL_DIRECT\t/* Deposit */
++            0\t/* MaxDiff */
++            Mod3PhTL_VOID_SCALING___a\t/* Conversion */
++            -50\t/* LowerLimit */
++            50\t/* UpperLimit */
++            BYTE_ORDER MSB_LAST
++        /end CHARACTERISTIC
++
+         /begin CHARACTERISTIC
+             Mod3PhTL_CalibParam.SqModlnIdxDpwmOffHard\t/* Name */
+             "square of modulation index value for transit back immediately to ModlnMod (here the current modulation index is evaluated)"\t/* LongIdentifier */
+@@ -216,6 +320,21 @@
+             BYTE_ORDER MSB_LAST
+         /end CHARACTERISTIC
+ 
++        /begin CHARACTERISTIC
++            Mod3PhTL_CalibParam.SwVers\t/* Name */
++            "Hash of the Mod3PhTL SW module"\t/* LongIdentifier */
++            ASCII\t/* Type */
++            0x0000\t/* Address */
++            UBYTE_COL_DIRECT\t/* Deposit */
++            0\t/* MaxDiff */
++            Mod3PhTL_VOID_SCALING___b\t/* Conversion */
++            0\t/* LowerLimit */
++            255\t/* UpperLimit */
++            NUMBER 6
++            BYTE_ORDER MSB_LAST
++            READ_ONLY 
++        /end CHARACTERISTIC
++
+         /begin CHARACTERISTIC
+             Mod3PhTL_CalibParam.UDropCompNeg0\t/* Name */
+             "voltage compensation negative limit for dataset 0"\t/* LongIdentifier */
+@@ -275,7 +394,7 @@
+             0x0000\t/* Address */
+             FLOAT32_IEEE_COL_DIRECT\t/* Deposit */
+             0\t/* MaxDiff */
+-            Mod3PhTL_VOID_SCALING_s_p_V\t/* Conversion */
++            Mod3PhTL_VOID_SCALING___a\t/* Conversion */
+             0\t/* LowerLimit */
+             1\t/* UpperLimit */
+             BYTE_ORDER MSB_LAST
+@@ -288,7 +407,7 @@
+             0x0000\t/* Address */
+             FLOAT32_IEEE_COL_DIRECT\t/* Deposit */
+             0\t/* MaxDiff */
+-            Mod3PhTL_VOID_SCALING_s_p_V\t/* Conversion */
++            Mod3PhTL_VOID_SCALING___a\t/* Conversion */
+             0\t/* LowerLimit */
+             1\t/* UpperLimit */
+             BYTE_ORDER MSB_LAST
+@@ -558,6 +677,20 @@
+             BYTE_ORDER MSB_LAST
+         /end MEASUREMENT
+ 
++        /begin MEASUREMENT
++            Mod3PhTL_MeasSig.SqModlnIdxDutyInp\t/* Name */
++            "squared modulation index based on voltage request and actual DC link voltage"\t/* LongIdentifier */
++            FLOAT32_IEEE\t/* Datatype */
++            Mod3PhTL_VOID_SCALING___a\t/* Conversion */
++            1\t/* Resolution */
++            100\t/* Accuracy */
++            0\t/* LowerLimit */
++            2\t/* UpperLimit */
++            ECU_ADDRESS 0x0000
++            ARRAY_SIZE 1
++            BYTE_ORDER MSB_LAST
++        /end MEASUREMENT
++
+         /begin MEASUREMENT
+             Mod3PhTL_MeasSig.SqModlnIdxDutyRefCorrd\t/* Name */
+             "squared modulation index based on corrected reference duty cycles"\t/* LongIdentifier */
+@@ -572,6 +705,20 @@
+             BYTE_ORDER MSB_LAST
+         /end MEASUREMENT
+ 
++        /begin MEASUREMENT
++            Mod3PhTL_MeasSig.SqModlnIdxDutyRefCorrdFild\t/* Name */
++            "squared modulation index based on corrected reference duty cycles"\t/* LongIdentifier */
++            FLOAT32_IEEE\t/* Datatype */
++            Mod3PhTL_VOID_SCALING___a\t/* Conversion */
++            1\t/* Resolution */
++            100\t/* Accuracy */
++            0\t/* LowerLimit */
++            2\t/* UpperLimit */
++            ECU_ADDRESS 0x0000
++            ARRAY_SIZE 1
++            BYTE_ORDER MSB_LAST
++        /end MEASUREMENT
++
+         /begin MEASUREMENT
+             Mod3PhTL_MeasSig.SwtStsUVW\t/* Name */
+             "switching status of each phase {0: flat phase, 1: switching action will take place in the current modulation period}"\t/* LongIdentifier */
+@@ -586,6 +733,19 @@
+             BYTE_ORDER MSB_LAST
+         /end MEASUREMENT
+ 
++        /begin MEASUREMENT
++            Mod3PhTL_OutputData.BlkOperActv\t/* Name */
++            "actual status of SixStep in case of overmodulation"\t/* LongIdentifier */
++            UBYTE\t/* Datatype */
++            Mod3PhTL_VOID_SCALING___c\t/* Conversion */
++            1\t/* Resolution */
++            100\t/* Accuracy */
++            0\t/* LowerLimit */
++            1\t/* UpperLimit */
++            ECU_ADDRESS 0x0000
++            BYTE_ORDER MSB_LAST
++        /end MEASUREMENT
++
+         /begin MEASUREMENT
+             Mod3PhTL_OutputData.DutyUVW\t/* Name */
+             "realizable reference duty cycle for every phase with zero state and limitation considerations"\t/* LongIdentifier */
+@@ -747,15 +907,6 @@
+             COEFFS 0 1 0 0 0 1
+         /end COMPU_METHOD
+ 
+-        /begin COMPU_METHOD
+-            Mod3PhTL_VOID_SCALING_s_p_V\t/* Name */
+-            "Void scaling for unscaled variables"\t/* LongIdentifier */
+-            RAT_FUNC\t/* ConversionType */
+-            "%12.6"\t/* Format */
+-            "s/V"\t/* Unit */
+-            COEFFS 0 1 0 0 0 1
+-        /end COMPU_METHOD
+-
+         /begin COMPU_METHOD
+             Mod3PhTL_VOID_SCALING_V\t/* Name */
+             "Void scaling for unscaled variables"\t/* LongIdentifier */
+@@ -776,13 +927,22 @@
+                 Mod3PhTL_CalibParam.SqModlnIdxDpwmOn\t/* Identifier */
+                 Mod3PhTL_CalibParam.SqModlnIdxDpwmOffSoft\t/* Identifier */
+                 Mod3PhTL_CalibParam.SqModlnIdxDpwmOffHard\t/* Identifier */
+-                Mod3PhTL_CalibParam.RPhaIvtrSca\t/* Identifier */
+                 Mod3PhTL_CalibParam.OverModlnCorrnCoeff0\t/* Identifier */
+                 Mod3PhTL_CalibParam.OverModlnCorrnCoeff1\t/* Identifier */
+                 Mod3PhTL_CalibParam.OverModlnCorrnMin\t/* Identifier */
+-                Mod3PhTL_CalibParam.SixStepSqModlnIdxThd\t/* Identifier */
++                Mod3PhTL_CalibParam.OverModlnIdxSqThd\t/* Identifier */
++                Mod3PhTL_CalibParam.SixStepSqModlnIdxThdHysOn\t/* Identifier */
++                Mod3PhTL_CalibParam.SixStepSqModlnIdxThdHysOff\t/* Identifier */
++                Mod3PhTL_CalibParam.SixStepUCmpLowrFac0\t/* Identifier */
++                Mod3PhTL_CalibParam.SixStepUCmpLowrFac1\t/* Identifier */
++                Mod3PhTL_CalibParam.SixStepUCmpUpprFac0\t/* Identifier */
++                Mod3PhTL_CalibParam.SixStepUCmpUpprFac1\t/* Identifier */
++                Mod3PhTL_CalibParam.SixStepUCmpUpprFac2\t/* Identifier */
++                Mod3PhTL_CalibParam.SixStepUCmpUpprFac3\t/* Identifier */
++                Mod3PhTL_CalibParam.SixStepUCmpSqdModlnIdxThd\t/* Identifier */
+                 Mod3PhTL_CalibParam.ModlnModStsWord\t/* Identifier */
+-                Mod3PhTL_CalibParam.NrVersSho\t/* Identifier */
++                Mod3PhTL_CalibParam.FPlsLimn1st\t/* Identifier */
++                Mod3PhTL_CalibParam.SwVers\t/* Identifier */
+                 Mod3PhTL_CalibParam.UDropSlp0\t/* Identifier */
+                 Mod3PhTL_CalibParam.UDropCompNeg0\t/* Identifier */
+                 Mod3PhTL_CalibParam.UDropCompPos0\t/* Identifier */
+@@ -817,12 +977,15 @@
+                 Mod3PhTL_OutputData.ModlnIdxActSqd\t/* Identifier */
+                 Mod3PhTL_OutputData.OverModlnActv\t/* Identifier */
+                 Mod3PhTL_OutputData.ModlnModTranReq\t/* Identifier */
++                Mod3PhTL_OutputData.BlkOperActv\t/* Identifier */
+                 Mod3PhTL_MeasSig.SwtStsUVW\t/* Identifier */
+             /end OUT_MEASUREMENT 
+             /begin LOC_MEASUREMENT
+                 Mod3PhTL_AlvCntr\t/* Identifier */
+                 Mod3PhTL_MeasSig.SqModlnIdxDutyRefCorrd\t/* Identifier */
+                 Mod3PhTL_MeasSig.DutySqWaveUVW\t/* Identifier */
++                Mod3PhTL_MeasSig.SqModlnIdxDutyInp\t/* Identifier */
++                Mod3PhTL_MeasSig.SqModlnIdxDutyRefCorrdFild\t/* Identifier */
+                 Mod3PhTL_InputData.URefUVW\t/* Identifier */
+                 Mod3PhTL_InputData.HvDcUAct\t/* Identifier */
+                 Mod3PhTL_InputData.FrqPwm\t/* Identifier */
+diff --git a/src/fw_cu/Components/Inv/ModSwtSig/Mod3Pha/include/Mod3PhTL.h b/src/fw_cu/Components/Inv/ModSwtSig/Mod3Pha/include/Mod3PhTL.h
+index 9efcaa56c..b81d66a01 100644
+--- a/src/fw_cu/Components/Inv/ModSwtSig/Mod3Pha/include/Mod3PhTL.h
++++ b/src/fw_cu/Components/Inv/ModSwtSig/Mod3Pha/include/Mod3PhTL.h
+@@ -1,11 +1,12 @@
+ /**************************************************************************************************\\
+  *** 
+- *** Simulink model       : Mod3PhTL
++ *** Simulink model       : Mod3PhTL <22ef49edf2dbf058f552ccd00580ccad6a0e82ec>
++ *** TL DataDictionary    : Mod3PhTL.dd <b0934af77f1bc4941b2eb08c5a4567af10d4f955>
+  *** TargetLink subsystem : Mod3PhTL
+  *** Codefile             : Mod3PhTL.h
+  ***
+  *** Generated by TargetLink, the dSPACE production quality code generator
+- *** Generation date: 2021-09-22 08:00:53
++ *** Generation date: 2021-12-02 14:41:53
+  ***
+  *** CODE GENERATOR OPTIONS:
+  *** Code generation mode                     : Standard
+@@ -42,13 +43,13 @@
+  *** Keep saturation elements                 : disabled
+  *** Extended variable sharing                : enabled
+  *** Extended lifetime optimization           : enabled
+- *** Style definition file                    : D:\\Git\\100kw\\ec_models_pub\\lib\\targetlink\\StyleSheet
+- ***                                            s\\config\\cconfig.xml
+- *** Root style sheet                         : D:\\Git\\100kw\\ec_models_pub\\lib\\targetlink\\StyleSheet
+- ***                                            s\\StyleSheets_DPR\\TL_CSourceCodeSS_MISRA_config.xsl
++ *** Style definition file                    : C:\\08_git\\ec_models_pub\\lib\\targetlink\\StyleSheets\\c
++ ***                                            onfig\\cconfig.xml
++ *** Root style sheet                         : C:\\08_git\\ec_models_pub\\lib\\targetlink\\StyleSheets\\S
++ ***                                            tyleSheets_DPR\\TL_CSourceCodeSS_MISRA_config.xsl
+  ***
+- *** TargetLink version      : 3.5p2 from 14-Aug-2014
+- *** Code generator version  : Build Id 3.5.0.28 from 2014-08-20 16:45:15
++ *** TargetLink version      : 3.5 from 30-Oct-2013
++ *** Code generator version  : Build Id 3.5.0.22 from 2013-10-07 16:59:57
+  *** Copyright (C) Siemens AG 2015 (All Rights Reserved. Confidential)
+ \\**************************************************************************************************/
+ 
+@@ -129,7 +130,6 @@
+ /*----------------------------------------------------------------------------*\\
+   INCLUDES
+ \\*----------------------------------------------------------------------------*/
+-#include "tl_defines_Mod3PhTL.h"
+ #include "Platform_Types.h"
+ /*----------------------------------------------------------------------------*\\
+   DEFINES
+@@ -148,6 +148,10 @@ struct tag_Mod3PhTL_MeasSig {
+    float32 SqModlnIdxDutyRefCorrd[1] /* Description: squared modulation index based on corrected ref
+    erence duty cycles */;
+    float32 DutySqWaveUVW[3] /* Description: square wave dury cycles */;
++   float32 SqModlnIdxDutyInp[1] /* Description: squared modulation index based on voltage request an
++   d actual DC link voltage */;
++   float32 SqModlnIdxDutyRefCorrdFild[1] /* Description: squared modulation index based on corrected
++    reference duty cycles */;
+ }; /* struct type created for variable: Mod3PhTL_MeasSig */
+ /*----------------------------------------------------------------------------*\\
+   ENUMS
+@@ -159,35 +163,35 @@ struct tag_Mod3PhTL_MeasSig {
+ #define MOD3PHTL_START_SEC_VAR_CLEARED_32
+ #include "MemMap.h"
+ /******************************************************************************\\
+-   MemMap_DISP_CLEARED_32: global observable variables (RAM) | Width: N.A.
++   MEMMAP_DISP_CLEARED_32: global observable variables (RAM) | Width: N.A.
+ \\******************************************************************************/
+-extern MemMap_DISP_CLEARED_32 struct tag_Mod3PhTL_MeasSig Mod3PhTL_MeasSig /* Description: Mod3PhTL 
+-   Measurable Structure */;
++extern struct tag_Mod3PhTL_MeasSig Mod3PhTL_MeasSig /* Description: Mod3PhTL Measurable Structure */
++    ;
+ #define MOD3PHTL_STOP_SEC_VAR_CLEARED_32
+ #include "MemMap.h"
+ #define MOD3PHTL_START_SEC_VAR_CLEARED_32
+ #include "MemMap.h"
+ 
+ /******************************************************************************\\
+-   UserSLGlobal: SLGlobal = { MemMap_GLOBAL_CLEARED_32_EXCLFROMA2L } | Width: 32
++   UserSLGlobal: SLGlobal = { MEMMAP_GLOBAL_CLEARED_32_EXCLFROMA2L } | Width: 32
+ \\******************************************************************************/
+ extern float32 SMod3PhTL12_CalcnHvDcUActIvs;
+ extern float32 SMod3PhTL13_Prodcurr;
+ extern float32 SMod3PhTL13_Prodcurs;
+ extern float32 SMod3PhTL13_calcphat;
+-extern float32 SMod3PhTL42_DetnDutyRefMax;
+-extern float32 SMod3PhTL42_DetnDutyRefMin;
+-extern float32 SMod3PhTL42_DetnDutyRefSum;
+-extern float32 SMod3PhTL63_w;
++extern float32 SMod3PhTL44_DetnDutyRefMax;
++extern float32 SMod3PhTL44_DetnDutyRefMin;
++extern float32 SMod3PhTL44_DetnDutyRefSum;
++extern float32 SMod3PhTL66_w;
+ #define MOD3PHTL_STOP_SEC_VAR_CLEARED_32
+ #include "MemMap.h"
+ #define MOD3PHTL_START_SEC_VAR_INIT_32
+ #include "MemMap.h"
+ 
+ /******************************************************************************\\
+-   MemMap_DISP_INIT_32: global observable variables (RAM) | Width: 32
++   MEMMAP_DISP_INIT_32: global observable variables (RAM) | Width: 32
+ \\******************************************************************************/
+-extern MemMap_DISP_INIT_32 uint32 Mod3PhTL_AlvCntr /* 
++extern uint32 Mod3PhTL_AlvCntr /* 
+    Unit       : -
+    Description: AliveCounter
+    LSB: 2^0 OFF:  0 MIN/MAX:  0 .. 4294967295 */;
+@@ -197,26 +201,28 @@ extern MemMap_DISP_INIT_32 uint32 Mod3PhTL_AlvCntr /*
+ #include "MemMap.h"
+ 
+ /******************************************************************************\\
+-   UserSLGlobalInit: SLGlobalInit = { MemMap_GLOBAL_INIT_32_EXCLFROMA2L } | Width: 32
++   UserSLGlobalInit: SLGlobalInit = { MEMMAP_GLOBAL_INIT_32_EXCLFROMA2L } | Width: 32
+ \\******************************************************************************/
+-extern float32 SMod3PhTL39_DutyU0CorrnCalcn;
++extern float32 SMod3PhTL41_DutyU0CorrnCalcn;
+ extern float32 SMod3PhTL9_MergeDutyCorrnFac[3];
+ extern float32 SMod3PhTL9_MergeUCorrn[3];
+ extern uint32 X_SMod3PhTL2_AliveCount /* 
+    Unit       : -
+    LSB: 2^0 OFF:  0 MIN/MAX:  0 .. 4294967295 */;
+-extern uint32 X_SMod3PhTL31_MemDutyEvlnHi[3];
+-extern uint32 X_SMod3PhTL31_MemDutyEvlnLo[3];
+-extern float32 X_SMod3PhTL47_HldSqModlnIdxOld;
++extern uint32 X_SMod3PhTL30_MemDutyEvlnHi[3];
++extern uint32 X_SMod3PhTL30_MemDutyEvlnLo[3];
++extern float32 X_SMod3PhTL37_UCalcdUVWLast[3];
++extern float32 X_SMod3PhTL49_HldSqModlnIdxOld;
+ 
+ /******************************************************************************\\
+-   UserSLGlobalInit: SLGlobalInit = { MemMap_GLOBAL_INIT_32_EXCLFROMA2L } | Width: 8
++   UserSLGlobalInit: SLGlobalInit = { MEMMAP_GLOBAL_INIT_32_EXCLFROMA2L } | Width: 8
+ \\******************************************************************************/
+-extern boolean SMod3PhTL39_ROWD;
+-extern boolean SMod3PhTL53_TranReqSRGate_Q;
+-extern boolean X_SMod3PhTL46_TranReqHold;
+-extern boolean X_SMod3PhTL53_UnitDly1st;
+-extern boolean X_SMod3PhTL53_UnitDly2nd;
++extern boolean SMod3PhTL41_ROWD;
++extern boolean SMod3PhTL55_TranReqSRGate_Q;
++extern boolean X_SMod3PhTL48_TranReqHold;
++extern boolean X_SMod3PhTL55_UnitDly1st;
++extern boolean X_SMod3PhTL55_UnitDly2nd;
++extern boolean X_SMod3PhTL61___StepOperActvDly;
+ #define MOD3PHTL_STOP_SEC_VAR_INIT_32
+ #include "MemMap.h"
+ 
+@@ -227,7 +233,7 @@ extern boolean X_SMod3PhTL53_UnitDly2nd;
+   FUNCTION PROTOTYPES
+ \\*----------------------------------------------------------------------------*/
+ /******************************************************************************\\
+-   MemMap_GLOBAL_FCN: global function(s) (exported to other modules)
++   MEMMAP_GLOBAL_FCN: global function(s) (exported to other modules)
+ \\******************************************************************************/
+ #define MOD3PHTL_START_SEC_CODE
+ #include "MemMap.h"
+diff --git a/src/fw_cu/Components/Inv/ModSwtSig/Mod3Pha/include/Mod3PhTL_Data.h b/src/fw_cu/Components/Inv/ModSwtSig/Mod3Pha/include/Mod3PhTL_Data.h
+index c2980a403..f3c75d64d 100644
+--- a/src/fw_cu/Components/Inv/ModSwtSig/Mod3Pha/include/Mod3PhTL_Data.h
++++ b/src/fw_cu/Components/Inv/ModSwtSig/Mod3Pha/include/Mod3PhTL_Data.h
+@@ -1,11 +1,12 @@
+ /**************************************************************************************************\\
+  *** 
+- *** Simulink model       : Mod3PhTL
++ *** Simulink model       : Mod3PhTL <22ef49edf2dbf058f552ccd00580ccad6a0e82ec>
++ *** TL DataDictionary    : Mod3PhTL.dd <b0934af77f1bc4941b2eb08c5a4567af10d4f955>
+  *** TargetLink subsystem : Mod3PhTL
+  *** Codefile             : Mod3PhTL_Data.h
+  ***
+  *** Generated by TargetLink, the dSPACE production quality code generator
+- *** Generation date: 2021-09-22 08:00:53
++ *** Generation date: 2021-12-02 14:41:53
+  ***
+  *** CODE GENERATOR OPTIONS:
+  *** Code generation mode                     : Standard
+@@ -42,13 +43,13 @@
+  *** Keep saturation elements                 : disabled
+  *** Extended variable sharing                : enabled
+  *** Extended lifetime optimization           : enabled
+- *** Style definition file                    : D:\\Git\\100kw\\ec_models_pub\\lib\\targetlink\\StyleSheet
+- ***                                            s\\config\\cconfig.xml
+- *** Root style sheet                         : D:\\Git\\100kw\\ec_models_pub\\lib\\targetlink\\StyleSheet
+- ***                                            s\\StyleSheets_DPR\\TL_CSourceCodeSS_MISRA_config.xsl
++ *** Style definition file                    : C:\\08_git\\ec_models_pub\\lib\\targetlink\\StyleSheets\\c
++ ***                                            onfig\\cconfig.xml
++ *** Root style sheet                         : C:\\08_git\\ec_models_pub\\lib\\targetlink\\StyleSheets\\S
++ ***                                            tyleSheets_DPR\\TL_CSourceCodeSS_MISRA_config.xsl
+  ***
+- *** TargetLink version      : 3.5p2 from 14-Aug-2014
+- *** Code generator version  : Build Id 3.5.0.28 from 2014-08-20 16:45:15
++ *** TargetLink version      : 3.5 from 30-Oct-2013
++ *** Code generator version  : Build Id 3.5.0.22 from 2013-10-07 16:59:57
+  *** Copyright (C) Siemens AG 2015 (All Rights Reserved. Confidential)
+ \\**************************************************************************************************/
+ 
+@@ -129,7 +130,6 @@
+ /*----------------------------------------------------------------------------*\\
+   INCLUDES
+ \\*----------------------------------------------------------------------------*/
+-#include "tl_defines_Mod3PhTL.h"
+ #include "Platform_Types.h"
+ /*----------------------------------------------------------------------------*\\
+   DEFINES
+@@ -163,17 +163,34 @@ struct tag_Mod3PhTL_CalibParam {
+    back slightly to ModlnMod (here the filtered modulation index is evaluated) */;
+    const float32 SqModlnIdxDpwmOffHard /* Description: square of modulation index value for transit 
+    back immediately to ModlnMod (here the current modulation index is evaluated) */;
+-   const uint8 NrVersSho /* Description: number of short GIT hash ID (version management) */;
+-   const float32 RPhaIvtrSca /* Description: scale factor for inverter phase resistance (input RPhaI
+-   vtr) */;
+    const float32 OverModlnCorrnCoeff0 /* Description: overmodulation correction polynomial coefficie
+    nt 0 */;
+    const float32 OverModlnCorrnCoeff1 /* Description: overmodulation correction polynomial coefficie
+    nt 1 */;
+-   const float32 OverModlnCorrnMin /* Description: minimum magnitude of additive square wave duty cy
+-   cles in order of duty cycle correction in overmodulation */;
+-   const float32 SixStepSqModlnIdxThd /* Description: threshold value of squared modulation index to
+-    force six-step modulation */;
++   const float32 OverModlnCorrnMin /* Description: overmodulation correction minimum value */;
++   const float32 OverModlnIdxSqThd /* Description: squared modulation index threshold to detect the 
++   transition into overmodulation */;
++   const float32 SixStepSqModlnIdxThdHysOn /* Description: squared modulation index threshold to swi
++   tch on hard six step hysteresis */;
++   const float32 SixStepSqModlnIdxThdHysOff /* Description: squared modulation index threshold to sw
++   itch off hard six step hysteresis */;
++   const float32 SixStepUCmpLowrFac0 /* Description: Feedback voltage calculation compensation facto
++   r for lower modulation index region offset */;
++   const float32 SixStepUCmpLowrFac1 /* Description: Feedback voltage calculation compensation facto
++   r for lower modulation index linear coefficient */;
++   const float32 SixStepUCmpUpprFac0 /* Description: Feedback voltage calculation compensation facto
++   r for upper modulation index region offset */;
++   const float32 SixStepUCmpUpprFac1 /* Description: Feedback voltage calculation compensation facto
++   r for upper modulation index linear coefficient */;
++   const float32 SixStepUCmpUpprFac2 /* Description: Feedback voltage calculation compensation facto
++   r for upper modulation index quadratic coefficient */;
++   const float32 SixStepUCmpUpprFac3 /* Description: Feedback voltage calculation compensation facto
++   r for upper modulation index cubic coefficient */;
++   const float32 SixStepUCmpSqdModlnIdxThd /* Description: Feedback voltage calculation compensation
++    squared modulation index threshold to switch between lower and upper region */;
++   const boolean FPlsLimn1st /* Description: force to only one pulse limitation for each PWM period 
++   (keep the first strategy that adapts with single update mode) */;
++   const uint8 SwVers[6] /* Description: Hash of the Mod3PhTL SW module */;
+ }; /* struct type created for variable: Mod3PhTL_CalibParam */
+ /*----------------------------------------------------------------------------*\\
+   ENUMS
+@@ -185,10 +202,10 @@ struct tag_Mod3PhTL_CalibParam {
+ #define MOD3PHTL_START_SEC_CALIB_32
+ #include "MemMap.h"
+ /******************************************************************************\\
+-   MemMap_CAL_NON_VOL_32: global calibratable parameters (ROM) | Width: N.A.
++   MEMMAP_CAL_NON_VOL_32: global calibratable parameters (ROM) | Width: N.A.
+ \\******************************************************************************/
+-extern MemMap_CAL_NON_VOL_32 struct tag_Mod3PhTL_CalibParam Mod3PhTL_CalibParam /* Description: Mod3
+-   PhTL Calib Param Structure */;
++extern const struct tag_Mod3PhTL_CalibParam Mod3PhTL_CalibParam /* Description: Mod3PhTL Calib Param
++    Structure */;
+ #define MOD3PHTL_STOP_SEC_CALIB_32
+ #include "MemMap.h"
+ 
+diff --git a/src/fw_cu/Components/Inv/ModSwtSig/Mod3Pha/include/Mod3PhTL_Inputs.h b/src/fw_cu/Components/Inv/ModSwtSig/Mod3Pha/include/Mod3PhTL_Inputs.h
+index 71f55420d..9c8f4877b 100644
+--- a/src/fw_cu/Components/Inv/ModSwtSig/Mod3Pha/include/Mod3PhTL_Inputs.h
++++ b/src/fw_cu/Components/Inv/ModSwtSig/Mod3Pha/include/Mod3PhTL_Inputs.h
+@@ -1,11 +1,12 @@
+ /**************************************************************************************************\\
+  *** 
+- *** Simulink model       : Mod3PhTL
++ *** Simulink model       : Mod3PhTL <22ef49edf2dbf058f552ccd00580ccad6a0e82ec>
++ *** TL DataDictionary    : Mod3PhTL.dd <b0934af77f1bc4941b2eb08c5a4567af10d4f955>
+  *** TargetLink subsystem : Mod3PhTL
+  *** Codefile             : Mod3PhTL_Inputs.h
+  ***
+  *** Generated by TargetLink, the dSPACE production quality code generator
+- *** Generation date: 2021-09-22 08:00:54
++ *** Generation date: 2021-12-02 14:41:53
+  ***
+  *** CODE GENERATOR OPTIONS:
+  *** Code generation mode                     : Standard
+@@ -42,13 +43,13 @@
+  *** Keep saturation elements                 : disabled
+  *** Extended variable sharing                : enabled
+  *** Extended lifetime optimization           : enabled
+- *** Style definition file                    : D:\\Git\\100kw\\ec_models_pub\\lib\\targetlink\\StyleSheet
+- ***                                            s\\config\\cconfig.xml
+- *** Root style sheet                         : D:\\Git\\100kw\\ec_models_pub\\lib\\targetlink\\StyleSheet
+- ***                                            s\\StyleSheets_DPR\\TL_CSourceCodeSS_MISRA_config.xsl
++ *** Style definition file                    : C:\\08_git\\ec_models_pub\\lib\\targetlink\\StyleSheets\\c
++ ***                                            onfig\\cconfig.xml
++ *** Root style sheet                         : C:\\08_git\\ec_models_pub\\lib\\targetlink\\StyleSheets\\S
++ ***                                            tyleSheets_DPR\\TL_CSourceCodeSS_MISRA_config.xsl
+  ***
+- *** TargetLink version      : 3.5p2 from 14-Aug-2014
+- *** Code generator version  : Build Id 3.5.0.28 from 2014-08-20 16:45:15
++ *** TargetLink version      : 3.5 from 30-Oct-2013
++ *** Code generator version  : Build Id 3.5.0.22 from 2013-10-07 16:59:57
+  *** Copyright (C) Siemens AG 2015 (All Rights Reserved. Confidential)
+ \\**************************************************************************************************/
+ 
+@@ -129,7 +130,6 @@
+ /*----------------------------------------------------------------------------*\\
+   INCLUDES
+ \\*----------------------------------------------------------------------------*/
+-#include "tl_defines_Mod3PhTL.h"
+ #include "Platform_Types.h"
+ /*----------------------------------------------------------------------------*\\
+   DEFINES
+@@ -173,10 +173,10 @@ struct tag_Mod3PhTL_InputData {
+ #define MOD3PHTL_START_SEC_VAR_INIT_32
+ #include "MemMap.h"
+ /******************************************************************************\\
+-   MemMap_DISP_INIT_32: global observable variables (RAM) | Width: N.A.
++   MEMMAP_DISP_INIT_32: global observable variables (RAM) | Width: N.A.
+ \\******************************************************************************/
+-extern MemMap_DISP_INIT_32 struct tag_Mod3PhTL_InputData Mod3PhTL_InputData /* Description: Input st
+-   ructure for Mod3PhTL */;
++extern struct tag_Mod3PhTL_InputData Mod3PhTL_InputData /* Description: Input structure for Mod3PhTL
++    */;
+ #define MOD3PHTL_STOP_SEC_VAR_INIT_32
+ #include "MemMap.h"
+ 
+diff --git a/src/fw_cu/Components/Inv/ModSwtSig/Mod3Pha/include/Mod3PhTL_Outputs.h b/src/fw_cu/Components/Inv/ModSwtSig/Mod3Pha/include/Mod3PhTL_Outputs.h
+index 7a5399370..593f695e1 100644
+--- a/src/fw_cu/Components/Inv/ModSwtSig/Mod3Pha/include/Mod3PhTL_Outputs.h
++++ b/src/fw_cu/Components/Inv/ModSwtSig/Mod3Pha/include/Mod3PhTL_Outputs.h
+@@ -1,11 +1,12 @@
+ /**************************************************************************************************\\
+  *** 
+- *** Simulink model       : Mod3PhTL
++ *** Simulink model       : Mod3PhTL <22ef49edf2dbf058f552ccd00580ccad6a0e82ec>
++ *** TL DataDictionary    : Mod3PhTL.dd <b0934af77f1bc4941b2eb08c5a4567af10d4f955>
+  *** TargetLink subsystem : Mod3PhTL
+  *** Codefile             : Mod3PhTL_Outputs.h
+  ***
+  *** Generated by TargetLink, the dSPACE production quality code generator
+- *** Generation date: 2021-09-22 08:00:54
++ *** Generation date: 2021-12-02 14:41:53
+  ***
+  *** CODE GENERATOR OPTIONS:
+  *** Code generation mode                     : Standard
+@@ -42,13 +43,13 @@
+  *** Keep saturation elements                 : disabled
+  *** Extended variable sharing                : enabled
+  *** Extended lifetime optimization           : enabled
+- *** Style definition file                    : D:\\Git\\100kw\\ec_models_pub\\lib\\targetlink\\StyleSheet
+- ***                                            s\\config\\cconfig.xml
+- *** Root style sheet                         : D:\\Git\\100kw\\ec_models_pub\\lib\\targetlink\\StyleSheet
+- ***                                            s\\StyleSheets_DPR\\TL_CSourceCodeSS_MISRA_config.xsl
++ *** Style definition file                    : C:\\08_git\\ec_models_pub\\lib\\targetlink\\StyleSheets\\c
++ ***                                            onfig\\cconfig.xml
++ *** Root style sheet                         : C:\\08_git\\ec_models_pub\\lib\\targetlink\\StyleSheets\\S
++ ***                                            tyleSheets_DPR\\TL_CSourceCodeSS_MISRA_config.xsl
+  ***
+- *** TargetLink version      : 3.5p2 from 14-Aug-2014
+- *** Code generator version  : Build Id 3.5.0.28 from 2014-08-20 16:45:15
++ *** TargetLink version      : 3.5 from 30-Oct-2013
++ *** Code generator version  : Build Id 3.5.0.22 from 2013-10-07 16:59:57
+  *** Copyright (C) Siemens AG 2015 (All Rights Reserved. Confidential)
+ \\**************************************************************************************************/
+ 
+@@ -129,7 +130,6 @@
+ /*----------------------------------------------------------------------------*\\
+   INCLUDES
+ \\*----------------------------------------------------------------------------*/
+-#include "tl_defines_Mod3PhTL.h"
+ #include "Platform_Types.h"
+ /*----------------------------------------------------------------------------*\\
+   DEFINES
+@@ -150,6 +150,7 @@ struct tag_Mod3PhTL_OutputData {
+    nsation inactive, 1: active} */;
+    uint8 ModlnModTranReq /* Description: modulation transition request {Bit0: modulation mode transi
+    tion requested for high linear modulation; Bit1: activation of overmodulation requested} */;
++   boolean BlkOperActv /* Description: actual status of SixStep in case of overmodulation */;
+ }; /* struct type created for variable: Mod3PhTL_OutputData */
+ /*----------------------------------------------------------------------------*\\
+   ENUMS
+@@ -161,10 +162,10 @@ struct tag_Mod3PhTL_OutputData {
+ #define MOD3PHTL_START_SEC_VAR_CLEARED_32
+ #include "MemMap.h"
+ /******************************************************************************\\
+-   MemMap_DISP_CLEARED_32: global observable variables (RAM) | Width: N.A.
++   MEMMAP_DISP_CLEARED_32: global observable variables (RAM) | Width: N.A.
+ \\******************************************************************************/
+-extern MemMap_DISP_CLEARED_32 struct tag_Mod3PhTL_OutputData Mod3PhTL_OutputData /* Description: Out
+-   put structure for Mod3PhTL */;
++extern struct tag_Mod3PhTL_OutputData Mod3PhTL_OutputData /* Description: Output structure for Mod3P
++   hTL */;
+ #define MOD3PHTL_STOP_SEC_VAR_CLEARED_32
+ #include "MemMap.h"
+ 
+diff --git a/src/fw_cu/Components/Inv/ModSwtSig/Mod3Pha/lib/Mod3Pha.a b/src/fw_cu/Components/Inv/ModSwtSig/Mod3Pha/lib/Mod3Pha.a
+index 4d5323b7d..dfa59dbc8 100644
+Binary files a/src/fw_cu/Components/Inv/ModSwtSig/Mod3Pha/lib/Mod3Pha.a and b/src/fw_cu/Components/Inv/ModSwtSig/Mod3Pha/lib/Mod3Pha.a differ
+diff --git a/src/fw_cu/Components/Inv/ModSwtSig/Mod3Pha/lib/Mod3Pha.info b/src/fw_cu/Components/Inv/ModSwtSig/Mod3Pha/lib/Mod3Pha.info
+new file mode 100644
+index 000000000..e8617c710
+--- /dev/null
++++ b/src/fw_cu/Components/Inv/ModSwtSig/Mod3Pha/lib/Mod3Pha.info
+@@ -0,0 +1,32 @@
++GIT information for C:/08_git/ec_models/NextGen/codegeneration_models/Mod3PhTL
++Created: Do,  2. Dez 2021 14:46:01
++
++*****
++COMMIT information:
++commit eb96a4f864cdaa632bf58757cd51c7a53c377d96
++Author: Frank IRMISCH (JV EXT) <frank.irmisch.jv.ext@valeo.com>
++Date:   Tue Nov 9 08:55:07 2021 +0100
++
++    $100kW-45191$ - Integration of PMTempCalcnThermNet DRCO_PMTEMPCALCNTHERMNET_BASIS_V01400
++    
++    remove PMTempCalcnThermNetVw
++    
++    Change-Id: Ie6b8a54ec0c76ebb40fbfb2db8f901c19343c63d
++
++*****
++TAGs on commit:
++P2-100KW-MASTER-0211-20211129
++
++*****
++Changed files under version control but not committed:
++NextGen/codegeneration_models/Mod3PhTL/archive/Mod3PhTL.a2l
++NextGen/codegeneration_models/Mod3PhTL/archive/Mod3PhTL/Mod3PhTL.c
++NextGen/codegeneration_models/Mod3PhTL/archive/Mod3PhTL/Mod3PhTL.h
++NextGen/codegeneration_models/Mod3PhTL/archive/Mod3PhTL/Mod3PhTL_Data.c
++NextGen/codegeneration_models/Mod3PhTL/archive/Mod3PhTL/Mod3PhTL_Data.h
++NextGen/codegeneration_models/Mod3PhTL/archive/Mod3PhTL/Mod3PhTL_Inputs.c
++NextGen/codegeneration_models/Mod3PhTL/archive/Mod3PhTL/Mod3PhTL_Inputs.h
++NextGen/codegeneration_models/Mod3PhTL/archive/Mod3PhTL/Mod3PhTL_Outputs.c
++NextGen/codegeneration_models/Mod3PhTL/archive/Mod3PhTL/Mod3PhTL_Outputs.h
++NextGen/codegeneration_models/Mod3PhTL/archive/Mod3PhTL/tl_defines_Mod3PhTL.h
++NextGen/codegeneration_models/Mod3PhTL/archive/Mod3Pha.a
+diff --git a/src/fw_cu/build/Parfiles/P2_100kW/Testbench/VW310E_76_49_A274_0028_VEH_200901.par b/src/fw_cu/build/Parfiles/P2_100kW/Testbench/VW310E_76_49_A274_0028_VEH_200901.par
+index 6e2411296..40baef374 100644
+--- a/src/fw_cu/build/Parfiles/P2_100kW/Testbench/VW310E_76_49_A274_0028_VEH_200901.par
++++ b/src/fw_cu/build/Parfiles/P2_100kW/Testbench/VW310E_76_49_A274_0028_VEH_200901.par
+@@ -7165,12 +7165,9 @@ IvtrThermalNetwork_CalibParam.bEna_TempCooltInletFromMeas [UINT(8)]  0 ;  0
+ Mod3PhTL_CalibParam.FrqDpwmMin [FLOAT]  7000 ;  7000
+ Mod3PhTL_CalibParam.IMinGdpwm [FLOAT]  1 ;  1
+ Mod3PhTL_CalibParam.ModlnModStsWord [UINT(8)]  2 ;  2
+-Mod3PhTL_CalibParam.NrVersSho [UINT(8)]  0 ;  0
+ Mod3PhTL_CalibParam.OverModlnCorrnCoeff0 [FLOAT] -1.324589490890503 ; -1.324589490890503
+ Mod3PhTL_CalibParam.OverModlnCorrnCoeff1 [FLOAT]  1.2706446647644043 ;  1.2706446647644043
+ Mod3PhTL_CalibParam.OverModlnCorrnMin [FLOAT]  0.0093994140625 ;  0.0093994140625
+-Mod3PhTL_CalibParam.RPhaIvtrSca [FLOAT]  1 ;  1
+-Mod3PhTL_CalibParam.SixStepSqModlnIdxThd [FLOAT]  1.215000033378601 ;  1.215000033378601
+ Mod3PhTL_CalibParam.SqModlnIdxDpwmOffHard [FLOAT]  0.03999999910593033 ;  0.03999999910593033
+ Mod3PhTL_CalibParam.SqModlnIdxDpwmOffSoft [FLOAT]  0.42250001430511475 ;  0.42250001430511475
+ Mod3PhTL_CalibParam.SqModlnIdxDpwmOn [FLOAT]  0.49000000953674316 ;  0.49000000953674316
+diff --git a/src/fw_cu/build/a2l/Measurements-to-Timeslices-Mapping.csv b/src/fw_cu/build/a2l/Measurements-to-Timeslices-Mapping.csv
+index c5fde3f6f..bb5de7d22 100644
+--- a/src/fw_cu/build/a2l/Measurements-to-Timeslices-Mapping.csv
++++ b/src/fw_cu/build/a2l/Measurements-to-Timeslices-Mapping.csv
+@@ -5110,6 +5110,9 @@ Mod3PhTL_MeasSig.DutySqWaveUVW,Core_2,C2_100u_PWM,0.1,,,DRCO
+ Mod3PhTL_MeasSig.DutyUnlimdUVW,Core_2,C2_100u_PWM,0.1,,,DRCO
+ Mod3PhTL_MeasSig.SqModlnIdxDutyRefCorrd,Core_2,C2_100u_PWM,0.1,,,DRCO
+ Mod3PhTL_MeasSig.SwtStsUVW,Core_2,C2_100u_PWM,0.1,,,DRCO
++Mod3PhTL_MeasSig.SqModlnIdxDutyInp,Core_2,C2_100u_PWM,0.1,,,DRCO
++Mod3PhTL_MeasSig.SqModlnIdxDutyRefCorrdFild,Core_2,C2_100u_PWM,0.1,,,DRCO
++Mod3PhTL_OutputData.BlkOperActv,Core_2,C2_100u_PWM,0.1,,,DRCO
+ Mod3PhTL_OutputData.DutyUVW,Core_2,C2_100u_PWM,0.1,,,DRCO
+ Mod3PhTL_OutputData.ModlnIdxActSqd,Core_2,C2_100u_PWM,0.1,,,DRCO
+ Mod3PhTL_OutputData.ModlnModAct,Core_2,C2_100u_PWM,0.1,,,DRCO
+'

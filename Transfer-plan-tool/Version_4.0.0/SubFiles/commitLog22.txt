@@ -1,0 +1,1421 @@
+b'commit 86733e36b6a372379c3555a8bfcb05268ce26495
+Author: Mohammed ANDALOUSSI (JV) <mohammed.andaloussi.jv@valeo.com>
+Date:   Tue Mar 22 01:16:42 2022 +0100
+
+    $100kW-54898$ - [CR B03] FCT_PrioCtrlSigSw - Update Unit Construction
+    
+    Change-Id: Ieb72fc6814970a0a3d46be189a75ebcac71f242f
+
+diff --git a/src/fw_cu/Components/Cmn/MngFlts/ErrDeb/src/ErrDeb_cfg.c b/src/fw_cu/Components/Cmn/MngFlts/ErrDeb/src/ErrDeb_cfg.c
+index 7d91f999b..f74d85c71 100644
+--- a/src/fw_cu/Components/Cmn/MngFlts/ErrDeb/src/ErrDeb_cfg.c
++++ b/src/fw_cu/Components/Cmn/MngFlts/ErrDeb/src/ErrDeb_cfg.c
+@@ -95,7 +95,7 @@
+ #include "SftyInvActr.h"
+ #include "SftyAcEvln.h"
+ #include "SftyHvDcUEvln.h"
+-
++#include "SftyE2eFpga.h"
+ /*================== [defines] ======================================================================================*/
+ 
+ /*================== [type definitions] =============================================================================*/
+@@ -2257,9 +2257,9 @@ CONST(ErrDeb_FltCfgType, ERRDEB_CONST) ErrDebFltCfg[ERR_DEB_FLT_CNT] =
+    /* MID_POINT_U */
+    { 
+       &ErrDebFltData_MID_POINT_U, /* Fault data */
+-      &SftyInvActrMidPointPhaUErrMonrSt, /* Direct pointer to monitor status */
++      &SftyE2eFpgaCombGrpABErrMonrSt, /* Direct pointer to monitor status */
+       NULL_PTR, /* Status update function used if MonrStsPtr == NULL_PTR */
+-      &SftyInvActr_ReinitMonrData, /* Monitor init function */
++      &SftyE2eFpga_ReinitFltSts, /* Monitor init function */
+       FCT_ID_LOCK_MID_POINT_U, /* FID for fault locking */
+       DemConf_DemEventParameter_MID_POINT_U, /* Dem paramter configured */
+       DEM_EVENT_INVALID 
+diff --git a/src/fw_cu/Components/Safety/Sfty_Cmn/SftyE2eFpga/include/SftyE2eFpga.h b/src/fw_cu/Components/Safety/Sfty_Cmn/SftyE2eFpga/include/SftyE2eFpga.h
+index 10644c8bb..fa6bd7789 100644
+--- a/src/fw_cu/Components/Safety/Sfty_Cmn/SftyE2eFpga/include/SftyE2eFpga.h
++++ b/src/fw_cu/Components/Safety/Sfty_Cmn/SftyE2eFpga/include/SftyE2eFpga.h
+@@ -30,6 +30,7 @@
+ 
+ extern FUNC(void, SFTYE2EFPGA_CODE) SftyE2eFpga_Init(void);
+ extern FUNC(void, SFTYE2EFPGA_CODE) SftyE2eFpga_MainFunction(void);
++extern FUNC(void, SFTYE2EFPGA_CODE) SftyE2eFpga_ReinitFltSts(void);
+ 
+ #define SFTYE2EFPGA_AREA_CMN_STOP_SEC_CODE_FAST
+ #include "MemMap.h"
+diff --git a/src/fw_cu/Components/Safety/Sfty_Cmn/SftyE2eFpga/include/SftyE2eFpga_data.h b/src/fw_cu/Components/Safety/Sfty_Cmn/SftyE2eFpga/include/SftyE2eFpga_data.h
+index 7589526ae..5acf53a85 100644
+--- a/src/fw_cu/Components/Safety/Sfty_Cmn/SftyE2eFpga/include/SftyE2eFpga_data.h
++++ b/src/fw_cu/Components/Safety/Sfty_Cmn/SftyE2eFpga/include/SftyE2eFpga_data.h
+@@ -55,6 +55,14 @@ extern VAR(boolean, SFTYE2EFPGA_VAR) SftyE2eFpgaScSpdReadyFltSts;
+ extern VAR(boolean, SFTYE2EFPGA_VAR) SftyE2eFpgaHsGateDrvrFltSts;
+ extern VAR(boolean, SFTYE2EFPGA_VAR) SftyE2eFpgaLoGateDrvrFltSts;
+ extern VAR(boolean, SFTYE2EFPGA_VAR) SftyE2eFpgaMidPointPhaFltSts[SYSDEF_EM_PHA_CNT_MAX];
++extern VAR(boolean, SFTYE2EFPGA_VAR) SftyE2eFpgaTxPwrSupLsFltSts;
++extern VAR(boolean, SFTYE2EFPGA_VAR) SftyE2eFpgaTxPwrSupHsFltSts;
++extern VAR(boolean, SFTYE2EFPGA_VAR) SftyE2eFpgaTxPwrSupMultFltSts;
++extern VAR(boolean, SFTYE2EFPGA_VAR) SftyE2eFpgaTxOverUnderCurBatFltSts;
++extern VAR(boolean, SFTYE2EFPGA_VAR) SftyE2eFpgaTxOverTempCtrlBdFltSts;
++extern VAR(boolean, SFTYE2EFPGA_VAR) SftyE2eFpgaTxOverTempIgbtFltSts;
++extern VAR(boolean, SFTYE2EFPGA_VAR) SftyE2eFpgaTxOverTempDrvBdFltSts;
++extern VAR(boolean, SFTYE2EFPGA_VAR) SftyE2eFpgaTxWdgCpldFltSts;
+ 
+ #define SFTYE2EFPGA_STOP_SEC_VAR_AREA_CMN_FAST_CLEARED
+ #include "MemMap.h"
+@@ -73,6 +81,7 @@ extern VAR(uint8,   SFTYE2EFPGA_VAR) SftyE2eFpgaRxMuxSeqErrMonrSt;
+ extern VAR(uint8,   SFTYE2EFPGA_VAR) SftyE2eFpgaModPlausErrMonrSt;
+ extern VAR(uint8,   SFTYE2EFPGA_VAR) SftyE2eFpgaPrmDlErrMonrSt;
+ extern VAR(uint8,   SFTYE2EFPGA_VAR) SftyE2eFpgaDmaTiStampErrMonrSt;
++extern VAR(uint8,   SFTYE2EFPGA_VAR) SftyE2eFpgaCombGrpABErrMonrSt;
+ 
+ #define SFTYE2EFPGA_STOP_SEC_VAR_AREA_CMN_FAST_INIT_8
+ #include "MemMap.h"
+diff --git a/src/fw_cu/Components/Safety/Sfty_Cmn/SftyE2eFpga/src/SftyE2eFpga.c b/src/fw_cu/Components/Safety/Sfty_Cmn/SftyE2eFpga/src/SftyE2eFpga.c
+index 22fc41717..a99d0b1e5 100644
+--- a/src/fw_cu/Components/Safety/Sfty_Cmn/SftyE2eFpga/src/SftyE2eFpga.c
++++ b/src/fw_cu/Components/Safety/Sfty_Cmn/SftyE2eFpga/src/SftyE2eFpga.c
+@@ -387,6 +387,168 @@ STATIC VAR(uint8, SFTYE2EFPGA_VAR) SftyE2eFpgaActvDchaReq;
+ */
+ STATIC VAR(uint8, SFTYE2EFPGA_VAR) SftyE2eFpgaMod;
+ 
++/*
++@@ SYMBOL = SftyE2eFpgaPwrSupLsFltStsAcc
++@@ A2L_TYPE = MEASURE
++@@ DATA_TYPE = UBYTE
++@@ DESCRIPTION = "Accumulated fault status"
++@@ GROUP = SftyE2eFpga
++@@ END
++*/
++STATIC VAR(uint8, SFTYE2EFPGA_VAR) SftyE2eFpgaPwrSupLsFltStsAcc;
++
++/*
++@@ SYMBOL = SftyE2eFpgaPwrSupHsFltStsAcc
++@@ A2L_TYPE = MEASURE
++@@ DATA_TYPE = UBYTE
++@@ DESCRIPTION = "Accumulated fault status"
++@@ GROUP = SftyE2eFpga
++@@ END
++*/
++STATIC VAR(uint8, SFTYE2EFPGA_VAR) SftyE2eFpgaPwrSupHsFltStsAcc;
++
++/*
++@@ SYMBOL = SftyE2eFpgaPwrSupMultFltStsAcc
++@@ A2L_TYPE = MEASURE
++@@ DATA_TYPE = UBYTE
++@@ DESCRIPTION = "Accumulated fault status"
++@@ GROUP = SftyE2eFpga
++@@ END
++*/
++STATIC VAR(uint8, SFTYE2EFPGA_VAR) SftyE2eFpgaPwrSupMultFltStsAcc;
++
++/*
++@@ SYMBOL = SftyE2eFpgaOverUnderCurBatFltStsAcc
++@@ A2L_TYPE = MEASURE
++@@ DATA_TYPE = UBYTE
++@@ DESCRIPTION = "Accumulated fault status"
++@@ GROUP = SftyE2eFpga
++@@ END
++*/
++STATIC VAR(uint8, SFTYE2EFPGA_VAR) SftyE2eFpgaOverUnderCurBatFltStsAcc;
++
++/*
++@@ SYMBOL = SftyE2eFpgaOverTempCtrlBdFltStsAcc
++@@ A2L_TYPE = MEASURE
++@@ DATA_TYPE = UBYTE
++@@ DESCRIPTION = "Accumulated fault status"
++@@ GROUP = SftyE2eFpga
++@@ END
++*/
++STATIC VAR(uint8, SFTYE2EFPGA_VAR) SftyE2eFpgaOverTempCtrlBdFltStsAcc;
++
++/*
++@@ SYMBOL = SftyE2eFpgaOverTempIgbtFltStsAcc
++@@ A2L_TYPE = MEASURE
++@@ DATA_TYPE = UBYTE
++@@ DESCRIPTION = "Accumulated fault status"
++@@ GROUP = SftyE2eFpga
++@@ END
++*/
++STATIC VAR(uint8, SFTYE2EFPGA_VAR) SftyE2eFpgaOverTempIgbtFltStsAcc;
++
++/*
++@@ SYMBOL = SftyE2eFpgaOverTempDrvBdFltStsAcc
++@@ A2L_TYPE = MEASURE
++@@ DATA_TYPE = UBYTE
++@@ DESCRIPTION = "Accumulated fault status"
++@@ GROUP = SftyE2eFpga
++@@ END
++*/
++STATIC VAR(uint8, SFTYE2EFPGA_VAR) SftyE2eFpgaOverTempDrvBdFltStsAcc;
++
++/*
++@@ SYMBOL = SftyE2eFpgaWdgCpldFltStsAcc
++@@ A2L_TYPE = MEASURE
++@@ DATA_TYPE = UBYTE
++@@ DESCRIPTION = "Accumulated fault status"
++@@ GROUP = SftyE2eFpga
++@@ END
++*/
++STATIC VAR(uint8, SFTYE2EFPGA_VAR) SftyE2eFpgaWdgCpldFltStsAcc;
++
++/* PRQA S 3229 ++ # these variables are written and not used. They are needed for debug prposes */
++/*
++@@ SYMBOL = SftyE2eFpgaPwrSupLsFltSts
++@@ A2L_TYPE = MEASURE
++@@ DATA_TYPE = UBYTE
++@@ DESCRIPTION = "Fault status"
++@@ GROUP = SftyE2eFpga
++@@ END
++*/
++STATIC VAR(uint8, SFTYE2EFPGA_VAR) SftyE2eFpgaPwrSupLsFltSts;
++
++/*
++@@ SYMBOL = SftyE2eFpgaPwrSupHsFltSts
++@@ A2L_TYPE = MEASURE
++@@ DATA_TYPE = UBYTE
++@@ DESCRIPTION = "Fault status"
++@@ GROUP = SftyE2eFpga
++@@ END
++*/
++STATIC VAR(uint8, SFTYE2EFPGA_VAR) SftyE2eFpgaPwrSupHsFltSts;
++
++/*
++@@ SYMBOL = SftyE2eFpgaPwrSupMultFltSts
++@@ A2L_TYPE = MEASURE
++@@ DATA_TYPE = UBYTE
++@@ DESCRIPTION = "Fault status"
++@@ GROUP = SftyE2eFpga
++@@ END
++*/
++STATIC VAR(uint8, SFTYE2EFPGA_VAR) SftyE2eFpgaPwrSupMultFltSts;
++
++/*
++@@ SYMBOL = SftyE2eFpgaOverUnderCurBatFltSts
++@@ A2L_TYPE = MEASURE
++@@ DATA_TYPE = UBYTE
++@@ DESCRIPTION = "Fault status"
++@@ GROUP = SftyE2eFpga
++@@ END
++*/
++STATIC VAR(uint8, SFTYE2EFPGA_VAR) SftyE2eFpgaOverUnderCurBatFltSts;
++
++/*
++@@ SYMBOL = SftyE2eFpgaOverTempCtrlBdFltSts
++@@ A2L_TYPE = MEASURE
++@@ DATA_TYPE = UBYTE
++@@ DESCRIPTION = "Fault status"
++@@ GROUP = SftyE2eFpga
++@@ END
++*/
++STATIC VAR(uint8, SFTYE2EFPGA_VAR) SftyE2eFpgaOverTempCtrlBdFltSts;
++
++/*
++@@ SYMBOL = SftyE2eFpgaOverTempIgbtFltSts
++@@ A2L_TYPE = MEASURE
++@@ DATA_TYPE = UBYTE
++@@ DESCRIPTION = "Fault status"
++@@ GROUP = SftyE2eFpga
++@@ END
++*/
++STATIC VAR(uint8, SFTYE2EFPGA_VAR) SftyE2eFpgaOverTempIgbtFltSts;
++
++/*
++@@ SYMBOL = SftyE2eFpgaOverTempDrvBdFltSts
++@@ A2L_TYPE = MEASURE
++@@ DATA_TYPE = UBYTE
++@@ DESCRIPTION = "Fault status"
++@@ GROUP = SftyE2eFpga
++@@ END
++*/
++STATIC VAR(uint8, SFTYE2EFPGA_VAR) SftyE2eFpgaOverTempDrvBdFltSts;
++
++/*
++@@ SYMBOL = SftyE2eFpgaWdgCpldFltSts
++@@ A2L_TYPE = MEASURE
++@@ DATA_TYPE = UBYTE
++@@ DESCRIPTION = "Fault status"
++@@ GROUP = SftyE2eFpga
++@@ END
++*/
++STATIC VAR(uint8, SFTYE2EFPGA_VAR) SftyE2eFpgaWdgCpldFltSts;
++
++/* PRQA S 3229 -- */
+ 
+ #define SFTYE2EFPGA_STOP_SEC_VAR_AREA_CMN_FAST_CLEARED
+ #include "MemMap.h"
+@@ -1117,6 +1279,134 @@ LOCAL_INLINE void SftyE2eFpga_ExtractMeasCohrncFltSts(void)
+    return;
+ }
+ 
++/******************************************************************/
++/*!
++ * \\fn      void SftyE2eFpga_ExtractPwrSupLsFltSts(void)
++ * \\brief   This function extracts power supply LS fault status
++ * \\Parent_DD : SftyE2eFpga_E2eFrameHndlr
++ * \\param   -
++ * \\return  -
++ */
++/******************************************************************/
++LOCAL_INLINE void SftyE2eFpga_ExtractPwrSupLsFltSts(void)
++{
++   SftyE2eFpgaPwrSupLsFltStsAcc |= ((uint8)(~(SftyE2eFpgaIpduRx.Data.RxA.Id.MxA.Sig.FltA.Field.PwrSupLs)) & 0x01u);
++
++   return;
++}
++
++/******************************************************************/
++/*!
++ * \\fn      void SftyE2eFpga_ExtractPwrSupHsFltSts(void)
++ * \\brief   This function extracts power supply HS fault status
++ * \\Parent_DD : SftyE2eFpga_E2eFrameHndlr
++ * \\param   -
++ * \\return  -
++ */
++/******************************************************************/
++LOCAL_INLINE void SftyE2eFpga_ExtractPwrSupHsFltSts(void)
++{
++   SftyE2eFpgaPwrSupHsFltStsAcc |= ((uint8)(~(SftyE2eFpgaIpduRx.Data.RxA.Id.MxA.Sig.FltA.Field.PwrSupHs)) & 0x01u);
++
++   return;
++}
++
++/******************************************************************/
++/*!
++ * \\fn      void SftyE2eFpga_ExtractPwrSupMultFltSts(void)
++ * \\brief   This function extracts power supply Multi fault status
++ * \\Parent_DD : SftyE2eFpga_E2eFrameHndlr
++ * \\param   -
++ * \\return  -
++ */
++/******************************************************************/
++LOCAL_INLINE void SftyE2eFpga_ExtractPwrSupMultFltSts(void)
++{
++   SftyE2eFpgaPwrSupMultFltStsAcc |= ((uint8)(~(SftyE2eFpgaIpduRx.Data.RxA.Id.MxA.Sig.FltA.Field.PwrSupMul)) & 0x01u);
++
++   return;
++}
++
++/******************************************************************/
++/*!
++ * \\fn      void SftyE2eFpga_ExtractOverUnderCurBatFltSts(void)
++ * \\brief   This function extracts over under current battery fault status
++ * \\Parent_DD : SftyE2eFpga_E2eFrameHndlr
++ * \\param   -
++ * \\return  -
++ */
++/******************************************************************/
++LOCAL_INLINE void SftyE2eFpga_ExtractOverUnderCurBatFltSts(void)
++{
++   SftyE2eFpgaOverUnderCurBatFltStsAcc |= ((uint8)(~(SftyE2eFpgaIpduRx.Data.RxA.Id.MxA.Sig.FltB.Field.OverUnderCurBat)) & 0x01u);
++
++   return;
++}
++
++/******************************************************************/
++/*!
++ * \\fn      void SftyE2eFpga_ExtractOverTempCtrlBdFltSts(void)
++ * \\brief   This function extracts over temperature control board fault status
++ * \\Parent_DD : SftyE2eFpga_E2eFrameHndlr
++ * \\param   -
++ * \\return  -
++ */
++/******************************************************************/
++LOCAL_INLINE void SftyE2eFpga_ExtractOverTempCtrlBdFltSts(void)
++{
++   SftyE2eFpgaOverTempCtrlBdFltStsAcc |= ((uint8)(~(SftyE2eFpgaIpduRx.Data.RxA.Id.MxA.Sig.FltB.Field.OverTempCtrlBd)) & 0x01u);
++
++   return;
++}
++
++/******************************************************************/
++/*!
++ * \\fn      void SftyE2eFpga_ExtractOverTempIgbtFltSts(void)
++ * \\brief   This function extracts over temperature IGBT fault status
++ * \\Parent_DD : SftyE2eFpga_E2eFrameHndlr
++ * \\param   -
++ * \\return  -
++ */
++/******************************************************************/
++LOCAL_INLINE void SftyE2eFpga_ExtractOverTempIgbtFltSts(void)
++{
++   SftyE2eFpgaOverTempIgbtFltStsAcc |= ((uint8)(~(SftyE2eFpgaIpduRx.Data.RxA.Id.MxA.Sig.FltB.Field.OverTempIgbt)) & 0x01u);
++
++   return;
++}
++
++/******************************************************************/
++/*!
++ * \\fn      void SftyE2eFpga_ExtractOverTempDrvBdFltSts(void)
++ * \\brief   This function extracts over temperature driver board fault status
++ * \\Parent_DD : SftyE2eFpga_E2eFrameHndlr
++ * \\param   -
++ * \\return  -
++ */
++/******************************************************************/
++LOCAL_INLINE void SftyE2eFpga_ExtractOverTempDrvBdFltSts(void)
++{
++   SftyE2eFpgaOverTempDrvBdFltStsAcc |= ((uint8)(~(SftyE2eFpgaIpduRx.Data.RxA.Id.MxA.Sig.FltB.Field.OverTempDrvBd)) & 0x01u);
++
++   return;
++}
++
++/******************************************************************/
++/*!
++ * \\fn      void SftyE2eFpga_ExtractWdgCpldFltSts(void)
++ * \\brief   This function extracts WDG CPLD fault status
++ * \\Parent_DD : SftyE2eFpga_E2eFrameHndlr
++ * \\param   -
++ * \\return  -
++ */
++/******************************************************************/
++LOCAL_INLINE void SftyE2eFpga_ExtractWdgCpldFltSts(void)
++{
++   SftyE2eFpgaWdgCpldFltStsAcc |= ((uint8)(~(SftyE2eFpgaIpduRx.Data.RxA.Id.MxA.Sig.FltB.Field.WdgCpld)) & 0x01u);
++
++   return;
++}
++
+ /******************************************************************/
+ /*!
+  * \\fn      void SftyE2eFpga_ExtractEmgySWFltSts(void)
+@@ -1214,14 +1504,14 @@ LOCAL_INLINE void SftyE2eFpga_ExtractLossComErrMonrSt(void)
+ }
+ /******************************************************************/
+ /*!
+- * \\fn      void SftyE2eFpga_ExtrFltStsGrpA(void)
++ * \\fn      void SftyE2eFpga_ExtrFltStsGrpAPart1(void)
+  * \\brief   This function extracts fault status from the IPDU
+  * \\Parent_DD : SftyE2eFpga_E2eFrameHndlr
+  * \\param   -
+  * \\return  -
+  */
+ /******************************************************************/
+-LOCAL_INLINE void SftyE2eFpga_ExtrFltStsGrpA(void)
++LOCAL_INLINE void SftyE2eFpga_ExtrFltStsGrpAPart1(void)
+ {
+    SftyE2eFpga_ExtractMeasCohrncFltSts();
+    SftyE2eFpga_ExtractEmgySWFltSts();
+@@ -1234,6 +1524,24 @@ LOCAL_INLINE void SftyE2eFpga_ExtrFltStsGrpA(void)
+    return;
+ }
+ 
++/******************************************************************/
++/*!
++ * \\fn      void SftyE2eFpga_ExtrFltStsGrpAPart2(void)
++ * \\brief   This function extracts fault status from the IPDU
++ * \\Parent_DD : SftyE2eFpga_E2eFrameHndlr
++ * \\param   -
++ * \\return  -
++ */
++/******************************************************************/
++LOCAL_INLINE void SftyE2eFpga_ExtrFltStsGrpAPart2(void)
++{
++   SftyE2eFpga_ExtractPwrSupLsFltSts();
++   SftyE2eFpga_ExtractPwrSupHsFltSts();
++   SftyE2eFpga_ExtractPwrSupMultFltSts();
++
++   return;
++}
++
+ /******************************************************************/
+ /*!
+  * \\fn      void SftyE2eFpga_ExtractOverUnderCurUFltSts(void)
+@@ -1348,14 +1656,14 @@ LOCAL_INLINE void SftyE2eFpga_ExtractMidPointPhaWFltSts(void)
+ 
+ /******************************************************************/
+ /*!
+- * \\fn      void SftyE2eFpga_ExtrFltStsGrpB(void)
++ * \\fn      void SftyE2eFpga_ExtrFltStsGrpBPart1(void)
+  * \\brief   This function extracts fault status from the IPDU
+  * \\Parent_DD : SftyE2eFpga_E2eFrameHndlr
+  * \\param   -
+  * \\return  -
+  */
+ /******************************************************************/
+-LOCAL_INLINE void SftyE2eFpga_ExtrFltStsGrpB(void)
++LOCAL_INLINE void SftyE2eFpga_ExtrFltStsGrpBPart1(void)
+ {
+    SftyE2eFpga_ExtractOverUnderCurUFltSts();
+    SftyE2eFpga_ExtractOverUnderCurVFltSts();
+@@ -1368,6 +1676,26 @@ LOCAL_INLINE void SftyE2eFpga_ExtrFltStsGrpB(void)
+    return;
+ }
+ 
++/******************************************************************/
++/*!
++ * \\fn      void SftyE2eFpga_ExtrFltStsGrpBPart2(void)
++ * \\brief   This function extracts fault status from the IPDU
++ * \\Parent_DD : SftyE2eFpga_E2eFrameHndlr
++ * \\param   -
++ * \\return  -
++ */
++/******************************************************************/
++LOCAL_INLINE void SftyE2eFpga_ExtrFltStsGrpBPart2(void)
++{
++   SftyE2eFpga_ExtractOverUnderCurBatFltSts();
++   SftyE2eFpga_ExtractOverTempCtrlBdFltSts();
++   SftyE2eFpga_ExtractOverTempIgbtFltSts();
++   SftyE2eFpga_ExtractOverTempDrvBdFltSts();
++   SftyE2eFpga_ExtractWdgCpldFltSts();
++
++   return;
++}
++
+ /******************************************************************/
+ /*!
+  * \\fn      void SftyE2eFpga_ExtrFltStsGrpC(void)
+@@ -1396,10 +1724,14 @@ LOCAL_INLINE void SftyE2eFpga_ExtrFltStsGrpC(void)
+ LOCAL_INLINE void SftyE2eFpga_ExtrFltSts(void)
+ {
+    /* Extract accumulated status of fault group A */
+-   SftyE2eFpga_ExtrFltStsGrpA();
++   SftyE2eFpga_ExtrFltStsGrpAPart1();
++
++   SftyE2eFpga_ExtrFltStsGrpAPart2();
+ 
+    /* Extract accumulated status of fault group B */
+-   SftyE2eFpga_ExtrFltStsGrpB();
++   SftyE2eFpga_ExtrFltStsGrpBPart1();
++
++   SftyE2eFpga_ExtrFltStsGrpBPart2();
+ 
+    /* Extract accumulated status of fault group C */
+    SftyE2eFpga_ExtrFltStsGrpC();
+@@ -1841,6 +2173,11 @@ LOCAL_INLINE void SftyE2eFpga_UpdtC2cFltBReinitStData(void)
+       SftyC2cData.FpgaTxDataFltBReinitSt.B.IgbtMidPointW  = SftyInvActrSetMidPointPhaWReinitSt;
+       SftyC2cData.FpgaTxDataFltBReinitSt.B.IgbtMidPointV  = SftyInvActrSetMidPointPhaVReinitSt;
+       SftyC2cData.FpgaTxDataFltBReinitSt.B.IgbtMidPointU  = SftyInvActrSetMidPointPhaUReinitSt;
++      SftyC2cData.FpgaTxDataFltBReinitSt.B.OverUndCurBat  = SftyE2eFpgaTxOverUnderCurBatFltSts;
++      SftyC2cData.FpgaTxDataFltBReinitSt.B.CtrlBdOt       = SftyE2eFpgaTxOverTempCtrlBdFltSts;
++      SftyC2cData.FpgaTxDataFltBReinitSt.B.IgbtOt         = SftyE2eFpgaTxOverTempIgbtFltSts;
++      SftyC2cData.FpgaTxDataFltBReinitSt.B.DrvBdOt        = SftyE2eFpgaTxOverTempDrvBdFltSts;
++      SftyC2cData.FpgaTxDataFltBReinitSt.B.WdgCpld        = SftyE2eFpgaTxWdgCpldFltSts;
+    }
+    else
+    {
+@@ -1864,9 +2201,12 @@ LOCAL_INLINE void SftyE2eFpga_UpdtC2cFltAReinitStData(void)
+ {
+    if ( SftyE2eFpgaReiniCombinedFltOvrdEna == FALSE)
+    {
+-      SftyC2cData.FpgaTxDataFltAReinitSt.B.MeasCohernc    = SftyAcEvlnSetPlausReinitSt | SftyHvDcUEvlnSetPlausReinitSt;
+-      SftyC2cData.FpgaTxDataFltAReinitSt.B.IgbtH          = SftyInvActrSetHsGateDrvrReinitSt;
+-      SftyC2cData.FpgaTxDataFltAReinitSt.B.IgbtL          = SftyInvActrSetLoGateDrvrReinitSt;
++      SftyC2cData.FpgaTxDataFltAReinitSt.B.MeasCohernc = SftyAcEvlnSetPlausReinitSt | SftyHvDcUEvlnSetPlausReinitSt;
++      SftyC2cData.FpgaTxDataFltAReinitSt.B.IgbtH       = SftyInvActrSetHsGateDrvrReinitSt;
++      SftyC2cData.FpgaTxDataFltAReinitSt.B.IgbtL       = SftyInvActrSetLoGateDrvrReinitSt;
++      SftyC2cData.FpgaTxDataFltAReinitSt.B.PwrSupLs    = SftyE2eFpgaTxPwrSupLsFltSts;
++      SftyC2cData.FpgaTxDataFltAReinitSt.B.PwrSupHs    = SftyE2eFpgaTxPwrSupHsFltSts;
++      SftyC2cData.FpgaTxDataFltAReinitSt.B.PwrSupMul   = SftyE2eFpgaTxPwrSupMultFltSts;
+    }
+    else
+    {
+@@ -1948,6 +2288,36 @@ LOCAL_INLINE void SftyE2eFpga_UpdtC2cActvDchaReq(void)
+    return;
+ }
+ 
++/******************************************************************/
++/*!
++ * \\fn      void SftyE2eFpga_SetTxFaultSts(void)
++ * \\brief   This function sets faults sent from AURIX to FPGA
++ * \\Parent_DD : SftyE2eFpga_MainFunction
++ * \\param   -
++ * \\return  void
++ */
++/******************************************************************/
++LOCAL_INLINE void SftyE2eFpga_SetTxFltSts(void)
++{
++   if (SftyC2cData.Kl15St !=  STS_KL15_OFF)
++   {
++      SftyE2eFpgaTxPwrSupLsFltSts         = TRUE;
++      SftyE2eFpgaTxPwrSupHsFltSts         = TRUE;
++      SftyE2eFpgaTxPwrSupMultFltSts       = TRUE;
++      SftyE2eFpgaTxOverUnderCurBatFltSts  = TRUE;
++      SftyE2eFpgaTxOverTempCtrlBdFltSts   = TRUE;
++      SftyE2eFpgaTxOverTempIgbtFltSts     = TRUE;
++      SftyE2eFpgaTxOverTempDrvBdFltSts    = TRUE;
++      SftyE2eFpgaTxWdgCpldFltSts          = TRUE;
++   }
++   else
++   {
++      /* Do nothing */
++   }
++
++
++   return;
++}
+ /******************************************************************/
+ /*!
+  * \\fn      void SftyE2eFpga_UpdtC2cData(void)
+@@ -1972,6 +2342,8 @@ LOCAL_INLINE void SftyE2eFpga_UpdtC2cData(void)
+ 
+    SftyE2eFpga_UpdtC2cActvDchaReq();
+ 
++   SftyE2eFpga_SetTxFltSts();
++
+    return;
+ }
+ 
+@@ -2044,6 +2416,38 @@ LOCAL_INLINE void SftyE2eFpga_CopyAndExtractSRxData(uint8 idx)
+    return;
+ }
+ 
++/******************************************************************/
++/*!
++ * \\fn      void SftyE2eFpga_UpdCombGrpABErrMonrSt(void)
++ * \\brief   This function updates SftyE2eFpgaCombGrpABErrMonrSt
++ * \\Parent_DD : SftyE2eFpga_MainFunction
++ * \\param   -
++ * \\return  void
++ */
++/******************************************************************/
++LOCAL_INLINE void SftyE2eFpga_UpdCombGrpABErrMonrSt(void)
++{
++   Std_ReturnType accRes;
++
++   accRes  = SftyE2eFpgaPwrSupLsFltStsAcc;
++   accRes |= SftyE2eFpgaPwrSupHsFltStsAcc;
++   accRes |= SftyE2eFpgaPwrSupMultFltStsAcc;
++   accRes |= SftyE2eFpgaOverUnderCurBatFltStsAcc;
++   accRes |= SftyE2eFpgaOverTempCtrlBdFltStsAcc;
++   accRes |= SftyE2eFpgaOverTempIgbtFltStsAcc;
++   accRes |= SftyE2eFpgaOverTempDrvBdFltStsAcc;
++   accRes |= SftyE2eFpgaWdgCpldFltStsAcc;
++
++   if(accRes == E_OK)
++   {
++      SftyE2eFpgaCombGrpABErrMonrSt = ERR_DEB_MONR_STS_PASSED;
++   }
++   else
++   {
++      SftyE2eFpgaCombGrpABErrMonrSt = ERR_DEB_MONR_STS_FAILED;
++   }
++   return;
++}
+ 
+ /******************************************************************/
+ /*!
+@@ -2077,6 +2481,14 @@ LOCAL_INLINE void SftyE2eFpga_RstFltSts(void)
+    SftyE2eFpgaMidPointPhaFltStsAcc[SFTY_PHA_V] = SFTY_E2E_FPGA_ACC_MONR_STS_PASSED;
+    SftyE2eFpgaMidPointPhaFltStsAcc[SFTY_PHA_W] = SFTY_E2E_FPGA_ACC_MONR_STS_PASSED;
+    SftyE2eFpgaModPlausErrMonrStAcc             = SFTY_E2E_FPGA_ACC_MONR_STS_PASSED;
++   SftyE2eFpgaPwrSupLsFltStsAcc                = SFTY_E2E_FPGA_ACC_MONR_STS_PASSED;
++   SftyE2eFpgaPwrSupHsFltStsAcc                = SFTY_E2E_FPGA_ACC_MONR_STS_PASSED;
++   SftyE2eFpgaPwrSupMultFltStsAcc              = SFTY_E2E_FPGA_ACC_MONR_STS_PASSED;
++   SftyE2eFpgaOverUnderCurBatFltStsAcc         = SFTY_E2E_FPGA_ACC_MONR_STS_PASSED;
++   SftyE2eFpgaOverTempCtrlBdFltStsAcc          = SFTY_E2E_FPGA_ACC_MONR_STS_PASSED;
++   SftyE2eFpgaOverTempIgbtFltStsAcc            = SFTY_E2E_FPGA_ACC_MONR_STS_PASSED;
++   SftyE2eFpgaOverTempDrvBdFltStsAcc           = SFTY_E2E_FPGA_ACC_MONR_STS_PASSED;
++   SftyE2eFpgaWdgCpldFltStsAcc                 = SFTY_E2E_FPGA_ACC_MONR_STS_PASSED;
+ 
+    return;
+ }
+@@ -2112,6 +2524,14 @@ LOCAL_INLINE void SftyE2eFpga_InitFltStsAcc(void)
+    SftyE2eFpgaTxCrcCtrlAErrMonrStAcc             = SFTY_E2E_FPGA_ACC_MONR_STS_PASSED;
+    SftyE2eFpgaTxCrcCtrlSErrMonrStAcc             = SFTY_E2E_FPGA_ACC_MONR_STS_PASSED;
+    SftyE2eFpgaModPlausErrMonrStAcc               = SFTY_E2E_FPGA_ACC_MONR_STS_PASSED;
++   SftyE2eFpgaPwrSupLsFltStsAcc                  = SFTY_E2E_FPGA_ACC_MONR_STS_PASSED;
++   SftyE2eFpgaPwrSupHsFltStsAcc                  = SFTY_E2E_FPGA_ACC_MONR_STS_PASSED;
++   SftyE2eFpgaPwrSupMultFltStsAcc                = SFTY_E2E_FPGA_ACC_MONR_STS_PASSED;
++   SftyE2eFpgaOverUnderCurBatFltStsAcc           = SFTY_E2E_FPGA_ACC_MONR_STS_PASSED;
++   SftyE2eFpgaOverTempCtrlBdFltStsAcc            = SFTY_E2E_FPGA_ACC_MONR_STS_PASSED;
++   SftyE2eFpgaOverTempIgbtFltStsAcc              = SFTY_E2E_FPGA_ACC_MONR_STS_PASSED;
++   SftyE2eFpgaOverTempDrvBdFltStsAcc             = SFTY_E2E_FPGA_ACC_MONR_STS_PASSED;
++   SftyE2eFpgaWdgCpldFltStsAcc                   = SFTY_E2E_FPGA_ACC_MONR_STS_PASSED;
+ 
+    return;
+ }
+@@ -2141,6 +2561,22 @@ LOCAL_INLINE void SftyE2eFpga_InitFltSts(void)
+    SftyE2eFpgaMidPointPhaFltSts[SFTY_PHA_U]              = TRUE;
+    SftyE2eFpgaMidPointPhaFltSts[SFTY_PHA_U]              = TRUE;
+    SftyE2eFpgaMidPointPhaFltSts[SFTY_PHA_U]              = TRUE;
++   SftyE2eFpgaPwrSupLsFltSts                             = TRUE;
++   SftyE2eFpgaPwrSupHsFltSts                             = TRUE;
++   SftyE2eFpgaPwrSupMultFltSts                           = TRUE;
++   SftyE2eFpgaOverUnderCurBatFltSts                      = TRUE;
++   SftyE2eFpgaOverTempCtrlBdFltSts                       = TRUE;
++   SftyE2eFpgaOverTempIgbtFltSts                         = TRUE;
++   SftyE2eFpgaOverTempDrvBdFltSts                        = TRUE;
++   SftyE2eFpgaWdgCpldFltSts                              = TRUE;
++   SftyE2eFpgaTxPwrSupLsFltSts                           = TRUE;
++   SftyE2eFpgaTxPwrSupHsFltSts                           = TRUE;
++   SftyE2eFpgaTxPwrSupMultFltSts                         = TRUE;
++   SftyE2eFpgaTxOverUnderCurBatFltSts                    = TRUE;
++   SftyE2eFpgaTxOverTempCtrlBdFltSts                     = TRUE;
++   SftyE2eFpgaTxOverTempIgbtFltSts                       = TRUE;
++   SftyE2eFpgaTxOverTempDrvBdFltSts                      = TRUE;
++   SftyE2eFpgaTxWdgCpldFltSts                            = TRUE;
+ 
+    return;
+ }
+@@ -2156,17 +2592,18 @@ LOCAL_INLINE void SftyE2eFpga_InitFltSts(void)
+ /******************************************************************/
+ LOCAL_INLINE void SftyE2eFpga_InitErrMonrSt(void)
+ {
+-   SftyE2eFpgaDmaTiStampErrMonrSt                        = ERR_DEB_MONR_STS_INACTIVE;
+-   SftyE2eFpgaRxMuxSeqErrMonrSt                          = ERR_DEB_MONR_STS_INACTIVE;
+-   SftyE2eFpgaRxACrcErrMonrSt                            = ERR_DEB_MONR_STS_INACTIVE;
+-   SftyE2eFpgaRxSCrcErrMonrSt                            = ERR_DEB_MONR_STS_INACTIVE;
+-   SftyE2eFpgaLossComErrMonrSt                           = ERR_DEB_MONR_STS_INACTIVE;
+-   SftyE2eFpgaSyncOutEarlyErrMonrSt                      = ERR_DEB_MONR_STS_INACTIVE;
+-   SftyE2eFpgaSyncOutLateErrMonrSt                       = ERR_DEB_MONR_STS_INACTIVE;
+-   SftyE2eFpgaTxCrcCtrlAErrMonrSt                        = ERR_DEB_MONR_STS_INACTIVE;
+-   SftyE2eFpgaTxCrcCtrlSErrMonrSt                        = ERR_DEB_MONR_STS_INACTIVE;
+-   SftyE2eFpgaModPlausErrMonrSt                          = ERR_DEB_MONR_STS_INACTIVE;
+-   SftyE2eFpgaPrmDlErrMonrSt                             = ERR_DEB_MONR_STS_INACTIVE;
++   SftyE2eFpgaDmaTiStampErrMonrSt     = ERR_DEB_MONR_STS_INACTIVE;
++   SftyE2eFpgaRxMuxSeqErrMonrSt       = ERR_DEB_MONR_STS_INACTIVE;
++   SftyE2eFpgaRxACrcErrMonrSt         = ERR_DEB_MONR_STS_INACTIVE;
++   SftyE2eFpgaRxSCrcErrMonrSt         = ERR_DEB_MONR_STS_INACTIVE;
++   SftyE2eFpgaLossComErrMonrSt        = ERR_DEB_MONR_STS_INACTIVE;
++   SftyE2eFpgaSyncOutEarlyErrMonrSt   = ERR_DEB_MONR_STS_INACTIVE;
++   SftyE2eFpgaSyncOutLateErrMonrSt    = ERR_DEB_MONR_STS_INACTIVE;
++   SftyE2eFpgaTxCrcCtrlAErrMonrSt     = ERR_DEB_MONR_STS_INACTIVE;
++   SftyE2eFpgaTxCrcCtrlSErrMonrSt     = ERR_DEB_MONR_STS_INACTIVE;
++   SftyE2eFpgaModPlausErrMonrSt       = ERR_DEB_MONR_STS_INACTIVE;
++   SftyE2eFpgaPrmDlErrMonrSt          = ERR_DEB_MONR_STS_INACTIVE;
++   SftyE2eFpgaCombGrpABErrMonrSt      = ERR_DEB_MONR_STS_INACTIVE;
+ 
+    return;
+ }
+@@ -2271,7 +2708,7 @@ LOCAL_INLINE Std_ReturnType SftyE2eFpga_AlvCntrChkHandlr(uint8 idx, uint8* alvCn
+ 
+ /******************************************************************/
+ /*!
+- * \\fn      void SftyE2eFpga_UpdAGrpFltSts(void)
++ * \\fn      void SftyE2eFpga_UpdAGrpFltStsPart1(void)
+  * \\brief   This function updates fault status according
+             to the accumulated fault status of group A
+  * \\Parent_DD : SftyE2eFpga_MainFunction
+@@ -2279,22 +2716,42 @@ LOCAL_INLINE Std_ReturnType SftyE2eFpga_AlvCntrChkHandlr(uint8 idx, uint8* alvCn
+  * \\return  void
+  */
+ /******************************************************************/
+-LOCAL_INLINE void SftyE2eFpga_UpdAGrpFltSts(void)
++LOCAL_INLINE void SftyE2eFpga_UpdAGrpFltStsPart1(void)
+ {
+    /* Update fault status according to the accumulated fault status of group A */
+-      SftyE2eFpgaMeasCohrncFltSts    = ((uint8)(~SftyE2eFpgaMeasCohrncFltStsAcc) & 0x01u);
+-      SftyE2eFpgaEmgySWFltSts         = ((uint8)(~SftyE2eFpgaEmgySWFltStsAcc) & 0x01u);
+-      SftyE2eFpgaLoGateDrvrFltSts     = ((uint8)(~SftyE2eFpgaLoGateDrvrFltStsAcc) & 0x01u);
+-      SftyE2eFpgaHsGateDrvrFltSts     = ((uint8)(~SftyE2eFpgaHsGateDrvrFltStsAcc) & 0x01u);
+-      SftyE2eFpgaActvDchaActvFltSts   = ((uint8)(~SftyE2eFpgaActvDchaActvFltStsAcc) & 0x01u);
+-      SftyE2eFpgaActvDchaInactvFltSts = ((uint8)(~SftyE2eFpgaActvDchaInactvFltStsAcc) & 0x01u);
++   SftyE2eFpgaMeasCohrncFltSts     = ((uint8)(~SftyE2eFpgaMeasCohrncFltStsAcc)     & 0x01u);
++   SftyE2eFpgaEmgySWFltSts         = ((uint8)(~SftyE2eFpgaEmgySWFltStsAcc)         & 0x01u);
++   SftyE2eFpgaLoGateDrvrFltSts     = ((uint8)(~SftyE2eFpgaLoGateDrvrFltStsAcc)     & 0x01u);
++   SftyE2eFpgaHsGateDrvrFltSts     = ((uint8)(~SftyE2eFpgaHsGateDrvrFltStsAcc)     & 0x01u);
++   SftyE2eFpgaActvDchaActvFltSts   = ((uint8)(~SftyE2eFpgaActvDchaActvFltStsAcc)   & 0x01u);
++   SftyE2eFpgaActvDchaInactvFltSts = ((uint8)(~SftyE2eFpgaActvDchaInactvFltStsAcc) & 0x01u);
+ 
+    return;
+ }
+ 
+ /******************************************************************/
+ /*!
+- * \\fn      void SftyE2eFpga_UpdBGrpFltSts(void)
++ * \\fn      void SftyE2eFpga_UpdAGrpFltStsPart2(void)
++ * \\brief   This function updates fault status according
++            to the accumulated fault status of group A
++ * \\Parent_DD : SftyE2eFpga_MainFunction
++ * \\param   -
++ * \\return  void
++ */
++/******************************************************************/
++LOCAL_INLINE void SftyE2eFpga_UpdAGrpFltStsPart2(void)
++{
++   /* Update fault status according to the accumulated fault status of group A */
++   SftyE2eFpgaPwrSupLsFltSts    = ((uint8)(~SftyE2eFpgaPwrSupLsFltStsAcc)   & 0x01u);
++   SftyE2eFpgaPwrSupHsFltSts    = ((uint8)(~SftyE2eFpgaPwrSupHsFltStsAcc)   & 0x01u);
++   SftyE2eFpgaPwrSupMultFltSts  = ((uint8)(~SftyE2eFpgaPwrSupMultFltStsAcc) & 0x01u);
++
++   return;
++}
++
++/******************************************************************/
++/*!
++ * \\fn      void SftyE2eFpga_UpdBGrpFltStsPart1(void)
+  * \\brief   This function updates fault status according
+             to the accumulated fault status of group B
+  * \\Parent_DD : SftyE2eFpga_MainFunction
+@@ -2302,7 +2759,7 @@ LOCAL_INLINE void SftyE2eFpga_UpdAGrpFltSts(void)
+  * \\return  void
+  */
+ /******************************************************************/
+-LOCAL_INLINE void SftyE2eFpga_UpdBGrpFltSts(void)
++LOCAL_INLINE void SftyE2eFpga_UpdBGrpFltStsPart1(void)
+ {
+    /* Update fault status according to the accumulated fault status of group B */
+    SftyE2eFpgaOverUnderCurUFltSts = ((uint8)(~SftyE2eFpgaOverUnderCurUFltStsAcc) & 0x01u);
+@@ -2317,6 +2774,28 @@ LOCAL_INLINE void SftyE2eFpga_UpdBGrpFltSts(void)
+    return;
+ }
+ 
++/******************************************************************/
++/*!
++ * \\fn      void SftyE2eFpga_UpdBGrpFltStsPart2(void)
++ * \\brief   This function updates fault status according
++            to the accumulated fault status of group B
++ * \\Parent_DD : SftyE2eFpga_MainFunction
++ * \\param   -
++ * \\return  void
++ */
++/******************************************************************/
++LOCAL_INLINE void SftyE2eFpga_UpdBGrpFltStsPart2(void)
++{
++   /* Update fault status according to the accumulated fault status of group B */
++   SftyE2eFpgaOverUnderCurBatFltSts = ((uint8)(~SftyE2eFpgaOverUnderCurBatFltStsAcc) & 0x01u);
++   SftyE2eFpgaOverTempCtrlBdFltSts  = ((uint8)(~SftyE2eFpgaOverTempCtrlBdFltStsAcc)  & 0x01u);
++   SftyE2eFpgaOverTempIgbtFltSts    = ((uint8)(~SftyE2eFpgaOverTempIgbtFltStsAcc)    & 0x01u);
++   SftyE2eFpgaOverTempDrvBdFltSts   = ((uint8)(~SftyE2eFpgaOverTempDrvBdFltStsAcc)   & 0x01u);
++   SftyE2eFpgaWdgCpldFltSts         = ((uint8)(~SftyE2eFpgaWdgCpldFltStsAcc)         & 0x01u);
++
++   return;
++}
++
+ /******************************************************************/
+ /*!
+  * \\fn      void SftyE2eFpga_UpdDGrpFltSts(void)
+@@ -2440,6 +2919,73 @@ LOCAL_INLINE void SftyE2eFpga_SRxFrameHandlr(uint8 idx)
+    return;
+ }
+ 
++/******************************************************************/
++/*!
++ * \\fn        void SftyE2eFpga_TogglFltSt(void)
++ * \\brief     This function toggles passed fault status
++ * \\param     [in] fltSt: Fault status to be toggled
++ * \\return    result of toggling
++ * \\Parent_DD SftyE2eFpga_ReinitFltSts
++ */
++/******************************************************************/
++LOCAL_INLINE uint8 SftyE2eFpga_TogglFltSt(uint8 fltSt)
++{
++   uint8 retVal;
++
++   /* ******** Variables declaration *********** */
++
++   /* ************* Source code **************** */
++
++   /* Reinitialization request of IGBT HS fault to FPGA */
++   if (fltSt == TRUE)
++   {
++      retVal = FALSE;
++   }
++   else
++   {
++      retVal = TRUE;
++   }
++
++   return retVal;
++}
++
++/******************************************************************/
++/*!
++ * \\fn      void SftyE2eFpga_ReinitFltStsGrpA(void)
++ * \\brief   toggles fault status
++ * \\param   void
++ * \\return  void
++ * \\Parent_DD SftyE2eFpga_ReinitFltSts
++ */
++/******************************************************************/
++LOCAL_INLINE void SftyE2eFpga_ReinitFltStsGrpA(void)
++{
++   SftyE2eFpgaTxPwrSupLsFltSts   = SftyE2eFpga_TogglFltSt(SftyE2eFpgaTxPwrSupLsFltSts);
++   SftyE2eFpgaTxPwrSupHsFltSts   = SftyE2eFpga_TogglFltSt(SftyE2eFpgaTxPwrSupHsFltSts);
++   SftyE2eFpgaTxPwrSupMultFltSts = SftyE2eFpga_TogglFltSt(SftyE2eFpgaTxPwrSupMultFltSts);
++
++   return;
++}
++
++/******************************************************************/
++/*!
++ * \\fn      void SftyE2eFpga_ReinitFltStsGrpB(void)
++ * \\brief   toggles fault status
++ * \\param   void
++ * \\return  void
++ * \\Parent_DD SftyE2eFpga_ReinitFltSts
++ */
++/******************************************************************/
++LOCAL_INLINE void SftyE2eFpga_ReinitFltStsGrpB(void)
++{
++   SftyE2eFpgaTxOverUnderCurBatFltSts  = SftyE2eFpga_TogglFltSt(SftyE2eFpgaTxOverUnderCurBatFltSts);
++   SftyE2eFpgaTxOverTempCtrlBdFltSts   = SftyE2eFpga_TogglFltSt(SftyE2eFpgaTxOverTempCtrlBdFltSts);
++   SftyE2eFpgaTxOverTempIgbtFltSts     = SftyE2eFpga_TogglFltSt(SftyE2eFpgaTxOverTempIgbtFltSts);
++   SftyE2eFpgaTxOverTempDrvBdFltSts    = SftyE2eFpga_TogglFltSt(SftyE2eFpgaTxOverTempDrvBdFltSts);
++   SftyE2eFpgaTxWdgCpldFltSts          = SftyE2eFpga_TogglFltSt(SftyE2eFpgaTxWdgCpldFltSts);
++
++   return;
++}
+ /*================== [definition of global functions] ========================*/
+ 
+ #define SFTYE2EFPGA_AREA_CMN_START_SEC_CODE_FAST
+@@ -2458,7 +3004,9 @@ LOCAL_INLINE void SftyE2eFpga_SRxFrameHandlr(uint8 idx)
+ STATIC FUNC(void, SFTYE2E_CODE) SftyE2eFpga_UpdFltSts(void)
+ {
+    /* Update fault status according to the accumulated fault status of group A */
+-   SftyE2eFpga_UpdAGrpFltSts();
++   SftyE2eFpga_UpdAGrpFltStsPart1();
++
++   SftyE2eFpga_UpdAGrpFltStsPart2();
+ 
+    if(SftyE2eFpgaLossComErrMonrStAcc == 0u)
+    {
+@@ -2470,7 +3018,9 @@ STATIC FUNC(void, SFTYE2E_CODE) SftyE2eFpga_UpdFltSts(void)
+    }
+ 
+    /* Update fault status according to the accumulated fault status of group B */
+-   SftyE2eFpga_UpdBGrpFltSts();
++   SftyE2eFpga_UpdBGrpFltStsPart1();
++
++   SftyE2eFpga_UpdBGrpFltStsPart2();
+ 
+    /* Update fault status according to the accumulated fault status of group C */
+    SftyE2eFpgaScSpdReadyFltSts    = ((uint8)(~SftyE2eFpgaScSpdReadyFltStsAcc)  & 0x01u);
+@@ -2500,6 +3050,8 @@ STATIC FUNC(void, SFTYE2E_CODE) SftyE2eFpga_UpdFltSts(void)
+       SftyE2eFpgaPrmDlErrMonrSt = ERR_DEB_MONR_STS_FAILED;
+    }
+ 
++   SftyE2eFpga_UpdCombGrpABErrMonrSt();
++
+    /* Reset status for next 200 us cycle */
+    SftyE2eFpga_RstFltSts();
+ 
+@@ -2602,6 +3154,7 @@ FUNC(void, SFTYE2EFPGA_CODE) SftyE2eFpga_MainFunction(void)
+    SftyE2eFpgaTxCrcCtrlSErrMonrSt   = ERR_DEB_MONR_STS_INACTIVE;
+    SftyE2eFpgaModPlausErrMonrSt     = ERR_DEB_MONR_STS_INACTIVE;
+    SftyE2eFpgaPrmDlErrMonrSt        = ERR_DEB_MONR_STS_INACTIVE;
++   SftyE2eFpgaCombGrpABErrMonrSt    = ERR_DEB_MONR_STS_INACTIVE;
+ 
+    /* Get current index written in the ring buffer */
+    SftyE2eFpgaDmaDataCurrIdx = SftyE2eFpga_GetCurrIdx(SFTYDMADRVR_CH_IDX_FPGA_SLAVE_SFTY_TRIG, SftyDmaE2eFpgaFrameRx, SFTY_E2E_FPGA_SPI_RX_BUF_LEN);
+@@ -2640,6 +3193,7 @@ FUNC(void, SFTYE2EFPGA_CODE) SftyE2eFpga_MainFunction(void)
+    }
+ 
+    SftyE2eFpga_UpdtC2cData();
++
+ #ifdef SWIT_IT_Active
+    SWIT_SftyE2eFpga_MainFunction_EndHook();
+ #endif
+@@ -2688,6 +3242,22 @@ FUNC(void, SFTYE2EFPGA_CODE) SftyE2eFpga_Init(void)
+    return;
+ }
+ 
++/******************************************************************/
++/*!
++ * \\fn      void SftyE2eFpga_ReinitFltSts(void)
++ * \\brief   toggles fault status
++ * \\param   void
++ * \\return  void
++ */
++/******************************************************************/
++FUNC(void, SFTYE2EFPGA_CODE) SftyE2eFpga_ReinitFltSts(void)
++{
++   SftyE2eFpga_ReinitFltStsGrpA();
++   SftyE2eFpga_ReinitFltStsGrpB();
++
++   return;
++}
++
+ #define SFTYE2EFPGA_AREA_CMN_STOP_SEC_CODE_FAST
+ #include "MemMap.h"
+ 
+diff --git a/src/fw_cu/Components/Safety/Sfty_Cmn/SftyE2eFpga/src/SftyE2eFpga_data.c b/src/fw_cu/Components/Safety/Sfty_Cmn/SftyE2eFpga/src/SftyE2eFpga_data.c
+index 603bb1ea4..7e323daa4 100644
+--- a/src/fw_cu/Components/Safety/Sfty_Cmn/SftyE2eFpga/src/SftyE2eFpga_data.c
++++ b/src/fw_cu/Components/Safety/Sfty_Cmn/SftyE2eFpga/src/SftyE2eFpga_data.c
+@@ -248,6 +248,86 @@ VAR(boolean, SFTYE2EFPGA_VAR) SftyE2eFpgaLoGateDrvrFltSts;
+ */
+ VAR(boolean, SFTYE2EFPGA_VAR) SftyE2eFpgaMidPointPhaFltSts[SYSDEF_EM_PHA_CNT_MAX];
+ 
++/*
++@@ SYMBOL = SftyE2eFpgaTxPwrSupLsFltSts
++@@ A2L_TYPE = MEASURE
++@@ DATA_TYPE = UBYTE
++@@ DESCRIPTION = "current fault status"
++@@ GROUP = SftyE2eFpga
++@@ END
++*/
++VAR(boolean,   SFTYE2EFPGA_VAR) SftyE2eFpgaTxPwrSupLsFltSts;
++
++/*
++@@ SYMBOL = SftyE2eFpgaTxPwrSupHsFltSts
++@@ A2L_TYPE = MEASURE
++@@ DATA_TYPE = UBYTE
++@@ DESCRIPTION = "current fault status"
++@@ GROUP = SftyE2eFpga
++@@ END
++*/
++VAR(boolean,   SFTYE2EFPGA_VAR) SftyE2eFpgaTxPwrSupHsFltSts;
++
++/*
++@@ SYMBOL = SftyE2eFpgaTxPwrSupMultFltSts
++@@ A2L_TYPE = MEASURE
++@@ DATA_TYPE = UBYTE
++@@ DESCRIPTION = "current fault status"
++@@ GROUP = SftyE2eFpga
++@@ END
++*/
++VAR(boolean,   SFTYE2EFPGA_VAR) SftyE2eFpgaTxPwrSupMultFltSts;
++
++/*
++@@ SYMBOL = SftyE2eFpgaTxOverUnderCurBatFltSts
++@@ A2L_TYPE = MEASURE
++@@ DATA_TYPE = UBYTE
++@@ DESCRIPTION = "current fault status"
++@@ GROUP = SftyE2eFpga
++@@ END
++*/
++VAR(boolean,   SFTYE2EFPGA_VAR) SftyE2eFpgaTxOverUnderCurBatFltSts;
++
++/*
++@@ SYMBOL = SftyE2eFpgaTxOverTempCtrlBdFltSts
++@@ A2L_TYPE = MEASURE
++@@ DATA_TYPE = UBYTE
++@@ DESCRIPTION = "current fault status"
++@@ GROUP = SftyE2eFpga
++@@ END
++*/
++VAR(boolean,   SFTYE2EFPGA_VAR) SftyE2eFpgaTxOverTempCtrlBdFltSts;
++
++/*
++@@ SYMBOL = SftyE2eFpgaTxOverTempIgbtFltSts
++@@ A2L_TYPE = MEASURE
++@@ DATA_TYPE = UBYTE
++@@ DESCRIPTION = "current fault status"
++@@ GROUP = SftyE2eFpga
++@@ END
++*/
++VAR(boolean,   SFTYE2EFPGA_VAR) SftyE2eFpgaTxOverTempIgbtFltSts;
++
++/*
++@@ SYMBOL = SftyE2eFpgaTxOverTempDrvBdFltSts
++@@ A2L_TYPE = MEASURE
++@@ DATA_TYPE = UBYTE
++@@ DESCRIPTION = "current fault status"
++@@ GROUP = SftyE2eFpga
++@@ END
++*/
++VAR(boolean,   SFTYE2EFPGA_VAR) SftyE2eFpgaTxOverTempDrvBdFltSts;
++
++/*
++@@ SYMBOL = SftyE2eFpgaTxWdgCpldFltSts
++@@ A2L_TYPE = MEASURE
++@@ DATA_TYPE = UBYTE
++@@ DESCRIPTION = "current fault status"
++@@ GROUP = SftyE2eFpga
++@@ END
++*/
++VAR(boolean,   SFTYE2EFPGA_VAR) SftyE2eFpgaTxWdgCpldFltSts;
++
+ #define SFTYE2EFPGA_STOP_SEC_VAR_AREA_CMN_FAST_CLEARED
+ #include "MemMap.h"
+ 
+@@ -375,6 +455,17 @@ VAR(uint8, SFTYE2EFPGA_VAR) SftyE2eFpgaPrmDlErrMonrSt = 0u;
+ */
+ VAR(uint8, SFTYE2EFPGA_VAR) SftyE2eFpgaDmaTiStampErrMonrSt = 0u;
+ 
++/*
++@@ SYMBOL = SftyE2eFpgaCombGrpABErrMonrSt
++@@ A2L_TYPE = MEASURE
++@@ DATA_TYPE = UBYTE
++@@ DESCRIPTION = "Error monitor"
++@@ CONVERSION = TABLE 0 "INACTIVE" 1 "PASSED" 2 "FAILED"
++@@ GROUP = SftyE2eFpga
++@@ END
++*/
++VAR(uint8, SFTYE2EFPGA_VAR) SftyE2eFpgaCombGrpABErrMonrSt = 0u;
++
+ #define SFTYE2EFPGA_STOP_SEC_VAR_AREA_CMN_FAST_INIT_8
+ #include "MemMap.h"
+ 
+diff --git a/src/fw_cu/Components/Safety/Sfty_Cmn/SftyErrDeb/include/SftyErrDeb_data.h b/src/fw_cu/Components/Safety/Sfty_Cmn/SftyErrDeb/include/SftyErrDeb_data.h
+index aaaeeda8e..1df0609fa 100644
+--- a/src/fw_cu/Components/Safety/Sfty_Cmn/SftyErrDeb/include/SftyErrDeb_data.h
++++ b/src/fw_cu/Components/Safety/Sfty_Cmn/SftyErrDeb/include/SftyErrDeb_data.h
+@@ -600,7 +600,13 @@ extern VAR(uint8,   SFTYE2EFPGA_VAR) SftyE2eFpgaDmaTiStampErrMonrSt;
+ #define SFTYE2EFPGA_STOP_SEC_VAR_AREA_CMN_FAST_INIT_8
+ #include "MemMap.h"
+ 
++#define SFTYE2EFPGA_START_SEC_VAR_AREA_CMN_FAST_INIT_8
++#include "MemMap.h"
++
++extern VAR(uint8,   SFTYE2EFPGA_VAR) SftyE2eFpgaCombGrpABErrMonrSt;
+ 
++#define SFTYE2EFPGA_STOP_SEC_VAR_AREA_CMN_FAST_INIT_8
++#include "MemMap.h"
+ 
+ /* Begin: SFTYTEMPEVLN_START_SEC_VAR_AREA_0_FAST_INIT_8 (online) */
+ #define SFTYTEMPEVLN_START_SEC_VAR_AREA_0_FAST_INIT_8
+diff --git a/src/fw_cu/Components/Safety/Sfty_Cmn/SftySysInit/include/SftySysInit.h b/src/fw_cu/Components/Safety/Sfty_Cmn/SftySysInit/include/SftySysInit.h
+index a004977fc..73225e64b 100644
+--- a/src/fw_cu/Components/Safety/Sfty_Cmn/SftySysInit/include/SftySysInit.h
++++ b/src/fw_cu/Components/Safety/Sfty_Cmn/SftySysInit/include/SftySysInit.h
+@@ -465,7 +465,6 @@
+ @@ A2L_TYPE = MEASURE
+ @@ DATA_TYPE = ULONG 0x00000800 [0 ... 1]
+ @@ DESCRIPTION = "Parklock H-Bridge HB1_EN signal out"
+-@@ ADDRESS = 0xf003ab00                  
+ @@ END
+ */
+ #define SFTY_HB1_EN_OUT_P                        MODULE_P11.OUT.B.P6
+@@ -476,7 +475,6 @@
+ @@ A2L_TYPE = MEASURE
+ @@ DATA_TYPE = ULONG 0xf8000000 [0 ... 31]
+ @@ CONVERSION = TABLE 0 "No input pull device connected, tristate mode" 1 "Input pull-down device connected" 2 "Input pull-up device connected" 3 "No input pull device connected, tristate mode" 4 "No input pull device connected, tristate mode" 5 "Input pull-down device connected" 6 "Input pull-up device connected" 7 "No input pull device connected, tristate mode" 8 "No input pull device connected, tristate mode" 9 "Input pull-down device connected" 10 "Input pull-up device connected" 11 "No input pull device connected, tristate mode" 12 "No input pull device connected, tristate mode" 13 "Input pull-down device connected" 14 "Input pull-up device connected" 15 "No input pull device connected, tristate mode" 16 "Push-pull, General-purpose output" 17 "Push-pull, Alternate output function 1" 18 "Push-pull, Alternate output function 2" 19 "Push-pull, Alternate output function 3" 20 "Push-pull, Alternate output function 4" 21 "Push-pull, Alternate output function 5" 22 "Push-pull, Alternate output function 6" 23 "Push-pull, Alternate output function 7" 24 "Open-drain, General-purpose output" 25 "Open-drain, Alternate output function 1" 26 "Open-drain, Alternate output function 2" 27 "Open-drain, Alternate output function 3" 28 "Open-drain, Alternate output function 4" 29 "Open-drain, Alternate output function 5" 30 "Open-drain, Alternate output function 6" 31 "Open-drain, Alternate output function 7" DEFAULT_VALUE "Unknown"
+-@@ ADDRESS = 0xf003ab14                  
+ @@ END
+ */
+ #define SFTY_HB1_EN_IOCR_PC                      MODULE_P11.IOCR4.B.PC6
+@@ -487,7 +485,6 @@
+ @@ A2L_TYPE = MEASURE
+ @@ DATA_TYPE = ULONG 0x00007000 [0 ... 7]
+ @@ CONVERSION = TABLE 0 "Speed grade 1, hystersis inactive" 1 "Speed grade 2, hystersis active" 2 "Speed grade 3, hystersis active" 3 "Speed grade 4, hystersis active" 4 "Speed grade 1, hystersis inactive" 5 "Speed grade 2, hystersis active" 6 "Speed grade 3, hystersis active" 7 "Speed grade 4, hystersis active" DEFAULT_VALUE "Unknown"
+-@@ ADDRESS = 0xf003ab40                  
+ @@ END
+ */
+ #define SFTY_HB1_EN_PDR_PD                       MODULE_P11.PDR0.B.PD6
+@@ -498,7 +495,6 @@
+ @@ A2L_TYPE = MEASURE
+ @@ DATA_TYPE = ULONG 0x00008000 [0 ... 1]
+ @@ CONVERSION = TABLE 0 "Automotive level" 1 "TTL level" DEFAULT_VALUE "Unknown"
+-@@ ADDRESS = 0xf003ab40                  
+ @@ END
+ */
+ #define SFTY_HB1_EN_PDR_PL                       MODULE_P11.PDR1.B.PL6
+@@ -509,7 +505,6 @@
+ @@ A2L_TYPE = MEASURE
+ @@ DATA_TYPE = ULONG 0x00000800 [0 ... 1]
+ @@ DESCRIPTION = "Parklock H-Bridge HB1_EN signal read back"
+-@@ ADDRESS = 0xf003ab24                  
+ @@ END
+ */
+ #define SFTY_HB1_EN_IN_P                         MODULE_P11.IN.B.P6
+@@ -519,7 +514,6 @@
+ @@ SYMBOL = HB1_EN.ESR
+ @@ A2L_TYPE = MEASURE
+ @@ DATA_TYPE = ULONG 0x00000800 [0 ... 1]
+-@@ ADDRESS = 0xf003ab50                  
+ @@ END
+ */
+ #define SFTY_HB1_EN_ESR_EN                       MODULE_P11.ESR.B.EN6
+@@ -535,7 +529,6 @@
+ @@ A2L_TYPE = MEASURE
+ @@ DATA_TYPE = ULONG 0x00001000 [0 ... 1]
+ @@ DESCRIPTION = "Parklock H-Bridge HB2_EN signal out"
+-@@ ADDRESS = 0xf003ad00                  
+ @@ END
+ */
+ #define SFTY_HB2_EN_OUT_P                        MODULE_P13.OUT.B.P0
+@@ -546,7 +539,6 @@
+ @@ A2L_TYPE = MEASURE
+ @@ DATA_TYPE = ULONG 0x000000f8 [0 ... 31]
+ @@ CONVERSION = TABLE 0 "No input pull device connected, tristate mode" 1 "Input pull-down device connected" 2 "Input pull-up device connected" 3 "No input pull device connected, tristate mode" 4 "No input pull device connected, tristate mode" 5 "Input pull-down device connected" 6 "Input pull-up device connected" 7 "No input pull device connected, tristate mode" 8 "No input pull device connected, tristate mode" 9 "Input pull-down device connected" 10 "Input pull-up device connected" 11 "No input pull device connected, tristate mode" 12 "No input pull device connected, tristate mode" 13 "Input pull-down device connected" 14 "Input pull-up device connected" 15 "No input pull device connected, tristate mode" 16 "Push-pull, General-purpose output" 17 "Push-pull, Alternate output function 1" 18 "Push-pull, Alternate output function 2" 19 "Push-pull, Alternate output function 3" 20 "Push-pull, Alternate output function 4" 21 "Push-pull, Alternate output function 5" 22 "Push-pull, Alternate output function 6" 23 "Push-pull, Alternate output function 7" 24 "Open-drain, General-purpose output" 25 "Open-drain, Alternate output function 1" 26 "Open-drain, Alternate output function 2" 27 "Open-drain, Alternate output function 3" 28 "Open-drain, Alternate output function 4" 29 "Open-drain, Alternate output function 5" 30 "Open-drain, Alternate output function 6" 31 "Open-drain, Alternate output function 7" DEFAULT_VALUE "Unknown"
+-@@ ADDRESS = 0xf003ad10                  
+ @@ END
+ */
+ #define SFTY_HB2_EN_IOCR_PC                      MODULE_P13.IOCR0.B.PC0
+@@ -557,7 +549,6 @@
+ @@ A2L_TYPE = MEASURE
+ @@ DATA_TYPE = ULONG 0x00070000 [0 ... 7]
+ @@ CONVERSION = TABLE 0 "Speed grade 1, hystersis inactive" 1 "Speed grade 2, hystersis active" 2 "Speed grade 3, hystersis active" 3 "Speed grade 4, hystersis active" 4 "Speed grade 1, hystersis inactive" 5 "Speed grade 2, hystersis active" 6 "Speed grade 3, hystersis active" 7 "Speed grade 4, hystersis active" DEFAULT_VALUE "Unknown"
+-@@ ADDRESS = 0xf003ad40                  
+ @@ END
+ */
+ #define SFTY_HB2_EN_PDR_PD                       MODULE_P13.PDR0.B.PD0
+@@ -568,7 +559,6 @@
+ @@ A2L_TYPE = MEASURE
+ @@ DATA_TYPE = ULONG 0x00080000 [0 ... 1]
+ @@ CONVERSION = TABLE 0 "Automotive level" 1 "TTL level" DEFAULT_VALUE "Unknown"
+-@@ ADDRESS = 0xf003ad40                  
+ @@ END
+ */
+ #define SFTY_HB2_EN_PDR_PL                       MODULE_P13.PDR1.B.PL0
+@@ -579,7 +569,6 @@
+ @@ A2L_TYPE = MEASURE
+ @@ DATA_TYPE = ULONG 0x00001000 [0 ... 1]
+ @@ DESCRIPTION = "Parklock H-Bridge HB2_EN signal read back"
+-@@ ADDRESS = 0xf003ad24                  
+ @@ END
+ */
+ #define SFTY_HB2_EN_IN_P                         MODULE_P13.IN.B.P0
+@@ -589,7 +578,6 @@
+ @@ SYMBOL = HB2_EN.ESR
+ @@ A2L_TYPE = MEASURE
+ @@ DATA_TYPE = ULONG 0x00001000 [0 ... 1]
+-@@ ADDRESS = 0xf003ad50                  
+ @@ END
+ */
+ #define SFTY_HB2_EN_ESR_EN                       MODULE_P13.ESR.B.EN0
+@@ -605,7 +593,6 @@
+ @@ A2L_TYPE = MEASURE
+ @@ DATA_TYPE = ULONG 0x00002000 [0 ... 1]
+ @@ DESCRIPTION = "Parklock H-Bridge HB1_CTRL signal out"
+-@@ ADDRESS = 0xf003ab00                  
+ @@ END
+ */
+ #define SFTY_HB1_CTRL_OUT_P                      MODULE_P11.OUT.B.P2
+@@ -616,7 +603,6 @@
+ @@ A2L_TYPE = MEASURE
+ @@ DATA_TYPE = ULONG 0x0000f800 [0 ... 31]
+ @@ CONVERSION = TABLE 0 "No input pull device connected, tristate mode" 1 "Input pull-down device connected" 2 "Input pull-up device connected" 3 "No input pull device connected, tristate mode" 4 "No input pull device connected, tristate mode" 5 "Input pull-down device connected" 6 "Input pull-up device connected" 7 "No input pull device connected, tristate mode" 8 "No input pull device connected, tristate mode" 9 "Input pull-down device connected" 10 "Input pull-up device connected" 11 "No input pull device connected, tristate mode" 12 "No input pull device connected, tristate mode" 13 "Input pull-down device connected" 14 "Input pull-up device connected" 15 "No input pull device connected, tristate mode" 16 "Push-pull, General-purpose output" 17 "Push-pull, Alternate output function 1" 18 "Push-pull, Alternate output function 2" 19 "Push-pull, Alternate output function 3" 20 "Push-pull, Alternate output function 4" 21 "Push-pull, Alternate output function 5" 22 "Push-pull, Alternate output function 6" 23 "Push-pull, Alternate output function 7" 24 "Open-drain, General-purpose output" 25 "Open-drain, Alternate output function 1" 26 "Open-drain, Alternate output function 2" 27 "Open-drain, Alternate output function 3" 28 "Open-drain, Alternate output function 4" 29 "Open-drain, Alternate output function 5" 30 "Open-drain, Alternate output function 6" 31 "Open-drain, Alternate output function 7" DEFAULT_VALUE "Unknown"
+-@@ ADDRESS = 0xf003ab10                  
+ @@ END
+ */
+ #define SFTY_HB1_CTRL_IOCR_PC                    MODULE_P11.IOCR0.B.PC2
+@@ -627,7 +613,6 @@
+ @@ A2L_TYPE = MEASURE
+ @@ DATA_TYPE = ULONG 0x00700000 [0 ... 7]
+ @@ CONVERSION = TABLE 0 "Speed grade 1, hystersis inactive" 1 "Speed grade 2, hystersis active" 2 "Speed grade 3, hystersis active" 3 "Speed grade 4, hystersis active" 4 "Speed grade 1, hystersis inactive" 5 "Speed grade 2, hystersis active" 6 "Speed grade 3, hystersis active" 7 "Speed grade 4, hystersis active" DEFAULT_VALUE "Unknown"
+-@@ ADDRESS = 0xf003ab40                  
+ @@ END
+ */
+ #define SFTY_HB1_CTRL_PDR_PD                     MODULE_P11.PDR0.B.PD2
+@@ -638,7 +623,6 @@
+ @@ A2L_TYPE = MEASURE
+ @@ DATA_TYPE = ULONG 0x00800000 [0 ... 1]
+ @@ CONVERSION = TABLE 0 "Automotive level" 1 "TTL level" DEFAULT_VALUE "Unknown"
+-@@ ADDRESS = 0xf003ab40                  
+ @@ END
+ */
+ #define SFTY_HB1_CTRL_PDR_PL                     MODULE_P11.PDR0.B.PL2
+@@ -649,7 +633,6 @@
+ @@ A2L_TYPE = MEASURE
+ @@ DATA_TYPE = ULONG 0x00002000 [0 ... 1]
+ @@ DESCRIPTION = "Parklock H-Bridge HB1_CTRL signal read back"
+-@@ ADDRESS = 0xf003ab24                  
+ @@ END
+ */
+ #define SFTY_HB1_CTRL_IN_P                       MODULE_P11.IN.B.P2
+@@ -659,7 +642,6 @@
+ @@ SYMBOL = HB1_CTRL.ESR
+ @@ A2L_TYPE = MEASURE
+ @@ DATA_TYPE = ULONG 0x00002000 [0 ... 1]
+-@@ ADDRESS = 0xf003ab50                  
+ @@ END
+ */
+ #define SFTY_HB1_CTRL_ESR_EN                     MODULE_P11.ESR.B.EN2
+@@ -675,7 +657,6 @@
+ @@ A2L_TYPE = MEASURE
+ @@ DATA_TYPE = ULONG 0x00000800 [0 ... 1]
+ @@ DESCRIPTION = "Parklock H-Bridge HB2_CTRL signal out"
+-@@ ADDRESS = 0xf003ad00                  
+ @@ END
+ */
+ #define SFTY_HB2_CTRL_OUT_P                      MODULE_P13.OUT.B.P1
+@@ -686,7 +667,6 @@
+ @@ A2L_TYPE = MEASURE
+ @@ DATA_TYPE = ULONG 0xf8000000 [0 ... 31]
+ @@ CONVERSION = TABLE 0 "No input pull device connected, tristate mode" 1 "Input pull-down device connected" 2 "Input pull-up device connected" 3 "No input pull device connected, tristate mode" 4 "No input pull device connected, tristate mode" 5 "Input pull-down device connected" 6 "Input pull-up device connected" 7 "No input pull device connected, tristate mode" 8 "No input pull device connected, tristate mode" 9 "Input pull-down device connected" 10 "Input pull-up device connected" 11 "No input pull device connected, tristate mode" 12 "No input pull device connected, tristate mode" 13 "Input pull-down device connected" 14 "Input pull-up device connected" 15 "No input pull device connected, tristate mode" 16 "Push-pull, General-purpose output" 17 "Push-pull, Alternate output function 1" 18 "Push-pull, Alternate output function 2" 19 "Push-pull, Alternate output function 3" 20 "Push-pull, Alternate output function 4" 21 "Push-pull, Alternate output function 5" 22 "Push-pull, Alternate output function 6" 23 "Push-pull, Alternate output function 7" 24 "Open-drain, General-purpose output" 25 "Open-drain, Alternate output function 1" 26 "Open-drain, Alternate output function 2" 27 "Open-drain, Alternate output function 3" 28 "Open-drain, Alternate output function 4" 29 "Open-drain, Alternate output function 5" 30 "Open-drain, Alternate output function 6" 31 "Open-drain, Alternate output function 7" DEFAULT_VALUE "Unknown"
+-@@ ADDRESS = 0xf003ad10                  
+ @@ END
+ */
+ #define SFTY_HB2_CTRL_IOCR_PC                    MODULE_P13.IOCR0.B.PC1
+@@ -697,7 +677,6 @@
+ @@ A2L_TYPE = MEASURE
+ @@ DATA_TYPE = ULONG 0x00007000 [0 ... 7]
+ @@ CONVERSION = TABLE 0 "Speed grade 1, hystersis inactive" 1 "Speed grade 2, hystersis active" 2 "Speed grade 3, hystersis active" 3 "Speed grade 4, hystersis active" 4 "Speed grade 1, hystersis inactive" 5 "Speed grade 2, hystersis active" 6 "Speed grade 3, hystersis active" 7 "Speed grade 4, hystersis active" DEFAULT_VALUE "Unknown"
+-@@ ADDRESS = 0xf003ad40                  
+ @@ END
+ */
+ #define SFTY_HB2_CTRL_PDR_PD                     MODULE_P13.PDR0.B.PD1
+@@ -708,7 +687,6 @@
+ @@ A2L_TYPE = MEASURE
+ @@ DATA_TYPE = ULONG 0x00008000 [0 ... 1]
+ @@ CONVERSION = TABLE 0 "Automotive level" 1 "TTL level" DEFAULT_VALUE "Unknown"
+-@@ ADDRESS = 0xf003ad40                  
+ @@ END
+ */
+ #define SFTY_HB2_CTRL_PDR_PL                     MODULE_P13.PDR0.B.PL1
+@@ -719,7 +697,6 @@
+ @@ A2L_TYPE = MEASURE
+ @@ DATA_TYPE = ULONG 0x00000800 [0 ... 1]
+ @@ DESCRIPTION = "Parklock H-Bridge HB2_CTRL signal read back"
+-@@ ADDRESS = 0xf003ad24                  
+ @@ END
+ */
+ #define SFTY_HB2_CTRL_IN_P                       MODULE_P13.IN.B.P1
+@@ -729,7 +706,6 @@
+ @@ SYMBOL = HB2_CTRL.ESR
+ @@ A2L_TYPE = MEASURE
+ @@ DATA_TYPE = ULONG 0x00000800 [0 ... 1]
+-@@ ADDRESS = 0xf003ad50                  
+ @@ END
+ */
+ #define SFTY_HB2_CTRL_ESR_EN                     MODULE_P13.ESR.B.EN1
+@@ -745,7 +721,6 @@
+ @@ A2L_TYPE = MEASURE
+ @@ DATA_TYPE = ULONG 0x00004000 [0 ... 1]
+ @@ DESCRIPTION = "Parklock position sensor supply enable signal PLC_SENS_EN out"
+-@@ ADDRESS = 0xf003ab00                  
+ @@ END
+ */
+ #define SFTY_N_P5V_PLC_SENS_EN_OUT_P             MODULE_P11.OUT.B.P9
+@@ -756,7 +731,6 @@
+ @@ A2L_TYPE = MEASURE
+ @@ DATA_TYPE = ULONG 0x00f80000 [0 ... 31]
+ @@ CONVERSION = TABLE 0 "No input pull device connected, tristate mode" 1 "Input pull-down device connected" 2 "Input pull-up device connected" 3 "No input pull device connected, tristate mode" 4 "No input pull device connected, tristate mode" 5 "Input pull-down device connected" 6 "Input pull-up device connected" 7 "No input pull device connected, tristate mode" 8 "No input pull device connected, tristate mode" 9 "Input pull-down device connected" 10 "Input pull-up device connected" 11 "No input pull device connected, tristate mode" 12 "No input pull device connected, tristate mode" 13 "Input pull-down device connected" 14 "Input pull-up device connected" 15 "No input pull device connected, tristate mode" 16 "Push-pull, General-purpose output" 17 "Push-pull, Alternate output function 1" 18 "Push-pull, Alternate output function 2" 19 "Push-pull, Alternate output function 3" 20 "Push-pull, Alternate output function 4" 21 "Push-pull, Alternate output function 5" 22 "Push-pull, Alternate output function 6" 23 "Push-pull, Alternate output function 7" 24 "Open-drain, General-purpose output" 25 "Open-drain, Alternate output function 1" 26 "Open-drain, Alternate output function 2" 27 "Open-drain, Alternate output function 3" 28 "Open-drain, Alternate output function 4" 29 "Open-drain, Alternate output function 5" 30 "Open-drain, Alternate output function 6" 31 "Open-drain, Alternate output function 7" DEFAULT_VALUE "Unknown"
+-@@ ADDRESS = 0xf003ab18                  
+ @@ END
+ */
+ #define SFTY_N_P5V_PLC_SENS_EN_IOCR_PC           MODULE_P11.IOCR8.B.PC9
+@@ -767,7 +741,6 @@
+ @@ A2L_TYPE = MEASURE
+ @@ DATA_TYPE = ULONG 0x07000000 [0 ... 7]
+ @@ CONVERSION = TABLE 0 "Speed grade 1, hystersis inactive" 1 "Speed grade 2, hystersis active" 2 "Speed grade 3, hystersis active" 3 "Speed grade 4, hystersis active" 4 "Speed grade 1, hystersis inactive" 5 "Speed grade 2, hystersis active" 6 "Speed grade 3, hystersis active" 7 "Speed grade 4, hystersis active" DEFAULT_VALUE "Unknown"
+-@@ ADDRESS = 0xf003ab44                  
+ @@ END
+ */
+ #define SFTY_N_P5V_PLC_SENS_EN_PDR_PD            MODULE_P11.PDR1.B.PD9
+@@ -778,7 +751,6 @@
+ @@ A2L_TYPE = MEASURE
+ @@ DATA_TYPE = ULONG 0x08000000 [0 ... 1]
+ @@ CONVERSION = TABLE 0 "Automotive level" 1 "TTL level" DEFAULT_VALUE "Unknown"
+-@@ ADDRESS = 0xf003ab44                  
+ @@ END
+ */
+ #define SFTY_N_P5V_PLC_SENS_EN_PDR_PL            MODULE_P11.PDR1.B.PL9
+diff --git a/src/fw_cu/Components/Safety/Sfty_Inv/SftyInvActr/src/SftyInvActr.c b/src/fw_cu/Components/Safety/Sfty_Inv/SftyInvActr/src/SftyInvActr.c
+index bd9252342..ac9ad096a 100644
+--- a/src/fw_cu/Components/Safety/Sfty_Inv/SftyInvActr/src/SftyInvActr.c
++++ b/src/fw_cu/Components/Safety/Sfty_Inv/SftyInvActr/src/SftyInvActr.c
+@@ -450,8 +450,10 @@ LOCAL_INLINE void SftyInvActr_HndlAscCmdNoFlt(void)
+    SftyInvActrStateReqSCSpdReady = ASC_HS_LS;
+ 
+    /* Update Required Mode for FPGA */
+-   if ((SftyInvActrEmmMode == ((uint8)EMM_INIT_MODE))    ||
+-       (SftyInvActrEmmMode == ((uint8)EMM_SLEEP_MODE))   ||
++   if ((SftyInvActrEmmMode == ((uint8)EMM_INIT_MODE))         ||
++       (SftyInvActrEmmMode == ((uint8)EMM_NACHLAUF_MODE))     ||
++       (SftyInvActrEmmMode == ((uint8)EMM_SLEEP_MODE))        ||
++       (SftyInvActrEmmMode == ((uint8)EMM_PREPARESLEEP_MODE)) ||
+        (SftyInvActrEmmMode == ((uint8)EMM_STANDBY_MODE)))
+    {
+       SftyInvActrStateReqMod = PWM_INIT_FPGA;
+@@ -483,8 +485,11 @@ LOCAL_INLINE void SftyInvActr_HndlSpoCmdNoFlt(void)
+    SftyInvActrStateReqSCSpdReady = OPEN_CIRCUIT;
+ 
+    /* Update Required Mode for FPGA */
+-   if ((SftyInvActrEmmMode == ((uint8)EMM_INIT_MODE)) ||
+-       (SftyInvActrEmmMode == ((uint8)EMM_SLEEP_MODE)))
++   if ((SftyInvActrEmmMode == ((uint8)EMM_INIT_MODE))         ||
++       (SftyInvActrEmmMode == ((uint8)EMM_NACHLAUF_MODE))     ||
++       (SftyInvActrEmmMode == ((uint8)EMM_PREPARESLEEP_MODE)) ||
++       (SftyInvActrEmmMode == ((uint8)EMM_SLEEP_MODE))        ||
++       (SftyInvActrEmmMode == ((uint8)EMM_STANDBY_MODE)))
+    {
+       SftyInvActrStateReqMod = PWM_INIT_FPGA;
+    }
+@@ -531,7 +536,7 @@ LOCAL_INLINE void SftyInvActr_SendCmd(uint8 safeStReqCmd)
+          /* SPO Commends */
+ \t     SftyInvActrStateReqMod        = PWM_INIT_FPGA;
+ \t     SftyInvActrStateReqEmgySw     = EMERGENCY_STOP;
+-\t     SftyInvActrStateReqSCSpdReady = ASC_HS_LS;
++\t     SftyInvActrStateReqSCSpdReady = OPEN_CIRCUIT;
+ \t\t 
+          break;
+       }
+@@ -722,7 +727,7 @@ LOCAL_INLINE void SftyInvActr_MonrSafeStExct(void)
+  * \\brief     This function toggles passed fault status
+  * \\param     [in] fltSt: Fault status to be toggled
+  * \\return    result of toggling
+- * \\Parent_DD SftyInvActr_MainFunctionAreaCmn
++ * \\Parent_DD SftyInvActr_ReinitMonrData
+  */
+ /******************************************************************/
+ LOCAL_INLINE uint8 SftyInvActr_TogglFltSt(uint8 fltSt)
+diff --git a/src/fw_cu/Components/Safety/Sfty_Inv/SftyTempEvln/src/SftyTempEvln.c b/src/fw_cu/Components/Safety/Sfty_Inv/SftyTempEvln/src/SftyTempEvln.c
+index b2e38c563..ff778dec4 100644
+--- a/src/fw_cu/Components/Safety/Sfty_Inv/SftyTempEvln/src/SftyTempEvln.c
++++ b/src/fw_cu/Components/Safety/Sfty_Inv/SftyTempEvln/src/SftyTempEvln.c
+@@ -480,6 +480,8 @@ LOCAL_INLINE void SftyTempEvln_GetIgbtTempRawVal(void)
+ 
+ LOCAL_INLINE void SftyTempEvln_GetIgbtTempRngSwtSts(void)
+ {
++   uint8 idx;
++
+ #ifndef SERIES_PRODUCTION
+    /* Replacement stimulus enable */
+    if(SftyReplcmtIgbtTempRngSwtStsValStiEna == TRUE)
+@@ -493,17 +495,14 @@ LOCAL_INLINE void SftyTempEvln_GetIgbtTempRngSwtSts(void)
+    else
+ #endif /* SERIES_PRODUCTION */
+    {
+-      /* Get range switch val */
+-      SftyTempEvlnIgbtRngSwtSts[SYSDEF_PHA_U] = (uint8)((SftyE2eFpgaTempIGBTRawVal[SYSDEF_PHA_U] & SFTY_TEMP_EVLN_IGBT_RNG_SWT_STS_MASK)
+-                                                         >> SFTY_TEMP_EVLN_IGBT_RNG_SWT_STS_BIT_POS);
+-
+-      SftyTempEvlnIgbtRngSwtSts[SYSDEF_PHA_V] = (uint8)((SftyE2eFpgaTempIGBTRawVal[SYSDEF_PHA_V] & SFTY_TEMP_EVLN_IGBT_RNG_SWT_STS_MASK)
+-                                                         >> SFTY_TEMP_EVLN_IGBT_RNG_SWT_STS_BIT_POS);
+-
+-      SftyTempEvlnIgbtRngSwtSts[SYSDEF_PHA_W] = (uint8)((SftyE2eFpgaTempIGBTRawVal[SYSDEF_PHA_W] & SFTY_TEMP_EVLN_IGBT_RNG_SWT_STS_MASK)
+-                                                         >> SFTY_TEMP_EVLN_IGBT_RNG_SWT_STS_BIT_POS);
+-
++      for(idx = 0u; idx < SYSDEF_EM_PHA_CNT_MAX; idx++ )
++      {
++         /* Get range switch val */
++         SftyTempEvlnIgbtRngSwtSts[idx] = (uint8)((SftyE2eFpgaTempIGBTRawVal[idx] & SFTY_TEMP_EVLN_IGBT_RNG_SWT_STS_MASK)
++                                                                  >> SFTY_TEMP_EVLN_IGBT_RNG_SWT_STS_BIT_POS);
++      }
+    }
++
+    return;
+ }
+ /*********************************************************************************************/
+diff --git a/src/fw_cu/build/a2l/Measurements-to-Timeslices-Mapping.csv b/src/fw_cu/build/a2l/Measurements-to-Timeslices-Mapping.csv
+index 570f58f46..a400a28c0 100644
+--- a/src/fw_cu/build/a2l/Measurements-to-Timeslices-Mapping.csv
++++ b/src/fw_cu/build/a2l/Measurements-to-Timeslices-Mapping.csv
+@@ -6269,6 +6269,7 @@ Tmm_SchMTaskPeriodViolation,Core_0,C0_1ms_TimeTask,1,,,BSW
+ Tmm_VX1000DAQTaskDurationViolation,Core_0,C0_1ms_TimeTask,1,,,BSW
+ Tmm_VX1000DAQTaskPeriodViolation,Core_0,C0_1ms_TimeTask,1,,,BSW
+ SftyE2eFpgaAlvCntr,Core_1,Core_1_200us,0.2,,,SSW
++SftyE2eFpgaCombGrpABErrMonrSt,Core_1,Core_1_200us,0.2,,,SSW
+ SftyE2eFpgaCurrTiStamp,Core_1,Core_1_200us,0.2,,,SSW
+ SftyE2eFpgaCuTSnsrRawVal,Core_1,Core_1_200us,0.2,,,SSW
+ SftyE2eFpgaDmaDataCurrIdx,Core_1,Core_1_200us,0.2,,,SSW
+@@ -6578,6 +6579,14 @@ SftyE2eFpgaMod,Core_1,Core_1_200us,0.2,,,SSW
+ SftyE2eFpgaModPlausErrMonrSt,Core_1,Core_1_200us,0.2,,,SSW
+ SftyE2eFpgaModPlausErrMonrStAcc,Core_1,Core_1_200us,0.2,,,SSW
+ SftyE2eFpgaNoEmgySwReq,Core_1,Core_1_200us,0.2,,,SSW
++SftyE2eFpgaOverTempCtrlBdFltSts,Core_1,Core_1_200us,0.2,,,SSW
++SftyE2eFpgaOverTempCtrlBdFltStsAcc,Core_1,Core_1_200us,0.2,,,SSW
++SftyE2eFpgaOverTempDrvBdFltSts,Core_1,Core_1_200us,0.2,,,SSW
++SftyE2eFpgaOverTempDrvBdFltStsAcc,Core_1,Core_1_200us,0.2,,,SSW
++SftyE2eFpgaOverTempIgbtFltSts,Core_1,Core_1_200us,0.2,,,SSW
++SftyE2eFpgaOverTempIgbtFltStsAcc,Core_1,Core_1_200us,0.2,,,SSW
++SftyE2eFpgaOverUnderCurBatFltSts,Core_1,Core_1_200us,0.2,,,SSW
++SftyE2eFpgaOverUnderCurBatFltStsAcc,Core_1,Core_1_200us,0.2,,,SSW
+ SftyE2eFpgaOverUnderCurUFltSts,Core_1,Core_1_200us,0.2,,,SSW
+ SftyE2eFpgaOverUnderCurUFltStsAcc,Core_1,Core_1_200us,0.2,,,SSW
+ SftyE2eFpgaOverUnderCurVFltSts,Core_1,Core_1_200us,0.2,,,SSW
+@@ -6590,6 +6599,12 @@ SftyE2eFpgaP5HSRawVal,Core_1,Core_1_200us,0.2,,,SSW
+ SftyE2eFpgaP5LSRawVal,Core_1,Core_1_200us,0.2,,,SSW
+ SftyE2eFpgaPrmDlErrMonrSt,Core_1,Core_1_200us,0.2,,,SSW
+ SftyE2eFpgaPS16MultRawVal,Core_1,Core_1_200us,0.2,,,SSW
++SftyE2eFpgaPwrSupHsFltSts,Core_1,Core_1_200us,0.2,,,SSW
++SftyE2eFpgaPwrSupHsFltStsAcc,Core_1,Core_1_200us,0.2,,,SSW
++SftyE2eFpgaPwrSupLsFltSts,Core_1,Core_1_200us,0.2,,,SSW
++SftyE2eFpgaPwrSupLsFltStsAcc,Core_1,Core_1_200us,0.2,,,SSW
++SftyE2eFpgaPwrSupMultFltSts,Core_1,Core_1_200us,0.2,,,SSW
++SftyE2eFpgaPwrSupMultFltStsAcc,Core_1,Core_1_200us,0.2,,,SSW
+ SftyE2eFpgaRxACrcErrMonrSt,Core_1,Core_1_200us,0.2,,,SSW
+ SftyE2eFpgaRxMuxSeqErrMonrSt,Core_1,Core_1_200us,0.2,,,SSW
+ SftyE2eFpgaRxSCrcErrMonrSt,Core_1,Core_1_200us,0.2,,,SSW
+@@ -6605,6 +6620,16 @@ SftyE2eFpgaTxCrcCtrlAErrMonrSt,Core_1,Core_1_200us,0.2,,,SSW
+ SftyE2eFpgaTxCrcCtrlAErrMonrStAcc,Core_1,Core_1_200us,0.2,,,SSW
+ SftyE2eFpgaTxCrcCtrlSErrMonrSt,Core_1,Core_1_200us,0.2,,,SSW
+ SftyE2eFpgaTxCrcCtrlSErrMonrStAcc,Core_1,Core_1_200us,0.2,,,SSW
++SftyE2eFpgaTxOverTempCtrlBdFltSts,Core_1,Core_1_200us,0.2,,,SSW
++SftyE2eFpgaTxOverTempDrvBdFltSts,Core_1,Core_1_200us,0.2,,,SSW
++SftyE2eFpgaTxOverTempIgbtFltSts,Core_1,Core_1_200us,0.2,,,SSW
++SftyE2eFpgaTxOverUnderCurBatFltSts,Core_1,Core_1_200us,0.2,,,SSW
++SftyE2eFpgaTxPwrSupHsFltSts,Core_1,Core_1_200us,0.2,,,SSW
++SftyE2eFpgaTxPwrSupLsFltSts,Core_1,Core_1_200us,0.2,,,SSW
++SftyE2eFpgaTxPwrSupMultFltSts,Core_1,Core_1_200us,0.2,,,SSW
++SftyE2eFpgaTxWdgCpldFltSts,Core_1,Core_1_200us,0.2,,,SSW
++SftyE2eFpgaWdgCpldFltSts,Core_1,Core_1_200us,0.2,,,SSW
++SftyE2eFpgaWdgCpldFltStsAcc,Core_1,Core_1_200us,0.2,,,SSW
+ DrvCtrlSdlRbl1msFpgaSetTx.RunTi,Core_2,C2_1ms,1,,,SWIT
+ SftyAcEvlnRxCrcErrMonrSt,Core_1,Core_1_200us,0.2,,,SSW
+ SftyAcEvlnSetOverCurrPhaReinitSt,Core_1,Core_1_200us,0.2,,,SSW
+'

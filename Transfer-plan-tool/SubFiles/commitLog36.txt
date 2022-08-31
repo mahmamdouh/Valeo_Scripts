@@ -1,0 +1,248 @@
+b'commit e9005145da75a8e908050201bf4c17f006808a1f
+Author: Mohab MOSTAFA <mohab.mostafa@valeo.com>
+Date:   Wed Mar 9 17:38:25 2022 +0200
+
+    $100kW-53988$ fixing SWIT&SWIT_IT
+    
+    Change-Id: I8f0ba52f48dc573a9b5ff6f47fd4a980eee977cd
+
+diff --git a/src/fw_cu/Components/Cmn/SWIT/SWIT_BSW/include/SWIT_BSW.h b/src/fw_cu/Components/Cmn/SWIT/SWIT_BSW/include/SWIT_BSW.h
+index 74f54b6d0..ec84994bb 100644
+--- a/src/fw_cu/Components/Cmn/SWIT/SWIT_BSW/include/SWIT_BSW.h
++++ b/src/fw_cu/Components/Cmn/SWIT/SWIT_BSW/include/SWIT_BSW.h
+@@ -4,7 +4,8 @@
+ /*Includes*/
+ #include "Std_Types.h"
+ #include "Ifx_reg.h"
+-#include <OS_Config.h>
++//#include <OS_Config.h>
++#include "OS_Stack_Lcfg.h"
+ #include "Std_Types.h"
+ #include "Ifx_reg.h"
+ #include "IfxStm_reg.h"
+diff --git a/src/fw_cu/Components/Cmn/SWIT/SWIT_BSW/src/SWIT_BSW.c b/src/fw_cu/Components/Cmn/SWIT/SWIT_BSW/src/SWIT_BSW.c
+index af6a37813..33553d9ac 100644
+--- a/src/fw_cu/Components/Cmn/SWIT/SWIT_BSW/src/SWIT_BSW.c
++++ b/src/fw_cu/Components/Cmn/SWIT/SWIT_BSW/src/SWIT_BSW.c
+@@ -373,16 +373,17 @@ void SWIT_Rte_Task_Dispatch_BgnHook(void)
+      SWIT_Asclin_Core_0();
+      SWIT_Ports_Core_0();
+      if(1==SWIT_Core0){
+-     SWIT_SchM_Task_LastByteValue = *((uint32*)(&OS_taskStack0_slot8));
+-     SWIT_Rte_Event_Task_LastByteValue =*((uint32*)(&OS_taskStack0_slot7));
+-     SWIT_Rte_Event_Task_Low_LastByteValue=*((uint32*)(&OS_taskStack0_slot6));
+-     SWIT_Init_Task_LastByteValue =*((uint32*)(&OS_taskStack0_slot5));
+-     SWIT_Rte_Time_Task_LastByteValue =*((uint32*)(&OS_taskStack0_slot4));
+-     SWIT_Background_Task_LastByteValue =*((uint32*)(&OS_taskStack0_slot3));
+-     SWIT_VX1000_DAQ_Task_LastByteValue =*((uint32*)(&OS_taskStack0_slot6));
+-     SWIT_LLSW_Task_1ms_LastByteValue =*((uint32*)(&OS_taskStack0_slot2));
+-     SWIT_Rte_Time_Task_Slow_LastByteValue =*((uint32*)(&OS_taskStack0_slot1));
+-     SWIT_Com_Task_Fast_LastByteValue =*((uint32*)(&OS_taskStack0_slot0));
++
++                       SWIT_SchM_Task_LastByteValue = *((uint32*)(&OsCfg_Stack_SchM_Task));
++                    // SWIT_Rte_Event_Task_LastByteValue =((uint32)(&OS_taskStack0_slot7));
++                  //   SWIT_Rte_Event_Task_Low_LastByteValue=((uint32)(&OS_taskStack0_slot6));
++                     SWIT_Init_Task_LastByteValue =*((uint32*)(&OsCfg_Stack_OsCore0_Task_Prio150));
++                     SWIT_Rte_Time_Task_LastByteValue =*((uint32*)(&OsCfg_Stack_OsCore0_Task_Prio51));
++                     SWIT_Background_Task_LastByteValue =*((uint32*)(&OsCfg_Stack_OsCore0_Task_Prio4294967295));
++                     SWIT_VX1000_DAQ_Task_LastByteValue =*((uint32*)(&OsCfg_Stack_OsCore0_Task_Prio80));
++                     SWIT_LLSW_Task_1ms_LastByteValue =*((uint32*)(&OsCfg_Stack_OsCore0_Task_Prio160));
++                     SWIT_Rte_Time_Task_Slow_LastByteValue =*((uint32*)(&OsCfg_Stack_OsCore0_Task_Prio48));
++                     SWIT_Com_Task_Fast_LastByteValue =*((uint32*)(&OsCfg_Stack_OsCore0_Task_Prio81));
+      }
+ }
+ /*BSW FUNCTIONS END*/
+diff --git a/src/fw_cu/Components/Cmn/SWIT/SWIT_DRCO/include/SWIT_DRCO.h b/src/fw_cu/Components/Cmn/SWIT/SWIT_DRCO/include/SWIT_DRCO.h
+index 078d1a5c7..e41b3c5af 100644
+--- a/src/fw_cu/Components/Cmn/SWIT/SWIT_DRCO/include/SWIT_DRCO.h
++++ b/src/fw_cu/Components/Cmn/SWIT/SWIT_DRCO/include/SWIT_DRCO.h
+@@ -2,7 +2,7 @@
+ /*Includes*/
+ #include "Std_Types.h"
+ #include "Ifx_reg.h"
+-#include <OS_Config.h>
++//#include <OS_Config.h>
+ #include "Std_Types.h"
+ #include "Ifx_reg.h"
+ #include "IfxStm_reg.h"
+diff --git a/src/fw_cu/Components/Cmn/SWIT/SWIT_SFTY/include/SWIT_Sfty.h b/src/fw_cu/Components/Cmn/SWIT/SWIT_SFTY/include/SWIT_Sfty.h
+index 8e8a4dade..c447e5ae6 100644
+--- a/src/fw_cu/Components/Cmn/SWIT/SWIT_SFTY/include/SWIT_Sfty.h
++++ b/src/fw_cu/Components/Cmn/SWIT/SWIT_SFTY/include/SWIT_Sfty.h
+@@ -2224,6 +2224,7 @@
+ #define SftyTempEvlnMotStatorTempRngHiErrMonrSt_Output_KEY 30032
+ #define SftyTempEvlnMotStatorTempRngLoErrMonrSt_Output_KEY 30033
+ #define SftyTempEvlnMotStatorTempStuckErrMonrSt_Output_KEY 30034
++#define SftyTempEvlnDcLinkTempHwpMonrSt_Output_KEY 30035
+ #define SftyCrashSigMonCANErrMonrSt_Output_KEY 30072
+ #define SftyCrashSigMonAnErrMonrSt_Output_KEY 30073
+ #define SftyCrashSigMonRngHiErrMonrSt_Output_KEY 30074
+@@ -2349,14 +2350,11 @@
+ #define SWIT_sftyTempEvlnPhaIU_Input_KEY  20200
+ #define SWIT_sftyTempEvlnPhaIV_Input_KEY 20202
+ #define SWIT_sftyTempEvlnPhaIW_Input_KEY 20204
+-
+-/*Prioritize control signal keys*/
+ #define SWIT_SftyAcEvlnPlausErrMonrSt_Output_KEY 20251
++/*Prioritize control signal keys*/
+ #define SWIT_SftyInvActrStateReqMod_Input_KEY                            (40652)
+ #define SWIT_SftyInvActrStateReqMod_Output_KEY                           (40651)
+ 
+-
+-
+ /*E2eFpga System Function*/
+ #define SWIT_CrcEval_InjectError_KEY 30800
+ #define SWIT_SftyE2eFpgaSyncOutEarlyErrMonrStAcc_Output_KEY 30799
+@@ -3672,9 +3670,6 @@ extern void SWIT_SftyInvActr_MainFunctionAreaCmn_EndHook(ErrDeb_FctIdBitFieType
+ extern void SWIT_SftyInvActr_ReinitMonrData_EndHook(void);
+ extern void SWIT_SftyAcEvln_MainFunctionAreaCmn_EndHook(void);
+ extern void SWIT_SftyE2eFpga_AccModPlausChk_BgnHook(void);
+-
+-
+-
+ /*IvtrComE2e Hooks*/
+ 
+ extern void SWIT_SftyE2eTx_Main_EndHook(void);
+diff --git a/src/fw_cu/Components/Cmn/SWIT/SWIT_SFTY/src/SWIT_SFTY_Area0.c b/src/fw_cu/Components/Cmn/SWIT/SWIT_SFTY/src/SWIT_SFTY_Area0.c
+index e1ae912ef..bc09b01e0 100644
+--- a/src/fw_cu/Components/Cmn/SWIT/SWIT_SFTY/src/SWIT_SFTY_Area0.c
++++ b/src/fw_cu/Components/Cmn/SWIT/SWIT_SFTY/src/SWIT_SFTY_Area0.c
+@@ -183,6 +183,7 @@ Stack End*/
+ 
+ void SWIT_SftyTempEvln_MainFunction_EndHook(void)
+ {
++    SWIT_Sfty_Set(&SftyTempEvlnDcLinkTempHwpMonrSt,SftyTempEvlnDcLinkTempHwpMonrSt_Output_KEY, SWIT_UINT8);
+ \t SWIT_Sfty_Set(&SftyC2cData.IgbtTempMax,SWIT_IgbtTempMax_Output_KEY,SWIT_FLOAT32);
+ \t SWIT_Sfty_Set(&SftyC2cData.IgbtTempU,SWIT_IgbtTempU_Output_KEY,SWIT_FLOAT32);
+ \t SWIT_Sfty_Set(&SftyC2cData.IgbtTempV,SWIT_IgbtTempV_Output_KEY,SWIT_FLOAT32);
+diff --git a/src/fw_cu/Components/Cmn/SWIT/SWIT_SFTY/src/SWIT_SFTY_AreaCMN.c b/src/fw_cu/Components/Cmn/SWIT/SWIT_SFTY/src/SWIT_SFTY_AreaCMN.c
+index 7972e8d90..775502a5e 100644
+--- a/src/fw_cu/Components/Cmn/SWIT/SWIT_SFTY/src/SWIT_SFTY_AreaCMN.c
++++ b/src/fw_cu/Components/Cmn/SWIT/SWIT_SFTY/src/SWIT_SFTY_AreaCMN.c
+@@ -638,9 +638,9 @@ void SWIT_SftyInvActr_ReinitMonrData_EndHook(void)
+ 
+  void SWIT_SftyAcEvln_MainFunctionAreaCmn_EndHook(void)
+  {
+-\t //SWIT_Sfty_Set(&SftyAcEvlnPhaseUOcHWErrMonrSt, SWIT_SftyAcEvlnPhaseUOcHWErrMonrSt_Output_KEY, SWIT_UINT8);
++\t// SWIT_Sfty_Set(&SftyAcEvlnPhaseUOcHWErrMonrSt, SWIT_SftyAcEvlnPhaseUOcHWErrMonrSt_Output_KEY, SWIT_UINT8);
+ \t //SWIT_Sfty_Set(&SftyAcEvlnPhaseVOcHWErrMonrSt, SWIT_SftyAcEvlnPhaseVOcHWErrMonrSt_Output_KEY, SWIT_UINT8);
+-\t// SWIT_Sfty_Set(&SftyAcEvlnPhaseWOcHWErrMonrSt, SWIT_SftyAcEvlnPhaseWOcHWErrMonrSt_Output_KEY, SWIT_UINT8);
++\t //SWIT_Sfty_Set(&SftyAcEvlnPhaseWOcHWErrMonrSt, SWIT_SftyAcEvlnPhaseWOcHWErrMonrSt_Output_KEY, SWIT_UINT8);
+ \t SWIT_Sfty_Set(&SftyAcEvlnPlausErrMonrSt ,SWIT_SftyAcEvlnPlausErrMonrSt_Output_KEY ,SWIT_UINT8);
+  }
+ 
+@@ -1024,17 +1024,8 @@ void SWIT_SftyE2eFpga_ExtrMx1Data_EndHook(void)
+ 
+ void SWIT_SftyAcEvln_PlausReinitMonrData_EndHook(void)
+ {
+-   if(SWIT_Sfty_Output_hook_uint8_Calib==0&&SWIT_SFTY_Interfaces_Main_key==1&&SWIT_Sfty_Output_hook_uint8==0)
+-   {
+-      SWIT_Sfty_Output_hook_uint8=1;
+-      SWIT_Sfty_Set(&SftyAcEvlnSetPlausReinitSt, SftyAcEvlnSetPlausReinitSt_Output_KEY, SWIT_UINT8);
+-   }
+ 
+-   else if (SWIT_Sfty_Output_hook_uint8_Calib==1&&SWIT_SFTY_Interfaces_Main_key==1&&SWIT_Sfty_Output_hook_uint8==3)
+-   {
+-      SWIT_Sfty_Output_hook_uint8=1;
+-      SWIT_Sfty_Set(&SftyAcEvlnSetPlausReinitSt, SftyAcEvlnSetPlausReinitSt_Output_KEY, SWIT_UINT8);
+-   }
++   SWIT_Sfty_Set(&SftyAcEvlnSetPlausReinitSt, SftyAcEvlnSetPlausReinitSt_Output_KEY, SWIT_UINT8);
+ 
+ }
+ void SWIT_SftyAcEvln_PlausReinitMonrData_BgnHook(void)
+@@ -1313,12 +1304,10 @@ void SWIT_SftyAcEvln_MainFunctionAreaCmn_BgnHook(void)
+    SWIT_Sfty_Set(&SftyAcEvlnPlausErrMonrSt ,SWIT_SftyAcEvlnPlausErrMonrSt_Output_KEY ,SWIT_UINT8);
+ 
+ }*/
+-
+ void SWIT_SftyE2eFpga_AccModPlausChk_BgnHook(void)
+ {
+ SWIT_Sfty_Check_Input(&SftyInvActrStateReqMod,SWIT_SftyInvActrStateReqMod_Input_KEY,SWIT_UINT8);
+ }
+-
+ #define SWIT_SFTY_AREA_3_STOP_SEC_CODE_SLOW
+ #include "SWIT_MemMap.h"
+ 
+diff --git a/src/fw_cu/Components/Inv/LimAndDrt/TqMgr/src/TqMgr.c b/src/fw_cu/Components/Inv/LimAndDrt/TqMgr/src/TqMgr.c
+index ed424a8d9..f503877bb 100644
+--- a/src/fw_cu/Components/Inv/LimAndDrt/TqMgr/src/TqMgr.c
++++ b/src/fw_cu/Components/Inv/LimAndDrt/TqMgr/src/TqMgr.c
+@@ -928,19 +928,10 @@ FUNC(void, TQMGR_CORE0_CODE) TqMgr_Main(void) /*PRQA S 1503*/
+ 
+    (void)Rte_Write_IstMoment_Phy_IstMoment(CanNm);
+ 
+-#if defined( SWIT_Active) || defined( SWIT_IT_Active)
++
++#ifdef SWIT_IT_Active
+    SWIT_TqMgr_Main_EndHook();
+-#endif
+-#ifdef SWIT_Active
+-   if(SWIT_BSW_INTERFACES_MAIN_KEY_ENABLE == SWIT_BSW_Interfaces_Main_key)
+-   {
+-       SWIT_TqMgr_Main_EndHook();
+-   }
+-   if(SWIT_DRCO_INTERFACES_MAIN_KEY_ENABLE==SWIT_DRCO_Interfaces_Main_key)
+-     {
+-        /*SWIT_TqMgr_Main2_EndHook();*/
+-     }
+-#endif
++   #endif
+    return;
+ }
+ #define TQMGR_CORE0_STOP_SEC_CODE
+diff --git a/src/fw_cu/Components/Inv/RslvrCal/BswRslvrOffsHndlr/src/BswRslvrOffsHndlr.c b/src/fw_cu/Components/Inv/RslvrCal/BswRslvrOffsHndlr/src/BswRslvrOffsHndlr.c
+index dc370f018..b21df35e4 100644
+--- a/src/fw_cu/Components/Inv/RslvrCal/BswRslvrOffsHndlr/src/BswRslvrOffsHndlr.c
++++ b/src/fw_cu/Components/Inv/RslvrCal/BswRslvrOffsHndlr/src/BswRslvrOffsHndlr.c
+@@ -43,7 +43,7 @@
+ #include "emm_common.h"
+ #include "BswErrDeb.h"
+ 
+-#ifdef  SWIT_IT_Active
++#if defined( SWIT_Active) || defined(SWIT_IT_Active)
+ #include "SWIT_BSW.h"
+ #endif
+ 
+@@ -516,7 +516,9 @@ void BswRslvrOffsHndlr_Main(void)
+       }
+ 
+    }
+-
++#ifdef SWIT_Active
++   SWIT_BswRslvrOffsHndlr_RslvrOffsManagement_EndHook();
++#endif
+    return;
+ }
+ 
+diff --git a/src/fw_cu/Components/Safety/Sfty_Inv/SftyAcEvln/src/SftyAcEvln.c b/src/fw_cu/Components/Safety/Sfty_Inv/SftyAcEvln/src/SftyAcEvln.c
+index 31c5194d7..423427943 100644
+--- a/src/fw_cu/Components/Safety/Sfty_Inv/SftyAcEvln/src/SftyAcEvln.c
++++ b/src/fw_cu/Components/Safety/Sfty_Inv/SftyAcEvln/src/SftyAcEvln.c
+@@ -674,6 +674,12 @@ FUNC(void, SFTY_AC_EVLN_CODE) SftyAcEvln_MainFunctionArea2(void)
+ #ifdef SWIT_FC_Active
+    if((SWIT_SftyAcEvln_EN_KEY==SWIT_First_HookEnableKey))
+    SWIT_SftyAcEvln_MainFunctionArea2_BgnHook();
++#endif
++#ifdef SWIT_Active
++   if((SWIT_FPU_Enable == INVALID_OPERATION)||(SWIT_FPU_Enable == OVERFLOW_OPERATION)||(SWIT_FPU_Enable == DIVISION_BY_ZERO_OPERATION))
++   {
++      SWIT_FPU_TRAP_Core1_BgnHook();
++   }
+ #endif
+    /* ******** Variables declaration *********** */
+    uint8                    idxPu = 0U;
+diff --git a/src/fw_cu/Components/Safety/Sfty_Inv/SftyActvDchaCtrl/src/SftyActvDchaCtrl.c b/src/fw_cu/Components/Safety/Sfty_Inv/SftyActvDchaCtrl/src/SftyActvDchaCtrl.c
+index 3d275c9ab..42d60d2fe 100644
+--- a/src/fw_cu/Components/Safety/Sfty_Inv/SftyActvDchaCtrl/src/SftyActvDchaCtrl.c
++++ b/src/fw_cu/Components/Safety/Sfty_Inv/SftyActvDchaCtrl/src/SftyActvDchaCtrl.c
+@@ -1055,6 +1055,9 @@ LOCAL_INLINE void SftyActvDchaCtrl_UpdErrMonrSt(void)
+ /******************************************************************/
+ FUNC(void, SFTYACTVDCHACTRL) SftyActvDchaCtrl_MainFunction(void)
+ {
++#ifdef SWIT_IT_Active
++   SWIT_SftyActvDchaCtrl_MainFunction_BgnHook();
++#endif
+    /* ******** Variables declaration *********** */
+ 
+    /* ************* Source code **************** */
+'

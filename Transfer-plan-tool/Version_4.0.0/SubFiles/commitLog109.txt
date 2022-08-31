@@ -1,0 +1,82 @@
+b'commit 2376e8ab0b0ca2c678d313700eff2a128149ecf5
+Author: Rishav RISHAV <rishav.rishav.jv.ext@valeo.com>
+Date:   Thu Dec 9 12:58:32 2021 +0530
+
+    $100kW-43475$ - [SWIT][DetmnTemp] B01: ErrMonrSts doesn\'t update in usedby component [SftyErrDeb]
+    
+    Change-Id: Ic2cfcae3df2fd49719429f4ee3f4cefe4acc634f
+
+diff --git a/src/fw_cu/Components/Safety/Sfty_Cmn/SftyErrDeb/include/SftyErrDeb_data.h b/src/fw_cu/Components/Safety/Sfty_Cmn/SftyErrDeb/include/SftyErrDeb_data.h
+index 584cbcb95..ff3f98836 100644
+--- a/src/fw_cu/Components/Safety/Sfty_Cmn/SftyErrDeb/include/SftyErrDeb_data.h
++++ b/src/fw_cu/Components/Safety/Sfty_Cmn/SftyErrDeb/include/SftyErrDeb_data.h
+@@ -1809,6 +1809,26 @@ extern VAR(uint8, SFTYTEMPEVLN_VAR) SftyTempEvlnMotStatorTempRngLoErrMonrSt;
+ #include "MemMap.h"
+ /* End: SFTYTEMPEVLN_STOP_SEC_VAR_AREA_0_FAST_INIT_8 (online) */
+ 
++/* Begin: SFTYTEMPEVLN_START_SEC_VAR_AREA_0_FAST_INIT_8 (online) */
++#define SFTYTEMPEVLN_START_SEC_VAR_AREA_0_FAST_INIT_8
++#include "MemMap.h"
++
++extern VAR(uint8, SFTYTEMPEVLN_VAR) SftyTempEvlnIgbtTempUPlausErrMonrSt;
++extern VAR(uint8, SFTYTEMPEVLN_VAR) SftyTempEvlnIgbtTempURngHiErrMonrSt;
++extern VAR(uint8, SFTYTEMPEVLN_VAR) SftyTempEvlnIgbtTempURngLoErrMonrSt;
++extern VAR(uint8, SFTYTEMPEVLN_VAR) SftyTempEvlnIgbtTempVPlausErrMonrSt;
++extern VAR(uint8, SFTYTEMPEVLN_VAR) SftyTempEvlnIgbtTempVRngHiErrMonrSt;
++extern VAR(uint8, SFTYTEMPEVLN_VAR) SftyTempEvlnIgbtTempVRngLoErrMonrSt;
++extern VAR(uint8, SFTYTEMPEVLN_VAR) SftyTempEvlnIgbtTempWPlausErrMonrSt;
++extern VAR(uint8, SFTYTEMPEVLN_VAR) SftyTempEvlnIgbtTempWRngHiErrMonrSt;
++extern VAR(uint8, SFTYTEMPEVLN_VAR) SftyTempEvlnIgbtTempWRngLoErrMonrSt;
++extern VAR(uint8, SFTYTEMPEVLN_VAR) SftyTempEvlnIgbtTempHWPErrMonrSt;
++extern VAR(uint8, SFTYTEMPEVLN_VAR) SftyTempEvlnMotStatorTempHWPErrMonrSt;
++
++#define SFTYTEMPEVLN_STOP_SEC_VAR_AREA_0_FAST_INIT_8
++#include "MemMap.h"
++/* End: SFTYTEMPEVLN_STOP_SEC_VAR_AREA_0_FAST_INIT_8 (online) */
++
+ /* Begin: SFTYACEVLN_START_SEC_VAR_AREA_1_FAST_INIT_8 (online) */
+ #define SFTYACEVLN_START_SEC_VAR_AREA_1_FAST_INIT_8
+ #include "MemMap.h"
+diff --git a/src/fw_cu/Components/Safety/Sfty_Inv/SftyTempEvln/src/SftyTempEvln.c b/src/fw_cu/Components/Safety/Sfty_Inv/SftyTempEvln/src/SftyTempEvln.c
+index e63fae4b4..8e68ef67e 100644
+--- a/src/fw_cu/Components/Safety/Sfty_Inv/SftyTempEvln/src/SftyTempEvln.c
++++ b/src/fw_cu/Components/Safety/Sfty_Inv/SftyTempEvln/src/SftyTempEvln.c
+@@ -797,11 +797,6 @@ LOCAL_INLINE void SftyTempEvln_EvlnIgbtTemp(void)
+          /* Validate Junction temperature */
+          SftyTempEvln_IgbtJuncTempChk();
+ 
+-         /* Update C2c variables */
+-         SftyC2cData.IgbtTempU = SftyTempEvlnIGBTPhyVal[SYSDEF_PHA_U];
+-         SftyC2cData.IgbtTempV = SftyTempEvlnIGBTPhyVal[SYSDEF_PHA_V];
+-         SftyC2cData.IgbtTempW = SftyTempEvlnIGBTPhyVal[SYSDEF_PHA_W];
+-         SftyC2cData.IgbtTempMax = SftyTempEvlnIgbtTMaxPhyVal;
+       }
+       else
+       {
+@@ -813,6 +808,12 @@ LOCAL_INLINE void SftyTempEvln_EvlnIgbtTemp(void)
+       /* Do Nothing*/
+    }
+ 
++   /* Update C2c variables */
++   SftyC2cData.IgbtTempU = SftyTempEvlnIGBTPhyVal[SYSDEF_PHA_U];
++   SftyC2cData.IgbtTempV = SftyTempEvlnIGBTPhyVal[SYSDEF_PHA_V];
++   SftyC2cData.IgbtTempW = SftyTempEvlnIGBTPhyVal[SYSDEF_PHA_W];
++   SftyC2cData.IgbtTempMax = SftyTempEvlnIgbtTMaxPhyVal;
++
+    return;
+ }
+ 
+diff --git a/src/fw_cu/build/subVariants/series_production/Parfiles/Testbench/VW310E_75_49_265A_0024_VEH_192701.par b/src/fw_cu/build/subVariants/series_production/Parfiles/Testbench/VW310E_75_49_265A_0024_VEH_192701.par
+index 1eb05daff..4cf58d032 100644
+--- a/src/fw_cu/build/subVariants/series_production/Parfiles/Testbench/VW310E_75_49_265A_0024_VEH_192701.par
++++ b/src/fw_cu/build/subVariants/series_production/Parfiles/Testbench/VW310E_75_49_265A_0024_VEH_192701.par
+@@ -16688,7 +16688,7 @@ ErrDeb.INV_EM_STATOR_TEMP_RNG_SWT.NvmFltStsIdx [UINT(8)]  0 ;  0
+ ErrDeb.INV_EM_STATOR_TEMP_STUCK.DebMethod [UINT(1)]  1 ; TIME_BASED
+ ErrDeb.INV_EM_STATOR_TEMP_STUCK.DebTiFacFailed [UINT(8)]  1 ;  1
+ ErrDeb.INV_EM_STATOR_TEMP_STUCK.DebTiFacPassed [UINT(8)]  1 ;  1
+-ErrDeb.INV_EM_STATOR_TEMP_STUCK.FltEna [UINT(1)]  0 ; DISABLED
++ErrDeb.INV_EM_STATOR_TEMP_STUCK.FltEna [UINT(1)]  1 ; ENABLED
+ ErrDeb.INV_EM_STATOR_TEMP_STUCK.FltSts1FailedReactnFidList [UINT(16),(32,1)]
+ :  7 ; FCT_ID_IAC_MAX_LIM_20
+ :  72 ; FCT_ID_EMX_WARNLAMPE_ANF
+'

@@ -1,0 +1,156 @@
+b'commit 2cebebb5bce41dd046a285b44089879278fdb62c
+Author: Santosh Pallanti <santos.pallanti.jv.ext@valeo.com>
+Date:   Wed Mar 16 12:41:05 2022 +0100
+
+    $100kW-53956$ - Remove Combined Error Logic from SftyRslvrEvln SSW Module
+    
+    Change-Id: I6783799cc2a0589a61acafb9a60c5d8aec3275dd
+
+Submodule src/fw_cu/Components/Safety/Sfty_Inv/SftyRslvrCompst f2b01b76e..14e321911:
+  > $100kW-53956$ - Remove Combined Error Logic from SftyRslvrEvln SSW Module
+diff --git a/src/fw_cu/build/a2l/Measurements-to-Timeslices-Mapping.csv b/src/fw_cu/build/a2l/Measurements-to-Timeslices-Mapping.csv
+index f10e64278..570f58f46 100644
+--- a/src/fw_cu/build/a2l/Measurements-to-Timeslices-Mapping.csv
++++ b/src/fw_cu/build/a2l/Measurements-to-Timeslices-Mapping.csv
+@@ -4999,50 +4999,11 @@ SftyRslvrDmaVadcSinN,Core_1,Core_1_200us,0.2,,,SSW
+ SftyRslvrDmaVadcSinP,Core_1,Core_1_200us,0.2,,,SSW
+ SftyRslvrDmaVadcTiStamp,Core_1,Core_1_200us,0.2,,,SSW
+ SftyRslvrDmaVadcVldFlg,Core_1,Core_1_200us,0.2,,,SSW
+-SftyRslvrEvlnArea1ErrMon.List1.All,Core_1,Core_1_200us,0.2,,,SSW
+-SftyRslvrEvlnArea1ErrMon.List1.ErrType.reserved_26,Core_1,Core_1_200us,0.2,,,SSW
+-SftyRslvrEvlnArea1ErrMon.List1.ErrType.VadcDmaErr,Core_1,Core_1_200us,0.2,,,SSW
+-SftyRslvrEvlnArea1ErrMon.List1.ErrType.VadcExctOldTiStampErr,Core_1,Core_1_200us,0.2,,,SSW
+-SftyRslvrEvlnArea1ErrMon.List1.ErrType.VadcOldTiStampErr,Core_1,Core_1_200us,0.2,,,SSW
+-SftyRslvrEvlnArea2ErrMon.List1.All,Core_1,Core_1_200us,0.2,,,SSW
+-SftyRslvrEvlnArea2ErrMon.List1.ErrType.DsadcDmaErr,Core_1,Core_1_200us,0.2,,,SSW
+-SftyRslvrEvlnArea2ErrMon.List1.ErrType.DsadcOldTiStampErr,Core_1,Core_1_200us,0.2,,,SSW
+-SftyRslvrEvlnArea2ErrMon.List1.ErrType.reserved_28,Core_1,Core_1_200us,0.2,,,SSW
+-SftyRslvrEvlnAreaCmnErrMon.List1.All,Core_1,Core_1_200us,0.2,,,SSW
+-SftyRslvrEvlnAreaCmnErrMon.List1.ErrType.VadcCosElecHiErr,Core_1,Core_1_200us,0.2,,,SSW
+-SftyRslvrEvlnAreaCmnErrMon.List1.ErrType.VadcCosElecLoErr,Core_1,Core_1_200us,0.2,,,SSW
+-SftyRslvrEvlnAreaCmnErrMon.List1.ErrType.VadcCosElecOpenErr,Core_1,Core_1_200us,0.2,,,SSW
+-SftyRslvrEvlnAreaCmnErrMon.List1.ErrType.VadcCosRngHiErr,Core_1,Core_1_200us,0.2,,,SSW
+-SftyRslvrEvlnAreaCmnErrMon.List1.ErrType.VadcCosRngLoErr,Core_1,Core_1_200us,0.2,,,SSW
+-SftyRslvrEvlnAreaCmnErrMon.List1.ErrType.VadcExctAmpRngHiErr,Core_1,Core_1_200us,0.2,,,SSW
+-SftyRslvrEvlnAreaCmnErrMon.List1.ErrType.VadcExctAmpRngLoErr,Core_1,Core_1_200us,0.2,,,SSW
+-SftyRslvrEvlnAreaCmnErrMon.List1.ErrType.VadcExctElecHiErr,Core_1,Core_1_200us,0.2,,,SSW
+-SftyRslvrEvlnAreaCmnErrMon.List1.ErrType.VadcExctElecLoErr,Core_1,Core_1_200us,0.2,,,SSW
+-SftyRslvrEvlnAreaCmnErrMon.List1.ErrType.VadcExctElecOpenErr,Core_1,Core_1_200us,0.2,,,SSW
+-SftyRslvrEvlnAreaCmnErrMon.List1.ErrType.VadcExctPlausErr,Core_1,Core_1_200us,0.2,,,SSW
+-SftyRslvrEvlnAreaCmnErrMon.List1.ErrType.VadcSinElecHiErr,Core_1,Core_1_200us,0.2,,,SSW
+-SftyRslvrEvlnAreaCmnErrMon.List1.ErrType.VadcSinElecLoErr,Core_1,Core_1_200us,0.2,,,SSW
+-SftyRslvrEvlnAreaCmnErrMon.List1.ErrType.VadcSinElecOpenErr,Core_1,Core_1_200us,0.2,,,SSW
+-SftyRslvrEvlnAreaCmnErrMon.List1.ErrType.VadcSinRngHiErr,Core_1,Core_1_200us,0.2,,,SSW
+-SftyRslvrEvlnAreaCmnErrMon.List1.ErrType.VadcSinRngLoErr,Core_1,Core_1_200us,0.2,,,SSW
+-SftyRslvrEvlnAreaCmnErrMon.List2.All,Core_1,Core_1_200us,0.2,,,SSW
+-SftyRslvrEvlnAreaCmnErrMon.List2.ErrType.AurixHwFlt,Core_1,Core_1_200us,0.2,,,SSW
+-SftyRslvrEvlnAreaCmnErrMon.List2.ErrType.CosAmpErr,Core_1,Core_1_200us,0.2,,,SSW
+-SftyRslvrEvlnAreaCmnErrMon.List2.ErrType.CosOffsErr,Core_1,Core_1_200us,0.2,,,SSW
+-SftyRslvrEvlnAreaCmnErrMon.List2.ErrType.reserved_16,Core_1,Core_1_200us,0.2,,,SSW
+-SftyRslvrEvlnAreaCmnErrMon.List2.ErrType.SinAmpErr,Core_1,Core_1_200us,0.2,,,SSW
+-SftyRslvrEvlnAreaCmnErrMon.List2.ErrType.SinCosPlausAmpErr,Core_1,Core_1_200us,0.2,,,SSW
+-SftyRslvrEvlnAreaCmnErrMon.List2.ErrType.SinOffsErr,Core_1,Core_1_200us,0.2,,,SSW
+-SftyRslvrEvlnAreaCmnErrMon.List2.ErrType.SqdSumErr,Core_1,Core_1_200us,0.2,,,SSW
+-SftyRslvrEvlnAreaCmnErrMon.List2.ErrType.ValCompErr,Core_1,Core_1_200us,0.2,,,SSW
+ SftyRslvrEvlnAtanVal,Core_1,Core_1_200us,0.2,,,SSW
+ SftyRslvrEvlnAtanValWoCmp,Core_1,Core_1_200us,0.2,,,SSW
+ SftyRslvrEvlnAurixHwFltErrMonrSt,Core_1,Core_1_200us,0.2,,,SSW
+-SftyRslvrEvlnAurixHwFltErrMonrSt.MonrStsCombined,Core_1,Core_1_200us,0.2,,,SSW
+ SftyRslvrEvlnCosAmpErrMonrSt,Core_1,Core_1_200us,0.2,,,SSW
+-SftyRslvrEvlnCosAmpErrMonrSt.MonrStsCombined,Core_1,Core_1_200us,0.2,,,SSW
+ SftyRslvrEvlnCosOffsErrMonrSt,Core_1,Core_1_200us,0.2,,,SSW
+-SftyRslvrEvlnCosOffsErrMonrSt.MonrStsCombined,Core_1,Core_1_200us,0.2,,,SSW
+ SftyRslvrEvlnCosRawCmpAbsVal,Core_1,Core_1_200us,0.2,,,SSW
+ SftyRslvrEvlnDsadcAtan,Core_1,Core_1_200us,0.2,,,SSW
+ SftyRslvrEvlnDsadcCos,Core_1,Core_1_200us,0.2,,,SSW
+@@ -5050,10 +5011,8 @@ SftyRslvrEvlnDsadcCosPeakAmpDe,Core_1,Core_1_200us,0.2,,,SSW
+ SftyRslvrEvlnDsadcCosPP,Core_1,Core_1_200us,0.2,,,SSW
+ SftyRslvrEvlnDsadcCosRawVal,Core_1,Core_1_200us,0.2,,,SSW
+ SftyRslvrEvlnDsadcDmaErrMonrSt,Core_1,Core_1_200us,0.2,,,SSW
+-SftyRslvrEvlnDsadcDmaErrMonrSt.MonrStsCombined,Core_1,Core_1_200us,0.2,,,SSW
+ SftyRslvrEvlnDsadcLstTiStamp,Core_1,Core_1_200us,0.2,,,SSW
+ SftyRslvrEvlnDsadcOldTiStampErrMonrSt,Core_1,Core_1_200us,0.2,,,SSW
+-SftyRslvrEvlnDsadcOldTiStampErrMonrSt.MonrStsCombined,Core_1,Core_1_200us,0.2,,,SSW
+ SftyRslvrEvlnDsadcResAppCosAbsOffs,Core_1,Core_1_200us,0.2,,,SSW
+ SftyRslvrEvlnDsadcResAppSinAbsOffs,Core_1,Core_1_200us,0.2,,,SSW
+ SftyRslvrEvlnDsadcSin,Core_1,Core_1_200us,0.2,,,SSW
+@@ -5064,9 +5023,6 @@ SftyRslvrEvlnDsadcSinRawVal,Core_1,Core_1_200us,0.2,,,SSW
+ SftyRslvrEvlnDsadcSqdSumAbsDif,Core_1,Core_1_200us,0.2,,,SSW
+ SftyRslvrEvlnDsadcSqrdSum,Core_1,Core_1_200us,0.2,,,SSW
+ SftyRslvrEvlnDsadcTiStamp,Core_1,Core_1_200us,0.2,,,SSW
+-SftyRslvrEvlnErrMonArea1CycCntr,Core_1,Core_1_200us,0.2,,,SSW
+-SftyRslvrEvlnErrMonArea2CycCntr,Core_1,Core_1_200us,0.2,,,SSW
+-SftyRslvrEvlnErrMonAreaCmnCycCntr,Core_1,Core_1_200us,0.2,,,SSW
+ SftyRslvrEvlnExctGtmTiStamp,Core_1,Core_1_200us,0.2,,,SSW
+ SftyRslvrEvlnExctLstGtmTiStamp,Core_1,Core_1_200us,0.2,,,SSW
+ SftyRslvrEvlnGtmRslvrExctFreqInHz,Core_1,Core_1_200us,0.2,,,SSW
+@@ -5076,68 +5032,41 @@ SftyRslvrEvlnPrevVadcCosPRawVal,Core_1,Core_1_200us,0.2,,,SSW
+ SftyRslvrEvlnPrevVadcSinNRawVal,Core_1,Core_1_200us,0.2,,,SSW
+ SftyRslvrEvlnPrevVadcSinPRawVal,Core_1,Core_1_200us,0.2,,,SSW
+ SftyRslvrEvlnRawAtanVldFlag,Core_1,Core_1_200us,0.2,,,SSW
+-SftyRslvrEvlnResetErrMaskArea1,Core_1,Core_1_200us,0.2,,,SSW
+-SftyRslvrEvlnResetErrMaskArea2,Core_1,Core_1_200us,0.2,,,SSW
+-SftyRslvrEvlnResetErrMaskAreaCmn,Core_1,Core_1_200us,0.2,,,SSW
+ SftyRslvrEvlnSinAmpErrMonrSt,Core_1,Core_1_200us,0.2,,,SSW
+-SftyRslvrEvlnSinAmpErrMonrSt.MonrStsCombined,Core_1,Core_1_200us,0.2,,,SSW
+ SftyRslvrEvlnSinCosPlausAmpErrMonrSt,Core_1,Core_1_200us,0.2,,,SSW
+-SftyRslvrEvlnSinCosPlausAmpErrMonrSt.MonrStsCombined,Core_1,Core_1_200us,0.2,,,SSW
+ SftyRslvrEvlnSinOffsErrMonrSt,Core_1,Core_1_200us,0.2,,,SSW
+-SftyRslvrEvlnSinOffsErrMonrSt.MonrStsCombined,Core_1,Core_1_200us,0.2,,,SSW
+ SftyRslvrEvlnSinRawCmpAbsVal,Core_1,Core_1_200us,0.2,,,SSW
+ SftyRslvrEvlnSqdSumErrMonrSt,Core_1,Core_1_200us,0.2,,,SSW
+-SftyRslvrEvlnSqdSumErrMonrSt.MonrStsCombined,Core_1,Core_1_200us,0.2,,,SSW
+ SftyRslvrEvlnTiStamp,Core_1,Core_1_200us,0.2,,,SSW
+ SftyRslvrEvlnVadcCosElecHiErrMonrSt,Core_1,Core_1_200us,0.2,,,SSW
+-SftyRslvrEvlnVadcCosElecHiErrMonrSt.MonrStsCombined,Core_1,Core_1_200us,0.2,,,SSW
+ SftyRslvrEvlnVadcCosElecLoErrMonrSt,Core_1,Core_1_200us,0.2,,,SSW
+-SftyRslvrEvlnVadcCosElecLoErrMonrSt.MonrStsCombined,Core_1,Core_1_200us,0.2,,,SSW
+ SftyRslvrEvlnVadcCosElecOpenErrMonrSt,Core_1,Core_1_200us,0.2,,,SSW
+-SftyRslvrEvlnVadcCosElecOpenErrMonrSt.MonrStsCombined,Core_1,Core_1_200us,0.2,,,SSW
+ SftyRslvrEvlnVadcCosNRawVal,Core_1,Core_1_200us,0.2,,,SSW
+ SftyRslvrEvlnVadcCosPRawVal,Core_1,Core_1_200us,0.2,,,SSW
+ SftyRslvrEvlnVadcCosRawVal,Core_1,Core_1_200us,0.2,,,SSW
+ SftyRslvrEvlnVadcCosRngHiErrMonrSt,Core_1,Core_1_200us,0.2,,,SSW
+-SftyRslvrEvlnVadcCosRngHiErrMonrSt.MonrStsCombined,Core_1,Core_1_200us,0.2,,,SSW
+ SftyRslvrEvlnVadcCosRngLoErrMonrSt,Core_1,Core_1_200us,0.2,,,SSW
+-SftyRslvrEvlnVadcCosRngLoErrMonrSt.MonrStsCombined,Core_1,Core_1_200us,0.2,,,SSW
+ SftyRslvrEvlnVadcDmaErrMonrSt,Core_1,Core_1_200us,0.2,,,SSW
+-SftyRslvrEvlnVadcDmaErrMonrSt.MonrStsCombined,Core_1,Core_1_200us,0.2,,,SSW
+ SftyRslvrEvlnVadcExctAmp,Core_1,Core_1_200us,0.2,,,SSW
+ SftyRslvrEvlnVadcExctAmpRngHiErrMonrSt,Core_1,Core_1_200us,0.2,,,SSW
+-SftyRslvrEvlnVadcExctAmpRngHiErrMonrSt.MonrStsCombined,Core_1,Core_1_200us,0.2,,,SSW
+ SftyRslvrEvlnVadcExctAmpRngLoErrMonrSt,Core_1,Core_1_200us,0.2,,,SSW
+-SftyRslvrEvlnVadcExctAmpRngLoErrMonrSt.MonrStsCombined,Core_1,Core_1_200us,0.2,,,SSW
+ SftyRslvrEvlnVadcExctElecHiErrMonrSt,Core_1,Core_1_200us,0.2,,,SSW
+-SftyRslvrEvlnVadcExctElecHiErrMonrSt.MonrStsCombined,Core_1,Core_1_200us,0.2,,,SSW
+ SftyRslvrEvlnVadcExctElecLoErrMonrSt,Core_1,Core_1_200us,0.2,,,SSW
+-SftyRslvrEvlnVadcExctElecLoErrMonrSt.MonrStsCombined,Core_1,Core_1_200us,0.2,,,SSW
+ SftyRslvrEvlnVadcExctElecOpenErrMonrSt,Core_1,Core_1_200us,0.2,,,SSW
+-SftyRslvrEvlnVadcExctElecOpenErrMonrSt.MonrStsCombined,Core_1,Core_1_200us,0.2,,,SSW
+ SftyRslvrEvlnVadcExctOldTiStampErrMonrSt,Core_1,Core_1_200us,0.2,,,SSW
+-SftyRslvrEvlnVadcExctOldTiStampErrMonrSt.MonrStsCombined,Core_1,Core_1_200us,0.2,,,SSW
+ SftyRslvrEvlnVadcExctPlausErrMonrSt,Core_1,Core_1_200us,0.2,,,SSW
+-SftyRslvrEvlnVadcExctPlausErrMonrSt.MonrStsCombined,Core_1,Core_1_200us,0.2,,,SSW
+ SftyRslvrEvlnVadcLstTiStamp,Core_1,Core_1_200us,0.2,,,SSW
+ SftyRslvrEvlnVadcOldTiStampErrMonrSt,Core_1,Core_1_200us,0.2,,,SSW
+-SftyRslvrEvlnVadcOldTiStampErrMonrSt.MonrStsCombined,Core_1,Core_1_200us,0.2,,,SSW
+ SftyRslvrEvlnVadcSinElecHiErrMonrSt,Core_1,Core_1_200us,0.2,,,SSW
+-SftyRslvrEvlnVadcSinElecHiErrMonrSt.MonrStsCombined,Core_1,Core_1_200us,0.2,,,SSW
+ SftyRslvrEvlnVadcSinElecLoErrMonrSt,Core_1,Core_1_200us,0.2,,,SSW
+-SftyRslvrEvlnVadcSinElecLoErrMonrSt.MonrStsCombined,Core_1,Core_1_200us,0.2,,,SSW
+ SftyRslvrEvlnVadcSinElecOpenErrMonrSt,Core_1,Core_1_200us,0.2,,,SSW
+-SftyRslvrEvlnVadcSinElecOpenErrMonrSt.MonrStsCombined,Core_1,Core_1_200us,0.2,,,SSW
+ SftyRslvrEvlnVadcSinNRawVal,Core_1,Core_1_200us,0.2,,,SSW
+ SftyRslvrEvlnVadcSinPRawVal,Core_1,Core_1_200us,0.2,,,SSW
+ SftyRslvrEvlnVadcSinRawVal,Core_1,Core_1_200us,0.2,,,SSW
+ SftyRslvrEvlnVadcSinRngHiErrMonrSt,Core_1,Core_1_200us,0.2,,,SSW
+-SftyRslvrEvlnVadcSinRngHiErrMonrSt.MonrStsCombined,Core_1,Core_1_200us,0.2,,,SSW
+ SftyRslvrEvlnVadcSinRngLoErrMonrSt,Core_1,Core_1_200us,0.2,,,SSW
+-SftyRslvrEvlnVadcSinRngLoErrMonrSt.MonrStsCombined,Core_1,Core_1_200us,0.2,,,SSW
+ SftyRslvrEvlnVadcTiStamp,Core_1,Core_1_200us,0.2,,,SSW
+ SftyRslvrEvlnValCompErrMonrSt,Core_1,Core_1_200us,0.2,,,SSW
+-SftyRslvrEvlnValCompErrMonrSt.MonrStsCombined,Core_1,Core_1_200us,0.2,,,SSW
+ SftyRslvrEvlnVldyFlg,Core_1,Core_1_200us,0.2,,,SSW
+ SftyRslvrOffsHndlrAscIqPlausErrMonrSt,Core_1,Core_1_200us,0.2,,,SSW
+ SftyRslvrOffsHndlrAscPlausChkState,Core_1,Core_1_200us,0.2,,,SSW
+'

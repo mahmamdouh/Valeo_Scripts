@@ -1,0 +1,387 @@
+b'commit ee3954cda7bf1e4a546b958ae5dd9a29f0d5ae04
+Author: Adi GODAVARTHI (JV) <adi.godavarthi.jv@valeo.com>
+Date:   Wed Jan 19 09:43:00 2022 +0100
+
+    $100kW-50852$ - QAC check for LlswFpga
+    
+    Change-Id: Ia0549876d68874bd6c959cbd9c79dcb538dc77d7
+
+diff --git a/src/fw_cu/Components/Inv/ValMeasAndProc/LlswFpgaIf/include/LlswFpgaIf.h b/src/fw_cu/Components/Inv/ValMeasAndProc/LlswFpgaIf/include/LlswFpgaIf.h
+index 84f061107..8badd6466 100644
+--- a/src/fw_cu/Components/Inv/ValMeasAndProc/LlswFpgaIf/include/LlswFpgaIf.h
++++ b/src/fw_cu/Components/Inv/ValMeasAndProc/LlswFpgaIf/include/LlswFpgaIf.h
+@@ -85,10 +85,10 @@ typedef enum {
+    FPGA_TRANS_ID_F3 = 0xf3
+ }FPGA_TransID_Type;
+ 
+-typedef union FpgaFaults_A_Type_{ /* mirrored */
++typedef union FpgaFaults_A_Type_{ /* mirrored */ /*PRQA S 0750 EOF */ /* Using of union type is allowed in Low-Level-Software */
+    uint16 U;
+    struct {
+-      uint16 LossComSPI      :1 ; /*Faults A.00 : Fault Status NOT SPI COM fault*/
++      uint16 LossComSPI      :1 ; /*Faults A.00 : Fault Status NOT SPI COM fault*/ /*PRQA S 635 EOF*/
+       uint16 MeasCoherency   :1 ; /*Faults A.01 : Fault Status NOT Spare*/
+       uint16 Spare02         :1 ; /*Faults A.02 : Fault Status NOT Spare*/
+       uint16 Spare03         :1 ; /*Faults A.03 : Fault Status NOT Spare*/
+@@ -343,7 +343,7 @@ typedef struct FpgaRxData_Type_{ /* FPGA -> Microcontroller */
+ #include <MemMap.h>
+ 
+ /* Lookup Table for poly 0x5643: */
+-EXTERNAL_ CONST(uint16, FPGA_CONST) SftyCrc_Tbl16_5643[CRC_16_TBL_SIZE];
++EXTERNAL_ CONST(uint16, FPGA_CONST) SftyCrc_Tbl16_5643[CRC_16_TBL_SIZE]; /*PRQA S 2021 EOF*/
+ EXTERNAL_ CONST(uint16, FPGA_CONST) SftyCrc_Tbl16_4825[CRC_16_TBL_SIZE];
+ EXTERNAL_ CONST(uint16, FPGA_CONST) SftyCrc_Tbl16_333F[CRC_16_TBL_SIZE];
+ 
+@@ -352,7 +352,7 @@ EXTERNAL_ CONST(uint16, FPGA_CONST) SftyCrc_Tbl16_333F[CRC_16_TBL_SIZE];
+ 
+ #define ISW_START_SEC_VAR_FAST_CLEARED
+ #include <MemMap.h>
+-EXTERNAL_ VAR(FpgaRxData_Type, FPGA_VAR) FpgaRxData;
++EXTERNAL_ VAR(FpgaRxData_Type, FPGA_VAR) FpgaRxData; /*PRQA S 1514 EOF*/ /*PRQA S 3406 EOF*/
+ EXTERNAL_ VAR(FpgaTxData_Type, FPGA_VAR) FpgaTxData;
+ 
+ #define ISW_STOP_SEC_VAR_FAST_CLEARED
+@@ -367,7 +367,7 @@ EXTERNAL_ uint32 __align(0x20) llswqspi_slavetest_slave_outdata[8];
+ 
+ #define ISW_START_SEC_VAR_FAST_INIT
+ #include <MemMap.h>
+-EXTERNAL_ VAR(boolean,FPGA_VAR) FpgaRx_DmaTransactionComplete;
++EXTERNAL_ VAR(boolean,FPGA_VAR) FpgaRx_DmaTransactionComplete; /*PRQA S 2021 EOF*/
+ #ifdef FPGA_QSPI_RUNTIME_MEASUREMENT_ENABLE
+ extern volatile uint32 qspi_rx_timestamp;
+ #endif
+@@ -378,7 +378,7 @@ extern volatile uint32 qspi_rx_timestamp;
+ /*================== [declaration of Inline functions] ======================*/
+ LOCAL_INLINE FUNC(void, FPGA_CODE) LlswFpgaIf_EnableHtLs(void)
+ {
+-   P00_OMSR0.B.PS3 = 1;
++   P00_OMSR0.B.PS3 = 1; /*PRQA S 1290 EOF*/
+ }
+ 
+ LOCAL_INLINE FUNC(void, FPGA_CODE) LlswFpgaIf_DisableHtLs(void)
+diff --git a/src/fw_cu/Components/Inv/ValMeasAndProc/LlswFpgaIf/src/LlswFpgaIf.c b/src/fw_cu/Components/Inv/ValMeasAndProc/LlswFpgaIf/src/LlswFpgaIf.c
+index cb82f582c..03296276c 100644
+--- a/src/fw_cu/Components/Inv/ValMeasAndProc/LlswFpgaIf/src/LlswFpgaIf.c
++++ b/src/fw_cu/Components/Inv/ValMeasAndProc/LlswFpgaIf/src/LlswFpgaIf.c
+@@ -1,5 +1,5 @@
+ /* ********************************************************************** */
+-/* Sourcefile:      LlswFpgaIf.c                                                */
++/* Sourcefile:      LlswFpgaIf.c                                          */
+ /*                                                                        */
+ /* Project:         eCar project                                          */
+ /*                  TriCore Aurix                                         */
+@@ -27,7 +27,7 @@
+ #include "Platform_Types.h"
+ #include "IntPrioDef.h"
+ #include "IfxPort_reg.h"
+-#include "Ifx_reg.h"
++#include "Ifx_reg.h" /*PRQA S 0380 EOF*/
+ #include "IfxStm_reg.h"
+ 
+ #include "LlswFpgaIf.h"
+@@ -70,7 +70,7 @@
+ #include <MemMap.h>
+ 
+ /* Lookup Table for poly 0x5643: */
+-CONST(uint16, FPGA_CONST) SftyCrc_Tbl16_5643[CRC_16_TBL_SIZE] =
++CONST(uint16, FPGA_CONST) SftyCrc_Tbl16_5643[CRC_16_TBL_SIZE] = /* PRQA S 1514 */ /* This constant is used by testcode */
+ {
+     0x0000U, 0x5643U, 0xAC86U, 0xFAC5U, 0x0F4FU, 0x590CU, 0xA3C9U, 0xF58AU, 0x1E9EU, 0x48DDU, 0xB218U, 0xE45BU, 0x11D1U, 0x4792U, 0xBD57U, 0xEB14U,
+     0x3D3CU, 0x6B7FU, 0x91BAU, 0xC7F9U, 0x3273U, 0x6430U, 0x9EF5U, 0xC8B6U, 0x23A2U, 0x75E1U, 0x8F24U, 0xD967U, 0x2CEDU, 0x7AAEU, 0x806BU, 0xD628U,
+@@ -91,7 +91,7 @@ CONST(uint16, FPGA_CONST) SftyCrc_Tbl16_5643[CRC_16_TBL_SIZE] =
+ };
+ 
+ /* Lookup Table for poly 0x4825: */
+-CONST(uint16, FPGA_CONST) SftyCrc_Tbl16_4825[CRC_16_TBL_SIZE] =
++CONST(uint16, FPGA_CONST) SftyCrc_Tbl16_4825[CRC_16_TBL_SIZE] = /* PRQA S 1514 */ /* This constant is used by testcode */
+ {
+     0x0000U, 0x4825U, 0x904AU, 0xD86FU, 0x68B1U, 0x2094U, 0xF8FBU, 0xB0DEU, 0xD162U, 0x9947U, 0x4128U, 0x090DU, 0xB9D3U, 0xF1F6U, 0x2999U, 0x61BCU,
+     0xEAE1U, 0xA2C4U, 0x7AABU, 0x328EU, 0x8250U, 0xCA75U, 0x121AU, 0x5A3FU, 0x3B83U, 0x73A6U, 0xABC9U, 0xE3ECU, 0x5332U, 0x1B17U, 0xC378U, 0x8B5DU,
+@@ -113,7 +113,7 @@ CONST(uint16, FPGA_CONST) SftyCrc_Tbl16_4825[CRC_16_TBL_SIZE] =
+ 
+ 
+ /* Lookup Table for poly 333f: */
+-CONST(uint16, FPGA_CONST) SftyCrc_Tbl16_333F[CRC_16_TBL_SIZE] =
++CONST(uint16, FPGA_CONST) SftyCrc_Tbl16_333F[CRC_16_TBL_SIZE] = /* PRQA S 1514 */ /* This constant is used by testcode */
+ {
+     0x0000U, 0x333FU, 0x667EU, 0x5541U, 0xCCFCU, 0xFFC3U, 0xAA82U, 0x99BDU, 0xAAC7U, 0x99F8U, 0xCCB9U, 0xFF86U, 0x663BU, 0x5504U, 0x0045U, 0x337AU,
+     0x66B1U, 0x558EU, 0x00CFU, 0x33F0U, 0xAA4DU, 0x9972U, 0xCC33U, 0xFF0CU, 0xCC76U, 0xFF49U, 0xAA08U, 0x9937U, 0x008AU, 0x33B5U, 0x66F4U, 0x55CBU,
+@@ -139,8 +139,8 @@ CONST(uint16, FPGA_CONST) SftyCrc_Tbl16_333F[CRC_16_TBL_SIZE] =
+ #define ISWIF_START_SEC_VAR_FAST_CLEARED
+ #include "MemMap.h"
+ 
+-uint32 __align(0x20) llswqspi_slavetest_slave_indata[8];
+-uint32 __align(0x20) llswqspi_slavetest_slave_outdata[8];
++uint32 __align(0x20) llswqspi_slavetest_slave_indata[8];  /*PRQA S 2021*/ /*PRQA S 1594*/ /* intended */
++uint32 __align(0x20) llswqspi_slavetest_slave_outdata[8]; /*PRQA S 2021*/ /*PRQA S 1594*/ /* intended */
+ 
+ #define ISWIF_STOP_SEC_VAR_FAST_CLEARED
+ #include "MemMap.h"
+@@ -150,12 +150,12 @@ uint32 __align(0x20) llswqspi_slavetest_slave_outdata[8];
+ 
+ STATIC VAR(uint32, FPGA_VAR) FpgaRx_indata[8];
+ STATIC VAR(uint32, FPGA_VAR) FpgaTx_outdata[8];
+-STATIC VAR(FpgaRx_Type_mirrored, FPGA_VAR) FpgaRx;
+-STATIC VAR(FpgaTx_Type_mirrored, FPGA_VAR) FpgaTx;
++STATIC VAR(FpgaRx_Type_mirrored, FPGA_VAR) FpgaRx; /*PRQA S 0759*/ /* Using of union type is allowed in Low-Level-Software */
++STATIC VAR(FpgaTx_Type_mirrored, FPGA_VAR) FpgaTx; /*PRQA S 0759*/ /* Using of union type is allowed in Low-Level-Software */
+ STATIC VAR(uint16, FPGA_VAR) Calc_CRC_RxA;
+ STATIC VAR(uint16, FPGA_VAR) Calc_CRC_RxS;
+-STATIC VAR(boolean, FPGA_VAR) RxA_CRC_correct;
+-STATIC VAR(boolean, FPGA_VAR) RxS_CRC_correct;
++STATIC VAR(boolean, FPGA_VAR) RxA_CRC_correct; /* PRQA S 3229 */ /* This variable is used by testcode */
++STATIC VAR(boolean, FPGA_VAR) RxS_CRC_correct; /* PRQA S 3229 */ /* This variable is used by testcode */
+ 
+ 
+ /*
+@@ -167,7 +167,7 @@ STATIC VAR(boolean, FPGA_VAR) RxS_CRC_correct;
+ @@ END
+ */
+ /*! \\cvar Calculation Value of SPI Tx Periodicity; unit \'-\' */
+-STATIC VAR(uint32,FPGA_VAR) LlswFpgaIfCalcTxProdSpi;
++STATIC VAR(uint32,FPGA_VAR) LlswFpgaIfCalcTxProdSpi; /* PRQA S 3229 */ /* This variable is used in measurement */
+ 
+ /*
+ @@ SYMBOL = LlswFpgaIfCalcRxProdSpi
+@@ -178,7 +178,7 @@ STATIC VAR(uint32,FPGA_VAR) LlswFpgaIfCalcTxProdSpi;
+ @@ END
+ */
+ /*! \\cvar Calculation Value of SPI Rx Periodicity; unit \'-\' */
+-STATIC VAR(uint32,FPGA_VAR) LlswFpgaIfCalcRxProdSpi;
++STATIC VAR(uint32,FPGA_VAR) LlswFpgaIfCalcRxProdSpi; /* PRQA S 3229 */ /* This variable is used in measurement */
+ 
+ /*
+ @@ SYMBOL = LlswFpgaIfTxStsSpi
+@@ -189,7 +189,7 @@ STATIC VAR(uint32,FPGA_VAR) LlswFpgaIfCalcRxProdSpi;
+ @@ END
+ */
+ /*! \\cvar State of SPI Tx frame; unit \'-\' */
+-STATIC VAR(boolean,FPGA_VAR) LlswFpgaIfTxStsSpi;
++STATIC VAR(boolean,FPGA_VAR) LlswFpgaIfTxStsSpi; /* PRQA S 3229 */ /* This variable is used in measurement */
+ 
+ /*
+ @@ SYMBOL = LlswFpgaIfRxStsSpi
+@@ -200,7 +200,7 @@ STATIC VAR(boolean,FPGA_VAR) LlswFpgaIfTxStsSpi;
+ @@ END
+ */
+ /*! \\cvar State of SPI Rx frame; unit \'-\' */
+-STATIC VAR(boolean,FPGA_VAR) LlswFpgaIfRxStsSpi;
++STATIC VAR(boolean,FPGA_VAR) LlswFpgaIfRxStsSpi; /* PRQA S 3229 */ /* This variable is used in measurement */
+ 
+ #define ISW_STOP_SEC_VAR_FAST_CLEARED
+ #include <MemMap.h>
+@@ -218,22 +218,22 @@ STATIC VAR(uint8,FPGA_VAR) FpgaRX_swapCRCbytes = 1U;
+ 
+ #define ISW_START_SEC_VAR_FAST_INIT
+ #include <MemMap.h>
+-VAR(boolean,FPGA_VAR) FpgaRx_DmaTransactionComplete = FALSE;
+-VAR(boolean,FPGA_VAR) App_Complete = FALSE;
+-VAR(boolean,FPGA_VAR) App_Timeout = FALSE;
++VAR(boolean,FPGA_VAR) FpgaRx_DmaTransactionComplete = FALSE; /* PRQA S 1514 */ /* This variable is used in other files as well */
++VAR(boolean,FPGA_VAR) App_Complete = FALSE;                  /* PRQA S 1514 */ /* PRQA S 3408 */ /* This variable is used in other files as well */
++VAR(boolean,FPGA_VAR) App_Timeout = FALSE;                   /* PRQA S 1514 */ /* PRQA S 3408 */ /* This variable is used in other files as well */
+ 
+-volatile uint32 fpgadma_timeoutCntr = 0;
+-volatile uint32 fpgadma_isrExcCntr = 0;
+-volatile uint32 qspi_tx_Prev_timestamp = 0;
+-volatile uint32 qspi_rx_Prev_timestamp = 0;
++volatile uint32 fpgadma_timeoutCntr = 0;     /* PRQA S 1290 */ /* PRQA S 1514 */ /* PRQA S 3408 */
++volatile uint32 fpgadma_isrExcCntr = 0;      /* PRQA S 1290 */ /* PRQA S 1514 */ /* PRQA S 3408 */
++volatile uint32 qspi_tx_Prev_timestamp = 0;  /* PRQA S 1290 */ /* PRQA S 1514 */ /* PRQA S 3408 */
++volatile uint32 qspi_rx_Prev_timestamp = 0;  /* PRQA S 1290 */ /* PRQA S 1514 */ /* PRQA S 3408 */
+ 
+ #ifdef FPGA_QSPI_RUNTIME_MEASUREMENT_ENABLE
+-volatile uint32 qspi_rx_timestamp = 0;
+-volatile uint32 qspi_tx_timestamp = 0;
+-volatile uint32 qspi_Rx2Tx_loop_time = 0;
+-volatile uint32 qspi_Rx2Tx_loop_time_max = 0;
+-volatile uint32 qspi_Rx2Tx_loop_time_min = 0xFFFFFFFF;
+-volatile boolean qspi_Rx2Tx_runtime_measure_enable = FALSE;
++volatile uint32 qspi_rx_timestamp = 0;                       /* PRQA S 1290 */ /* PRQA S 1504 */ /* Test variables. No risk with warnings */
++volatile uint32 qspi_tx_timestamp = 0;                       /* PRQA S 1290 */ /* PRQA S 1514 */ /* PRQA S 3408 */ /* Test variables. No risk with warnings */
++volatile uint32 qspi_Rx2Tx_loop_time = 0;                    /* PRQA S 1290 */ /* PRQA S 1514 */ /* PRQA S 3408 */ /* Test variables. No risk with warnings */
++volatile uint32 qspi_Rx2Tx_loop_time_max = 0;                /* PRQA S 1290 */ /* PRQA S 1514 */ /* PRQA S 3408 */ /* Test variables. No risk with warnings */
++volatile uint32 qspi_Rx2Tx_loop_time_min = 0xFFFFFFFF;       /* PRQA S 1281 */ /* PRQA S 1514 */ /* PRQA S 3408 */ /* Test variables. No risk with warnings */
++volatile boolean qspi_Rx2Tx_runtime_measure_enable = FALSE;  /* PRQA S 3408 */ /* PRQA S 1504 */ /* Test variables. No risk with warnings */
+ #endif
+ 
+ #define ISW_STOP_SEC_VAR_FAST_INIT
+@@ -252,7 +252,7 @@ STATIC FUNC(uint16, FPGA_CODE) DrcoCrc_CalcCRC16( const uint8 Crc_Data[], uint32
+ /* #define FPGA_START_SEC_CODE_SLOW */
+ #include <MemMap.h>
+ 
+-void __interrupt( ISR_GTM_FPGA_RXDMA_TIMEOUT ) __vector_table(VTABLE_CPU2) __enable_ isr_gtm_fpga_rxdma_timeout(void)
++void __interrupt( ISR_GTM_FPGA_RXDMA_TIMEOUT ) __vector_table(VTABLE_CPU2) __enable_ isr_gtm_fpga_rxdma_timeout(void) /* PRQA S 1503 */ /* PRQA S 3408 */
+ {
+    qspi_Rx2Tx_runtime_measure_enable = TRUE;
+ 
+@@ -263,10 +263,10 @@ void __interrupt( ISR_GTM_FPGA_RXDMA_TIMEOUT ) __vector_table(VTABLE_CPU2) __ena
+       fpgadma_timeoutCntr++;
+ 
+       /* Reset Qspi Sequence */
+-      LLSWQSpi_ResetSeq(LLSWQSPI_SEQ_ID_FPGA_INIT);
++      LLSWQSpi_ResetSeq(LLSWQSPI_SEQ_ID_FPGA_INIT); /* PRQA S 3200 */ /* intended functionality */
+ 
+       /* QSPI_Transmit() */
+-      LLSWQSpi_Transmit(LLSWQSPI_SEQ_ID_FPGA_INIT);
++      LLSWQSpi_Transmit(LLSWQSPI_SEQ_ID_FPGA_INIT); /* PRQA S 3200 */ /* intended functionality */
+ 
+       /* QSPI Error monitoring by Application*/
+       LlswFpgaIf_MonrHndlrSwTreat_core2();
+@@ -277,7 +277,7 @@ void __interrupt( ISR_GTM_FPGA_RXDMA_TIMEOUT ) __vector_table(VTABLE_CPU2) __ena
+    }
+ }
+ 
+-void __interrupt( ISR_GTM_TCALC ) __vector_table(VTABLE_CPU2) __enable_ isr_gtm_tcalc(void)
++void __interrupt( ISR_GTM_TCALC ) __vector_table(VTABLE_CPU2) __enable_ isr_gtm_tcalc(void) /* PRQA S 1503 */ /* PRQA S 3408 */
+ {
+    if (FALSE == App_Complete)
+    {
+@@ -290,12 +290,12 @@ void __interrupt( ISR_GTM_TCALC ) __vector_table(VTABLE_CPU2) __enable_ isr_gtm_
+    }
+ }
+ 
+-FUNC(void, FPGA_CODE) LlswFpgaIf_Init(void)
++FUNC(void, FPGA_CODE) LlswFpgaIf_Init(void) /* PRQA S 1503 */ /* function used in initialization */
+ {
+    /*assign buffer */
+    /* TODO Assign the Tx/Rx buffer from DrcoIf */
+    /* LLSWQSpi_AssignChanBuffers(LLSWQSPI_CH_ID_FPGA_INIT, (void*) llswqspi_slavetest_slave_outdata, (void*) llswqspi_slavetest_slave_indata); */
+-   LLSWQSpi_AssignChanBuffers(LLSWQSPI_CH_ID_FPGA_INIT, (void*) BSWFPGAIF_TXBUFFER, (void*) BSWFPGAIF_RXBUFFER);
++   LLSWQSpi_AssignChanBuffers(LLSWQSPI_CH_ID_FPGA_INIT, (void*) BSWFPGAIF_TXBUFFER, (void*) BSWFPGAIF_RXBUFFER); /* PRQA S 312 */ /* PRQA S 314 */ /* PRQA S 3200 */
+ 
+ #if 0
+    /* The first QSPI Transmit shall be called from the first DMA transaction timeout  ISR */
+@@ -307,14 +307,14 @@ FUNC(void, FPGA_CODE) LlswFpgaIf_Init(void)
+    /* Dio_WriteChannel(DIO_CHANNEL_33_3, STD_LOW); */
+    P33_OUT.B.P3 = 0U;
+ 
+-   //FpgaIf_EnableHtLs(); /* TODO: Check if enable has to be done here */
++   /* FpgaIf_EnableHtLs(); */ /* TODO: Check if enable has to be done here */
+ 
+-   //FpgaIf_EnableHtHs(); /* TODO: Check if enable has to be done here */
++   /* FpgaIf_EnableHtHs(); */ /* TODO: Check if enable has to be done here */
+ }
+ 
+-void LlswFpgaIf_Tx(void)
++void LlswFpgaIf_Tx(void)  /* PRQA S 1503 */ /* function is used */
+ {
+-   volatile uint32 qspi_tx_Current_timestamp = 0;
++   volatile uint32 qspi_tx_Current_timestamp = 0; /* PRQA S 1290 */ /* Functionality analysed */
+ 
+    /*assign buffer */
+ #if 0  /* TODO Check if required and if the buffers change from DrcoIf */
+@@ -323,12 +323,12 @@ void LlswFpgaIf_Tx(void)
+ 
+    /*This functionality is used to calculate the periodicity for debug purpose.*/
+    qspi_tx_Current_timestamp = STM1_TIM0.U;
+-   LlswFpgaIfCalcTxProdSpi = (uint16) qspi_tx_Current_timestamp - (uint16) qspi_tx_Prev_timestamp;
++   LlswFpgaIfCalcTxProdSpi = (uint16) qspi_tx_Current_timestamp - (uint16) qspi_tx_Prev_timestamp; /* PRQA S 4491 */ /* PRQA S 0404 */ /* Test code. No risk with warnings */
+    qspi_tx_Prev_timestamp = qspi_tx_Current_timestamp;
+ 
+    LlswFpgaIfTxStsSpi = FALSE;
+    /* start sequence */
+-   LLSWQSpi_Transmit(LLSWQSPI_SEQ_ID_FPGA_INIT);
++   LLSWQSpi_Transmit(LLSWQSPI_SEQ_ID_FPGA_INIT); /* PRQA S 3200 */ /* return value not needed */
+ 
+    LlswFpgaIfTxStsSpi = TRUE;
+ 
+@@ -337,21 +337,21 @@ void LlswFpgaIf_Tx(void)
+ 
+    if(TRUE == qspi_Rx2Tx_runtime_measure_enable)
+    {
+-      if(qspi_tx_timestamp > qspi_rx_timestamp)
++      if(qspi_tx_timestamp > qspi_rx_timestamp) /* PRQA S 0404 */ /* Test code. No risk with warnings */
+       {
+-         qspi_Rx2Tx_loop_time = qspi_tx_timestamp - qspi_rx_timestamp;
++         qspi_Rx2Tx_loop_time = qspi_tx_timestamp - qspi_rx_timestamp; /* PRQA S 0404 */ /* Test code. No risk with warnings */
+       }
+       else
+       {
+-         qspi_Rx2Tx_loop_time = qspi_tx_timestamp + (0xFFFFFFFF - qspi_rx_timestamp);
++         qspi_Rx2Tx_loop_time = qspi_tx_timestamp + (0xFFFFFFFF - qspi_rx_timestamp); /* PRQA S 0404 */ /* PRQA S 1281 */  /* Test code. No risk with warnings */
+       }
+ 
+-      if(qspi_Rx2Tx_loop_time_max < qspi_Rx2Tx_loop_time)
++      if(qspi_Rx2Tx_loop_time_max < qspi_Rx2Tx_loop_time) /* PRQA S 0404 */ /* Test code. No risk with warnings */
+       {
+          qspi_Rx2Tx_loop_time_max = qspi_Rx2Tx_loop_time;
+       }
+ 
+-      if(qspi_Rx2Tx_loop_time_min > qspi_Rx2Tx_loop_time)
++      if(qspi_Rx2Tx_loop_time_min > qspi_Rx2Tx_loop_time) /* PRQA S 0404 */ /* Test code. No risk with warnings */
+       {
+          qspi_Rx2Tx_loop_time_min = qspi_Rx2Tx_loop_time;
+       }
+@@ -359,9 +359,9 @@ void LlswFpgaIf_Tx(void)
+ #endif
+ }
+ 
+-void LlswFpgaIf_RxNotif(void)
++void LlswFpgaIf_RxNotif(void)   /* PRQA S 1503 */ /* function used in LlswQSpi_cfg_core2.c */
+ {
+-   volatile uint32 qspi_rx_current_timestamp = 0;
++   volatile uint32 qspi_rx_current_timestamp = 0; /* PRQA S 1290 */ /* Functionality analysed */
+ 
+ #ifdef FPGA_QSPI_RUNTIME_MEASUREMENT_ENABLE
+    qspi_rx_timestamp = STM1_TIM0.U;
+@@ -369,7 +369,7 @@ void LlswFpgaIf_RxNotif(void)
+ 
+    /*this is for the periodicity calculation for debug purpose*/
+    qspi_rx_current_timestamp = STM1_TIM0.U;
+-   LlswFpgaIfCalcRxProdSpi = (uint16) qspi_rx_current_timestamp - (uint16) qspi_rx_Prev_timestamp;
++   LlswFpgaIfCalcRxProdSpi = (uint16) qspi_rx_current_timestamp - (uint16) qspi_rx_Prev_timestamp; /* PRQA S 4491 */ /* PRQA S 0404 */ /* Test code. No risk with warnings */
+    qspi_rx_Prev_timestamp = qspi_rx_current_timestamp;
+ 
+    LlswFpgaIfRxStsSpi = FALSE;
+@@ -389,12 +389,12 @@ void LlswFpgaIf_RxNotif(void)
+    BswFpgaIf_UpdRxFrm();
+ }
+ 
+-FUNC(void, FPGA_CODE) LlswFpgaIf_Main(void)
++FUNC(void, FPGA_CODE) LlswFpgaIf_Main(void) /* PRQA S 1503 */ /* Function is used */
+ {
+    LlswFpgaDecodeRx();
+    LlswFpgaUpdateTx();
+ }
+-void LlswFpgaIf_MonrHndlrSwTreat_core2(void)
++void LlswFpgaIf_MonrHndlrSwTreat_core2(void) /* PRQA S 1505 */
+ {
+ 
+    /*Set the event status to Failed for TREAT*/
+@@ -436,7 +436,7 @@ STATIC FUNC(void, FPGA_CODE) LlswFpgaDecodeRx(void)
+     {
+         RxA_CRC_correct = TRUE;
+ 
+-        FpgaRxData.ReceiptID        = (FPGA_RecID_Type)FpgaRx.B.ReceiptID;
++        FpgaRxData.ReceiptID        = (FPGA_RecID_Type)FpgaRx.B.ReceiptID; /* PRQA S 4342 EOF */ /* Test code. Warnings can be ignored */
+         FpgaRxData.PWM_RatioFreqRes = (FPGA_FreqRatio_Type)FpgaRx.B.PWM_RatioFreqRes;
+         FpgaRxData.CurAcq           = (uint8)FpgaRx.B.CurAcq;
+         FpgaRxData.SwitchTypeRes    = (FPGA_Switch_Type)FpgaRx.B.SwitchTypeRes;
+@@ -473,14 +473,14 @@ STATIC FUNC(void, FPGA_CODE) LlswFpgaDecodeRx(void)
+             FpgaRxData.Version_FPGA_H = FpgaRxData.Version_FPGA_H | (FpgaRx.B.Mux1_LSB4);
+         break;
+ 
+-        default:
++        default: /* PRQA S 2016 EOF */ /* Test code. Warnings can be ignored */
+         break;
+         }
+     }
+     else
+     {
+         RxA_CRC_correct = FALSE;
+-\t\tLLSWQSpi_ResetSeq(LLSWQSPI_SEQ_ID_FPGA_INIT);
++\t\tLLSWQSpi_ResetSeq(LLSWQSPI_SEQ_ID_FPGA_INIT); /* PRQA S 3200 EOF */ /* Test code. Warnings can be ignored */
+     }
+ 
+     /* synchrounous frame*/
+@@ -709,7 +709,7 @@ STATIC FUNC(uint16, FPGA_CODE) DrcoCrc_CalcCRC16
+         switch (Crc_polynom)
+         {
+         case CRC_POLYNOM_5643:
+-            Crc_RetValue16 = SftyCrc_Tbl16_5643[((uint8)(Crc_RetValue16 >> 8U)) ^ (*Crc_Data--)] ^ ((uint16)(Crc_RetValue16 << 8U));
++            Crc_RetValue16 = SftyCrc_Tbl16_5643[((uint8)(Crc_RetValue16 >> 8U)) ^ (*Crc_Data--)] ^ ((uint16)(Crc_RetValue16 << 8U)); /* PRQA S 489 EOF */ /* PRQA S 1338 EOF */  /* Test code. Warnings can be ignored */
+         break;
+ 
+         case CRC_POLYNOM_4825:
+'

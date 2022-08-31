@@ -1,0 +1,53 @@
+b'commit 8b0613e8461bc90fe18af80b3ff8eee550393013
+Author: Raja-Sekhar KAMMALA (JV) <raja-sekhar.kammala.jv@valeo.com>
+Date:   Tue Jan 25 09:53:37 2022 +0100
+
+    $100kW-51139$ - Replace BswC2cData.IgbtTempU with SftyC2cData.IgbtTempU and BswC2cData.IgbtTempMax with SftyC2cData.IgbtTempMax
+    
+    Change-Id: I5a5fde6d5a2808098c56d2074fb952d6f0d949f1
+
+diff --git a/src/fw_cu/Components/Inv/LimAndDrt/IvtrHvAcI2tDrtg/src/IvtrHvAcI2tDrtg_Wrpr.c b/src/fw_cu/Components/Inv/LimAndDrt/IvtrHvAcI2tDrtg/src/IvtrHvAcI2tDrtg_Wrpr.c
+index 28bcd97fc..82347885f 100644
+--- a/src/fw_cu/Components/Inv/LimAndDrt/IvtrHvAcI2tDrtg/src/IvtrHvAcI2tDrtg_Wrpr.c
++++ b/src/fw_cu/Components/Inv/LimAndDrt/IvtrHvAcI2tDrtg/src/IvtrHvAcI2tDrtg_Wrpr.c
+@@ -32,7 +32,7 @@
+ #include "AddGlobalDefines.h"
+ #include "IvtrHvAcI2tDrtg_Wrpr.h"
+ #include "IvtrHvAcI2tDrtg_WrprData.h"
+-
++#include "C2cComSftyData.h"
+ #include "IvtrHvAcI2tDrtg.h"
+ #include "IvtrHvAcI2tDrtg_Inputs.h"
+ #include "IvtrHvAcI2tDrtg_Outputs.h"
+@@ -105,7 +105,7 @@ FUNC(void, IVTRHVACI2TDRTG_CODE) IvtrHvAcI2tDrtg_Run(void)
+    IvtrHvAcI2tDrtg_InputData.IgbtTempMaxVld = FALSE;
+ #endif
+  
+-   IvtrHvAcI2tDrtg_InputData.IgbtTempMax = BswC2cData.IgbtTempMax; /* Maximum IGBT temperature (based directly on sensor values) */
++   IvtrHvAcI2tDrtg_InputData.IgbtTempMax = SftyC2cData.IgbtTempMax; /* Maximum IGBT temperature (based directly on sensor values) */
+    IvtrHvAcI2tDrtg_InputData.NvmI2tCntrVal1 = BswC2cData.InvTempNvm.AcI2tCntr1; /* I2t counter value stored in NVM (derating 1) */
+    IvtrHvAcI2tDrtg_InputData.NvmI2tCntrVal2 = BswC2cData.InvTempNvm.AcI2tCntr2; /* I2t counter value stored in NVM (derating 2) */
+ 
+diff --git a/src/fw_cu/Components/Inv/LimAndDrt/IvtrHvDcI2tDrtg/src/IvtrHvDcI2tDrtg_Wrpr.c b/src/fw_cu/Components/Inv/LimAndDrt/IvtrHvDcI2tDrtg/src/IvtrHvDcI2tDrtg_Wrpr.c
+index 36ad223d9..c27803cee 100644
+--- a/src/fw_cu/Components/Inv/LimAndDrt/IvtrHvDcI2tDrtg/src/IvtrHvDcI2tDrtg_Wrpr.c
++++ b/src/fw_cu/Components/Inv/LimAndDrt/IvtrHvDcI2tDrtg/src/IvtrHvDcI2tDrtg_Wrpr.c
+@@ -32,7 +32,7 @@
+ #include "AddGlobalDefines.h"
+ #include "IvtrHvDcI2tDrtg_Wrpr.h"
+ #include "IvtrHvDcI2tDrtg_WrprData.h"
+-
++#include "C2cComSftyData.h"
+ #include "IvtrHvDcI2tDrtg.h"
+ #include "IvtrHvDcI2tDrtg_Inputs.h"
+ #include "IvtrHvDcI2tDrtg_Outputs.h"
+@@ -99,7 +99,7 @@ FUNC(void, IVTRHVDCI2TDRTG_CODE) IvtrHvDcI2tDrtg_Run(void)
+ 
+    IvtrHvDcI2tDrtg_InputData.HvOffTi = BswC2cData.HvOffTi; /* High Voltage Off time */
+    IvtrHvDcI2tDrtg_InputData.VehPrkgTi = BswC2cData.VehPrkgTi; /* Vehicle off time */
+-   IvtrHvDcI2tDrtg_InputData.IgbtTempMax = BswC2cData.IgbtTempMax; /* Maximum NTC temperature */
++   IvtrHvDcI2tDrtg_InputData.IgbtTempMax = SftyC2cData.IgbtTempMax; /* Maximum NTC temperature */
+    IvtrHvDcI2tDrtg_InputData.NvmI2tCntrVal1 = BswC2cData.InvTempNvm.DcLinkI2tCntr1; /* Stored NVM data 1 */
+    IvtrHvDcI2tDrtg_InputData.NvmI2tCntrVal2 = BswC2cData.InvTempNvm.DcLinkI2tCntr2; /* Stored NVM data 2 */
+ 
+'

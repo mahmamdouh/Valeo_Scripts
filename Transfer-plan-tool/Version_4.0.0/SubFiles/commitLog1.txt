@@ -1,0 +1,83 @@
+b'commit 28156c75d430709d01e96c47b627d7ce5d98cd5e
+Author: Sapthagiri GUDIHALLI (JV) <sapthagiri.gudihalli.jv@valeo.com>
+Date:   Fri Apr 8 10:37:37 2022 +0200
+
+    $100kW-53812$ - B02:[SWIT] [ HSI][Static Testing Defects For HSI]
+    
+    Change-Id: I189955af15d4c96ceecd0a58bf140b96684dd399
+
+diff --git a/src/fw_cu/Components/Cmn/MngModes/EMM/include/emm_common.h b/src/fw_cu/Components/Cmn/MngModes/EMM/include/emm_common.h
+index b02d47bc9..8e6f77d6b 100644
+--- a/src/fw_cu/Components/Cmn/MngModes/EMM/include/emm_common.h
++++ b/src/fw_cu/Components/Cmn/MngModes/EMM/include/emm_common.h
+@@ -111,10 +111,10 @@ typedef struct PwmOutputMeasType_
+ /*Enum type definition for Dio signals*/
+ typedef enum Dio_DbgCfgtype_
+ {
+-  DBG_M_ENA_HT_HS,
+-  DBG_M_ENA_HT_LS,
+-  DBG_M_PW_DOWN,
+-  DBG_M_KEY_ON
++  M_ENA_HT_HS,
++  M_ENA_HT_LS,
++  M_PW_DOWN,
++  M_KEY_ON
+ }Dio_DbgCfgtype;
+ 
+ /*Enum type definition for Pwm output signals*/
+diff --git a/src/fw_cu/Components/Cmn/MngModes/EMM/src/emm.c b/src/fw_cu/Components/Cmn/MngModes/EMM/src/emm.c
+index f2c888e88..2b146f7ac 100644
+--- a/src/fw_cu/Components/Cmn/MngModes/EMM/src/emm.c
++++ b/src/fw_cu/Components/Cmn/MngModes/EMM/src/emm.c
+@@ -988,13 +988,13 @@ FUNC(void, EMM_CODE)  Emm_Init(void)
+ 
+           /*Read and update Dsadc signal values*/
+           EmmDbgDsadcRawValArr[AN_DELTA_SIN] = ((sint16) MODULE_EDSADC.CH[EMM_DSADC_Channel_3].RESM.B.RESULTLO);
+-          EmmDbgDsadcRawValArr[AN_DELTA_COS] = ((sint16) MODULE_EDSADC.CH[EMM_DSADC_Channel_2].RESM.B.RESULTLO);;
++          EmmDbgDsadcRawValArr[AN_DELTA_COS] = ((sint16) MODULE_EDSADC.CH[EMM_DSADC_Channel_2].RESM.B.RESULTLO);
+ 
+           /*Read Dio Input input signals*/
+-          EmmDbgDiStsArr[DBG_M_KEY_ON] = Dio_GetPinSts(DioConf_DioChannel_M_KEY_ON);
+-          EmmDbgDiStsArr[DBG_M_ENA_HT_HS] = Dio_GetPinSts(DioConf_DioChannel_M_ENA_HT_HS);
+-          EmmDbgDiStsArr[DBG_M_ENA_HT_LS] = Dio_GetPinSts(DioConf_DioChannel_M_ENA_HT_LS);
+-          EmmDbgDiStsArr[DBG_M_PW_DOWN] = Dio_GetPinSts(DioConf_DioChannel_M_PW_DOWN);
++          EmmDbgDiStsArr[M_KEY_ON] = Dio_GetPinSts(DioConf_DioChannel_M_KEY_ON);
++          EmmDbgDiStsArr[M_ENA_HT_HS] = Dio_GetPinSts(DioConf_DioChannel_M_ENA_HT_HS);
++          EmmDbgDiStsArr[M_ENA_HT_LS] = Dio_GetPinSts(DioConf_DioChannel_M_ENA_HT_LS);
++          EmmDbgDiStsArr[M_PW_DOWN] = Dio_GetPinSts(DioConf_DioChannel_M_PW_DOWN);
+ 
+           /*Read Pwm Input signal*/
+           EmmDbgPwmInpArr[DBG_M_EXCITATION_IN][DBG_M_EXCITATION_IN] = GtmDrv_GetPwmDtyCyc(M_EXCITATION_IN);
+@@ -1003,22 +1003,22 @@ FUNC(void, EMM_CODE)  Emm_Init(void)
+           if(EmmDbgDoStsOvrdEna == FALSE)
+           {
+              /*Set default value */
+-             EmmDbgDoReqdStArr[DBG_M_ENA_HT_HS] = EmmDbgDoStsDfltValArr[DBG_M_ENA_HT_HS];
+-             EmmDbgDoReqdStArr[DBG_M_ENA_HT_LS]= EmmDbgDoStsDfltValArr[DBG_M_ENA_HT_LS];
+-             EmmDbgDoReqdStArr[DBG_M_PW_DOWN]= EmmDbgDoStsDfltValArr[DBG_M_PW_DOWN];
++             EmmDbgDoReqdStArr[M_ENA_HT_HS] = EmmDbgDoStsDfltValArr[M_ENA_HT_HS];
++             EmmDbgDoReqdStArr[M_ENA_HT_LS]= EmmDbgDoStsDfltValArr[M_ENA_HT_LS];
++             EmmDbgDoReqdStArr[M_PW_DOWN]= EmmDbgDoStsDfltValArr[M_PW_DOWN];
+           }
+           else
+           {
+              /*Read Dio value from EmmDbgDoStsOvrdArr */
+-             EmmDbgDoReqdStArr[DBG_M_ENA_HT_HS] = EmmDbgDoStsOvrdArr[DBG_M_ENA_HT_HS];
+-             EmmDbgDoReqdStArr[DBG_M_ENA_HT_LS]= EmmDbgDoStsOvrdArr[DBG_M_ENA_HT_LS];
+-             EmmDbgDoReqdStArr[DBG_M_PW_DOWN]= EmmDbgDoStsOvrdArr[DBG_M_PW_DOWN];
++             EmmDbgDoReqdStArr[M_ENA_HT_HS] = EmmDbgDoStsOvrdArr[M_ENA_HT_HS];
++             EmmDbgDoReqdStArr[M_ENA_HT_LS]= EmmDbgDoStsOvrdArr[M_ENA_HT_LS];
++             EmmDbgDoReqdStArr[M_PW_DOWN]= EmmDbgDoStsOvrdArr[M_PW_DOWN];
+           }
+ 
+           /*Set Dio port pin*/
+-          Dio_SetPortPinSts(DioConf_DioChannel_M_ENA_HT_HS,EmmDbgDoReqdStArr[DBG_M_ENA_HT_HS]);
+-          Dio_SetPortPinSts(DioConf_DioChannel_M_ENA_HT_LS,EmmDbgDoReqdStArr[DBG_M_ENA_HT_LS]);
+-          Dio_SetPortPinSts(DioConf_DioChannel_M_PW_DOWN,EmmDbgDoReqdStArr[DBG_M_PW_DOWN]);
++          Dio_SetPortPinSts(DioConf_DioChannel_M_ENA_HT_HS,EmmDbgDoReqdStArr[M_ENA_HT_HS]);
++          Dio_SetPortPinSts(DioConf_DioChannel_M_ENA_HT_LS,EmmDbgDoReqdStArr[M_ENA_HT_LS]);
++          Dio_SetPortPinSts(DioConf_DioChannel_M_PW_DOWN,EmmDbgDoReqdStArr[M_PW_DOWN]);
+ 
+           /*Read and copy Pwm output signal values */
+           if(EmmDbgPwmValOvrdEna == FALSE)
+'

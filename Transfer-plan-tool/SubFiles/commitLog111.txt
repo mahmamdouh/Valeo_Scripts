@@ -1,0 +1,375 @@
+b'commit 964d37b48c30db349f888b157c4f954d4bb8add0
+Author: Sapthagiri GUDIHALLI (JV) <sapthagiri.gudihalli.jv@valeo.com>
+Date:   Wed Dec 8 11:11:24 2021 +0100
+
+    $100kW-47905$ - [SWIT][CanCom] Variable Emm_InputData.InvModReq updated with unexpected value
+    
+    Change-Id: If0712705ad399e5bc69c157677e66eae0b71dbaa
+
+diff --git a/src/fw_cu/Components/Cmn/MngModes/EMM/include/emm.h b/src/fw_cu/Components/Cmn/MngModes/EMM/include/emm.h
+index c7efbafd7..54185e2bb 100644
+--- a/src/fw_cu/Components/Cmn/MngModes/EMM/include/emm.h
++++ b/src/fw_cu/Components/Cmn/MngModes/EMM/include/emm.h
+@@ -39,14 +39,6 @@
+ 
+ /*================== [type definitions] ==============================================================================*/
+ 
+-typedef enum Emm_RslvrCalibStsType_
+-{
+-   EMM_RSLVR_CALIB_INACTIVE,
+-   EMM_RSLVR_CALIB_WAIT_SSW,
+-   EMM_RSLVR_CALIB_WAIT_NVM,
+-   EMM_RSLVR_CALIB_FINISHED
+-} Emm_RslvrCalibStsType;
+-
+ /*================== [declaration of public data] ====================================================================*/
+ 
+ 
+diff --git a/src/fw_cu/Components/Cmn/MngModes/EMM/include/emm_cnf.h b/src/fw_cu/Components/Cmn/MngModes/EMM/include/emm_cnf.h
+index 3de9a4f39..4bcce1645 100644
+--- a/src/fw_cu/Components/Cmn/MngModes/EMM/include/emm_cnf.h
++++ b/src/fw_cu/Components/Cmn/MngModes/EMM/include/emm_cnf.h
+@@ -44,13 +44,11 @@
+ #define ISGMODTYP1_FLT 2U
+ #define ISGMODTYP1_TQCTRL 3U
+ #define ISGMODTYP1_SLEEP 4U
+-#define ISGMODTYP1_CAL 5U
+ #define ISGMODTYP1_PRESHUTDOWN 6U
+ 
+ /* map this signal 100kW-4786 - ModeRequest */
+ #define ISGMODTYP1_STBREQ 0U
+ #define ISGMODTYP1_TQREQ  1U
+-#define ISGMODTYP1_CAREQ  4U
+ 
+ #define EMM_WAKEUP_TIMEOUT_CNTR_LIMIT_INIT                  1000U\t
+ #define EMM_BATTERY_OPEN                                    0U
+diff --git a/src/fw_cu/Components/Cmn/MngModes/EMM/src/emm.c b/src/fw_cu/Components/Cmn/MngModes/EMM/src/emm.c
+index 5c081797f..ee8c3a68b 100644
+--- a/src/fw_cu/Components/Cmn/MngModes/EMM/src/emm.c
++++ b/src/fw_cu/Components/Cmn/MngModes/EMM/src/emm.c
+@@ -91,12 +91,6 @@ VAR(EMM_ModeType, EMM_VAR) Emm_CurrentMode = EMM_INIT_MODE;
+ /*! Variable to hold the EMM module initialization status */
+ STATIC VAR(EMM_ModuleInitStatusType, EMM_VAR) Emm_ModuleInitStatus = EMM_NOT_INITIALISED;
+ 
+-/*EMotor_Anlernen_Anforderung*/
+-STATIC VAR(boolean, EMM_VAR) Emm_RslvrCalibReqd = FALSE;
+-
+-
+-STATIC VAR(boolean, EMM_VAR) Emm_RslvrCalibRetryLock = FALSE;
+-
+ #define EMM_STOP_SEC_VAR_SLOW_INIT
+ #include "MemMap.h"
+ 
+@@ -112,17 +106,6 @@ STATIC VAR(boolean, EMM_VAR) Emm_RslvrCalibRetryLock = FALSE;
+ /*! Output data of EMM module */
+ STATIC VAR(Emm_OutputDataType, EMM_VAR) Emm_OutputData;
+ 
+-/*
+-@@ SYMBOL = Emm_RslvrCalibSts
+-@@ A2L_TYPE = MEASURE
+-@@ DATA_TYPE = ULONG [0 ... 3]
+-@@ CONVERSION = TABLE 0 "INACTIVE" 1 "WAIT_SSW" 2 "WAIT_NVM" 3 "FINISHED"
+-@@ DESCRIPTION = "Resolver calibration status (BSW)"
+-@@ GROUP = Ecu_Mode_Manager
+-@@ END
+-*/
+-STATIC Emm_RslvrCalibStsType Emm_RslvrCalibSts; /*! Resolver calibration status (BSW) */
+-
+ /*
+ @@ INSTANCE = Emm_InputData
+ @@ STRUCTURE = Emm_InputDataType
+@@ -393,9 +376,7 @@ FUNC(void, EMM_CODE)  Emm_Init(void)
+ 
+    /* set the ModuleInitStatus variable to EMM_INITIALISED */
+    Emm_ModuleInitStatus = EMM_INITIALISED;
+-   Emm_RslvrCalibReqd = FALSE;
+-   Emm_RslvrCalibRetryLock = FALSE;
+-   Emm_RslvrCalibSts = EMM_RSLVR_CALIB_INACTIVE;
++
+ }
+ 
+ 
+@@ -423,7 +404,7 @@ FUNC(void, EMM_CODE)  Emm_Init(void)
+       /*Reserved*/
+       case EMM_CALIB_MODE :
+       {
+-         Emm_CalibMode();
++         /*Reserved*/
+       }
+       break;
+ 
+@@ -585,23 +566,6 @@ FUNC(void, EMM_CODE)  Emm_Init(void)
+     {
+       EMM_RequestNewMode(EMM_FAILURE_MODE);
+     }
+-   /*Check for Calib mode*/
+-\telse if(EMM_CALIB_MODE == Emm_InputData.InvModReq)
+-   {
+-      if(
+-        /* Calibration retry lock must NOT be active. This prevents toggling between calib mode and standby */
+-         (FALSE == Emm_RslvrCalibRetryLock) &&
+-         /* If we are not currently in calibration mode, allow entering it only if request is set on CAN */
+-         ((Emm_CurrentMode == EMM_CALIB_MODE) || (TRUE == Emm_RslvrCalibReqd)))
+-\t      {
+-\t         EMM_RequestNewMode(EMM_CALIB_MODE);
+-\t      }
+-\t   else
+-\t   {
+-\t     /* Calib mode is requested but currently not allowed -> goto standby */
+-\t      EMM_RequestNewMode(EMM_STANDBY_MODE);
+-\t   }
+-\t }
+ \t/*Check the conditions for torque mode*/
+     else if ((Emm_InputData.InvModReq == EMM_TRQCTRL_MODE) &&
+      (Emm_InputData.EmmBatStat == EMM_BATTERY_CLOSE) &&
+@@ -708,165 +672,21 @@ FUNC(void, EMM_CODE)  Emm_Init(void)
+     {
+ \t  EMM_RequestNewMode(EMM_FAILURE_MODE);
+     }
+-
+-    else if(EMM_CALIB_MODE == Emm_InputData.InvModReq)
+-    {
+-      if(
+-         /* Calibration retry lock must NOT be active. This prevents toggling between calib mode and standby */
+-         (FALSE == Emm_RslvrCalibRetryLock) &&
+-         /* If we are not currently in calibration mode, allow entering it only if request is set on CAN */
+-         ((Emm_CurrentMode == EMM_CALIB_MODE) || (TRUE == Emm_RslvrCalibReqd)))
+-         {
+-            EMM_RequestNewMode(EMM_CALIB_MODE);
+-         }
+-         else
+-         {
+-           /* Calib mode is requested but currently not allowed -> goto standby */
+-           EMM_RequestNewMode(EMM_STANDBY_MODE);
+-        }
+-    }
+ \t/*Check for conditions of standby mode*/
+     else if ((Emm_InputData.InvModReq == EMM_STANDBY_MODE)   ||
+              ((BswErrDebFctInhbnSts.B.FctIdStandbyMode == ERR_DEB_FCT_INHBN_ACTIVE) ||
+ \t          (DrvCtrlC2cData.UDcActFild1 < (Emm_C_uWorkHV - Emm_C_uWorkHystHV)) ||
+ \t          (Emm_InputData.EmmBatStat == EMM_BATTERY_OPEN))  ||
+ \t          ((Emm_InputData.SleepRequestInv == TRUE) && (Emm_InputData.SleepRequestEcu == TRUE)))
+-\t{
+-          EMM_RequestNewMode(EMM_STANDBY_MODE);
+-\t}
++\t {
++      EMM_RequestNewMode(EMM_STANDBY_MODE);
++\t }
+     else
+     {
+       /* Do Nothing */
+     }
+ }
+ 
+-
+- /*****************************************************************************/
+- /*!
+- * \\fn      void Emm_CalibMode(void)
+- * \\brief   Inverter  resolver calibration mode actions.
+- * \\param   [in]  none
+- * \\param   [out] none
+- * \\return  None
+- */
+- /*****************************************************************************/
+- LOCAL_INLINE FUNC(void, EMM_CODE) Emm_CalibMode(void)
+- {
+-     if(EMM_RSLVR_CALIB_INACTIVE == Emm_RslvrCalibSts)
+-    {
+-       /*calib mode is required, wait for STS_CALIB_INACTIVE*/
+-       if (STS_CALIB_INACTIVE == SftyC2cData.StsRslvrCalib)
+-       {
+-          /*stay in online calibration mode, request online roda*/
+-          BswC2cData.ReqRslvrCalib = TRUE;
+-          Emm_RslvrCalibSts = EMM_RSLVR_CALIB_WAIT_SSW;
+-       }
+-    }
+-    else if(EMM_RSLVR_CALIB_WAIT_SSW == Emm_RslvrCalibSts)
+-    {
+-       /*wait until RODA finished*/
+-       if(STS_CALIB_PASSED == SftyC2cData.StsRslvrCalib)
+-       {
+-          /*roda passed, copy offset */
+-          BswC2cData.RslvrOffsNvm = SftyC2cData.RslvrOffsNvm;
+-          /* Set valid-pattern */
+-          BswC2cData.RslvrOffsNvm.Pattern = RODA_PATTERN_VALID;
+-          /* Prepare NvM-Data for writing */
+-          /* Enable NVM RAM block writing */
+-          (void)NvM_SetRamBlockStatus(NvMConf_NvMBlockDescriptor_NvM_BLOCK_RESOLVER_OFFSET, TRUE);
+-          /* Write the data into the chosen Ram area  */
+-          (void)NvM_WriteBlock(NvMConf_NvMBlockDescriptor_NvM_BLOCK_RESOLVER_OFFSET, NULL_PTR);
+-          /* CZ: NOTE: If the NVM writing fails, we still have a valid resolver offset in this case.
+-           * Thus, it should be fine to release the calib request on CAN. */
+-          BswC2cData.ReqRslvrCalib = FALSE;
+-          Emm_RslvrCalibSts = EMM_RSLVR_CALIB_WAIT_NVM;
+-       }
+-       else if(STS_CALIB_FAILED == SftyC2cData.StsRslvrCalib)
+-       {
+-          /* CZ: New information from Andreas Schulz: Goto standby mode and wait for reactivation.
+-           * TO CLARIFY: Goto failure mode on "critical" errors? Directly or can we go to standby mode first? */
+-          Emm_RslvrCalibRetryLock = TRUE;
+-          EMM_RequestNewMode(EMM_STANDBY_MODE);
+-          BswC2cData.ReqRslvrCalib = FALSE;
+-          Emm_RslvrCalibSts = EMM_RSLVR_CALIB_FINISHED;
+-       }
+-       else
+-       {
+-          /* RODA pending; wait for SSW */
+-       }
+-    }
+-    else if(EMM_RSLVR_CALIB_WAIT_NVM == Emm_RslvrCalibSts)
+-    {
+-       Emm_RslvrCalibSts = EMM_RSLVR_CALIB_FINISHED;
+-    }
+-    else /* EMM_RSLVR_CALIB_FINISHED */
+-    {
+-       /* RODA finished, wait for mode switch */
+-    }
+-
+-    /*Check the conditions for mode transition*/
+-    Emm_CalibModeTransitionChk();
+-
+-    return;
+- }
+-
+-
+- /*****************************************************************************/
+- /*!
+- * \\fn      void Emm_CalibModeTransitionChk(void)
+- * \\brief   This function shall check the conditions for EMM mode
+-            transitions in Calib mode.
+- * \\param   [in]  none
+- * \\param   [out] none
+- * \\return  None
+- */
+- /*****************************************************************************/
+- LOCAL_INLINE FUNC(void, EMM_CODE) Emm_CalibModeTransitionChk(void)
+- {
+-    /* Prio 1) Sleep request must have highest prio,*/
+-    if ((TRUE == Emm_InputData.SleepRequestInv) &&
+-        (TRUE == Emm_InputData.SleepRequestEcu))
+-    {
+-       EMM_RequestNewMode(EMM_NACHLAUF_MODE);
+-    }
+-    /* Prio 2) Fault transition check*/
+-    else if (TRUE == Emm_InputData.EmmFltModeReqActive)
+-    {
+-       EMM_RequestNewMode(Emm_InputData.EmmFltModeReq);
+-    }
+-    /* Prio 3) Manual Standby mode transition check*/
+-    else if (EMM_STANDBY_MODE == Emm_InputData.InvModReq)
+-    {
+-       EMM_RequestNewMode(EMM_STANDBY_MODE);
+-    }
+-    /* Prio 4 Calib mode transition check*/
+-    else if(EMM_CALIB_MODE == Emm_InputData.InvModReq)
+-    {
+-        if(
+-           /* Calibration retry lock must NOT be active. This prevents toggling between calib mode and standby */
+-           (FALSE == Emm_RslvrCalibRetryLock) &&
+-           /* If we are not currently in calibration mode, allow entering it only if request is set on CAN */
+-           ((Emm_CurrentMode == EMM_CALIB_MODE) || (TRUE == Emm_RslvrCalibReqd)))
+-        {
+-           EMM_RequestNewMode(EMM_CALIB_MODE);
+-        }
+-        else
+-        {
+-           /* Calib mode is requested but currently not allowed -> goto standby */
+-           EMM_RequestNewMode(EMM_STANDBY_MODE);
+-        }
+-     }
+-    /* Prio 4 Torque mode transition check*/
+-    else if(EMM_TRQCTRL_MODE == Emm_InputData.InvModReq)
+-    {
+-      /*! switch to torque control mode */
+-      EMM_RequestNewMode(EMM_TRQCTRL_MODE);
+-    }
+-    else
+-    {
+-      /* Do Nothing */
+-    }
+- }
+ /*****************************************************************************/
+ /*!
+  * \\fn      Emm_SleepMode(void)
+@@ -897,10 +717,6 @@ FUNC(void, EMM_CODE)  Emm_Init(void)
+ {
+    if(ReqMod != Emm_CurrentMode)
+    {
+-      /* Abort any ongoing resolver calibration procedure */
+-      BswC2cData.ReqRslvrCalib = FALSE;
+-      Emm_RslvrCalibSts = EMM_RSLVR_CALIB_INACTIVE;
+-
+       /* Changes the current mode to requested mode */
+       Emm_CurrentMode = ReqMod;
+ \t  
+@@ -968,14 +784,6 @@ FUNC(void, EMM_CODE)  Emm_Init(void)
+      {
+        Emm_InputData.InvModReq = EMM_STANDBY_MODE;
+      }
+-
+-\t/* If the VCU commands a different mode than CALIB mode, we reset the calib mode lock to enable transition
+-    * to calib mode again when the VCU requests it */
+-   if(EMM_CALIB_MODE != Emm_InputData.InvModReq)
+-   {
+-     Emm_RslvrCalibRetryLock = FALSE;
+-\t}
+-
+    /* Read the current BswM mode */
+    Emm_InputData.CurrentBswMMode  = (uint8) EMM_GETBSWMMODE();
+ 
+@@ -1020,10 +828,6 @@ FUNC(void, EMM_CODE)  Emm_Init(void)
+      /* Calculate the value of the INV sleep request signal */
+      Emm_InputData.SleepRequestInv = sleepReqInv;
+    }
+-      /**/
+-   /* Emm_RslvrCalibReqd = BswErrDebFctInhbnSts.B.FctIdEm1AnlernenElMotorAnf; */
+-   /*Signal shall be set to TRUE for resolver offset calibration*/
+-   Emm_RslvrCalibReqd = TRUE;
+    
+ #if defined(SWIT_Active) ||defined(SWIT_IT_Active)
+    SWIT_EMM_ReadSignals_EndHook();
+@@ -1139,11 +943,6 @@ FUNC(void, EMM_CODE)  Emm_Init(void)
+ \t\t retVal = EMM_TRQCTRL_MODE;
+ \t\t break;
+ \t  }
+-\t  case ISGMODTYP1_CAREQ:
+-\t  {
+-\t     retVal = EMM_CALIB_MODE;
+-\t     break;
+-\t  }
+ \t  default:
+ \t  {
+ \t\t /* Do nothing */
+diff --git a/src/fw_cu/Components/Cmn/MngModes/EMM/src/emm_cnf.c b/src/fw_cu/Components/Cmn/MngModes/EMM/src/emm_cnf.c
+index 4649dc9e6..9c26933ad 100644
+--- a/src/fw_cu/Components/Cmn/MngModes/EMM/src/emm_cnf.c
++++ b/src/fw_cu/Components/Cmn/MngModes/EMM/src/emm_cnf.c
+@@ -61,7 +61,7 @@ CONST( Emm_TqSetptGenModeReqMappingType, EMM_CONST ) TqSetptGenModeReqValues[EMM
+  * Column 2: CAN values */
+ CONST( Emm_StateEcuActDescType, EMM_CONST ) StateEcuActValues[EMM_NR_OF_INVCACTVALUES] = 
+ {
+-   {EMM_CALIB_MODE,          ISGMODTYP1_CAL},
++   {EMM_CALIB_MODE,          ISGMODTYP1_STB},
+    {EMM_FAILURE_MODE,        ISGMODTYP1_FLT},
+    {EMM_FREEWHEEL_MODE,      ISGMODTYP1_STB},
+    {EMM_INIT_MODE,           ISGMODTYP1_ININ},
+diff --git a/src/fw_cu/build/a2l/Measurements-to-Timeslices-Mapping.csv b/src/fw_cu/build/a2l/Measurements-to-Timeslices-Mapping.csv
+index bb5de7d22..fb96ba218 100644
+--- a/src/fw_cu/build/a2l/Measurements-to-Timeslices-Mapping.csv
++++ b/src/fw_cu/build/a2l/Measurements-to-Timeslices-Mapping.csv
+@@ -1273,7 +1273,6 @@ Emm_InputData.SleepRequestInv,Core_0,C0_1ms_TimeTask,10,,,BSW
+ Emm_InputData.WakeRequestEcu,Core_0,C0_1ms_TimeTask,10,,,BSW
+ Emm_InputData.WakeRequestInv,Core_0,C0_1ms_TimeTask,10,,,BSW
+ Emm_OutputData.StateEcuAct,Core_0,C0_1ms_TimeTask,10,,,BSW
+-Emm_RslvrCalibSts,Core_0,C0_1ms_TimeTask,10,,,BSW
+ EmmDbgDiStsArr_M_ENA_HT_HS,Core_0,C0_10ms_Slow,10,,,BSW
+ EmmDbgDiStsArr_M_ENA_HT_LS,Core_0,C0_10ms_Slow,10,,,BSW
+ EmmDbgDiStsArr_M_KEY_ON,Core_0,C0_10ms_Slow,10,,,BSW
+@@ -8521,4 +8520,4 @@ ErrDebTaskDataCore2.FctInhbnSts.B.FCT_ID_RSLVR_OFFS_INIT_FLT,Core_2,C2_100u_PWM,
+ ErrDebTaskDataCore2.FctInhbnSts.B.FCT_ID_SPD_MAX_LIM,Core_2,C2_100u_PWM,0.1,,,DRCO
+ ErrDebTaskDataCore2.FctInhbnSts.B.FCT_ID_TQ_MAX_LIM_30,Core_2,C2_100u_PWM,0.1,,,DRCO
+ ErrDebTaskDataCore2.FctInhbnSts.B.FCT_ID_VEH_PRKG_TI_INI,Core_2,C2_100u_PWM,0.1,,,DRCO
+-ErrDebTaskDataCore2.FctInhbnSts.B.FCT_ID_VEH_PRKG_TI_INVLD,Core_2,C2_100u_PWM,0.1,,,DRCO
+\\ No newline at end of file
++ErrDebTaskDataCore2.FctInhbnSts.B.FCT_ID_VEH_PRKG_TI_INVLD,Core_2,C2_100u_PWM,0.1,,,DRCO
+'

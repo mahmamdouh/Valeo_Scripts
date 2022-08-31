@@ -1,0 +1,954 @@
+b'commit 6025778005705531bd667b132127651fe0018e86
+Author: Adi GODAVARTHI (JV) <adi.godavarthi.jv@valeo.com>
+Date:   Mon Dec 13 14:41:58 2021 +0100
+
+    $100kW-48892$ - LLSW changes for FCT_Control_Parking_Position requirements
+    
+    Change-Id: Ideb7b9c7d17109d66cc5c818a6a8e038c05d2645
+
+diff --git a/src/fw_cu/Components/Cmn/Sys/GtmDrv/include/LlswGtm_TomCfg.h b/src/fw_cu/Components/Cmn/Sys/GtmDrv/include/LlswGtm_TomCfg.h
+index a2d9c5149..99eede6db 100644
+--- a/src/fw_cu/Components/Cmn/Sys/GtmDrv/include/LlswGtm_TomCfg.h
++++ b/src/fw_cu/Components/Cmn/Sys/GtmDrv/include/LlswGtm_TomCfg.h
+@@ -126,11 +126,12 @@ typedef enum
+     Gtm_Tom_Tom0_Ch5    = 2,
+     Gtm_Tom_Tom0_Ch6    = 3,
+     Gtm_Tom_Tom0_Ch7    = 4,
+-    Gtm_Tom_Tom2_Ch0    = 5,
+-    Gtm_Tom_Tom2_Ch2    = 6,
+-    Gtm_Tom_Tom2_Ch4    = 7,
+-    Gtm_Tom_Tom2_Ch6    = 8,
+-    Gtm_Tom_Tom2_Ch10   = 9,
++    Gtm_Tom_Tom0_Ch15    = 5,
++    Gtm_Tom_Tom2_Ch0    = 6,
++    Gtm_Tom_Tom2_Ch2    = 7,
++    Gtm_Tom_Tom2_Ch4    = 8,
++    Gtm_Tom_Tom2_Ch6    = 9,
++    Gtm_Tom_Tom2_Ch10   = 10,
+ #ifdef GTMDRV_SW_TEST_EN
+     Gtm_Tom_Test_Cfg,
+ #endif /* GTMDRV_SW_TEST_EN */
+diff --git a/src/fw_cu/Components/Cmn/Sys/GtmDrv/src/LlswGtm_Cfg.c b/src/fw_cu/Components/Cmn/Sys/GtmDrv/src/LlswGtm_Cfg.c
+index c282b7657..e7a9538d1 100644
+--- a/src/fw_cu/Components/Cmn/Sys/GtmDrv/src/LlswGtm_Cfg.c
++++ b/src/fw_cu/Components/Cmn/Sys/GtmDrv/src/LlswGtm_Cfg.c
+@@ -41,10 +41,10 @@
+ /*================== [defines] ==============================================*/
+ 
+ #define GTM_ADCTRIG0_OUT0_VAL { \\
+-    .B.SEL0  = 0x1U,   /* GTM_ADCTRIG0OUT0.B.SEL0: VADC0: no trigger. default value */  \\
++    .B.SEL0  = 0x1U,   /* GTM_ADCTRIG0OUT0.B.SEL0: VADC0: TOM0_CH6 -->  */  \\
+     .B.SEL1  = 0x0U,   /* GTM_ADCTRIG0OUT0.B.SEL1: VADC1: no trigger. default value */ \\
+     .B.SEL2  = 0x0U,   /* GTM_ADCTRIG0OUT0.B.SEL2: VADC2: no trigger. default value */ \\
+-    .B.SEL3  = 0x1U,   /* GTM_ADCTRIG0OUT0.B.SEL3: VADC3: TOM0_CH6 --> AN_MOT_SIN_SAFE */ \\
++    .B.SEL3  = 0x1U,   /* GTM_ADCTRIG0OUT0.B.SEL3: VADC3: TOM0_CH6 --> AN_DELTA_SIN_NEG_SAFE */ \\
+     .B.SEL4  = 0x0U,   /* GTM_ADCTRIG0OUT0.B.SEL4: VADC4: no trigger. default value */ \\
+     .B.SEL5  = 0x0U,   /* GTM_ADCTRIG0OUT0.B.SEL5: VADC5: no trigger. default value */ \\
+     .B.SEL6  = 0x0U,   /* GTM_ADCTRIG0OUT0.B.SEL6: VADC6: no trigger. default value */ \\
+@@ -52,16 +52,16 @@
+ }
+ 
+ #define GTM_ADCTRIG0_OUT1_VAL { \\
+-    .B.SEL0  = 0x0U,   /* GTM_ADCTRIG0OUT1.B.SEL0: VADC8:  no trigger. default value */  \\
++    .B.SEL0  = 0xFU,   /* GTM_ADCTRIG0OUT1.B.SEL0: VADC8:  no trigger. default value */  \\
+     .B.SEL1  = 0x0U,   /* GTM_ADCTRIG0OUT1.B.SEL1: VADC9:  no trigger. default value */ \\
+     .B.SEL2  = 0x0U,   /* GTM_ADCTRIG0OUT1.B.SEL2: VADC10: no trigger. default value */ \\
+     .B.SEL3  = 0x0U,   /* GTM_ADCTRIG0OUT1.B.SEL3: VADC11: no trigger. default value */ \\
+ }
+ 
+ #define GTM_ADCTRIG1_OUT0_VAL { \\
+-    .B.SEL0  = 0x5U,   /* GTM_ADCTRIG1OUT0.B.SEL0: VADC0: ATOM1_CH4 --> AN_26V_BT */  \\
++    .B.SEL0  = 0x5U,   /* GTM_ADCTRIG1OUT0.B.SEL0: VADC0: ATOM1_CH4 --> AN_M_INTLOC */  \\
+     .B.SEL1  = 0x0U,   /* GTM_ADCTRIG1OUT0.B.SEL1: VADC1: no trigger. default value */ \\
+-    .B.SEL2  = 0x6U,   /* GTM_ADCTRIG1OUT0.B.SEL2: VADC2: ATOM1_CH5 --> AN_P12V_BATT_F */ \\
++    .B.SEL2  = 0x0U,   /* GTM_ADCTRIG1OUT0.B.SEL2: VADC2: no trigger. default value */ \\
+     .B.SEL3  = 0x0U,   /* GTM_ADCTRIG1OUT0.B.SEL3: VADC3: no trigger. default value */ \\
+     .B.SEL4  = 0x0U,   /* GTM_ADCTRIG1OUT0.B.SEL4: VADC4: no trigger. default value */ \\
+     .B.SEL5  = 0x0U,   /* GTM_ADCTRIG1OUT0.B.SEL5: VADC5: no trigger. default value */ \\
+@@ -70,7 +70,7 @@
+ }
+ 
+ #define GTM_ADCTRIG1_OUT1_VAL { \\
+-    .B.SEL0  = 0x5U,   /* GTM_ADCTRIG1OUT1.B.SEL0: VADC8:  ATOM1_CH4 --> AN_CRASH    */  \\
++    .B.SEL0  = 0x5U,   /* GTM_ADCTRIG1OUT1.B.SEL0: VADC8:  ATOM1_CH4 --> AN_M_CRASH    */  \\
+     .B.SEL1  = 0x0U,   /* GTM_ADCTRIG1OUT1.B.SEL1: VADC9:  no trigger. default value */ \\
+     .B.SEL2  = 0x0U,   /* GTM_ADCTRIG1OUT1.B.SEL2: VADC10: no trigger. default value */ \\
+     .B.SEL3  = 0x0U,   /* GTM_ADCTRIG1OUT1.B.SEL3: VADC11: no trigger. default value */ \\
+@@ -711,11 +711,11 @@ static const LlswGtm_GtmToVadcConCfgType LlswGtm_GtmToVadcConConfig[LLSWGTM_VADC
+         /* ADCTRIG0OUT register*/
+         {
+           .AdcTrig.OUT0.U  = 0x00001001U, //TODO GTM_ADCTRIG0_OUT0_VAL,
+-          .AdcTrig.OUT1  = GTM_ADCTRIG0_OUT1_VAL,
++          .AdcTrig.OUT1  = 0x0000000FU  //GTM_ADCTRIG0_OUT1_VAL,
+         },
+         /* ADCTRIG1OUT register*/
+         {
+-          .AdcTrig.OUT0.U  = 0x00000605U, // GTM_ADCTRIG1_OUT0_VAL,
++          .AdcTrig.OUT0.U  = 0x00000005U, // /TODO GTM_ADCTRIG1_OUT0_VAL,
+           .AdcTrig.OUT1.U  = 0x0005U, // GTM_ADCTRIG1_OUT1_VAL,
+         },
+         /* ADCTRIG2OUT register*/
+diff --git a/src/fw_cu/Components/Cmn/Sys/GtmDrv/src/LlswGtm_TomCfg.c b/src/fw_cu/Components/Cmn/Sys/GtmDrv/src/LlswGtm_TomCfg.c
+index 293d4704f..97290bbee 100644
+--- a/src/fw_cu/Components/Cmn/Sys/GtmDrv/src/LlswGtm_TomCfg.c
++++ b/src/fw_cu/Components/Cmn/Sys/GtmDrv/src/LlswGtm_TomCfg.c
+@@ -225,6 +225,37 @@ const LlswGtm_TomCh_CfgType Tom_Tom0_Ch7 =
+ 
+ }; /* Tom_Tom0_Ch7 */
+ 
++
++
++
++const LlswGtm_TomCh_CfgType Tom_Tom0_Ch15 =
++{
++      /* ************************************************************************* */
++      /*                         Tom_Tom0_Ch3 Configuration                        */
++      /* ************************************************************************* */
++      /* GTM_TOM0_CH3_CTRL.U = 0x01000800U;    Trigout is Trig_CCU0, reset on match CM0, CMU_FXCLK0, SL=1 */
++      .CTRL.B.SL                 = (uint32) GTM_TOM_CH_HIGH_SIG_LEVEL,           /* SL=1 */
++      .CTRL.B.CLK_SRC_SR         = (uint32) GTM_TOM_CH_SEL_CMU_FXCLK0,           /* CMU_FXCLK0 */
++      .CTRL.B.RST_CCU0           = (uint32) GTM_TOM_CH_RST_ON_CCU0_COMP_MTCH,    /* Reset on Match CM0 */
++      .CTRL.B.TRIGOUT            = (uint32) GTM_TOM_CH_TRIGOUT_IS_TRIG_CCU0,     /* Trigout is Trig_CCU0 */
++
++      .CN0.B.CN0 = (uint32) 0U,     /* CN0:  24 bit counter */
++
++      .CM0.B.CM0 = (uint32) 0x2710U,           /* CM0:  24 bit counter */
++      .SR0.B.SR0 = (uint32) 0x2710U,           /* SR0:  24 bit counter */
++      .CM1.B.CM1 = (uint32) (0x2710U / 2U),    /* CM1:  24 bit counter */
++      .SR1.B.SR1 = (uint32) (0x2710U / 2U),    /* SR1:  24 bit counter */
++      .IRQ_EN.B.CCU0TC_IRQ_EN = (uint32) GTM_TOM_IRQ_DISABLE,    /* interrupt triggered by CCU0 not visible outside GTM */
++      .IRQ_EN.B.CCU1TC_IRQ_EN = (uint32) GTM_TOM_IRQ_DISABLE,    /* interrupt triggered by CCU1 not visible outside GTM */
++
++      .idxTomMod_en  = LlswGtm_TOM0,
++      .idxTomChnl_en = TOM_CH15,
++
++}; /* Tom_Tom0_Ch3 */
++
++
++
++
+ const LlswGtm_TomCh_CfgType Tom_Tom2_Ch0 =
+ {
+       /* ************************************************************************* */
+@@ -524,7 +555,7 @@ const LlswGtm_TomTgc_CfgType LlswGtm_Tom0TgcCfg =
+       .Tgc1EnDisCtrl.B.ENDIS_CTRL12 = (uint32) GTM_TOM_TGC_DISABLE_CHANNEL,
+       .Tgc1EnDisCtrl.B.ENDIS_CTRL13 = (uint32) GTM_TOM_TGC_DISABLE_CHANNEL,
+       .Tgc1EnDisCtrl.B.ENDIS_CTRL14 = (uint32) GTM_TOM_TGC_DISABLE_CHANNEL,
+-      .Tgc1EnDisCtrl.B.ENDIS_CTRL15 = (uint32) GTM_TOM_TGC_DISABLE_CHANNEL,
++      .Tgc1EnDisCtrl.B.ENDIS_CTRL15 = (uint32) GTM_TOM_TGC_ENABLE_CHANNEL,
+ 
+        /*! TOM0 TGC1 Output Enable Control Register: GTM_TOM0_TGC1_OUTEN_CTRL */
+ /* CH8-15 (shadow values of OUTEN_STAT Register. Update on Trigger): disable channels CH8-15 output */
+@@ -535,7 +566,7 @@ const LlswGtm_TomTgc_CfgType LlswGtm_Tom0TgcCfg =
+       .Tgc1OutEnCtrl.B.OUTEN_CTRL12 = (uint32) GTM_TOM_TGC_OUTEN_DISABLE,
+       .Tgc1OutEnCtrl.B.OUTEN_CTRL13 = (uint32) GTM_TOM_TGC_OUTEN_DISABLE,
+       .Tgc1OutEnCtrl.B.OUTEN_CTRL14 = (uint32) GTM_TOM_TGC_OUTEN_DISABLE,
+-      .Tgc1OutEnCtrl.B.OUTEN_CTRL15 = (uint32) GTM_TOM_TGC_OUTEN_DISABLE,
++      .Tgc1OutEnCtrl.B.OUTEN_CTRL15 = (uint32) GTM_TOM_TGC_OUTEN_ENABLE,
+ 
+       /*! TOM0 TGC1 Force Update Control Register: GTM_TOM0_TGC1_FUPD_CTRL */
+       .Tgc1FupdCtrl.B.FUPD_CTRL8  = (uint32) GTM_TOM_TGC_FUPD_NO_CHANGE,
+@@ -545,7 +576,7 @@ const LlswGtm_TomTgc_CfgType LlswGtm_Tom0TgcCfg =
+       .Tgc1FupdCtrl.B.FUPD_CTRL12 = (uint32) GTM_TOM_TGC_FUPD_NO_CHANGE,
+       .Tgc1FupdCtrl.B.FUPD_CTRL13 = (uint32) GTM_TOM_TGC_FUPD_NO_CHANGE,
+       .Tgc1FupdCtrl.B.FUPD_CTRL14 = (uint32) GTM_TOM_TGC_FUPD_NO_CHANGE,
+-      .Tgc1FupdCtrl.B.FUPD_CTRL15 = (uint32) GTM_TOM_TGC_FUPD_NO_CHANGE,
++      .Tgc1FupdCtrl.B.FUPD_CTRL15 = (uint32) GTM_TOM_TGC_FUPD_ENABLE,
+       .Tgc1FupdCtrl.B.RSTCN0_CH8  = (uint32) GTM_TOM_TGC_FUPD_RSTCN0_DISABLE, /* disable resetting of TOM2 CH8 CNO counter on force update */
+       .Tgc1FupdCtrl.B.RSTCN0_CH9  = (uint32) GTM_TOM_TGC_FUPD_RSTCN0_DISABLE, /* disable resetting of TOM2 CH9 CNO counter on force update */
+       .Tgc1FupdCtrl.B.RSTCN0_CH10 = (uint32) GTM_TOM_TGC_FUPD_RSTCN0_DISABLE, /* disable resetting of TOM2 CH10 CNO counter on force update */
+@@ -572,7 +603,7 @@ const LlswGtm_TomTgc_CfgType LlswGtm_Tom0TgcCfg =
+       .Tgc1GlbCtrl.B.UPEN_CTRL12 = (uint32) GTM_TOM_TGC_GLB_UPEN_NO_CHANGE,
+       .Tgc1GlbCtrl.B.UPEN_CTRL13 = (uint32) GTM_TOM_TGC_GLB_UPEN_NO_CHANGE,
+       .Tgc1GlbCtrl.B.UPEN_CTRL14 = (uint32) GTM_TOM_TGC_GLB_UPEN_NO_CHANGE,
+-      .Tgc1GlbCtrl.B.UPEN_CTRL15 = (uint32) GTM_TOM_TGC_GLB_UPEN_NO_CHANGE,
++      .Tgc1GlbCtrl.B.UPEN_CTRL15 = (uint32) GTM_TOM_TGC_GLB_UPEN_ENABLE,
+  };
+ 
+ const LlswGtm_TomTgc_CfgType LlswGtm_Tom1TgcCfg =
+@@ -1069,6 +1100,7 @@ const LlswGtm_TomCh_CfgType *const Tom_ptrChCfg[LLSWGTM_TOM_NR_POST_BUILD_CONFIG
+         &Tom_Tom0_Ch5,
+         &Tom_Tom0_Ch6,
+         &Tom_Tom0_Ch7,
++        &Tom_Tom0_Ch15,
+         &Tom_Tom2_Ch0,
+         &Tom_Tom2_Ch2,
+         &Tom_Tom2_Ch4,
+diff --git a/src/fw_cu/Components/Cmn/ValMeasAndProc/EVADC/include/Evadc.h b/src/fw_cu/Components/Cmn/ValMeasAndProc/EVADC/include/Evadc.h
+index 323754a3f..0f09dd072 100644
+--- a/src/fw_cu/Components/Cmn/ValMeasAndProc/EVADC/include/Evadc.h
++++ b/src/fw_cu/Components/Cmn/ValMeasAndProc/EVADC/include/Evadc.h
+@@ -137,16 +137,16 @@ typedef enum Vadc_ChannelsType_
+    /*,M_DELTA_SIN_POS            = x     GROUP8, CHANNEL4. Not used */
+    /*,M_DELTA_SIN_NEG            = x     GROUP8, CHANNEL5. Not used */
+    ,AN_CRASH                     = 15    /*GROUP8, CHANNEL6. Not used */
+-   /*,AN_PLC_MOT_N_DIAG          = x     GROUP8, CHANNEL7. Not used */
++   ,AN_PLC_MOT_N_DIAG            = 16    /* GROUP8, CHANNEL7 */
+ 
+    /*,NOT_CONNECTED              = x     GROUP8, CHANNEL8. Not connected */
+    /*,NOT_CONNECTED              = x     GROUP8, CHANNEL9. Not connected */
+    /*,NOT_CONNECTED              = x     GROUP8, CHANNEL10. Not connected */
+    /*,NOT_CONNECTED              = x     GROUP8, CHANNEL11. Not connected */
+-   /*,AN_PLC_MOT_P_DIAG          = x     GROUP8, CHANNEL12. Not used */
++   ,AN_PLC_MOT_P_DIAG            = 17    /* GROUP8, CHANNEL12.  */
+    /*,AN_P5V_PLC_SENS_MEAS       = x     GROUP8, CHANNEL13. Not used */
+-   /*,AN_PLC_CURRENT_MEAS        = x     GROUP8, CHANNEL14. Not used */
+-   ,AN_M_P5V_REF_PROT            = 16 /* GROUP8, CHANNEL15. Not used */
++   ,AN_PLC_CURRENT_MEAS          = 18    /* GROUP8, CHANNEL14.  */
++   ,AN_M_P5V_REF_PROT            = 19 /* GROUP8, CHANNEL15. Not used */
+ 
+    /* GROUP9 */
+    /*,NOT_USED                   = x     GROUP6, CHANNEL0. Not used */
+@@ -168,7 +168,7 @@ typedef enum Vadc_ChannelsType_
+    /*,NOT_CONNECTED              = x      GROUP7, CHANNEL7. Not connected */
+ 
+    /* Length of the array (buffer: Vadc_Result) */
+-   ,VADC_MAX_CHANNELS            = 17
++   ,VADC_MAX_CHANNELS            = 20
+ 
+ }Vadc_ChannelsType;
+ 
+diff --git a/src/fw_cu/Components/Cmn/ValMeasAndProc/EVADC/src/Evadc.c b/src/fw_cu/Components/Cmn/ValMeasAndProc/EVADC/src/Evadc.c
+index 8c05a9a17..f2544994c 100644
+--- a/src/fw_cu/Components/Cmn/ValMeasAndProc/EVADC/src/Evadc.c
++++ b/src/fw_cu/Components/Cmn/ValMeasAndProc/EVADC/src/Evadc.c
+@@ -39,6 +39,12 @@
+ #include "Evadc.h"
+ #include "SftyDma.h"
+ 
++
++extern VAR(SftyRslvrDma_DataType, SFTY_RSLVRDMA_VAR) SftyDmaVadcKl30Udata[2];
++extern VAR(SftyRslvrDma_DataType, SFTY_RSLVRDMA_VAR) SftyDmaVadcPlcActrlData[2];
++extern VAR(SftyRslvrDma_DataType, SFTY_RSLVRDMA_VAR) SftyDmaVadcPlcActrPosUData[2];
++extern VAR(SftyRslvrDma_DataType, SFTY_RSLVRDMA_VAR) SftyDmaVadcPlcActrNegUData[2];
++
+ /*================== [prototype of local functions] ================================*/
+ 
+ #define VADC_START_SEC_INIT_CODE_SLOW
+@@ -999,6 +1005,13 @@ LOCAL_INLINE FUNC(void, VADC_CODE) Vadc_InterruptInit(void)
+    temp_SRC_SRCR.B.CLRR = 1U;
+    SRC_VADCG2SR0.U      = temp_SRC_SRCR.U;
+ 
++   temp_SRC_SRCR.U = 0U;
++   temp_SRC_SRCR.B.SRPN = (uint32)SFTY_DMA_DRVR_CH_IDX_VADC_AN_P12V_BATT_F;
++   temp_SRC_SRCR.B.SRE  = VADC_SERVICE_REQUEST_ENABLE;
++   temp_SRC_SRCR.B.TOS  = TOS_DMA;
++   temp_SRC_SRCR.B.CLRR = 1U;
++   SRC_VADCG2SR1.U      = temp_SRC_SRCR.U;
++
+    /*!
+    \\* Result Interrupt service Node Pointer setting for Group 3, Result register 0 (SFTY_DMA_DRVR_CH_IDX_SIN_N_VADC_RSLVR)
+    \\* SRPN = Service Request Priority Number
+@@ -1025,6 +1038,27 @@ LOCAL_INLINE FUNC(void, VADC_CODE) Vadc_InterruptInit(void)
+    temp_SRC_SRCR.B.CLRR = 1U;
+    SRC_VADCG8SR0.U      = temp_SRC_SRCR.U;
+ 
++   temp_SRC_SRCR.U = 0U;
++   temp_SRC_SRCR.B.SRPN = (uint32)SFTY_DMA_DRVR_CH_IDX_VADC_AN_PLC_MOT_N_DIAG;
++   temp_SRC_SRCR.B.SRE  = VADC_SERVICE_REQUEST_ENABLE;
++   temp_SRC_SRCR.B.TOS  = TOS_DMA;
++   temp_SRC_SRCR.B.CLRR = 1U;
++   SRC_VADCG8SR1.U      = temp_SRC_SRCR.U;
++
++   temp_SRC_SRCR.U = 0U;
++   temp_SRC_SRCR.B.SRPN = (uint32)SFTY_DMA_DRVR_CH_IDX_VADC_AN_PLC_MOT_P_DIAG;
++   temp_SRC_SRCR.B.SRE  = VADC_SERVICE_REQUEST_ENABLE;
++   temp_SRC_SRCR.B.TOS  = TOS_DMA;
++   temp_SRC_SRCR.B.CLRR = 1U;
++   SRC_VADCG8SR2.U      = temp_SRC_SRCR.U;
++
++   temp_SRC_SRCR.U = 0U;
++   temp_SRC_SRCR.B.SRPN = (uint32)SFTY_DMA_DRVR_CH_IDX_VADC_AN_PLC_CURRENT_MEAS;
++   temp_SRC_SRCR.B.SRE  = VADC_SERVICE_REQUEST_ENABLE;
++   temp_SRC_SRCR.B.TOS  = TOS_DMA;
++   temp_SRC_SRCR.B.CLRR = 1U;
++   SRC_VADCG8SR3.U      = temp_SRC_SRCR.U;
++
+     return;
+ }
+ 
+@@ -1356,12 +1390,8 @@ LOCAL_INLINE FUNC(void, VADC_CODE)  Vadc_StoreQueueResultG1(void)
+ #include "MemMap.h"
+ LOCAL_INLINE FUNC(void, VADC_CODE) Vadc_StoreQueueResultG2(void)
+ {
+-   Ifx_EVADC_G_RES AdcResRegVal;/*PRQA S 0759*/
+-   /*! \\misra Msg(4:0759) An object of union type has been defined.
+-                          MISRA-C:2004 Rule 18.4
+-                          WE allow the use of union in typedef defined by Infineon for assigning values to proper bit fields.  */
+-
+    uint16 RslvrCosPData;  /* Result goes direct to Safety through DMA. */
++   uint16 Kl30Udata;  /* Result goes direct to Safety through DMA. */
+ 
+    RslvrCosPData = 0U;
+    if ( E_OK == Vadc_GetLastValFromSftyBuff((uint16)SFTY_DMA_DRVR_CH_IDX_COS_VADC_RSLVR, SFTY_RSLVRDMA_RESOLVER_BUF_LEN, SftyRslvrDmaVadcCosData, &RslvrCosPData) )
+@@ -1373,10 +1403,10 @@ LOCAL_INLINE FUNC(void, VADC_CODE) Vadc_StoreQueueResultG2(void)
+       /*Do Nothing*/
+    }
+ 
+-   AdcResRegVal.U = Vadc_ReadResultRegister(GROUP2, CHANNEL3);
+-   if(TRUE == AdcResRegVal.B.VF)
++   Kl30Udata = 0U;
++   if ( E_OK == Vadc_GetLastValFromSftyBuff((uint16)SFTY_DMA_DRVR_CH_IDX_VADC_AN_P12V_BATT_F, 8, SftyDmaVadcKl30Udata, &Kl30Udata) )   /* ????????????????????   use macro for buffer length */
+    {
+-      Vadc_Result[AN_P12V_BATT_F] = AdcResRegVal.B.RESULT;
++       Vadc_Result[AN_P12V_BATT_F] = Kl30Udata;
+    }
+    else
+    {
+@@ -1421,7 +1451,7 @@ LOCAL_INLINE FUNC(void, VADC_CODE) Vadc_StoreQueueResultG3(void)
+    AdcResRegVal.U = Vadc_ReadResultRegister(GROUP3, CHANNEL1);
+    if(TRUE == AdcResRegVal.B.VF)
+    {
+-      Vadc_Result[AN_SNS_SUP_2] = (uint16)(AdcResRegVal.B.RESULT / VADC_ACCU_FOUR_DIV_FACTOR);
++      Vadc_Result[AN_SNS_SUP_2] = (uint16)(AdcResRegVal.B.RESULT);
+    }
+    else
+    {
+@@ -1431,7 +1461,7 @@ LOCAL_INLINE FUNC(void, VADC_CODE) Vadc_StoreQueueResultG3(void)
+    AdcResRegVal.U = Vadc_ReadResultRegister(GROUP3, CHANNEL2);
+    if(TRUE == AdcResRegVal.B.VF)
+    {
+-      Vadc_Result[AN_MAIN_SUP] = (uint16)(AdcResRegVal.B.RESULT / VADC_ACCU_FOUR_DIV_FACTOR);
++      Vadc_Result[AN_MAIN_SUP] = (uint16)(AdcResRegVal.B.RESULT);
+    }
+    else
+    {
+@@ -1471,6 +1501,10 @@ LOCAL_INLINE FUNC(void, VADC_CODE) Vadc_StoreQueueResultG8(void)
+                           MISRA-C:2004 Rule 18.4
+                           WE allow the use of union in typedef defined by Infineon for assigning values to proper bit fields.  */
+    uint16 VoltMeasCrash;  /* Result goes direct to Safety through DMA. */
++   uint16 ActrNegUData;   /* Result goes direct to Safety through DMA. */
++   uint16 ActrPosUData;   /* Result goes direct to Safety through DMA. */
++   uint16 PlcActrlData;   /* Result goes direct to Safety through DMA. */
++
+ 
+    VoltMeasCrash = 0U;
+    if ( E_OK == Vadc_GetLastValFromSftyBuff((uint16)SFTY_DMA_DRVR_CH_IDX_VADC_ANALOG_CRASH_DATA, SFTY_DMA_VADC_ANALOG_CRASH_BUF_LEN, SftyDmaVadcCrashData, &VoltMeasCrash) )
+@@ -1482,10 +1516,40 @@ LOCAL_INLINE FUNC(void, VADC_CODE) Vadc_StoreQueueResultG8(void)
+       /*Do Nothing*/
+    }
+ 
++   ActrNegUData = 0U;
++   if ( E_OK == Vadc_GetLastValFromSftyBuff((uint16)SFTY_DMA_DRVR_CH_IDX_VADC_AN_PLC_MOT_N_DIAG, 8, SftyDmaVadcPlcActrNegUData, &ActrNegUData) )   /* ????????????????????   use macro for buffer length */
++   {
++       Vadc_Result[AN_PLC_MOT_N_DIAG] = ActrNegUData;
++   }
++   else
++   {
++      /*Do Nothing*/
++   }
++
++   ActrPosUData = 0U;
++   if ( E_OK == Vadc_GetLastValFromSftyBuff((uint16)SFTY_DMA_DRVR_CH_IDX_VADC_AN_PLC_MOT_P_DIAG, 8, SftyDmaVadcPlcActrPosUData, &ActrPosUData) )    /* ????????????????????   use macro for buffer length */
++   {
++       Vadc_Result[AN_PLC_MOT_P_DIAG] = ActrPosUData;
++   }
++   else
++   {
++      /*Do Nothing*/
++   }
++
++   PlcActrlData = 0U;
++   if ( E_OK == Vadc_GetLastValFromSftyBuff((uint16)SFTY_DMA_DRVR_CH_IDX_VADC_AN_PLC_CURRENT_MEAS, 8, SftyDmaVadcPlcActrlData, &PlcActrlData) )    /* ????????????????????   use macro for buffer length */
++   {
++       Vadc_Result[AN_PLC_CURRENT_MEAS] = PlcActrlData;
++   }
++   else
++   {
++      /*Do Nothing*/
++   }
++
+    AdcResRegVal.U = Vadc_ReadResultRegister(GROUP8, CHANNEL15);
+    if(TRUE == AdcResRegVal.B.VF)
+    {
+-      Vadc_Result[AN_M_P5V_REF_PROT] = (uint16)(AdcResRegVal.B.RESULT / VADC_ACCU_FOUR_DIV_FACTOR);
++      Vadc_Result[AN_M_P5V_REF_PROT] = (uint16)(AdcResRegVal.B.RESULT);
+    }
+    else
+    {
+diff --git a/src/fw_cu/Components/Cmn/ValMeasAndProc/EVADC/src/Evadc_Cfg.c b/src/fw_cu/Components/Cmn/ValMeasAndProc/EVADC/src/Evadc_Cfg.c
+index 7921df506..447af1f5b 100644
+--- a/src/fw_cu/Components/Cmn/ValMeasAndProc/EVADC/src/Evadc_Cfg.c
++++ b/src/fw_cu/Components/Cmn/ValMeasAndProc/EVADC/src/Evadc_Cfg.c
+@@ -732,6 +732,7 @@ CONST(VadcGroupConfigType,VADC_CONST) PrimaryGroupCfgTable[VADC_MAX_PRIMARY_GROU
+        *\\ REV7NP = 0000 Select service request line 0
+        */
+        .Vadc_Revnp0.B.REV0NP = (uint32)SERVICE_REQUEST_LINE0,
++       .Vadc_Revnp0.B.REV3NP = (uint32)SERVICE_REQUEST_LINE1,
+ 
+        /*!
+        *\\ G2REVNP1 Result Event Node Pointer Register 1, Group 2
+@@ -1023,20 +1024,36 @@ CONST(VadcGroupConfigType,VADC_CONST) SecondaryGroupCfgTable[VADC_MAX_SECONDARY_
+       *\\ ASEN1 = 1 Arbitration Slot Disable
+       *\\ ASEN2 = 1 Arbitration Slot Enable
+       */
+-      .Vadc_Arbpr.B.PRIO0 = (uint32)LOWEST_PRIORITY,                 /* do not care value */
+-      .Vadc_Arbpr.B.CSM0  = (uint32)VADC_WAIT_FOR_START_MODE,        /* do not care value */
++      .Vadc_Arbpr.B.PRIO0 = (uint32)HIGHEST_PRIORITY,                 /* do not care value */
++      .Vadc_Arbpr.B.CSM0  = (uint32)VADC_CANCLE_INJECT_REPEAT_MODE,        /* do not care value */
+       .Vadc_Arbpr.B.PRIO1 = (uint32)MEDIUM_PRIORITY1,                /* do not care value */
+       .Vadc_Arbpr.B.CSM1  = (uint32)VADC_WAIT_FOR_START_MODE,        /* do not care value */
+       .Vadc_Arbpr.B.PRIO2 = (uint32)LOWEST_PRIORITY,
+       .Vadc_Arbpr.B.CSM2  = (uint32)VADC_WAIT_FOR_START_MODE,
+-      .Vadc_Arbpr.B.ASEN0 = (uint32)ARBITRATION_SLOT_DISABLE,
++      .Vadc_Arbpr.B.ASEN0 = (uint32)ARBITRATION_SLOT_ENABLE,
+       .Vadc_Arbpr.B.ASEN1 = (uint32)ARBITRATION_SLOT_ENABLE,
+       .Vadc_Arbpr.B.ASEN2 = (uint32)ARBITRATION_SLOT_ENABLE,
+ 
+ \t   /*!
+ \t   *\\ G8QCTRL0 Queue 0 Source Control Register, Group 8
+ \t   */
+-\t   .Vadc_Qctrl[0].U = VADC_CLEAR_REGISTER,
++
++      .Vadc_Qctrl[0].B.SRCRESREG = (uint32)GXRES0,
++      .Vadc_Qctrl[0].B.XTSEL     = VADC_USE_SELECTED_GATE_INPUT,
++      .Vadc_Qctrl[0].B.XTMODE    = (uint32)TRIGGER_UPON_FALLING_EDGE,
++      .Vadc_Qctrl[0].B.XTWC      = VADC_REGISTER_WRITE_CONTROL,
++      .Vadc_Qctrl[0].B.GTSEL     = (uint32)GXREQGTA,
++      .Vadc_Qctrl[0].B.GTWC      = VADC_REGISTER_WRITE_CONTROL,
++      .Vadc_Qctrl[0].B.TMEN      = VADC_TIMER_MODE_DISABLED,
++      .Vadc_Qctrl[0].B.TMWC      = VADC_REGISTER_WRITE_CONTROL,
++
++      .Vadc_Qmr[0].B.ENGT   = (uint32)CONVERSION_REQUEST,
++      .Vadc_Qmr[0].B.ENTR   = (uint32)EXTERNAL_TRIGGER_ENABLE,
++      .Vadc_Qmr[0].B.CLRV   = VADC_NO_ACTION,
++      .Vadc_Qmr[0].B.FLUSH  = VADC_NO_ACTION,
++      .Vadc_Qmr[0].B.CEV    = VADC_NO_ACTION,
++      .Vadc_Qmr[0].B.RPTDIS = (uint32)CANCLLED_CONVERSION_REPEATED,
++
+ 
+       /*!
+       *\\ G8QCTRL2 Queue 1 Source Control Register, Group 8
+@@ -1078,11 +1095,6 @@ CONST(VadcGroupConfigType,VADC_CONST) SecondaryGroupCfgTable[VADC_MAX_SECONDARY_
+       .Vadc_Qctrl[2].B.TMEN      = VADC_TIMER_MODE_DISABLED,
+       .Vadc_Qctrl[2].B.TMWC      = VADC_REGISTER_WRITE_CONTROL,
+ 
+-\t   /*!
+-\t   *\\ G8QMR0 Queue 0 Mode Register,, Group 8
+-\t   */
+-\t   .Vadc_Qmr[0].U = VADC_CLEAR_REGISTER,
+-
+        /*!
+        *\\ G8QMR1 Queue 1 Mode Register,, Group 8
+        *\\ ENGT   = 1 conversion requests are issued
+@@ -1144,12 +1156,15 @@ CONST(VadcGroupConfigType,VADC_CONST) SecondaryGroupCfgTable[VADC_MAX_SECONDARY_
+ \t   /*!
+ \t   *\\ G8REVNP0 Result Event Node Pointer Register 0, Group 8
+ \t   */
+-\t   .Vadc_Revnp0.B.REV6NP = (uint32)SERVICE_REQUEST_LINE0, /* Service Request Line0 is used */
++      .Vadc_Revnp0.B.REV6NP = (uint32)SERVICE_REQUEST_LINE0, /* Service Request Line0 is used */
++      .Vadc_Revnp0.B.REV7NP = (uint32)SERVICE_REQUEST_LINE1, /* Service Request Line1 is used */
++      .Vadc_Revnp1.B.REV12NP = (uint32)SERVICE_REQUEST_LINE2, /* Service Request Line2 is used */
++      .Vadc_Revnp1.B.REV14NP = (uint32)SERVICE_REQUEST_LINE3, /* Service Request Line3 is used */
+ 
+ \t   /*!
+ \t   *\\ G8REVNP1 Result Event Node Pointer Register 1, Group 8
+ \t   */
+-\t   .Vadc_Revnp1.U = (uint32)VADC_CLEAR_REGISTER,
++\t//   .Vadc_Revnp1.U = (uint32)VADC_CLEAR_REGISTER,
+ 
+ \t   /* !
+ \t   *\\ G8SYNCTR Synchronization Control Register, Group 8
+@@ -1905,7 +1920,7 @@ CONST(VadcPrimaryChannelConfigType,VADC_CONST) PrimaryChannelCfgTable[VADC_MAX_P
+        .Vadc_Rcr[3].B.DMM   = (uint32)STANDARD_DATA_REDUCTION,
+        .Vadc_Rcr[3].B.WFR   = (uint32)OVERWRITE_MODE,
+        .Vadc_Rcr[3].B.FEN   = (uint32)SEPERATE_RESULT_REGISTER,
+-       .Vadc_Rcr[3].B.SRGEN = (uint32)RESULT_SERVICE_REQUEST_DISABLE,
++       .Vadc_Rcr[3].B.SRGEN = (uint32)RESULT_SERVICE_REQUEST_ENABLE,
+ 
+        /*!
+        *\\ G2RCR4 Group 2 Result Control Reg. 4
+@@ -2186,7 +2201,13 @@ CONST(VadcSecondaryChannelConfigType,VADC_CONST) SecondaryChannelCfgTable[VADC_M
+       /*!
+       *\\ G8CHCTR7 Group 8, Channel 7 Ctrl. Reg.
+       */
+-\t   .Vadc_Chctr[7].U     = VADC_CLEAR_REGISTER,
++      .Vadc_Chctr[7].B.SYNC    = (uint32)SYNC_REQUEST_DISABLE,
++      .Vadc_Chctr[7].B.REFSEL  = (uint32)STANDARD_REFERENCE,
++      .Vadc_Chctr[7].B.BNDSELX = (uint32)STANDARDMODE,
++      .Vadc_Chctr[7].B.RESREG  = (uint32)RESREG7,
++      .Vadc_Chctr[7].B.RESPOS  = (uint32)RIGHT_ALIGNED,
++      .Vadc_Chctr[7].B.BWDCH   = (uint32)VAREF,
++      .Vadc_Chctr[7].B.BWDEN   = (uint32)BROKEN_WIRE_DETECTION_DISABLE,
+       /*!
+       *\\ G8CHCTR8 Group 8, Channel 8 Ctrl. Reg.
+       */
+@@ -2206,7 +2227,13 @@ CONST(VadcSecondaryChannelConfigType,VADC_CONST) SecondaryChannelCfgTable[VADC_M
+       /*!
+       *\\ G8CHCTR12 Group 8, Channel 12 Ctrl. Reg.
+       */
+-\t   .Vadc_Chctr[12].U    = VADC_CLEAR_REGISTER,
++      .Vadc_Chctr[12].B.SYNC    = (uint32)SYNC_REQUEST_DISABLE,
++      .Vadc_Chctr[12].B.REFSEL  = (uint32)STANDARD_REFERENCE,
++      .Vadc_Chctr[12].B.BNDSELX = (uint32)STANDARDMODE,
++      .Vadc_Chctr[12].B.RESREG  = (uint32)RESREG12,
++      .Vadc_Chctr[12].B.RESPOS  = (uint32)RIGHT_ALIGNED,
++      .Vadc_Chctr[12].B.BWDCH   = (uint32)VAREF,
++      .Vadc_Chctr[12].B.BWDEN   = (uint32)BROKEN_WIRE_DETECTION_DISABLE,
+       /*!
+       *\\ G8CHCTR13 Group 8, Channel 13 Ctrl. Reg.
+       */
+@@ -2214,7 +2241,13 @@ CONST(VadcSecondaryChannelConfigType,VADC_CONST) SecondaryChannelCfgTable[VADC_M
+       /*!
+       *\\ G8CHCTR14 Group 8, Channel 14 Ctrl. Reg.
+       */
+-\t   .Vadc_Chctr[14].U    = VADC_CLEAR_REGISTER,
++      .Vadc_Chctr[14].B.SYNC    = (uint32)SYNC_REQUEST_DISABLE,
++      .Vadc_Chctr[14].B.REFSEL  = (uint32)STANDARD_REFERENCE,
++      .Vadc_Chctr[14].B.BNDSELX = (uint32)STANDARDMODE,
++      .Vadc_Chctr[14].B.RESREG  = (uint32)RESREG14,
++      .Vadc_Chctr[14].B.RESPOS  = (uint32)RIGHT_ALIGNED,
++      .Vadc_Chctr[14].B.BWDCH   = (uint32)VAREF,
++      .Vadc_Chctr[14].B.BWDEN   = (uint32)BROKEN_WIRE_DETECTION_DISABLE,
+ 
+       /*!
+       *\\ G8CHCTR15 Group 8, Channel 15 Ctrl. Reg.
+@@ -2266,7 +2299,11 @@ CONST(VadcSecondaryChannelConfigType,VADC_CONST) SecondaryChannelCfgTable[VADC_M
+       /*!
+       *\\ G8RCR7 Group 8 Result Control Reg. 7
+       */
+-      .Vadc_Rcr[7].U  = VADC_CLEAR_REGISTER,
++      .Vadc_Rcr[7].B.DRCTR = (uint32)DATA_REDUCTION_DISABLE,
++      .Vadc_Rcr[7].B.DMM   = (uint32)STANDARD_DATA_REDUCTION,
++      .Vadc_Rcr[7].B.WFR   = (uint32)OVERWRITE_MODE,
++      .Vadc_Rcr[7].B.FEN   = (uint32)SEPERATE_RESULT_REGISTER,
++      .Vadc_Rcr[7].B.SRGEN = (uint32)RESULT_SERVICE_REQUEST_ENABLE,
+       /*!
+       *\\ G8RCR8 Group 8 Result Control Reg. 8
+       */
+@@ -2286,7 +2323,11 @@ CONST(VadcSecondaryChannelConfigType,VADC_CONST) SecondaryChannelCfgTable[VADC_M
+       /*!
+       *\\ G8RCR12 Group 8 Result Control Reg. 12
+       */
+-      .Vadc_Rcr[12].U = VADC_CLEAR_REGISTER,
++      .Vadc_Rcr[12].B.DRCTR = (uint32)DATA_REDUCTION_DISABLE,
++      .Vadc_Rcr[12].B.DMM   = (uint32)STANDARD_DATA_REDUCTION,
++      .Vadc_Rcr[12].B.WFR   = (uint32)OVERWRITE_MODE,
++      .Vadc_Rcr[12].B.FEN   = (uint32)SEPERATE_RESULT_REGISTER,
++      .Vadc_Rcr[12].B.SRGEN = (uint32)RESULT_SERVICE_REQUEST_ENABLE,
+       /*!
+       *\\ G8RCR13 Group 8 Result Control Reg. 13
+       */
+@@ -2294,7 +2335,11 @@ CONST(VadcSecondaryChannelConfigType,VADC_CONST) SecondaryChannelCfgTable[VADC_M
+       /*!
+       *\\ G8RCR14 Group 8 Result Control Reg. 14
+       */
+-      .Vadc_Rcr[14].U = VADC_CLEAR_REGISTER,
++      .Vadc_Rcr[14].B.DRCTR = (uint32)DATA_REDUCTION_DISABLE,
++      .Vadc_Rcr[14].B.DMM   = (uint32)STANDARD_DATA_REDUCTION,
++      .Vadc_Rcr[14].B.WFR   = (uint32)OVERWRITE_MODE,
++      .Vadc_Rcr[14].B.FEN   = (uint32)SEPERATE_RESULT_REGISTER,
++      .Vadc_Rcr[14].B.SRGEN = (uint32)RESULT_SERVICE_REQUEST_ENABLE,
+       /*!
+       *\\ G8RCR15 Group 8 Result Control Reg. 15
+       *\\ DRCTR = 3 Accumulate 4 Result
+@@ -2895,14 +2940,19 @@ CONST(VadcSecondaryQueueChConfigType,VADC_CONST) SecondaryQueueChCfgTable[VADC_M
+ {
+         /* GROUP 8 Queued channel configuration */
+         {
+-            .VadcMaxQueuedChannels = { 0,         /* Max Channels for GROUP 8 QUEUE 0*/
++            .VadcMaxQueuedChannels = { 1,         /* Max Channels for GROUP 8 QUEUE 0*/
+                                        1,         /* Max Channels for GROUP 8 QUEUE 1*/
+-                                       1          /* Max Channels for GROUP 8 QUEUE 2*/
++                                       3          /* Max Channels for GROUP 8 QUEUE 2*/
+                                      },
+             .VadcQueuedChannels    = {
+ 
+                                         { /*QUEUE 0 Configuration*/
+-
++                                              {
++                                                 .B.REQCHNR = (uint32)CHANNEL14,
++                                                 .B.RF      = (uint32)AUTOMATIC_REFILL,
++                                                 .B.ENSI    = (uint32)VADC_SOURCE_INTERRUPT_DISABLE,
++                                                 .B.EXTR    = (uint32)EXTERNAL_TRIGGER_ENABLE,
++                                              },
+                                         },
+                                         { /*QUEUE 1 Configuration*/
+                                               {
+@@ -2913,11 +2963,24 @@ CONST(VadcSecondaryQueueChConfigType,VADC_CONST) SecondaryQueueChCfgTable[VADC_M
+                                               },
+                                         },
+                                         { /*QUEUE 2 Configuration*/
++
++                                              {
++                                                 .B.REQCHNR = (uint32)CHANNEL7,
++                                                 .B.RF      = (uint32)AUTOMATIC_REFILL,
++                                                 .B.ENSI    = (uint32)VADC_SOURCE_INTERRUPT_DISABLE,
++                                                 .B.EXTR    = (uint32)EXTERNAL_TRIGGER_ENABLE,                       /* ???????? */
++                                              },
++                                              {
++                                                 .B.REQCHNR = (uint32)CHANNEL12,
++                                                 .B.RF      = (uint32)AUTOMATIC_REFILL,
++                                                 .B.ENSI    = (uint32)VADC_SOURCE_INTERRUPT_DISABLE,
++                                                 .B.EXTR    = (uint32)EXTERNAL_TRIGGER_DISABLE,                        /* ???????? */
++                                              },
+                                               {
+                                                  .B.REQCHNR = (uint32)CHANNEL15,
+                                                  .B.RF      = (uint32)AUTOMATIC_REFILL,
+                                                  .B.ENSI    = (uint32)VADC_SOURCE_INTERRUPT_DISABLE,
+-                                                 .B.EXTR    = (uint32)EXTERNAL_TRIGGER_ENABLE,
++                                                 .B.EXTR    = (uint32)EXTERNAL_TRIGGER_DISABLE,
+                                               },
+                                         }
+             }
+diff --git a/src/fw_cu/Components/Safety/Sfty_Cmn/SftyDmaDrvr/include/SftyDmaDrvr_cfg.h b/src/fw_cu/Components/Safety/Sfty_Cmn/SftyDmaDrvr/include/SftyDmaDrvr_cfg.h
+index f2145a198..d3626f3d6 100644
+--- a/src/fw_cu/Components/Safety/Sfty_Cmn/SftyDmaDrvr/include/SftyDmaDrvr_cfg.h
++++ b/src/fw_cu/Components/Safety/Sfty_Cmn/SftyDmaDrvr/include/SftyDmaDrvr_cfg.h
+@@ -75,11 +75,7 @@
+ /* ==== P15_V ====== */
+ #define SFTY_DMA_DRVR_CH_IDX_VADC_P15_V_DATA                      (DMA_CHANNEL21)
+ 
+-/* ==== P15_W ====== */
+-#define SFTY_DMA_DRVR_CH_IDX_VADC_P15_W_DATA                      (DMA_CHANNEL22)
+ 
+-/* ==== P5_V ====== */
+-#define SFTY_DMA_DRVR_CH_IDX_VADC_P5_V_DATA                       (DMA_CHANNEL23)
+ 
+ /* ==== P5_W ====== */
+ #define SFTY_DMA_DRVR_CH_IDX_VADC_P5_W_DATA                       (DMA_CHANNEL24)
+@@ -97,6 +93,20 @@
+ #define SFTY_DMA_DRVR_CH_IDX_VADC_P16_DATA                        (DMA_CHANNEL27) /* This channel is used in Base Plus only. Not in Base Minus */
+ #endif/* SYSCON_FTR_PSM == 1 */
+ 
++#define SFTY_DMA_DRVR_CH_IDX_VADC_AN_P12V_BATT_F_TIMESTAMP     (DMA_CHANNEL20)
++#define SFTY_DMA_DRVR_CH_IDX_VADC_AN_P12V_BATT_F               (DMA_CHANNEL21)
++
++#define SFTY_DMA_DRVR_CH_IDX_VADC_AN_PLC_MOT_N_DIAG_TIMESTAMP     (DMA_CHANNEL22)
++#define SFTY_DMA_DRVR_CH_IDX_VADC_AN_PLC_MOT_N_DIAG               (DMA_CHANNEL23)
++
++#define SFTY_DMA_DRVR_CH_IDX_VADC_AN_PLC_MOT_P_DIAG_TIMESTAMP     (DMA_CHANNEL24)
++#define SFTY_DMA_DRVR_CH_IDX_VADC_AN_PLC_MOT_P_DIAG               (DMA_CHANNEL25)
++
++#define SFTY_DMA_DRVR_CH_IDX_VADC_AN_PLC_CURRENT_MEAS_TIMESTAMP   (DMA_CHANNEL26)
++#define SFTY_DMA_DRVR_CH_IDX_VADC_AN_PLC_CURRENT_MEAS             (DMA_CHANNEL27)
++
++
++
+ /* CTP_MOT1 DMA Channel */
+ #define SFTY_DMA_DRVR_CH_IDX_VADC_CTP_MOT1_TIMESTAMP              (DMA_CHANNEL28)
+ #define SFTY_DMA_DRVR_CH_IDX_VADC_CTP_MOT1_DATA                   (DMA_CHANNEL29)
+diff --git a/src/fw_cu/Components/Safety/Sfty_Cmn/SftyDmaDrvr/src/SftyDmaDrvr_cfg.c b/src/fw_cu/Components/Safety/Sfty_Cmn/SftyDmaDrvr/src/SftyDmaDrvr_cfg.c
+index 4e2a1c6a7..ed4dccbc2 100644
+--- a/src/fw_cu/Components/Safety/Sfty_Cmn/SftyDmaDrvr/src/SftyDmaDrvr_cfg.c
++++ b/src/fw_cu/Components/Safety/Sfty_Cmn/SftyDmaDrvr/src/SftyDmaDrvr_cfg.c
+@@ -59,6 +59,12 @@
+ 
+ /*================== [definition of global data] ============================*/
+ 
++VAR(SftyRslvrDma_DataType, SFTY_RSLVRDMA_VAR) SftyDmaVadcKl30Udata[2];
++VAR(SftyRslvrDma_DataType, SFTY_RSLVRDMA_VAR) SftyDmaVadcPlcActrlData[2];
++VAR(SftyRslvrDma_DataType, SFTY_RSLVRDMA_VAR) SftyDmaVadcPlcActrPosUData[2];
++VAR(SftyRslvrDma_DataType, SFTY_RSLVRDMA_VAR) SftyDmaVadcPlcActrNegUData[2];
++
++
+ #define SFTY_DMA_DRVR_START_SEC_CONST_AREA_0
+ #include "MemMap.h"
+ 
+@@ -182,64 +188,7 @@ CONST(SftyDmaDrvrChannelCfg_Type, SFTY_DMA_DRVR_CALIB) SftyDmaDrvrChannelCfg[] =
+       .HRR.B.HRP          = (uint32)SFTY_DMA_DRVR_HWRES_PARTITION_3,               /*Hardware Resource Register*/
+    },
+ #endif
+-   {/** WHEEL SPEED SENSOR DATA (RIGHT) FROM GTM */
+-      .ChIndex            = SFTY_DMA_DRVR_CH_IDX_R_WHL_SPD_DATA, /* PRQA S 1053 */
+-      .CH.SADR.U          = (uint32)(&GTM_TIM2_CH3_GPR0.U),                        /* PRQA S 0303 */    /* Message: Cast between a pointer to volatile object and an integral type.
+-                                                                                                           Justification: Type casting required to store the address in DMA source address register.
+-                                                                                                           Justification applicable for source address type casting of all channels */
+-      .CH.DADR.U          = (uint32)(WhlSpdSnsrIf_edgeCycBufRi),                   /* PRQA S 0306 */    /* Message: Cast between a pointer to object and an integral type.
+-                                                                                                           Justification: Type casting required to store the address in DMA destination address register.
+-                                                                                                           Justification applicable for destination address type casting of all channels */
+-      .CH.CHCFGR.B.PRSEL  = (uint32) SFTY_DMA_DRVR_PRSEL_HW_TRIGGER,
+-      .CH.CHCFGR.B.RROAT  = (uint32) SFTY_DMA_DRVR_RROAT_TRANSFER,
+-      .CH.CHCFGR.B.TREL   = 1U,                                                    /*Transfer Reload Counter*/
+-      .CH.CHCFGR.B.CHMODE = (uint32) SFTY_DMA_DRVR_CHMODE_CONTINUOUS_MODE,
+-      .CH.CHCFGR.B.CHDW   = (uint32) SFTY_DMA_DRVR_CHDW_4BYTE,
+-      .CH.CHCFGR.B.BLKM   = (uint32) SFTY_DMA_DRVR_BLKM_MOVE_1,
+-      .CH.ADICR.B.SCBE    = (uint32) SFTY_DMA_DRVR_SCBE_ENABLE,                    /*Source Circular Buffer*/
+-      .CH.ADICR.B.DCBE    = (uint32) SFTY_DMA_DRVR_DCBE_ENABLE,                    /*Destination Circular Buffer*/
+-      .CH.ADICR.B.SMF     = (uint32) SFTY_DMA_DRVR_SMF_BY_1DW,
+-      .CH.ADICR.B.DMF     = (uint32) SFTY_DMA_DRVR_DMF_BY_1DW,
+-      .CH.ADICR.B.INCS    = (uint32) SFTY_DMA_DRVR_INCS_INCREMENT,
+-      .CH.ADICR.B.INCD    = (uint32) SFTY_DMA_DRVR_INCD_INCREMENT,
+-      .CH.ADICR.B.CBLS    = (uint32) SFTY_DMA_DRVR_CBLS_NO_CIRBUF,
+-      .CH.ADICR.B.CBLD    = (uint32) SFTY_DMA_DRVR_CBLD_CIRBUF_128BYTE ,
+-      .CH.ADICR.B.STAMP   = (uint32) SFTY_DMA_DRVR_STAMP_DISABLE,                  /*Time Stamp*/
+-      .CH.ADICR.B.IRDV    = 0U,                                                    /*Interrupt Raise Detect Value*/
+-      .CH.ADICR.B.INTCT   = (uint32) SFTY_DMA_DRVR_INTCT_TRG_ON_IRDV_MATCH,        /*Enable Interrupt or Daisy Chain Event at IRDV = TOUNT*/
+-      .CH.ADICR.B.SHCT    = (uint32) SFTY_DMA_DRVR_SHCT_NO_SHADOW,                 /*source/destination registers written directly*/
+-      .CH.SHADR.U         = (uint32) SFTY_DMA_DRVR_SHADR_NOT_USED ,                /*shadow register, only valid if activated by SHCT*/
+-      .TSR.B.ECH          = (uint32) SFTY_DMA_DRVR_ECH_ENABLE,                     /*Enable HW Requests (will set TSRz.HTRE high)*/
+-      .SRC.U              = 0U,                                                    /*service request control register, see point 15.4.3.4 of MANUAL*/
+-      .HRR.B.HRP          = (uint32) SFTY_DMA_DRVR_HWRES_PARTITION_0,              /*Hardware Resource Register*/
+-   },
+-   {/** WHEEL SPEED SENSOR DATA (LEFT) FROM GTM */
+-      .ChIndex            = SFTY_DMA_DRVR_CH_IDX_L_WHL_SPD_DATA,
+-      .CH.SADR.U          = (uint32)(&GTM_TIM2_CH7_GPR0.U),                        /* PRQA S 0303 */    /*time stamp for wheel speed sensor*/
+-      .CH.DADR.U          = (uint32)(WhlSpdSnsrIf_edgeCycBufLe),                   /* PRQA S 0306 */
+-      .CH.CHCFGR.B.PRSEL  = (uint32) SFTY_DMA_DRVR_PRSEL_HW_TRIGGER,
+-      .CH.CHCFGR.B.RROAT  = (uint32) SFTY_DMA_DRVR_RROAT_TRANSFER,
+-      .CH.CHCFGR.B.TREL   = 1U,                                                    /*Transfer Reload Counter*/
+-      .CH.CHCFGR.B.CHMODE = (uint32) SFTY_DMA_DRVR_CHMODE_CONTINUOUS_MODE,
+-      .CH.CHCFGR.B.CHDW   = (uint32) SFTY_DMA_DRVR_CHDW_4BYTE,
+-      .CH.CHCFGR.B.BLKM   = (uint32) SFTY_DMA_DRVR_BLKM_MOVE_1,
+-      .CH.ADICR.B.SCBE    = (uint32) SFTY_DMA_DRVR_SCBE_ENABLE,                    /*Source Circular Buffer*/
+-      .CH.ADICR.B.DCBE    = (uint32) SFTY_DMA_DRVR_DCBE_ENABLE,                    /*Destination Circular Buffer*/
+-      .CH.ADICR.B.SMF     = (uint32) SFTY_DMA_DRVR_SMF_BY_1DW,
+-      .CH.ADICR.B.DMF     = (uint32) SFTY_DMA_DRVR_DMF_BY_1DW,
+-      .CH.ADICR.B.INCS    = (uint32) SFTY_DMA_DRVR_INCS_INCREMENT,
+-      .CH.ADICR.B.INCD    = (uint32) SFTY_DMA_DRVR_INCD_INCREMENT,
+-      .CH.ADICR.B.CBLS    = (uint32) SFTY_DMA_DRVR_CBLS_NO_CIRBUF,
+-      .CH.ADICR.B.CBLD    = (uint32) SFTY_DMA_DRVR_CBLD_CIRBUF_128BYTE ,
+-      .CH.ADICR.B.STAMP   = (uint32) SFTY_DMA_DRVR_STAMP_DISABLE,                  /*Time Stamp*/
+-      .CH.ADICR.B.IRDV    = 0U,                                                    /*Interrupt Raise Detect Value*/
+-      .CH.ADICR.B.INTCT   = (uint32) SFTY_DMA_DRVR_INTCT_TRG_ON_IRDV_MATCH,        /*Enable Interrupt or Daisy Chain Event at IRDV = TOUNT*/
+-      .CH.ADICR.B.SHCT    = (uint32) SFTY_DMA_DRVR_SHCT_NO_SHADOW,                 /*source/destination registers written directly*/
+-      .CH.SHADR.U         = (uint32) SFTY_DMA_DRVR_SHADR_NOT_USED ,                /*shadow register, only valid if activated by SHCT*/
+-      .TSR.B.ECH          = (uint32) SFTY_DMA_DRVR_ECH_ENABLE,                     /*Enable HW Requests (will set TSRz.HTRE high)*/
+-      .SRC.U              = 0U,                                                    /*service request control register, see point 15.4.3.4 of MANUAL*/
+-      .HRR.B.HRP          = (uint32) SFTY_DMA_DRVR_HWRES_PARTITION_0,              /*Hardware Resource Register*/
+-   },
++
+    {/** CS High-to-Low TimeStamp */
+       .ChIndex            = SFTY_DMA_DRVR_CH_IDX_CS_TIMESTMP,
+       .CH.SADR.U          = (uint32)(&GTM_TIM3_CH2_GPR0.U),                        /* PRQA S 0303 */    /*time stamp for CS*/
+@@ -937,7 +886,238 @@ CONST(SftyDmaDrvrChannelCfg_Type, SFTY_DMA_DRVR_CALIB) SftyDmaDrvrChannelCfg[] =
+       .TSR.B.ECH          = (uint32) SFTY_DMA_DRVR_ECH_ENABLE,                     /*Enable HW Requests (will set TSRz.HTRE high)*/
+       .SRC.U              = 0U,                                                    /*service request control register, see point 15.4.3.4 of MANUAL*/
+       .HRR.B.HRP          = (uint32) SFTY_DMA_DRVR_HWRES_PARTITION_0,              /*Hardware Resource Register*/
+-   }
++   },
++
++
++
++
++
++
++   {/** RESOLVER SINE+ IN VADC */
++      .ChIndex            =  SFTY_DMA_DRVR_CH_IDX_VADC_AN_PLC_MOT_N_DIAG,
++      .CH.SADR.U          = (uint32)(&EVADC_G8RES7.U),                              /* PRQA S 0303 */
++      .CH.DADR.U          = (uint32)(SftyDmaVadcPlcActrNegUData),                     /* PRQA S 0306 */
++      .CH.CHCFGR.B.PRSEL  = (uint32) SFTY_DMA_DRVR_PRSEL_DAISY_CHAIN,
++      .CH.CHCFGR.B.RROAT  = (uint32) SFTY_DMA_DRVR_RROAT_TRANSFER,
++      .CH.CHCFGR.B.TREL   = 1U,                                                    /*Transfer Reload Counter*/
++      .CH.CHCFGR.B.CHMODE = (uint32) SFTY_DMA_DRVR_CHMODE_CONTINUOUS_MODE,
++      .CH.CHCFGR.B.CHDW   = (uint32) SFTY_DMA_DRVR_CHDW_4BYTE,                     /* Transfer complete 32 bit VADC result register to SSW */
++      .CH.CHCFGR.B.BLKM   = (uint32) SFTY_DMA_DRVR_BLKM_MOVE_1,
++      .CH.ADICR.B.SCBE    = (uint32) SFTY_DMA_DRVR_SCBE_ENABLE,                    /*Source Circular Buffer*/
++      .CH.ADICR.B.DCBE    = (uint32) SFTY_DMA_DRVR_DCBE_ENABLE,                    /*Destination Circular Buffer*/
++      .CH.ADICR.B.SMF     = (uint32) SFTY_DMA_DRVR_SMF_BY_1DW,
++      .CH.ADICR.B.DMF     = (uint32) SFTY_DMA_DRVR_DMF_BY_2DW,
++      .CH.ADICR.B.INCS    = (uint32) SFTY_DMA_DRVR_INCS_INCREMENT,
++      .CH.ADICR.B.INCD    = (uint32) SFTY_DMA_DRVR_INCD_INCREMENT,
++      .CH.ADICR.B.CBLS    = (uint32) SFTY_DMA_DRVR_CBLS_NO_CIRBUF,
++      .CH.ADICR.B.CBLD    = (uint32) SFTY_DMA_DRVR_CBLD_CIRBUF_16BYTE,
++      .CH.ADICR.B.STAMP   = (uint32) SFTY_DMA_DRVR_STAMP_DISABLE,                   /*Time Stamp*/
++      .CH.ADICR.B.IRDV    = 0U,                                                    /*Interrupt Raise Detect Value*/
++      .CH.ADICR.B.INTCT   = (uint32) SFTY_DMA_DRVR_INTCT_TRG_ON_IRDV_MATCH,        /*Enable Interrupt or Daisy Chain Event at IRDV = TOUNT*/
++      .CH.ADICR.B.SHCT    = (uint32) SFTY_DMA_DRVR_SHCT_NO_SHADOW,                 /*source/destination registers written directly*/
++      .CH.SHADR.U         = (uint32) SFTY_DMA_DRVR_SHADR_NOT_USED ,                /*shadow register, only valid if activated by SHCT*/
++      .TSR.B.ECH          = (uint32) SFTY_DMA_DRVR_ECH_ENABLE,                     /*Enable HW Requests (will set TSRz.HTRE high)*/
++      .SRC.U              = 0U,                                                    /*service request control register, see point 15.4.3.4 of MANUAL*/
++      .HRR.B.HRP          = (uint32) SFTY_DMA_DRVR_HWRES_PARTITION_0,              /*Hardware Resource Register*/
++   },
++   {/** RESOLVER SINE+ Timestamp IN VADC */
++      .ChIndex            =  SFTY_DMA_DRVR_CH_IDX_VADC_AN_PLC_MOT_N_DIAG_TIMESTAMP,
++      .CH.SADR.U          = (uint32)(&DMA_TIME),                              /* PRQA S 0303 */
++      .CH.DADR.U          = (uint32)(&(SftyDmaVadcPlcActrNegUData[0].tiStamp)),                     /* PRQA S 0306 */
++      .CH.CHCFGR.B.PRSEL  = (uint32) SFTY_DMA_DRVR_PRSEL_HW_TRIGGER,
++      .CH.CHCFGR.B.RROAT  = (uint32) SFTY_DMA_DRVR_RROAT_TRANSFER,
++      .CH.CHCFGR.B.TREL   = 1U,                                                    /*Transfer Reload Counter*/
++      .CH.CHCFGR.B.CHMODE = (uint32) SFTY_DMA_DRVR_CHMODE_CONTINUOUS_MODE,
++      .CH.CHCFGR.B.CHDW   = (uint32) SFTY_DMA_DRVR_CHDW_4BYTE,                     /* Transfer complete 32 bit VADC result register to SSW */
++      .CH.CHCFGR.B.BLKM   = (uint32) SFTY_DMA_DRVR_BLKM_MOVE_1,
++      .CH.ADICR.B.SCBE    = (uint32) SFTY_DMA_DRVR_SCBE_ENABLE,                    /*Source Circular Buffer*/
++      .CH.ADICR.B.DCBE    = (uint32) SFTY_DMA_DRVR_DCBE_ENABLE,                    /*Destination Circular Buffer*/
++      .CH.ADICR.B.SMF     = (uint32) SFTY_DMA_DRVR_SMF_BY_1DW,
++      .CH.ADICR.B.DMF     = (uint32) SFTY_DMA_DRVR_DMF_BY_2DW,
++      .CH.ADICR.B.INCS    = (uint32) SFTY_DMA_DRVR_INCS_INCREMENT,
++      .CH.ADICR.B.INCD    = (uint32) SFTY_DMA_DRVR_INCD_INCREMENT,
++      .CH.ADICR.B.CBLS    = (uint32) SFTY_DMA_DRVR_CBLS_NO_CIRBUF,
++      .CH.ADICR.B.CBLD    = (uint32) SFTY_DMA_DRVR_CBLD_CIRBUF_16BYTE,
++      .CH.ADICR.B.STAMP   = (uint32) SFTY_DMA_DRVR_STAMP_DISABLE,                   /*Time Stamp*/
++      .CH.ADICR.B.IRDV    = 0U,                                                    /*Interrupt Raise Detect Value*/
++      .CH.ADICR.B.INTCT   = (uint32) SFTY_DMA_DRVR_INTCT_TRG_ON_IRDV_MATCH,        /*Enable Interrupt or Daisy Chain Event at IRDV = TOUNT*/
++      .CH.ADICR.B.SHCT    = (uint32) SFTY_DMA_DRVR_SHCT_NO_SHADOW,                 /*source/destination registers written directly*/
++      .CH.SHADR.U         = (uint32) SFTY_DMA_DRVR_SHADR_NOT_USED ,                /*shadow register, only valid if activated by SHCT*/
++      .TSR.B.ECH          = (uint32) SFTY_DMA_DRVR_ECH_ENABLE,                     /*Enable HW Requests (will set TSRz.HTRE high)*/
++      .SRC.U              = 0U,                                                    /*service request control register, see point 15.4.3.4 of MANUAL*/
++      .HRR.B.HRP          = (uint32) SFTY_DMA_DRVR_HWRES_PARTITION_0,              /*Hardware Resource Register*/
++   },
++
++   {/** RESOLVER SINE+ IN VADC */
++      .ChIndex            =  SFTY_DMA_DRVR_CH_IDX_VADC_AN_PLC_MOT_P_DIAG,
++      .CH.SADR.U          = (uint32)(&EVADC_G8RES12.U),                              /* PRQA S 0303 */
++      .CH.DADR.U          = (uint32)(SftyDmaVadcPlcActrPosUData),                     /* PRQA S 0306 */
++      .CH.CHCFGR.B.PRSEL  = (uint32) SFTY_DMA_DRVR_PRSEL_DAISY_CHAIN,
++      .CH.CHCFGR.B.RROAT  = (uint32) SFTY_DMA_DRVR_RROAT_TRANSFER,
++      .CH.CHCFGR.B.TREL   = 1U,                                                    /*Transfer Reload Counter*/
++      .CH.CHCFGR.B.CHMODE = (uint32) SFTY_DMA_DRVR_CHMODE_CONTINUOUS_MODE,
++      .CH.CHCFGR.B.CHDW   = (uint32) SFTY_DMA_DRVR_CHDW_4BYTE,                     /* Transfer complete 32 bit VADC result register to SSW */
++      .CH.CHCFGR.B.BLKM   = (uint32) SFTY_DMA_DRVR_BLKM_MOVE_1,
++      .CH.ADICR.B.SCBE    = (uint32) SFTY_DMA_DRVR_SCBE_ENABLE,                    /*Source Circular Buffer*/
++      .CH.ADICR.B.DCBE    = (uint32) SFTY_DMA_DRVR_DCBE_ENABLE,                    /*Destination Circular Buffer*/
++      .CH.ADICR.B.SMF     = (uint32) SFTY_DMA_DRVR_SMF_BY_1DW,
++      .CH.ADICR.B.DMF     = (uint32) SFTY_DMA_DRVR_DMF_BY_2DW,
++      .CH.ADICR.B.INCS    = (uint32) SFTY_DMA_DRVR_INCS_INCREMENT,
++      .CH.ADICR.B.INCD    = (uint32) SFTY_DMA_DRVR_INCD_INCREMENT,
++      .CH.ADICR.B.CBLS    = (uint32) SFTY_DMA_DRVR_CBLS_NO_CIRBUF,
++      .CH.ADICR.B.CBLD    = (uint32) SFTY_DMA_DRVR_CBLD_CIRBUF_16BYTE,
++      .CH.ADICR.B.STAMP   = (uint32) SFTY_DMA_DRVR_STAMP_DISABLE,                   /*Time Stamp*/
++      .CH.ADICR.B.IRDV    = 0U,                                                    /*Interrupt Raise Detect Value*/
++      .CH.ADICR.B.INTCT   = (uint32) SFTY_DMA_DRVR_INTCT_TRG_ON_IRDV_MATCH,        /*Enable Interrupt or Daisy Chain Event at IRDV = TOUNT*/
++      .CH.ADICR.B.SHCT    = (uint32) SFTY_DMA_DRVR_SHCT_NO_SHADOW,                 /*source/destination registers written directly*/
++      .CH.SHADR.U         = (uint32) SFTY_DMA_DRVR_SHADR_NOT_USED ,                /*shadow register, only valid if activated by SHCT*/
++      .TSR.B.ECH          = (uint32) SFTY_DMA_DRVR_ECH_ENABLE,                     /*Enable HW Requests (will set TSRz.HTRE high)*/
++      .SRC.U              = 0U,                                                    /*service request control register, see point 15.4.3.4 of MANUAL*/
++      .HRR.B.HRP          = (uint32) SFTY_DMA_DRVR_HWRES_PARTITION_0,              /*Hardware Resource Register*/
++   },
++   {/** RESOLVER SINE+ Timestamp IN VADC */
++      .ChIndex            =  SFTY_DMA_DRVR_CH_IDX_VADC_AN_PLC_MOT_P_DIAG_TIMESTAMP,
++      .CH.SADR.U          = (uint32)(&DMA_TIME),                              /* PRQA S 0303 */
++      .CH.DADR.U          = (uint32)(&(SftyDmaVadcPlcActrPosUData[0].tiStamp)),                     /* PRQA S 0306 */
++      .CH.CHCFGR.B.PRSEL  = (uint32) SFTY_DMA_DRVR_PRSEL_HW_TRIGGER,
++      .CH.CHCFGR.B.RROAT  = (uint32) SFTY_DMA_DRVR_RROAT_TRANSFER,
++      .CH.CHCFGR.B.TREL   = 1U,                                                    /*Transfer Reload Counter*/
++      .CH.CHCFGR.B.CHMODE = (uint32) SFTY_DMA_DRVR_CHMODE_CONTINUOUS_MODE,
++      .CH.CHCFGR.B.CHDW   = (uint32) SFTY_DMA_DRVR_CHDW_4BYTE,                     /* Transfer complete 32 bit VADC result register to SSW */
++      .CH.CHCFGR.B.BLKM   = (uint32) SFTY_DMA_DRVR_BLKM_MOVE_1,
++      .CH.ADICR.B.SCBE    = (uint32) SFTY_DMA_DRVR_SCBE_ENABLE,                    /*Source Circular Buffer*/
++      .CH.ADICR.B.DCBE    = (uint32) SFTY_DMA_DRVR_DCBE_ENABLE,                    /*Destination Circular Buffer*/
++      .CH.ADICR.B.SMF     = (uint32) SFTY_DMA_DRVR_SMF_BY_1DW,
++      .CH.ADICR.B.DMF     = (uint32) SFTY_DMA_DRVR_DMF_BY_2DW,
++      .CH.ADICR.B.INCS    = (uint32) SFTY_DMA_DRVR_INCS_INCREMENT,
++      .CH.ADICR.B.INCD    = (uint32) SFTY_DMA_DRVR_INCD_INCREMENT,
++      .CH.ADICR.B.CBLS    = (uint32) SFTY_DMA_DRVR_CBLS_NO_CIRBUF,
++      .CH.ADICR.B.CBLD    = (uint32) SFTY_DMA_DRVR_CBLD_CIRBUF_16BYTE,
++      .CH.ADICR.B.STAMP   = (uint32) SFTY_DMA_DRVR_STAMP_DISABLE,                   /*Time Stamp*/
++      .CH.ADICR.B.IRDV    = 0U,                                                    /*Interrupt Raise Detect Value*/
++      .CH.ADICR.B.INTCT   = (uint32) SFTY_DMA_DRVR_INTCT_TRG_ON_IRDV_MATCH,        /*Enable Interrupt or Daisy Chain Event at IRDV = TOUNT*/
++      .CH.ADICR.B.SHCT    = (uint32) SFTY_DMA_DRVR_SHCT_NO_SHADOW,                 /*source/destination registers written directly*/
++      .CH.SHADR.U         = (uint32) SFTY_DMA_DRVR_SHADR_NOT_USED ,                /*shadow register, only valid if activated by SHCT*/
++      .TSR.B.ECH          = (uint32) SFTY_DMA_DRVR_ECH_ENABLE,                     /*Enable HW Requests (will set TSRz.HTRE high)*/
++      .SRC.U              = 0U,                                                    /*service request control register, see point 15.4.3.4 of MANUAL*/
++      .HRR.B.HRP          = (uint32) SFTY_DMA_DRVR_HWRES_PARTITION_0,              /*Hardware Resource Register*/
++   },
++
++
++   {/** RESOLVER SINE+ IN VADC */
++      .ChIndex            =  SFTY_DMA_DRVR_CH_IDX_VADC_AN_PLC_CURRENT_MEAS,
++      .CH.SADR.U          = (uint32)(&EVADC_G8RES14.U),                              /* PRQA S 0303 */
++      .CH.DADR.U          = (uint32)(SftyDmaVadcPlcActrlData),                     /* PRQA S 0306 */
++      .CH.CHCFGR.B.PRSEL  = (uint32) SFTY_DMA_DRVR_PRSEL_DAISY_CHAIN,
++      .CH.CHCFGR.B.RROAT  = (uint32) SFTY_DMA_DRVR_RROAT_TRANSFER,
++      .CH.CHCFGR.B.TREL   = 1U,                                                    /*Transfer Reload Counter*/
++      .CH.CHCFGR.B.CHMODE = (uint32) SFTY_DMA_DRVR_CHMODE_CONTINUOUS_MODE,
++      .CH.CHCFGR.B.CHDW   = (uint32) SFTY_DMA_DRVR_CHDW_4BYTE,                     /* Transfer complete 32 bit VADC result register to SSW */
++      .CH.CHCFGR.B.BLKM   = (uint32) SFTY_DMA_DRVR_BLKM_MOVE_1,
++      .CH.ADICR.B.SCBE    = (uint32) SFTY_DMA_DRVR_SCBE_ENABLE,                    /*Source Circular Buffer*/
++      .CH.ADICR.B.DCBE    = (uint32) SFTY_DMA_DRVR_DCBE_ENABLE,                    /*Destination Circular Buffer*/
++      .CH.ADICR.B.SMF     = (uint32) SFTY_DMA_DRVR_SMF_BY_1DW,
++      .CH.ADICR.B.DMF     = (uint32) SFTY_DMA_DRVR_DMF_BY_2DW,
++      .CH.ADICR.B.INCS    = (uint32) SFTY_DMA_DRVR_INCS_INCREMENT,
++      .CH.ADICR.B.INCD    = (uint32) SFTY_DMA_DRVR_INCD_INCREMENT,
++      .CH.ADICR.B.CBLS    = (uint32) SFTY_DMA_DRVR_CBLS_NO_CIRBUF,
++      .CH.ADICR.B.CBLD    = (uint32) SFTY_DMA_DRVR_CBLD_CIRBUF_16BYTE,
++      .CH.ADICR.B.STAMP   = (uint32) SFTY_DMA_DRVR_STAMP_DISABLE,                   /*Time Stamp*/
++      .CH.ADICR.B.IRDV    = 0U,                                                    /*Interrupt Raise Detect Value*/
++      .CH.ADICR.B.INTCT   = (uint32) SFTY_DMA_DRVR_INTCT_TRG_ON_IRDV_MATCH,        /*Enable Interrupt or Daisy Chain Event at IRDV = TOUNT*/
++      .CH.ADICR.B.SHCT    = (uint32) SFTY_DMA_DRVR_SHCT_NO_SHADOW,                 /*source/destination registers written directly*/
++      .CH.SHADR.U         = (uint32) SFTY_DMA_DRVR_SHADR_NOT_USED ,                /*shadow register, only valid if activated by SHCT*/
++      .TSR.B.ECH          = (uint32) SFTY_DMA_DRVR_ECH_ENABLE,                     /*Enable HW Requests (will set TSRz.HTRE high)*/
++      .SRC.U              = 0U,                                                    /*service request control register, see point 15.4.3.4 of MANUAL*/
++      .HRR.B.HRP          = (uint32) SFTY_DMA_DRVR_HWRES_PARTITION_0,              /*Hardware Resource Register*/
++   },
++   {/** RESOLVER SINE+ Timestamp IN VADC */
++      .ChIndex            =  SFTY_DMA_DRVR_CH_IDX_VADC_AN_PLC_CURRENT_MEAS_TIMESTAMP,
++      .CH.SADR.U          = (uint32)(&DMA_TIME),                              /* PRQA S 0303 */
++      .CH.DADR.U          = (uint32)(&(SftyDmaVadcPlcActrlData[0].tiStamp)),                     /* PRQA S 0306 */
++      .CH.CHCFGR.B.PRSEL  = (uint32) SFTY_DMA_DRVR_PRSEL_HW_TRIGGER,
++      .CH.CHCFGR.B.RROAT  = (uint32) SFTY_DMA_DRVR_RROAT_TRANSFER,
++      .CH.CHCFGR.B.TREL   = 1U,                                                    /*Transfer Reload Counter*/
++      .CH.CHCFGR.B.CHMODE = (uint32) SFTY_DMA_DRVR_CHMODE_CONTINUOUS_MODE,
++      .CH.CHCFGR.B.CHDW   = (uint32) SFTY_DMA_DRVR_CHDW_4BYTE,                     /* Transfer complete 32 bit VADC result register to SSW */
++      .CH.CHCFGR.B.BLKM   = (uint32) SFTY_DMA_DRVR_BLKM_MOVE_1,
++      .CH.ADICR.B.SCBE    = (uint32) SFTY_DMA_DRVR_SCBE_ENABLE,                    /*Source Circular Buffer*/
++      .CH.ADICR.B.DCBE    = (uint32) SFTY_DMA_DRVR_DCBE_ENABLE,                    /*Destination Circular Buffer*/
++      .CH.ADICR.B.SMF     = (uint32) SFTY_DMA_DRVR_SMF_BY_1DW,
++      .CH.ADICR.B.DMF     = (uint32) SFTY_DMA_DRVR_DMF_BY_2DW,
++      .CH.ADICR.B.INCS    = (uint32) SFTY_DMA_DRVR_INCS_INCREMENT,
++      .CH.ADICR.B.INCD    = (uint32) SFTY_DMA_DRVR_INCD_INCREMENT,
++      .CH.ADICR.B.CBLS    = (uint32) SFTY_DMA_DRVR_CBLS_NO_CIRBUF,
++      .CH.ADICR.B.CBLD    = (uint32) SFTY_DMA_DRVR_CBLD_CIRBUF_16BYTE,
++      .CH.ADICR.B.STAMP   = (uint32) SFTY_DMA_DRVR_STAMP_DISABLE,                   /*Time Stamp*/
++      .CH.ADICR.B.IRDV    = 0U,                                                    /*Interrupt Raise Detect Value*/
++      .CH.ADICR.B.INTCT   = (uint32) SFTY_DMA_DRVR_INTCT_TRG_ON_IRDV_MATCH,        /*Enable Interrupt or Daisy Chain Event at IRDV = TOUNT*/
++      .CH.ADICR.B.SHCT    = (uint32) SFTY_DMA_DRVR_SHCT_NO_SHADOW,                 /*source/destination registers written directly*/
++      .CH.SHADR.U         = (uint32) SFTY_DMA_DRVR_SHADR_NOT_USED ,                /*shadow register, only valid if activated by SHCT*/
++      .TSR.B.ECH          = (uint32) SFTY_DMA_DRVR_ECH_ENABLE,                     /*Enable HW Requests (will set TSRz.HTRE high)*/
++      .SRC.U              = 0U,                                                    /*service request control register, see point 15.4.3.4 of MANUAL*/
++      .HRR.B.HRP          = (uint32) SFTY_DMA_DRVR_HWRES_PARTITION_0,              /*Hardware Resource Register*/
++   },
++
++
++   {/** RESOLVER SINE+ IN VADC */
++      .ChIndex            =  SFTY_DMA_DRVR_CH_IDX_VADC_AN_P12V_BATT_F,
++      .CH.SADR.U          = (uint32)(&EVADC_G2RES3.U),                              /* PRQA S 0303 */
++      .CH.DADR.U          = (uint32)(SftyDmaVadcKl30Udata),                     /* PRQA S 0306 */
++      .CH.CHCFGR.B.PRSEL  = (uint32) SFTY_DMA_DRVR_PRSEL_DAISY_CHAIN,
++      .CH.CHCFGR.B.RROAT  = (uint32) SFTY_DMA_DRVR_RROAT_TRANSFER,
++      .CH.CHCFGR.B.TREL   = 1U,                                                    /*Transfer Reload Counter*/
++      .CH.CHCFGR.B.CHMODE = (uint32) SFTY_DMA_DRVR_CHMODE_CONTINUOUS_MODE,
++      .CH.CHCFGR.B.CHDW   = (uint32) SFTY_DMA_DRVR_CHDW_4BYTE,                     /* Transfer complete 32 bit VADC result register to SSW */
++      .CH.CHCFGR.B.BLKM   = (uint32) SFTY_DMA_DRVR_BLKM_MOVE_1,
++      .CH.ADICR.B.SCBE    = (uint32) SFTY_DMA_DRVR_SCBE_ENABLE,                    /*Source Circular Buffer*/
++      .CH.ADICR.B.DCBE    = (uint32) SFTY_DMA_DRVR_DCBE_ENABLE,                    /*Destination Circular Buffer*/
++      .CH.ADICR.B.SMF     = (uint32) SFTY_DMA_DRVR_SMF_BY_1DW,
++      .CH.ADICR.B.DMF     = (uint32) SFTY_DMA_DRVR_DMF_BY_2DW,
++      .CH.ADICR.B.INCS    = (uint32) SFTY_DMA_DRVR_INCS_INCREMENT,
++      .CH.ADICR.B.INCD    = (uint32) SFTY_DMA_DRVR_INCD_INCREMENT,
++      .CH.ADICR.B.CBLS    = (uint32) SFTY_DMA_DRVR_CBLS_NO_CIRBUF,
++      .CH.ADICR.B.CBLD    = (uint32) SFTY_DMA_DRVR_CBLD_CIRBUF_16BYTE,
++      .CH.ADICR.B.STAMP   = (uint32) SFTY_DMA_DRVR_STAMP_DISABLE,                   /*Time Stamp*/
++      .CH.ADICR.B.IRDV    = 0U,                                                    /*Interrupt Raise Detect Value*/
++      .CH.ADICR.B.INTCT   = (uint32) SFTY_DMA_DRVR_INTCT_TRG_ON_IRDV_MATCH,        /*Enable Interrupt or Daisy Chain Event at IRDV = TOUNT*/
++      .CH.ADICR.B.SHCT    = (uint32) SFTY_DMA_DRVR_SHCT_NO_SHADOW,                 /*source/destination registers written directly*/
++      .CH.SHADR.U         = (uint32) SFTY_DMA_DRVR_SHADR_NOT_USED ,                /*shadow register, only valid if activated by SHCT*/
++      .TSR.B.ECH          = (uint32) SFTY_DMA_DRVR_ECH_ENABLE,                     /*Enable HW Requests (will set TSRz.HTRE high)*/
++      .SRC.U              = 0U,                                                    /*service request control register, see point 15.4.3.4 of MANUAL*/
++      .HRR.B.HRP          = (uint32) SFTY_DMA_DRVR_HWRES_PARTITION_0,              /*Hardware Resource Register*/
++   },
++   {/** RESOLVER SINE+ Timestamp IN VADC */
++      .ChIndex            =  SFTY_DMA_DRVR_CH_IDX_VADC_AN_P12V_BATT_F_TIMESTAMP,
++      .CH.SADR.U          = (uint32)(&DMA_TIME),                              /* PRQA S 0303 */
++      .CH.DADR.U          = (uint32)(&(SftyDmaVadcKl30Udata[0].tiStamp)),                     /* PRQA S 0306 */
++      .CH.CHCFGR.B.PRSEL  = (uint32) SFTY_DMA_DRVR_PRSEL_HW_TRIGGER,
++      .CH.CHCFGR.B.RROAT  = (uint32) SFTY_DMA_DRVR_RROAT_TRANSFER,
++      .CH.CHCFGR.B.TREL   = 1U,                                                    /*Transfer Reload Counter*/
++      .CH.CHCFGR.B.CHMODE = (uint32) SFTY_DMA_DRVR_CHMODE_CONTINUOUS_MODE,
++      .CH.CHCFGR.B.CHDW   = (uint32) SFTY_DMA_DRVR_CHDW_4BYTE,                     /* Transfer complete 32 bit VADC result register to SSW */
++      .CH.CHCFGR.B.BLKM   = (uint32) SFTY_DMA_DRVR_BLKM_MOVE_1,
++      .CH.ADICR.B.SCBE    = (uint32) SFTY_DMA_DRVR_SCBE_ENABLE,                    /*Source Circular Buffer*/
++      .CH.ADICR.B.DCBE    = (uint32) SFTY_DMA_DRVR_DCBE_ENABLE,                    /*Destination Circular Buffer*/
++      .CH.ADICR.B.SMF     = (uint32) SFTY_DMA_DRVR_SMF_BY_1DW,
++      .CH.ADICR.B.DMF     = (uint32) SFTY_DMA_DRVR_DMF_BY_2DW,
++      .CH.ADICR.B.INCS    = (uint32) SFTY_DMA_DRVR_INCS_INCREMENT,
++      .CH.ADICR.B.INCD    = (uint32) SFTY_DMA_DRVR_INCD_INCREMENT,
++      .CH.ADICR.B.CBLS    = (uint32) SFTY_DMA_DRVR_CBLS_NO_CIRBUF,
++      .CH.ADICR.B.CBLD    = (uint32) SFTY_DMA_DRVR_CBLD_CIRBUF_16BYTE,
++      .CH.ADICR.B.STAMP   = (uint32) SFTY_DMA_DRVR_STAMP_DISABLE,                   /*Time Stamp*/
++      .CH.ADICR.B.IRDV    = 0U,                                                    /*Interrupt Raise Detect Value*/
++      .CH.ADICR.B.INTCT   = (uint32) SFTY_DMA_DRVR_INTCT_TRG_ON_IRDV_MATCH,        /*Enable Interrupt or Daisy Chain Event at IRDV = TOUNT*/
++      .CH.ADICR.B.SHCT    = (uint32) SFTY_DMA_DRVR_SHCT_NO_SHADOW,                 /*source/destination registers written directly*/
++      .CH.SHADR.U         = (uint32) SFTY_DMA_DRVR_SHADR_NOT_USED ,                /*shadow register, only valid if activated by SHCT*/
++      .TSR.B.ECH          = (uint32) SFTY_DMA_DRVR_ECH_ENABLE,                     /*Enable HW Requests (will set TSRz.HTRE high)*/
++      .SRC.U              = 0U,                                                    /*service request control register, see point 15.4.3.4 of MANUAL*/
++      .HRR.B.HRP          = (uint32) SFTY_DMA_DRVR_HWRES_PARTITION_0,              /*Hardware Resource Register*/
++   },
++
++
++
++
+ };
+ #define SFTY_DMA_DRVR_STOP_SEC_CONST_AREA_0
+ /* Message: Use of #include directive after code fragment.
+'

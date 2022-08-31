@@ -1,0 +1,25 @@
+b'commit fc5650fa61f0390cedab19095fd664727da8dc82
+Author: Sapthagiri GUDIHALLI (JV) <sapthagiri.gudihalli.jv@valeo.com>
+Date:   Tue Dec 7 14:29:37 2021 +0100
+
+    $100kW-45359$ - ECU state is not updating to Sleep mode and stays ate EMM_PREPARESLEEP_MODE in INCA
+    
+    Change-Id: I84cc7a3e8b57f5378dd0fa66fde48342de52c37d
+
+diff --git a/src/fw_cu/Components/Cmn/MngModes/EMM/src/emm.c b/src/fw_cu/Components/Cmn/MngModes/EMM/src/emm.c
+index 670a02913..5c081797f 100644
+--- a/src/fw_cu/Components/Cmn/MngModes/EMM/src/emm.c
++++ b/src/fw_cu/Components/Cmn/MngModes/EMM/src/emm.c
+@@ -509,9 +509,8 @@ FUNC(void, EMM_CODE)  Emm_Init(void)
+ /*****************************************************************************/
+  LOCAL_INLINE FUNC(void, EMM_CODE)  Emm_PrepareSleepMode(void)
+ {
+-   /* Send the last CAN message with Mode = SLEEP*/
+-    Emm_OutputData.StateEcuAct = StateEcuActValues[EMM_SLEEP_MODE].stateEcuAct;
+-   (void)EMM_SENDSTATEINVACT(Emm_OutputData.StateEcuAct);
++   /* Set the Emm_Current mode to SLEEP*/
++   EMM_RequestNewMode(EMM_SLEEP_MODE);
+ 
+    /* Start the shutdown sequence for BswM */
+    EMM_BswMShutdownRequest();
+'

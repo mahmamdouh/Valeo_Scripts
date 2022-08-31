@@ -1,0 +1,2373 @@
+b'commit 929e18c2e5dbba84732b46b248681de6b83efcab
+Author: Yunpeng DONG (JV) <yunpeng.dong.jv@valeo.com>
+Date:   Wed Apr 6 11:14:56 2022 +0800
+
+    $100kW-55287$ - [CR B03] FCT_DchaSysSw - Release Unit Construction
+    
+    Change-Id: Ic12d7e100cb15f39c781bff47e44d8f457d55b3e
+
+diff --git a/src/fw_cu/Components/Safety/Sfty_Cmn/Sfty_Common/include/SftyReplcmt_data.h b/src/fw_cu/Components/Safety/Sfty_Cmn/Sfty_Common/include/SftyReplcmt_data.h
+index c506ef951..c3fd77864 100644
+--- a/src/fw_cu/Components/Safety/Sfty_Cmn/Sfty_Common/include/SftyReplcmt_data.h
++++ b/src/fw_cu/Components/Safety/Sfty_Cmn/Sfty_Common/include/SftyReplcmt_data.h
+@@ -3153,6 +3153,101 @@ extern CONST(uint8, SFTYSPDMON_CALIB) SftyReplcmtSpdMonAgVldyFlg;
+ #include "MemMap.h"
+ 
+ extern CONST(float32, SFTYSPDMON_CALIB) SftyReplcmtSpdMonMeclSpdFild;
++#define SFTYREPLCMT_STOP_SEC_CALIB_32
++#include "MemMap.h"
++#define SFTYREPLCMT_START_SEC_CALIB_8
++#include "MemMap.h"
++
++extern CONST(uint8, SFTYREPLCMT_CALIB) SftyReplcmtActvDchaCtrlFltStiEna;
++
++#define SFTYREPLCMT_STOP_SEC_CALIB_8
++#include "MemMap.h"
++
++#define SFTYREPLCMT_START_SEC_CALIB_8
++#include "MemMap.h"
++
++extern CONST(uint8, SFTYREPLCMT_CALIB) SftyReplcmtActvDchaCtrlHvDcVoltStiEna;
++
++#define SFTYREPLCMT_STOP_SEC_CALIB_8
++#include "MemMap.h"
++
++#define SFTYREPLCMT_START_SEC_CALIB_8
++#include "MemMap.h"
++
++extern CONST(uint8, SFTYREPLCMT_CALIB) SftyReplcmtActvDchaCtrlCanE2eStiEna;
++
++#define SFTYREPLCMT_STOP_SEC_CALIB_8
++#include "MemMap.h"
++
++#define SFTYREPLCMT_START_SEC_CALIB_8
++#include "MemMap.h"
++
++extern CONST(uint8, SFTYREPLCMT_CALIB) SftyReplcmtActvDchaCtrlSftyErrDebStiEna;
++
++#define SFTYREPLCMT_STOP_SEC_CALIB_8
++#include "MemMap.h"
++
++#define SFTYREPLCMT_START_SEC_CALIB_8
++#include "MemMap.h"
++
++extern CONST(uint8, SFTYREPLCMT_CALIB) SftyReplcmtActvDchaCtrlActvFlt;
++
++#define SFTYREPLCMT_STOP_SEC_CALIB_8
++#include "MemMap.h"
++
++#define SFTYREPLCMT_START_SEC_CALIB_8
++#include "MemMap.h"
++
++extern CONST(uint8, SFTYREPLCMT_CALIB) SftyReplcmtActvDchaCtrlInactvFlt;
++
++#define SFTYREPLCMT_STOP_SEC_CALIB_8
++#include "MemMap.h"
++
++#define SFTYREPLCMT_START_SEC_CALIB_8
++#include "MemMap.h"
++
++extern CONST(uint8, SFTYREPLCMT_CALIB) SftyReplcmtActvDchaCtrlBattCntctrSt;
++
++#define SFTYREPLCMT_STOP_SEC_CALIB_8
++#include "MemMap.h"
++
++#define SFTYREPLCMT_START_SEC_CALIB_8
++#include "MemMap.h"
++
++extern CONST(uint8, SFTYREPLCMT_CALIB) SftyReplcmtActvDchaCtrlE2eReq;
++
++#define SFTYREPLCMT_STOP_SEC_CALIB_8
++#include "MemMap.h"
++
++#define SFTYREPLCMT_START_SEC_CALIB_8
++#include "MemMap.h"
++
++extern CONST(uint8, SFTYREPLCMT_CALIB) SftyReplcmtActvDchaCtrlFctIdActDcha;
++
++#define SFTYREPLCMT_STOP_SEC_CALIB_8
++#include "MemMap.h"
++
++#define SFTYREPLCMT_START_SEC_CALIB_8
++#include "MemMap.h"
++
++extern CONST(uint8, SFTYREPLCMT_CALIB) SftyReplcmtActvDchaCtrlFctIdCanVcuInvStat1;
++
++#define SFTYREPLCMT_STOP_SEC_CALIB_8
++#include "MemMap.h"
++
++#define SFTYREPLCMT_START_SEC_CALIB_8
++#include "MemMap.h"
++
++extern CONST(uint8, SFTYREPLCMT_CALIB) SftyReplcmtActvDchaCtrlFctIdActvDchaCanFailr; 
++
++#define SFTYREPLCMT_STOP_SEC_CALIB_8
++#include "MemMap.h"
++
++#define SFTYREPLCMT_START_SEC_CALIB_32
++#include "MemMap.h"
++
++extern CONST(float32, SFTYREPLCMT_CALIB) SftyReplcmtActvDchaCtrlHvDcVolt; 
++
+ #define SFTYREPLCMT_STOP_SEC_CALIB_32
+ #include "MemMap.h"
+ #endif
+diff --git a/src/fw_cu/Components/Safety/Sfty_Cmn/Sfty_Common/src/SftyReplcmt_data.c b/src/fw_cu/Components/Safety/Sfty_Cmn/Sfty_Common/src/SftyReplcmt_data.c
+index d2730076a..667250360 100644
+--- a/src/fw_cu/Components/Safety/Sfty_Cmn/Sfty_Common/src/SftyReplcmt_data.c
++++ b/src/fw_cu/Components/Safety/Sfty_Cmn/Sfty_Common/src/SftyReplcmt_data.c
+@@ -3726,6 +3726,242 @@ CONST(uint8, SFTYSPDMON_CALIB) SftyReplcmtSpdMonAgVldyFlg = 0u;
+ #define SFTYREPLCMT_STOP_SEC_CALIB_8
+ #include "MemMap.h"
+ 
++/* Begin: SFTYREPLCMT_START_SEC_CALIB_8 (calib) */
++#define SFTYREPLCMT_START_SEC_CALIB_8
++#include "MemMap.h"
++
++/*
++@@ SYMBOL = SftyReplcmtActvDchaCtrlFltStiEna
++@@ A2L_TYPE = PARAMETER
++@@ DATA_TYPE = UBYTE [0 ... 1]
++@@ CONVERSION = TABLE 0 "Disable" 1 "Enable"
++@@ DESCRIPTION = "Enable stimulation of Active Disharge Fault Status from SftyE2eFpga module"
++@@ GROUP = SftyActvDchaCtrl
++@@ END
++*/
++CONST(uint8, SFTYREPLCMT_CALIB) SftyReplcmtActvDchaCtrlFltStiEna = FALSE;
++
++#define SFTYREPLCMT_STOP_SEC_CALIB_8
++#include "MemMap.h"
++/* End: SFTYREPLCMT_STOP_SEC_CALIB_8 (calib) */
++
++
++/* Begin: SFTYREPLCMT_START_SEC_CALIB_8 (calib) */
++#define SFTYREPLCMT_START_SEC_CALIB_8
++#include "MemMap.h"
++
++/*
++@@ SYMBOL = SftyReplcmtActvDchaCtrlHvDcVoltStiEna
++@@ A2L_TYPE = PARAMETER
++@@ DATA_TYPE = UBYTE [0 ... 1]
++@@ CONVERSION = TABLE 0 "Disable" 1 "Enable"
++@@ DESCRIPTION = "Enable stimulation of HvDcU Physical Value from SftyHvDcUEvln module"
++@@ GROUP = SftyActvDchaCtrl
++@@ END
++*/
++CONST(uint8, SFTYREPLCMT_CALIB) SftyReplcmtActvDchaCtrlHvDcVoltStiEna = FALSE;
++
++#define SFTYREPLCMT_STOP_SEC_CALIB_8
++#include "MemMap.h"
++/* End: SFTYREPLCMT_STOP_SEC_CALIB_8 (calib) */
++
++
++/* Begin: SFTYREPLCMT_START_SEC_CALIB_8 (calib) */
++#define SFTYREPLCMT_START_SEC_CALIB_8
++#include "MemMap.h"
++
++/*
++@@ SYMBOL = SftyReplcmtActvDchaCtrlCanE2eStiEna
++@@ A2L_TYPE = PARAMETER
++@@ DATA_TYPE = UBYTE [0 ... 1]
++@@ CONVERSION = TABLE 0 "Disable" 1 "Enable"
++@@ DESCRIPTION = "Enable stimulation of input interface from SftyE2e module"
++@@ GROUP = SftyActvDchaCtrl
++@@ END
++*/
++CONST(uint8, SFTYREPLCMT_CALIB) SftyReplcmtActvDchaCtrlCanE2eStiEna = FALSE;
++
++#define SFTYREPLCMT_STOP_SEC_CALIB_8
++#include "MemMap.h"
++/* End: SFTYREPLCMT_STOP_SEC_CALIB_8 (calib) */
++
++
++/* Begin: SFTYREPLCMT_START_SEC_CALIB_8 (calib) */
++#define SFTYREPLCMT_START_SEC_CALIB_8
++#include "MemMap.h"
++
++/*
++@@ SYMBOL = SftyReplcmtActvDchaCtrlSftyErrDebStiEna
++@@ A2L_TYPE = PARAMETER
++@@ DATA_TYPE = UBYTE [0 ... 1]
++@@ CONVERSION = TABLE 0 "Disable" 1 "Enable"
++@@ DESCRIPTION = "Enable stimulation of input interface from SftyErrDeb module"
++@@ GROUP = SftyActvDchaCtrl
++@@ END
++*/
++CONST(uint8, SFTYREPLCMT_CALIB) SftyReplcmtActvDchaCtrlSftyErrDebStiEna = FALSE;
++
++#define SFTYREPLCMT_STOP_SEC_CALIB_8
++#include "MemMap.h"
++/* End: SFTYREPLCMT_STOP_SEC_CALIB_8 (calib) */
++
++
++
++
++/* Begin: SFTYREPLCMT_START_SEC_CALIB_8 (calib) */
++#define SFTYREPLCMT_START_SEC_CALIB_8
++#include "MemMap.h"
++
++/*
++@@ SYMBOL = SftyReplcmtActvDchaCtrlActvFlt
++@@ A2L_TYPE = PARAMETER
++@@ DATA_TYPE = UBYTE [0 ... 1]
++@@ CONVERSION = TABLE 0 "Fault" 1 "No_Fault"
++@@ DESCRIPTION = "Replacement value for Fault state of Activate ActiveDischarge safety guarded by E2E"
++@@ GROUP = SftyActvDchaCtrl
++@@ END
++*/
++CONST(uint8, SFTYREPLCMT_CALIB) SftyReplcmtActvDchaCtrlActvFlt = 1u;
++
++#define SFTYREPLCMT_STOP_SEC_CALIB_8
++#include "MemMap.h"
++/* End: SFTYREPLCMT_STOP_SEC_CALIB_8 (calib) */
++
++
++/* Begin: SFTYREPLCMT_START_SEC_CALIB_8 (calib) */
++#define SFTYREPLCMT_START_SEC_CALIB_8
++#include "MemMap.h"
++
++/*
++@@ SYMBOL = SftyReplcmtActvDchaCtrlInactvFlt
++@@ A2L_TYPE = PARAMETER
++@@ DATA_TYPE = UBYTE [0 ... 1]
++@@ CONVERSION = TABLE 0 "Fault" 1 "No_Fault"
++@@ DESCRIPTION = "Replacement value for Fault state of inactivate ActiveDischarge safety guarded by E2E"
++@@ GROUP = SftyActvDchaCtrl
++@@ END
++*/
++CONST(uint8, SFTYREPLCMT_CALIB) SftyReplcmtActvDchaCtrlInactvFlt = 1u;
++
++#define SFTYREPLCMT_STOP_SEC_CALIB_8
++#include "MemMap.h"
+ /* End: SFTYREPLCMT_STOP_SEC_CALIB_8 (calib) */
+ 
+ 
++/* Begin: SFTYREPLCMT_START_SEC_CALIB_8 (calib) */
++#define SFTYREPLCMT_START_SEC_CALIB_8
++#include "MemMap.h"
++
++/*
++@@ SYMBOL = SftyReplcmtActvDchaCtrlBattCntctrSt
++@@ A2L_TYPE = PARAMETER
++@@ DATA_TYPE = UBYTE [0 ... 1]
++@@ CONVERSION = TABLE 0 "Open" 1 "Close"
++@@ DESCRIPTION = "Replacement value for Hv Battery Contactor Status from SftyE2e module"
++@@ GROUP = SftyActvDchaCtrl
++@@ END
++*/
++CONST(uint8, SFTYREPLCMT_CALIB) SftyReplcmtActvDchaCtrlBattCntctrSt = 0u;
++
++#define SFTYREPLCMT_STOP_SEC_CALIB_8
++#include "MemMap.h"
++/* End: SFTYREPLCMT_STOP_SEC_CALIB_8 (calib) */
++
++
++/* Begin: SFTYREPLCMT_START_SEC_CALIB_8 (calib) */
++#define SFTYREPLCMT_START_SEC_CALIB_8
++#include "MemMap.h"
++
++/*
++@@ SYMBOL = SftyReplcmtActvDchaCtrlE2eReq
++@@ A2L_TYPE = PARAMETER
++@@ DATA_TYPE = UBYTE [0 ... 1]
++@@ CONVERSION = TABLE 0 "No Adis Request" 1 "Adis Request"
++@@ DESCRIPTION = "Replacement value for Active Discharge request from SftyE2e module"
++@@ GROUP = SftyActvDchaCtrl
++@@ END
++*/
++CONST(uint8, SFTYREPLCMT_CALIB) SftyReplcmtActvDchaCtrlE2eReq = 0u;
++
++#define SFTYREPLCMT_STOP_SEC_CALIB_8
++#include "MemMap.h"
++/* End: SFTYREPLCMT_STOP_SEC_CALIB_8 (calib) */
++
++
++/* Begin: SFTYREPLCMT_START_SEC_CALIB_8 (calib) */
++#define SFTYREPLCMT_START_SEC_CALIB_8
++#include "MemMap.h"
++
++/*
++@@ SYMBOL = SftyReplcmtActvDchaCtrlFctIdActDcha
++@@ A2L_TYPE = PARAMETER
++@@ DATA_TYPE = UBYTE [0 ... 1]
++@@ CONVERSION = TABLE 0 "No Adis Request" 1 "Adis Request"
++@@ DESCRIPTION = "Replacement value for Local Variable that FID to trigger Active Discharge"
++@@ GROUP = SftyActvDchaCtrl
++@@ END
++*/
++CONST(uint8, SFTYREPLCMT_CALIB) SftyReplcmtActvDchaCtrlFctIdActDcha = 0u;
++
++#define SFTYREPLCMT_STOP_SEC_CALIB_8
++#include "MemMap.h"
++/* End: SFTYREPLCMT_STOP_SEC_CALIB_8 (calib) */
++
++
++/* Begin: SFTYREPLCMT_START_SEC_CALIB_8 (calib) */
++#define SFTYREPLCMT_START_SEC_CALIB_8
++#include "MemMap.h"
++
++/*
++@@ SYMBOL = SftyReplcmtActvDchaCtrlFctIdCanVcuInvStat1
++@@ A2L_TYPE = PARAMETER
++@@ DATA_TYPE = UBYTE [0 ... 1]
++@@ CONVERSION = TABLE 0 "No Adis Request" 1 "Adis Request"
++@@ DESCRIPTION = "Replacement value for Local Variable that FID to indicate VcuInvCtrl1 CAN frame failure"
++@@ GROUP = SftyActvDchaCtrl
++@@ END
++*/
++CONST(uint8, SFTYREPLCMT_CALIB) SftyReplcmtActvDchaCtrlFctIdCanVcuInvStat1 = 0u;
++
++#define SFTYREPLCMT_STOP_SEC_CALIB_8
++#include "MemMap.h"
++/* End: SFTYREPLCMT_STOP_SEC_CALIB_8 (calib) */
++
++
++/* Begin: SFTYREPLCMT_START_SEC_CALIB_8 (calib) */
++#define SFTYREPLCMT_START_SEC_CALIB_8
++#include "MemMap.h"
++
++/*
++@@ SYMBOL = SftyReplcmtActvDchaCtrlFctIdActvDchaCanFailr
++@@ A2L_TYPE = PARAMETER
++@@ DATA_TYPE = UBYTE [0 ... 1]
++@@ CONVERSION = TABLE 0 "No Adis Request" 1 "Adis Request"
++@@ DESCRIPTION = "Replacement value for Local Variable that FID to trigger Active discharge during CAN failure conditions"
++@@ GROUP = SftyActvDchaCtrl
++@@ END
++*/
++CONST(uint8, SFTYREPLCMT_CALIB) SftyReplcmtActvDchaCtrlFctIdActvDchaCanFailr = 0u;
++
++#define SFTYREPLCMT_STOP_SEC_CALIB_8
++#include "MemMap.h"
++/* End: SFTYREPLCMT_STOP_SEC_CALIB_8 (calib) */
++
++
++/* Begin: SFTYREPLCMT_START_SEC_CALIB_32 (calib) */
++#define SFTYREPLCMT_START_SEC_CALIB_32
++#include "MemMap.h"
++
++/*
++@@ SYMBOL = SftyReplcmtActvDchaCtrlHvDcVolt
++@@ A2L_TYPE = PARAMETER
++@@ DATA_TYPE = FLOAT [0.00 ... 914.00]
++@@ DESCRIPTION = "Replacement value for HvDcU Physical Value in Voltage"
++@@ GROUP = SftyActvDchaCtrl
++@@ END
++*/
++CONST(float32, SFTYREPLCMT_CALIB) SftyReplcmtActvDchaCtrlHvDcVolt = 0.0f;
++
++#define SFTYREPLCMT_STOP_SEC_CALIB_32
++#include "MemMap.h"
++/* End: SFTYREPLCMT_STOP_SEC_CALIB_32 (calib) */
+diff --git a/src/fw_cu/Components/Safety/Sfty_Inv/SftyActvDchaCtrl/include/SftyActvDchaCtrl_data.h b/src/fw_cu/Components/Safety/Sfty_Inv/SftyActvDchaCtrl/include/SftyActvDchaCtrl_data.h
+index 66d386d67..838b70e49 100644
+--- a/src/fw_cu/Components/Safety/Sfty_Inv/SftyActvDchaCtrl/include/SftyActvDchaCtrl_data.h
++++ b/src/fw_cu/Components/Safety/Sfty_Inv/SftyActvDchaCtrl/include/SftyActvDchaCtrl_data.h
+@@ -82,11 +82,11 @@
+   
+ /*================== [Type Definitions] =====================================*/
+ 
+-typedef struct SftyActvDchaPrmDataType_
++typedef struct SftyActvDchaCtrlPrmType_
+ {
+    /*
+    @@ ELEMENT = VbatMinThd
+-   @@ STRUCTURE = SftyActvDchaPrmDataType
++   @@ STRUCTURE = SftyActvDchaCtrlPrmType
+    @@ A2L_TYPE = PARAMETER
+    @@ DATA_TYPE = FLOAT [0.00 ... 600.00]
+    @@ DESCRIPTION = "Min battery voltage for checking the internal trigger condition of active discharge by Resistor"
+@@ -97,7 +97,7 @@ typedef struct SftyActvDchaPrmDataType_
+ 
+    /*
+    @@ ELEMENT = HvDcVoltThd
+-   @@ STRUCTURE = SftyActvDchaPrmDataType
++   @@ STRUCTURE = SftyActvDchaCtrlPrmType
+    @@ A2L_TYPE = PARAMETER
+    @@ DATA_TYPE = FLOAT [0.00 ... 100.00]
+    @@ DESCRIPTION = "HVDC voltage threshold for determining the successful of active discharge"
+@@ -108,7 +108,7 @@ typedef struct SftyActvDchaPrmDataType_
+ 
+    /*
+    @@ ELEMENT = HvDcVoltTole
+-   @@ STRUCTURE = SftyActvDchaPrmDataType
++   @@ STRUCTURE = SftyActvDchaCtrlPrmType
+    @@ A2L_TYPE = PARAMETER
+    @@ DATA_TYPE = FLOAT [0.00 ... 10.0]
+    @@ DESCRIPTION = "HVDC accuracy tolerance for active discharge target voltage"
+@@ -118,85 +118,85 @@ typedef struct SftyActvDchaPrmDataType_
+    float32 HvDcVoltTole;
+ 
+    /*
+-   @@ ELEMENT = AdisByRRtryDurnTimThd
+-   @@ STRUCTURE = SftyActvDchaPrmDataType
++   @@ ELEMENT = RtryDurnTiThd
++   @@ STRUCTURE = SftyActvDchaCtrlPrmType
+    @@ A2L_TYPE = PARAMETER
+    @@ DATA_TYPE = UBYTE [0 ... 200]
+    @@ DESCRIPTION = "The duration between 2 times resistor discharge"
+    @@ GROUP = SftyActvDchaCtrl
+    @@ END
+    */
+-   uint8 AdisByRRtryDurnTimThd;
++   uint8 RtryDurnTiThd;
+ 
+    /*
+-   @@ ELEMENT = DeltaTimAdisByRThd
+-   @@ STRUCTURE = SftyActvDchaPrmDataType
++   @@ ELEMENT = DeltaTiThd
++   @@ STRUCTURE = SftyActvDchaCtrlPrmType
+    @@ A2L_TYPE = PARAMETER
+    @@ DATA_TYPE = UBYTE [0 ... 200]
+    @@ DESCRIPTION = "Delta time for dV/dt check for active discharge by resistor"
+    @@ GROUP = SftyActvDchaCtrl
+    @@ END
+    */
+-   uint8 DeltaTimAdisByRThd;
++   uint8 DeltaTiThd;
+ 
+    /*
+-   @@ ELEMENT = DvDtChkDelayTimAdisByRThd
+-   @@ STRUCTURE = SftyActvDchaPrmDataType
++   @@ ELEMENT = DvDtDelayTiThd
++   @@ STRUCTURE = SftyActvDchaCtrlPrmType
+    @@ A2L_TYPE = PARAMETER
+    @@ DATA_TYPE = UBYTE [0 ... 100]
+    @@ DESCRIPTION = "The delay time for start checking the dv/dt for active discharge by resistor"
+    @@ GROUP = SftyActvDchaCtrl
+    @@ END
+    */
+-   uint8 DvDtChkDelayTimAdisByRThd;  
++   uint8 DvDtDelayTiThd;  
+ 
+    /*
+-   @@ ELEMENT = AdisByREnaDvThd
+-   @@ STRUCTURE = SftyActvDchaPrmDataType
++   @@ ELEMENT = DvThd
++   @@ STRUCTURE = SftyActvDchaCtrlPrmType
+    @@ A2L_TYPE = PARAMETER
+    @@ DATA_TYPE = FLOAT [0.00 ... 200.00]
+    @@ DESCRIPTION = "The dV threshold when active discharge by resistor is enable"
+    @@ GROUP = SftyActvDchaCtrl
+    @@ END
+    */
+-   float32 AdisByREnaDvThd;
++   float32 DvThd;
+ 
+    /*
+-   @@ ELEMENT = EffeChkFailTimeByRInRowThd
+-   @@ STRUCTURE = SftyActvDchaPrmDataType
++   @@ ELEMENT = EfcContsFailTiThd
++   @@ STRUCTURE = SftyActvDchaCtrlPrmType
+    @@ A2L_TYPE = PARAMETER
+    @@ DATA_TYPE = UBYTE [0 ... 10]
+    @@ DESCRIPTION = "The maximum fail times for checking the dv/dt of active discharge by resistor in a row"
+    @@ GROUP = SftyActvDchaCtrl
+    @@ END
+    */
+-   uint8 EffeChkFailTimeByRInRowThd;
++   uint8 EfcContsFailTiThd;
+ 
+    /*
+-   @@ ELEMENT = EffeChkFailTimeByRTotThd
+-   @@ STRUCTURE = SftyActvDchaPrmDataType
++   @@ ELEMENT = EfcFltTotalThd
++   @@ STRUCTURE = SftyActvDchaCtrlPrmType
+    @@ A2L_TYPE = PARAMETER
+    @@ DATA_TYPE = UBYTE [0 ... 20]
+    @@ DESCRIPTION = "The maximum fail times for checking the dv/dt of active discharge by resistor total"
+    @@ GROUP = SftyActvDchaCtrl
+    @@ END
+    */
+-   uint8 EffeChkFailTimeByRTotThd;
++   uint8 EfcFltTotalThd;
+ 
+    /*
+-   @@ ELEMENT = EffeChkTotalFailTimesByRTimThd
+-   @@ STRUCTURE = SftyActvDchaPrmDataType
++   @@ ELEMENT = EfcFltTiThd
++   @@ STRUCTURE = SftyActvDchaCtrlPrmType
+    @@ A2L_TYPE = PARAMETER
+    @@ DATA_TYPE = FLOAT [0.00 ... 20.00]
+    @@ DESCRIPTION = "The limited time for the total fail times of Dv/Dt"
+    @@ GROUP = SftyActvDchaCtrl
+    @@ END
+    */
+-   float32 EffeChkTotalFailTimesByRTimThd;
++   float32 EfcFltTiThd;
+ 
+    /*
+    @@ ELEMENT = HvDcVoltHys
+-   @@ STRUCTURE = SftyActvDchaPrmDataType
++   @@ STRUCTURE = SftyActvDchaCtrlPrmType
+    @@ A2L_TYPE = PARAMETER
+    @@ DATA_TYPE = FLOAT [0.00 ... 20.00]
+    @@ DESCRIPTION = "The HVDC voltage hysteresis for ending active discharge"
+@@ -206,28 +206,28 @@ typedef struct SftyActvDchaPrmDataType_
+    float32 HvDcVoltHys;
+ 
+    /*
+-   @@ ELEMENT = AdisFaultTimeThd
+-   @@ STRUCTURE = SftyActvDchaPrmDataType
++   @@ ELEMENT = FltTiThd
++   @@ STRUCTURE = SftyActvDchaCtrlPrmType
+    @@ A2L_TYPE = PARAMETER
+    @@ DATA_TYPE = UBYTE [0 ... 10]
+    @@ DESCRIPTION = "The time threshold for determining the failure of active discharge"
+    @@ GROUP = SftyActvDchaCtrl
+    @@ END
+    */
+-   uint8 AdisFaultTimeThd;
++   uint8 FltTiThd;
+ 
+    /*
+-   @@ ELEMENT = AdisByRTimeThd
+-   @@ STRUCTURE = SftyActvDchaPrmDataType
++   @@ ELEMENT = TiThd
++   @@ STRUCTURE = SftyActvDchaCtrlPrmType
+    @@ A2L_TYPE = PARAMETER
+    @@ DATA_TYPE = UBYTE [0 ... 10]
+    @@ DESCRIPTION = "The required time of active discharge by Resistor"
+    @@ GROUP = SftyActvDchaCtrl
+    @@ END
+    */
+-   uint8 AdisByRTimeThd;
++   uint8 TiThd;
+ 
+-}SftyActvDchaPrmDataType;
++}SftyActvDchaCtrlPrmType;
+    
+    
+    
+@@ -315,7 +315,7 @@ extern VAR(uint8, SFTYACTVDCHACTRL_VAR) SftyActvDchaCtrlFctIdActvDchaCanFailr;
+ #define SFTYACTVDCHACTRL_START_SEC_VAR_AREA_CMN_FAST_INIT_8
+ #include "MemMap.h"
+ 
+-extern VAR(uint8, SFTYACTVDCHACTRL_VAR) SftyActvDchaCtrlEfcErrMonrStIntel;
++extern VAR(uint8, SFTYACTVDCHACTRL_VAR) SftyActvDchaCtrlEfcIntelMonrSt;
+ 
+ #define SFTYACTVDCHACTRL_STOP_SEC_VAR_AREA_CMN_FAST_INIT_8
+ #include "MemMap.h"
+@@ -326,7 +326,7 @@ extern VAR(uint8, SFTYACTVDCHACTRL_VAR) SftyActvDchaCtrlEfcErrMonrStIntel;
+ #define SFTYACTVDCHACTRL_START_SEC_VAR_AREA_CMN_FAST_INIT_8
+ #include "MemMap.h"
+ 
+-extern VAR(uint8, SFTYACTVDCHACTRL_VAR) SftyActvDchaCtrlFltErrMonrStIntel;
++extern VAR(uint8, SFTYACTVDCHACTRL_VAR) SftyActvDchaCtrlFltIntelMonrSt;
+ 
+ #define SFTYACTVDCHACTRL_STOP_SEC_VAR_AREA_CMN_FAST_INIT_8
+ #include "MemMap.h"
+@@ -426,63 +426,22 @@ extern VAR(uint8, SFTYACTVDCHACTRL_VAR) SftyActvDchaCtrlFltErrMonrSt;
+ #define SFTYACTVDCHACTRL_START_SEC_CALIB_32
+ #include "MemMap.h"
+ 
+-extern CONST(SftyActvDchaPrmDataType, SFTYACTVDCHACTRL_CONST) SftyActvDchaPrmData;
++extern CONST(SftyActvDchaCtrlPrmType, SFTYACTVDCHACTRL_CONST) SftyActvDchaCtrlPrm;
+ 
+ #define SFTYACTVDCHACTRL_STOP_SEC_CALIB_32
+ #include "MemMap.h"
+ /* End: SFTYACTVDCHACTRL_STOP_SEC_CALIB_32 (calib) */
+ 
+-
+-/* ********************* End Of Declaration Of Calibration Variables ********************* */
+-
+-
+-
+-
+-
+-/* ********************* Declaration Of Replace Variables For Debug ********************* */
+-
+-
+-/* ********************* SEC_CALIB_8 ********************* */
+-
+-/* Begin: SFTYREPLCMT_START_SEC_CALIB_8 (calib) */
+-#define SFTYREPLCMT_START_SEC_CALIB_8
+-#include "MemMap.h"
+-
+-
+-extern CONST(uint8, SFTYREPLCMT_CALIB) SftyReplcmtActvDchaCtrlAdisFltStiEna;
+-extern CONST(uint8, SFTYREPLCMT_CALIB) SftyReplcmtActvDchaCtrlHvDcVoltStiEna;
+-extern CONST(uint8, SFTYREPLCMT_CALIB) SftyReplcmtActvDchaCtrlCanE2eIpStiEna;
+-extern CONST(uint8, SFTYREPLCMT_CALIB) SftyReplcmtActvDchaCtrlSftyErrDebIpStiEna;
+-
+-extern CONST(uint8, SFTYREPLCMT_CALIB) SftyReplcmtActvDchaCtrlActvFlt;
+-extern CONST(uint8, SFTYREPLCMT_CALIB) SftyReplcmtActvDchaCtrlInactvFlt;
+-extern CONST(uint8, SFTYREPLCMT_CALIB) SftyReplcmtActvDchaCtrlBattCntctrSt;
+-extern CONST(uint8, SFTYREPLCMT_CALIB) SftyReplcmtActvDchaCtrlE2eReq;
+-extern CONST(uint8, SFTYREPLCMT_CALIB) SftyReplcmtActvDchaCtrlFctIdActDcha;
+-extern CONST(uint8, SFTYREPLCMT_CALIB) SftyReplcmtActvDchaCtrlFctIdCanVcuInvStat1;
+-extern CONST(uint8, SFTYREPLCMT_CALIB) SftyReplcmtActvDchaCtrlFctIdActvDchaCanFailr; /* PRQA S 0777 # variable name does differ from other identifier */
+-
+-
+-#define SFTYREPLCMT_STOP_SEC_CALIB_8
++/* ********************* Calibration Variables ********************* */
++/* Begin: SFTYACTVDCHACTRL_START_SEC_CALIB_8 (calib) */
++#define SFTYACTVDCHACTRL_START_SEC_CALIB_8
+ #include "MemMap.h"
+-/* End: SFTYREPLCMT_STOP_SEC_CALIB_8 (calib) */
+-
+ 
+-/* ********************* SEC_CALIB_32 ********************* */
++extern CONST(uint8, SFTYACTVDCHACTRL_CONST) SftyActvDchaCtrlReqCmdCntThd;
+ 
+-/* Begin: SFTYREPLCMT_START_SEC_CALIB_32 (calib) */
+-#define SFTYREPLCMT_START_SEC_CALIB_32
++#define SFTYACTVDCHACTRL_STOP_SEC_CALIB_8
+ #include "MemMap.h"
+-
+-extern CONST(float32, SFTYREPLCMT_CALIB) SftyReplcmtActvDchaCtrlHvDcVolt; /* PRQA S 0777 # variable name does differ from other identifier */
+-
+-#define SFTYREPLCMT_STOP_SEC_CALIB_32
+-#include "MemMap.h"
+-/* End: SFTYREPLCMT_STOP_SEC_CALIB_32 (calib) */
+-
+-
+-/* ********************* End Of Replace Variables For Debug ********************* */
+-
++/* End: SFTYACTVDCHACTRL_STOP_SEC_CALIB_8 (calib) */
+ 
+ /*============================== End Of [Declaration for Calibration Variables] ==============================*/
+ 
+diff --git a/src/fw_cu/Components/Safety/Sfty_Inv/SftyActvDchaCtrl/src/SftyActvDchaCtrl.c b/src/fw_cu/Components/Safety/Sfty_Inv/SftyActvDchaCtrl/src/SftyActvDchaCtrl.c
+index 142c553e7..bee982e70 100644
+--- a/src/fw_cu/Components/Safety/Sfty_Inv/SftyActvDchaCtrl/src/SftyActvDchaCtrl.c
++++ b/src/fw_cu/Components/Safety/Sfty_Inv/SftyActvDchaCtrl/src/SftyActvDchaCtrl.c
+@@ -37,6 +37,7 @@
+ #include "C2cComBswData.h"
+ #include "SftyErrDeb.h" /* PRQA S 0380 # header file necessary; inclusion of macros unavoidable */
+ #include "ErrDeb_cfg.h"
++#include "ErrDeb_cmn.h"
+ #include "SftyE2eRx_cfg.h"
+ #include "SftyE2eRx_data.h"
+ #include "SftyE2eFpga_data.h"
+@@ -44,15 +45,19 @@
+ #include "Mathlib.h"
+ #include "SftyUtils.h"
+ #include <string.h>
++#include "SftyReplcmt_data.h"
+ #if defined( SWIT_FC_Active) || defined( SWIT_Active) || defined( SWIT_IT_Active)
+ #include "SWIT_Sfty.h" 
+ #endif
+ 
+ 
+ /*================== [defines] ================================================*/
++/* active discharge time counter max value */
++#define SFTY_ACTV_DCHA_CTRL_R_TM_CTR_MAX        (0xFFFFFFFFUL)
+ 
+-#define SFTY_ACTV_DCHA_CTRL_ADIS_R_TM_CTR_MAX        (0xFFFFFFFFU)
++/* active discharge efficiency time counter max value */
+ #define SFTY_ACTV_DCHA_CTRL_EFCTV_FAIL_TM_R_CTR_MAX  (0xFFU)
++
+ /*================== [type definitions] =======================================*/
+ 
+ /* Begin: SFTYACTVDCHACTRL_START_SEC_VAR_AREA_CMN_FAST_INIT_8 (online) */
+@@ -60,7 +65,7 @@
+ #include "MemMap.h"
+ 
+ /*
+-@@ SYMBOL = SftyActvDchaCtrlStrtupTestSts
++@@ SYMBOL = SftyActvDchaCtrlStrtupTstSts
+ @@ A2L_TYPE = MEASURE
+ @@ DATA_TYPE = UBYTE [0 ... 2]
+ @@ CONVERSION = TABLE 0 "INACTIVE" 1 "RUNNING" 2 "FINISHED"
+@@ -68,11 +73,11 @@
+ @@ GROUP = SftyActvDchaCtrl
+ @@ END
+ */
+-STATIC VAR(uint8, SFTYACTVDCHACTRL_VAR) SftyActvDchaCtrlStrtupTestSts = ADIS_STRTUP_TEST_INACTIVE;
++STATIC VAR(uint8, SFTYACTVDCHACTRL_VAR) SftyActvDchaCtrlStrtupTstSts = ADIS_STRTUP_TEST_INACTIVE;
+ 
+ 
+ /*
+-@@ SYMBOL = SftyActvDchaCtrlAdisReqCmdHasSent
++@@ SYMBOL = SftyActvDchaCtrlReqSentCmd
+ @@ A2L_TYPE = MEASURE
+ @@ DATA_TYPE = UBYTE [0 ... 1]
+ @@ CONVERSION = TABLE 0 "Not_Send" 1 "Send"
+@@ -80,11 +85,12 @@ STATIC VAR(uint8, SFTYACTVDCHACTRL_VAR) SftyActvDchaCtrlStrtupTestSts = ADIS_STR
+ @@ GROUP = SftyActvDchaCtrl
+ @@ END
+ */
+-STATIC VAR(boolean, SFTYACTVDCHACTRL_VAR) SftyActvDchaCtrlAdisReqCmdHasSent = FALSE;
++STATIC VAR(uint8, SFTYACTVDCHACTRL_VAR) SftyActvDchaCtrlReqSentCmd = FALSE;
++
+ 
+ 
+ /*
+-@@ SYMBOL = SftyActvDchaCtrlActvDchaReqIntel
++@@ SYMBOL = SftyActvDchaCtrlIntReq
+ @@ A2L_TYPE = MEASURE
+ @@ DATA_TYPE = UBYTE [0 ... 1]
+ @@ CONVERSION = TABLE 0 "Deactive" 1 "Active"
+@@ -92,11 +98,11 @@ STATIC VAR(boolean, SFTYACTVDCHACTRL_VAR) SftyActvDchaCtrlAdisReqCmdHasSent = FA
+ @@ GROUP = SftyActvDchaCtrl
+ @@ END
+ */
+-STATIC VAR(uint8, SFTYACTVDCHACTRL_VAR) SftyActvDchaCtrlActvDchaReqIntel = ACTV_DCHA_DEACTVE;
++STATIC VAR(uint8, SFTYACTVDCHACTRL_VAR) SftyActvDchaCtrlIntReq = ACTV_DCHA_DEACTVE;
+ 
+ 
+ /*
+-@@ SYMBOL = SftyActvDchaCtrlActvDchaReqExtel
++@@ SYMBOL = SftyActvDchaCtrlExtReq
+ @@ A2L_TYPE = MEASURE
+ @@ DATA_TYPE = UBYTE [0 ... 1]
+ @@ CONVERSION = TABLE 0 "Deactive" 1 "Active"
+@@ -104,11 +110,11 @@ STATIC VAR(uint8, SFTYACTVDCHACTRL_VAR) SftyActvDchaCtrlActvDchaReqIntel = ACTV_
+ @@ GROUP = SftyActvDchaCtrl
+ @@ END
+ */
+-STATIC VAR(uint8, SFTYACTVDCHACTRL_VAR) SftyActvDchaCtrlActvDchaReqExtel = ACTV_DCHA_DEACTVE;
++STATIC VAR(uint8, SFTYACTVDCHACTRL_VAR) SftyActvDchaCtrlExtReq = ACTV_DCHA_DEACTVE;
+ 
+ 
+ /*
+-@@ SYMBOL = SftyActvDchaCtrlActvDchaReq
++@@ SYMBOL = SftyActvDchaCtrlAdisReq
+ @@ A2L_TYPE = MEASURE
+ @@ DATA_TYPE = UBYTE [0 ... 1]
+ @@ CONVERSION = TABLE 0 "Deactive" 1 "Active"
+@@ -116,11 +122,11 @@ STATIC VAR(uint8, SFTYACTVDCHACTRL_VAR) SftyActvDchaCtrlActvDchaReqExtel = ACTV_
+ @@ GROUP = SftyActvDchaCtrl
+ @@ END
+ */
+-STATIC VAR(uint8, SFTYACTVDCHACTRL_VAR) SftyActvDchaCtrlActvDchaReq = ACTV_DCHA_DEACTVE;
++STATIC VAR(uint8, SFTYACTVDCHACTRL_VAR) SftyActvDchaCtrlAdisReq = ACTV_DCHA_DEACTVE;
+ 
+ 
+ /*
+-@@ SYMBOL = SftyActvDchaCtrlReqAdisByRCmdUpdEna
++@@ SYMBOL = SftyActvDchaCtrlReqCmdUpdEna
+ @@ A2L_TYPE = MEASURE
+ @@ DATA_TYPE = UBYTE [0 ... 1]
+ @@ CONVERSION = TABLE 0 "Disabled" 1 "Enabled"
+@@ -128,11 +134,11 @@ STATIC VAR(uint8, SFTYACTVDCHACTRL_VAR) SftyActvDchaCtrlActvDchaReq = ACTV_DCHA_
+ @@ GROUP = SftyActvDchaCtrl
+ @@ END
+ */
+-STATIC VAR(uint8, SFTYACTVDCHACTRL_VAR) SftyActvDchaCtrlReqAdisByRCmdUpdEna = SFTY_ACTIV_DCHA_DISABLED;
++STATIC VAR(uint8, SFTYACTVDCHACTRL_VAR) SftyActvDchaCtrlReqCmdUpdEna = SFTY_ACTIV_DCHA_DISABLED;
+ 
+ 
+ /*
+-@@ SYMBOL = SftyActvDhaCtrlAdisOperSts
++@@ SYMBOL = SftyActvDchaCtrlOperSts
+ @@ A2L_TYPE = MEASURE
+ @@ DATA_TYPE = UBYTE [0 ... 1]
+ @@ CONVERSION = TABLE 0 "INACTIVE" 1 "RUNNING" 2 "FINISHED"
+@@ -140,55 +146,55 @@ STATIC VAR(uint8, SFTYACTVDCHACTRL_VAR) SftyActvDchaCtrlReqAdisByRCmdUpdEna = SF
+ @@ GROUP = SftyActvDchaCtrl
+ @@ END
+ */
+-STATIC VAR(uint8, SFTYACTVDCHACTRL_VAR) SftyActvDhaCtrlAdisOperSts = ADIS_OPER_STS_INACTIVE;
++STATIC VAR(uint8, SFTYACTVDCHACTRL_VAR) SftyActvDchaCtrlOperSts = ADIS_OPER_STS_INACTIVE;
+ 
+ 
+ /*
+-@@ SYMBOL = SftyActvDchaCtrlDvDtChkDlyTimAdisByRCnt
++@@ SYMBOL = SftyActvDchaCtrlDvDtChkDlyTiCnt
+ @@ A2L_TYPE = MEASURE
+ @@ DATA_TYPE = UBYTE [0 ... 100]
+ @@ DESCRIPTION = "Delay time countor for start checking the dv/dt for active discharge by resistor"
+ @@ GROUP = SftyActvDchaCtrl
+ @@ END
+ */
+-STATIC VAR(uint8, SFTYACTVDCHACTRL_VAR) SftyActvDchaCtrlDvDtChkDlyTimAdisByRCnt = 0U;
++STATIC VAR(uint8, SFTYACTVDCHACTRL_VAR) SftyActvDchaCtrlDvDtChkDlyTiCnt = 0U;
+ 
+ 
+ /*
+-@@ SYMBOL = SftyActvDchaCtrlDeltaTimeResistorCnt
++@@ SYMBOL = SftyActvDchaCtrlDeltaTiCnt
+ @@ A2L_TYPE = MEASURE
+ @@ DATA_TYPE = UBYTE
+ @@ DESCRIPTION = "Delta time countor for dV/dt check for active discharge by resistor"
+ @@ GROUP = SftyActvDchaCtrl
+ @@ END
+ */
+-STATIC VAR(uint8, SFTYACTVDCHACTRL_VAR) SftyActvDchaCtrlDeltaTimeResistorCnt = 0U;
++STATIC VAR(uint8, SFTYACTVDCHACTRL_VAR) SftyActvDchaCtrlDeltaTiCnt = 0U;
+ 
+ 
+ /*
+-@@ SYMBOL = SftyActvDchaCtrlEffeChkFailTimeAdisByRInRowCnt
++@@ SYMBOL = SftyActvDchaCtrlEfcFailTiConsCnt
+ @@ A2L_TYPE = MEASURE
+ @@ DATA_TYPE = UBYTE
+ @@ DESCRIPTION = "The maximum fail times for checking the dv/dt of active discharge by resistor in a row"
+ @@ GROUP = SftyActvDchaCtrl
+ @@ END
+ */
+-STATIC VAR(uint8, SFTYACTVDCHACTRL_VAR) SftyActvDchaCtrlEffeChkFailTimeAdisByRInRowCnt = 0U;
++STATIC VAR(uint8, SFTYACTVDCHACTRL_VAR) SftyActvDchaCtrlEfcFailTiConsCnt = 0U;
+ 
+ 
+ /*
+-@@ SYMBOL = SftyActvDchaCtrlEffeChkFailTimesAdisByRTotCnt
++@@ SYMBOL = SftyActvDchaCtrlEfcFailTiTotCnt
+ @@ A2L_TYPE = MEASURE
+ @@ DATA_TYPE = UBYTE
+ @@ DESCRIPTION = "The maximum fail times for checking the dv/dt of active discharge by resistor total"
+ @@ GROUP = SftyActvDchaCtrl
+ @@ END
+ */
+-STATIC VAR(uint8, SFTYACTVDCHACTRL_VAR) SftyActvDchaCtrlEffeChkFailTimesAdisByRTotCnt = 0U;
++STATIC VAR(uint8, SFTYACTVDCHACTRL_VAR) SftyActvDchaCtrlEfcFailTiTotCnt = 0U;
+ 
+ 
+ /*
+-@@ SYMBOL = SftyActvChaCtrlAdisSuccessful
++@@ SYMBOL = SftyActvDchaCtrlMonrSt 
+ @@ A2L_TYPE = MEASURE
+ @@ DATA_TYPE = UBYTE [0 ... 2]
+ @@ CONVERSION = TABLE 0 "INACTIVE" 1 "PASSED" 2 "FAILED"
+@@ -196,7 +202,7 @@ STATIC VAR(uint8, SFTYACTVDCHACTRL_VAR) SftyActvDchaCtrlEffeChkFailTimesAdisByRT
+ @@ GROUP = SftyActvDchaCtrl
+ @@ END
+ */
+-STATIC VAR(uint8, SFTYACTVDCHACTRL_VAR) SftyActvChaCtrlAdisSuccessful = ERR_DEB_MONR_STS_INACTIVE;
++STATIC VAR(uint8, SFTYACTVDCHACTRL_VAR) SftyActvDchaCtrlMonrSt = ERR_DEB_MONR_STS_INACTIVE;
+ 
+ 
+ #define SFTYACTVDCHACTRL_STOP_SEC_VAR_AREA_CMN_FAST_INIT_8
+@@ -206,78 +212,76 @@ STATIC VAR(uint8, SFTYACTVDCHACTRL_VAR) SftyActvChaCtrlAdisSuccessful = ERR_DEB_
+ 
+ 
+ 
+-
+-
+ /* Begin: SFTYACTVDCHACTRL_START_SEC_VAR_AREA_CMN_FAST_INIT_32 (online) */
+ #define SFTYACTVDCHACTRL_START_SEC_VAR_AREA_CMN_FAST_INIT_32
+ #include "MemMap.h"
+-
+ /*
+-@@ SYMBOL = SftyActvDchaCtrlEffeChkTotalFailTimesAdisByRTimCnt
++@@ SYMBOL = SftyActvDchaCtrlHvDcUValPre
+ @@ A2L_TYPE = MEASURE
+-@@ DATA_TYPE = ULONG
+-@@ DESCRIPTION = "The limited time countorfor the total fail times of Dv/Dt"
++@@ DATA_TYPE = FLOAT [0.00 ... 914.00]
++@@ DESCRIPTION = "Previous HvDcU Physical Value in Voltage"
+ @@ GROUP = SftyActvDchaCtrl
+ @@ END
+ */
+-STATIC VAR(uint32, SFTYACTVDCHACTRL_VAR) SftyActvDchaCtrlEffeChkTotalFailTimesAdisByRTimCnt = 0UL;
++STATIC VAR(float32, SFTYACTVDCHACTRL_VAR) SftyActvDchaCtrlHvDcUValPre = 0.0f;
++
++STATIC VAR(ErrDeb_MonrStsType, SFTYACTVDCHACTRL_VAR) SftyActvDchaCtrlEfcConstErrMonrSt = ERR_DEB_MONR_STS_INACTIVE;
++
++
++STATIC VAR(ErrDeb_MonrStsType, SFTYACTVDCHACTRL_VAR) SftyActvDchaCtrlEfcTotalErrMonrSt = ERR_DEB_MONR_STS_INACTIVE;
++
++
++#define SFTYACTVDCHACTRL_STOP_SEC_VAR_AREA_CMN_FAST_INIT_32
++#include "MemMap.h"
++/* End: SFTYACTVDCHACTRL_STOP_SEC_VAR_AREA_CMN_FAST_INIT_32 (online) */
++
++
++
++/* Begin: SFTYACTVDCHACTRL_START_SEC_VAR_AREA_CMN_FAST_CLEARED_32 (online struct) */
++#define SFTYACTVDCHACTRL_START_SEC_VAR_AREA_CMN_FAST_CLEARED_32
++#include "MemMap.h"
+ 
+ /*
+-@@ SYMBOL = SftyActvDchaCtrlByRRtryDurnCnt
++@@ SYMBOL = SftyActvDchaCtrlEfcTotFailTi
+ @@ A2L_TYPE = MEASURE
+ @@ DATA_TYPE = ULONG
+-@@ DESCRIPTION = "The duration time countor between 2 times resistor discharge"
++@@ DESCRIPTION = "The limited time countor for the total fail times of Dv/Dt"
+ @@ GROUP = SftyActvDchaCtrl
+ @@ END
+ */
+-STATIC VAR(uint32, SFTYACTVDCHACTRL_VAR) SftyActvDchaCtrlByRRtryDurnCnt = 0UL;
+-
++STATIC VAR(uint32, SFTYACTVDCHACTRL_VAR) SftyActvDchaCtrlEfcTotFailTi;
+ 
+ /*
+-@@ SYMBOL = SftyActvDchaCtrlAdisByRTimeCnt
++@@ SYMBOL = SftyActvDchaCtrlRtryDurnCnt
+ @@ A2L_TYPE = MEASURE
+ @@ DATA_TYPE = ULONG
+-@@ DESCRIPTION = "Monitoring Time Countor for the active discharge if HVDC voltage is lower than 60V within 2s"
++@@ DESCRIPTION = "The duration time countor between 2 times resistor discharge"
+ @@ GROUP = SftyActvDchaCtrl
+ @@ END
+ */
+-STATIC VAR(uint32, SFTYACTVDCHACTRL_VAR) SftyActvDchaCtrlAdisByRTimeCnt = 0UL;
++STATIC VAR(uint32, SFTYACTVDCHACTRL_VAR) SftyActvDchaCtrlRtryDurnCnt;
+ 
+ 
+ /*
+-@@ SYMBOL = SftyActvDchaCtrlAdisFaultTimeCnt
++@@ SYMBOL = SftyActvDchaCtrlTiCnt
+ @@ A2L_TYPE = MEASURE
+ @@ DATA_TYPE = ULONG
+-@@ DESCRIPTION = "Monitoring Time Countor for the active discharge if HVDC voltage is Higher than 60V after 2s"
++@@ DESCRIPTION = "Monitoring Time Countor for the active discharge if HVDC voltage is lower than 60V within 2s"
+ @@ GROUP = SftyActvDchaCtrl
+ @@ END
+ */
+-STATIC VAR(uint32, SFTYACTVDCHACTRL_VAR) SftyActvDchaCtrlAdisFaultTimeCnt = 0UL;
++STATIC VAR(uint32, SFTYACTVDCHACTRL_VAR) SftyActvDchaCtrlTiCnt;
+ 
+ 
+ /*
+-@@ SYMBOL = SftyActvDchaCtrlHvDcUValPre
++@@ SYMBOL = SftyActvDchaCtrlFaultTiCnt
+ @@ A2L_TYPE = MEASURE
+-@@ DATA_TYPE = FLOAT [0.00 ... 914.00]
+-@@ DESCRIPTION = "Previous HvDcU Physical Value in Voltage"
++@@ DATA_TYPE = ULONG
++@@ DESCRIPTION = "Monitoring Time Countor for the active discharge if HVDC voltage is Higher than 60V after 2s"
+ @@ GROUP = SftyActvDchaCtrl
+ @@ END
+ */
+-STATIC VAR(float32, SFTYACTVDCHACTRL_VAR) SftyActvDchaCtrlHvDcUValPre = 0.0f;
+-
+-STATIC VAR(ErrDeb_MonrStsType, SFTYACTVDCHACTRL_VAR) SftyActvDchaCtrlEfcErrMonrStInRow = ERR_DEB_MONR_STS_INACTIVE;
+-STATIC VAR(ErrDeb_MonrStsType, SFTYACTVDCHACTRL_VAR) SftyActvDchaCtrlEfcErrMonrStTotal = ERR_DEB_MONR_STS_INACTIVE;
+-
+-
+-#define SFTYACTVDCHACTRL_STOP_SEC_VAR_AREA_CMN_FAST_INIT_32
+-#include "MemMap.h"
+-/* End: SFTYACTVDCHACTRL_STOP_SEC_VAR_AREA_CMN_FAST_INIT_32 (online) */
+-
+-
+-
+-/* Begin: SFTYACTVDCHACTRL_START_SEC_VAR_AREA_CMN_FAST_CLEARED_32 (online struct) */
+-#define SFTYACTVDCHACTRL_START_SEC_VAR_AREA_CMN_FAST_CLEARED_32
+-#include "MemMap.h"
++STATIC VAR(uint32, SFTYACTVDCHACTRL_VAR) SftyActvDchaCtrlFaultTiCnt;
+ 
+ 
+ #define SFTYACTVDCHACTRL_STOP_SEC_VAR_AREA_CMN_FAST_CLEARED_32
+@@ -285,20 +289,12 @@ STATIC VAR(ErrDeb_MonrStsType, SFTYACTVDCHACTRL_VAR) SftyActvDchaCtrlEfcErrMonrS
+ /* End: SFTYACTVDCHACTRL_STOP_SEC_VAR_AREA_CMN_FAST_CLEARED_32 (online struct) */
+ 
+ 
+-
+-/*================== [global function definitions] ===========================*/
+-
+ /*================== [definition of local functions] ========================*/
+-
+-
+-/* ************************ P2_100KW **************************************** */
+-
+-
+ /******************************************************************/
+ /*!
+  * \\fn        void SftyActvDchaCtrl_ClrErrMonrSt(void)
+- * \\brief     This function clears all the error monitor status that is about
+- *\\           Active Discharge Executation
++ * \\brief     This function clears error monitor status that is about
++ *\\           active discharge executation
+  * \\return    None
+  * \\Parent_DD SftyActvDchaCtrl_MainFunction
+  */
+@@ -309,8 +305,8 @@ LOCAL_INLINE void SftyActvDchaCtrl_ClrErrMonrSt(void)
+ \t
+    /* ************* Source code **************** */
+ 
+-   SftyActvDchaCtrlEfcErrMonrStIntel  = ERR_DEB_MONR_STS_INACTIVE;
+-   SftyActvDchaCtrlFltErrMonrStIntel  = ERR_DEB_MONR_STS_INACTIVE;
++   SftyActvDchaCtrlEfcIntelMonrSt  = ERR_DEB_MONR_STS_INACTIVE;
++   SftyActvDchaCtrlFltIntelMonrSt  = ERR_DEB_MONR_STS_INACTIVE;
+    SftyActvDchaCtrlActvFltSts         = ADIS_STS_NO_FAULT;
+    SftyActvDchaCtrlInactvFltSts       = ADIS_STS_NO_FAULT;
+    
+@@ -334,11 +330,11 @@ LOCAL_INLINE void SftyActvDchaCtrl_GetInputData(void)
+    
+    /* ************* Source code **************** */
+ 
+-   /* 1> Read Fault Status for Active Discharge that are from SftyE2eFpga module */
++   /* Read Fault Status for Active Discharge that are from SftyE2eFpga module */
+    
+ #ifndef SERIES_PRODUCTION
+ 
+-   if (SftyReplcmtActvDchaCtrlAdisFltStiEna == TRUE)
++   if (SftyReplcmtActvDchaCtrlFltStiEna == TRUE)
+    {
+       SftyActvDchaCtrlActvFltSts   = SftyReplcmtActvDchaCtrlActvFlt;
+       SftyActvDchaCtrlInactvFltSts = SftyReplcmtActvDchaCtrlInactvFlt;
+@@ -349,11 +345,11 @@ LOCAL_INLINE void SftyActvDchaCtrl_GetInputData(void)
+ 
+    {
+       SftyActvDchaCtrlActvFltSts   = SftyE2eFpgaActvDchaActvFltSts;
+-\t   SftyActvDchaCtrlInactvFltSts = SftyE2eFpgaActvDchaInactvFltSts;
++\t  SftyActvDchaCtrlInactvFltSts = SftyE2eFpgaActvDchaInactvFltSts;
+    }
+    
+ 
+-   /* 2> Read HvDc Voltage that is from SftyHvDcUEvln module */
++   /* Read HvDc Voltage that is from SftyHvDcUEvln module */
+ 
+ #ifndef SERIES_PRODUCTION
+ 
+@@ -370,14 +366,14 @@ LOCAL_INLINE void SftyActvDchaCtrl_GetInputData(void)
+    }
+ 
+    
+-   /* 3> Read External Request for Active Discharge by Resistor that is from SftyE2E module */
++   /* Read External Request for Active Discharge by Resistor that is from SftyE2E module */
+ 
+ #ifndef SERIES_PRODUCTION
+    
+-   if (SftyReplcmtActvDchaCtrlCanE2eIpStiEna == TRUE)
++   if (SftyReplcmtActvDchaCtrlCanE2eStiEna == TRUE)
+    {
+       SftyActvDchaCtrlBattCntctrSts = SftyReplcmtActvDchaCtrlBattCntctrSt;
+-\t   SftyActvDchaCtrlE2eReq        = SftyReplcmtActvDchaCtrlE2eReq;
++\t  SftyActvDchaCtrlE2eReq        = SftyReplcmtActvDchaCtrlE2eReq;
+    }
+    else
+ \t  
+@@ -385,19 +381,19 @@ LOCAL_INLINE void SftyActvDchaCtrl_GetInputData(void)
+    
+    {
+       SftyActvDchaCtrlBattCntctrSts = SftyE2ePhyDataVcuInvStat1BattContactorSt;  
+-\t   SftyActvDchaCtrlE2eReq        = SftyE2ePhyDataVcuInvCtrl1ActDischReq;
++\t  SftyActvDchaCtrlE2eReq        = SftyE2ePhyDataVcuInvCtrl1ActDischReq;
+    }
+ 
+ 
+-   /* 4> Read Active Discharge Request that is from SftyErrDeb module */
++   /* Read Active Discharge Request that is from SftyErrDeb module */
+ 
+ #ifndef SERIES_PRODUCTION
+ 
+-   if (SftyReplcmtActvDchaCtrlSftyErrDebIpStiEna == TRUE)
++   if (SftyReplcmtActvDchaCtrlSftyErrDebStiEna == TRUE)
+    {
+       SftyActvDchaCtrlFctIdActvDcha\t\t    = SftyReplcmtActvDchaCtrlFctIdActDcha;
+-\t   SftyActvDchaCtrlFctIdCanVcuInvCtrl1   = SftyReplcmtActvDchaCtrlFctIdCanVcuInvStat1;
+-\t   SftyActvDchaCtrlFctIdActvDchaCanFailr = SftyReplcmtActvDchaCtrlFctIdActvDchaCanFailr;
++\t  SftyActvDchaCtrlFctIdCanVcuInvCtrl1   = SftyReplcmtActvDchaCtrlFctIdCanVcuInvStat1;
++\t  SftyActvDchaCtrlFctIdActvDchaCanFailr = SftyReplcmtActvDchaCtrlFctIdActvDchaCanFailr;
+    }
+    else
+ 
+@@ -405,8 +401,8 @@ LOCAL_INLINE void SftyActvDchaCtrl_GetInputData(void)
+ \t  
+    {
+       SftyActvDchaCtrlFctIdActvDcha\t\t    = SftyErrDebFctInhbnSts.B.FctIdActvDcha;
+-\t   SftyActvDchaCtrlFctIdCanVcuInvCtrl1   = SftyErrDebFctInhbnSts.B.FctIdCanVcuInvCtrl1;
+-\t   SftyActvDchaCtrlFctIdActvDchaCanFailr = SftyErrDebFctInhbnSts.B.FctIdActvDchaCanFailr;
++\t  SftyActvDchaCtrlFctIdCanVcuInvCtrl1   = SftyErrDebFctInhbnSts.B.FctIdCanVcuInvCtrl1;
++\t  SftyActvDchaCtrlFctIdActvDchaCanFailr = SftyErrDebFctInhbnSts.B.FctIdActvDchaCanFailr;
+    }
+    \t
+    return;
+@@ -421,75 +417,77 @@ LOCAL_INLINE void SftyActvDchaCtrl_GetInputData(void)
+  * \\Parent_DD SftyActvDchaCtrl_MainFunction
+  */
+ /******************************************************************/
+-LOCAL_INLINE void SftyActvDchaCtrl_StrtupTest(void)
++LOCAL_INLINE void SftyActvDchaCtrl_StrtupTst(void)
+ {
+    /* ******** Variables declaration *********** */
+    
+    /* ************* Source code **************** */
+-   if (SftyActvDchaCtrlBattCntctrSts == HV_BATT_CONTACTOR_OPEN)
+-   {
+-      if (SftyActvDchaCtrlStrtupTestSts != ADIS_STRTUP_TEST_FINISHED)
++         /* Check HV contactor status and start up test status */
++   if ((SftyActvDchaCtrlBattCntctrSts == HV_BATT_CONTACTOR_OPEN) &&
++   \t  (SftyActvDchaCtrlStrtupTstSts != ADIS_STRTUP_TEST_FINISHED))
+       {
+-         if (SftyActvDchaCtrlAdisReqCmdHasSent == TRUE)
++         /* Check request command */
++         if (SftyActvDchaCtrlReqSentCmd == TRUE)
+          {
+-            if (SftyActvDchaCtrlInactvFltSts == ADIS_STS_FAULT)
+-            {
+-               SftyActvDchaCtrlInactvErrMonrSt = ERR_DEB_MONR_STS_FAILED;
+-            }
+-            else
+-            {
+-               SftyActvDchaCtrlInactvErrMonrSt = ERR_DEB_MONR_STS_PASSED;
+-            }
+-
+-            SftyActvDchaCtrlStrtupTestSts   = ADIS_STRTUP_TEST_FINISHED;
+-            SftyActvDchaCtrlActvDchaReqViaR = ACTV_DCHA_NO_REQ;
++\t
++             /* Check FPGA inactive fault status */
++             if (SftyActvDchaCtrlInactvFltSts == ADIS_STS_FAULT)
++             {
++                 SftyActvDchaCtrlInactvErrMonrSt = ERR_DEB_MONR_STS_FAILED;
++             }
++             else
++             {
++                 SftyActvDchaCtrlInactvErrMonrSt = ERR_DEB_MONR_STS_PASSED;
++             }
++                /* Set the start up test status to finished status */
++             SftyActvDchaCtrlStrtupTstSts   = ADIS_STRTUP_TEST_FINISHED;
++             SftyActvDchaCtrlActvDchaReqViaR = ACTV_DCHA_NO_REQ;
++
+          }
+          else
+          {
++           /* Set start up command automaticlly*/
+             SftyActvDchaCtrlActvDchaReqViaR   = ACTV_DCHA_REQ;
+-            SftyActvDchaCtrlStrtupTestSts     = ADIS_STRTUP_TEST_RUNNING;
+-            SftyActvDchaCtrlAdisReqCmdHasSent = TRUE;
++            SftyActvDchaCtrlStrtupTstSts     = ADIS_STRTUP_TEST_RUNNING;
++            SftyActvDchaCtrlReqSentCmd = TRUE;
+          }
+       }
+       else
+       {
+          /* Do Nothing! */
+       }
+-   }
+-   else
+-   {
+-      /* Do Nothing! */
+-   }
++
+    return;
+ }
+ 
+ /******************************************************************/
+ /*!
+- * \\fn        void SftyActvDchaCtrl_IntelAdisReq(void)
++ * \\fn        void SftyActvDchaCtrl_IntReq(void)
+  * \\brief     This function determines the Internal Active Discharge Request
+  *\\           Such as Crash Active / Passive and HvDc Voltage Failure
+  * \\return    None
+  * \\Parent_DD SftyActvDchaCtrl_MainFunction
+  */
+ /******************************************************************/
+-LOCAL_INLINE void SftyActvDchaCtrl_IntelAdisReq(void)
++LOCAL_INLINE void SftyActvDchaCtrl_IntReq(void)
+ {
+    /* ******** Variables declaration *********** */
+    
+    /* ************* Source code **************** */
+-
+-   /* Checking Condition */
+-   if ( (SftyActvDchaCtrlFctIdActvDcha == ACTV_DCHA_ACTVE)            ||
+-        (((SftyActvDchaCtrlHvDcUVal < SftyActvDchaPrmData.VbatMinThd) ||
++   /* Checking active discharge internal trigger condition */
++   if ((SftyActvDchaCtrlFctIdActvDcha == ACTV_DCHA_ACTVE)            ||
++        (((SftyActvDchaCtrlHvDcUVal < SftyActvDchaCtrlPrm.VbatMinThd) ||
+         (SftyActvDchaCtrlFctIdActvDchaCanFailr == ACTV_DCHA_ACTVE))   &&
+         (SftyActvDchaCtrlFctIdCanVcuInvCtrl1 == ACTV_DCHA_ACTVE))
+       )
+-   {
+-      SftyActvDchaCtrlActvDchaReqIntel = ACTV_DCHA_ACTVE;
+-   }
++    {
++       /* Set active discharge internal request to active */
++       SftyActvDchaCtrlIntReq = ACTV_DCHA_ACTVE;
++    }
+    else
+ \t{
+-      SftyActvDchaCtrlActvDchaReqIntel = ACTV_DCHA_DEACTVE;
++\t   /* Set active discharge internal request to deactive */
++       SftyActvDchaCtrlIntReq = ACTV_DCHA_DEACTVE;
+ \t}
+ 
+    return;
+@@ -498,105 +496,138 @@ LOCAL_INLINE void SftyActvDchaCtrl_IntelAdisReq(void)
+ 
+ /******************************************************************/
+ /*!
+- * \\fn        void SftyActvDchaCtrl_ExtelAdisReq(void)
++ * \\fn        void SftyActvDchaCtrl_ExtReq(void)
+  * \\brief     This function determines the External Active Discharge Request
+  *\\           Such as ADIS Request by CAN E2E
+  * \\return    None
+  * \\Parent_DD SftyActvDchaCtrl_MainFunction
+  */
+ /******************************************************************/
+-LOCAL_INLINE void SftyActvDchaCtrl_ExtelAdisReq(void)
++LOCAL_INLINE void SftyActvDchaCtrl_ExtReq(void)
+ {
+    /* ******** Variables declaration *********** */
+    
+    /* ************* Source code **************** */
+-   
++    /* Checking active discharge external trigger condition */
+    if (SftyActvDchaCtrlE2eReq == ACTV_DCHA_ACTVE)
+    {
+-      SftyActvDchaCtrlActvDchaReqExtel = ACTV_DCHA_ACTVE;
++      /* Set active discharge external request to active */
++      SftyActvDchaCtrlExtReq = ACTV_DCHA_ACTVE;
+    }
+    else
+    {
+-      SftyActvDchaCtrlActvDchaReqExtel = ACTV_DCHA_DEACTVE;
++      /* Set active discharge external request to active */
++      SftyActvDchaCtrlExtReq = ACTV_DCHA_DEACTVE;
+    }
+ 
+ 
+    return;
+ }
+ 
++/******************************************************************/
++/*!
++ * \\fn        void SftyActvDchaCtrl_MonrExit(void)
++ * \\brief     This function checks the exit conditions for "End of Active Discharge by Resistor".
++ * \\return    None
++ * \\Parent_DD SftyActvDchaCtrl_MainFunction
++ */
++/******************************************************************/
++LOCAL_INLINE void SftyActvDchaCtrl_MonrExit(void)
++{
++   /* ******** Variables declaration *********** */
++   
++   /* ************* Source code **************** */
++   /* Checking active discharge exit condition */
++   if ((ErrDebFltData_INV_ACTV_DCHA_EFC.FltSts1QualSts == ERR_DEB_FLT_STS_FAILED) ||  /* Adis is not effective */
++   \t  (SftyActvDchaCtrlMonrSt == ERR_DEB_MONR_STS_PASSED)     ||        /* Discharge passed */
++   \t  ((SftyActvDchaCtrlIntReq == ACTV_DCHA_DEACTVE)        &&        /* No Adis Request */
++      (SftyActvDchaCtrlExtReq == ACTV_DCHA_DEACTVE)))
++   {
++      /* Cancel active discharge request */
++      SftyActvDchaCtrlActvDchaReqViaR = ACTV_DCHA_NO_REQ;
++      SftyActvDchaCtrlOperSts      = ADIS_OPER_STS_FINISHED;
++\t  SftyActvDchaCtrlAdisReq = ACTV_DCHA_DEACTVE;
++   }
++   else
++   {
++      /* Do Nothing! */
++   }
++
++   return;
++}
+ 
+ 
+ /******************************************************************/
+ /*!
+- * \\fn        void SftyActvDchaCtrl_DetmnAdisReq(void)
++ * \\fn        void SftyActvDchaCtrl_DetmnReq(void)
+  * \\brief     This function determines the Active Discharge Request depending on the trigger conditions
+  *\\           Such as Internal / External Request and HvDc Voltage
+  * \\return    None
+  * \\Parent_DD SftyActvDchaCtrl_MainFunction
+  */
+ /******************************************************************/
+-LOCAL_INLINE void SftyActvDchaCtrl_DetmnAdisReq(void)
++LOCAL_INLINE void SftyActvDchaCtrl_DetmnReq(void)
+ {
+    /* ******** Variables declaration *********** */
+-   
+-   /* ************* Source code **************** */
+-   if (SftyActvDchaCtrlStrtupTestSts == ADIS_STRTUP_TEST_FINISHED)
+-   {\t
+-      /* 1> Internal AD Request Decision */
+-      SftyActvDchaCtrl_IntelAdisReq();
+-
+-      /* 2> External AD Request Decision ( From CAN E2E ) */
+-      SftyActvDchaCtrl_ExtelAdisReq();
+-
+-      /* 3> Active Discharge Request Decision */
+-      if (( SftyActvDchaCtrlHvDcUVal > (SftyActvDchaPrmData.HvDcVoltThd - SftyActvDchaPrmData.HvDcVoltTole)) &&  /* > (60V -1.3V) */
+-   \t    ((SftyActvDchaCtrlActvDchaReqIntel == ACTV_DCHA_ACTVE) ||
+-   \t     (SftyActvDchaCtrlActvDchaReqExtel == ACTV_DCHA_ACTVE)))
++   float32 adisHvDcuThd;
++   /* ************* Source code **************** */\t
++      /* Internal AD Request Decision */
++      SftyActvDchaCtrl_IntReq();
++
++      /* External AD Request Decision ( From CAN E2E ) */
++      SftyActvDchaCtrl_ExtReq();
++\t  
++      /* Calculate the HvDc voltage threshold */
++\t  adisHvDcuThd = SftyActvDchaCtrlPrm.HvDcVoltThd - SftyActvDchaCtrlPrm.HvDcVoltTole;
++\t  
++      /* Active Discharge Request Decision */
++      if ((SftyActvDchaCtrlHvDcUVal > adisHvDcuThd) &&  /* > (60V -1.3V) */
++   \t     ((SftyActvDchaCtrlIntReq == ACTV_DCHA_ACTVE) ||
++   \t     (SftyActvDchaCtrlExtReq == ACTV_DCHA_ACTVE)))
+       {
+-         SftyActvDchaCtrlActvDchaReq = ACTV_DCHA_ACTVE;
++          SftyActvDchaCtrlAdisReq = ACTV_DCHA_ACTVE;
+       }
+       else
+       {
+-         SftyActvDchaCtrlActvDchaReq = ACTV_DCHA_DEACTVE;
++          SftyActvDchaCtrlAdisReq = ACTV_DCHA_DEACTVE;
+       }
+-   }
+-   else
+-   {
+-      SftyActvDchaCtrlActvDchaReq = ACTV_DCHA_DEACTVE;
+-   }
+-   
++\t  
++     /* Check the exit condtion for request */
++     SftyActvDchaCtrl_MonrExit();
++
++
+    return;
+ }
+ 
+ 
+ /******************************************************************/
+ /*!
+- * \\fn        void SftyActvDchaCtrl_UpdAdisReqCmd(void)
++ * \\fn        void SftyActvDchaCtrl_UpdReqCmd(void)
+  * \\brief     This function Updaties the Active Discharge Request Command
+  *\\           considering the interval time of it
+  * \\return    None
+  * \\Parent_DD SftyActvDchaCtrl_MainFunction
+  */
+ /******************************************************************/
+-LOCAL_INLINE void SftyActvDchaCtrl_UpdAdisReqCmd(void)
++LOCAL_INLINE void SftyActvDchaCtrl_UpdReqCmd(void)
+ {
+    /* ******** Variables declaration *********** */
+-   uint32 adisByRRtryDurnTim;
++   uint32 adisByRRtryDurnTi;
+    
+    /* ************* Source code **************** */
+ 
+-   /* Interval Time Checking between 2 Adjacent Request */
+-   if (SftyActvDchaCtrlReqAdisByRCmdUpdEna == SFTY_ACTIV_DCHA_DISABLED)
++   /* Internal time checking between 2 adjacent Request */
++   if (SftyActvDchaCtrlReqCmdUpdEna == SFTY_ACTIV_DCHA_DISABLED)
+    {
+-\t  adisByRRtryDurnTim = ((uint32)SftyActvDchaPrmData.AdisByRRtryDurnTimThd) * ((uint32)CNT_1S_TO_1MS);
++\t  adisByRRtryDurnTi = ((uint32)SftyActvDchaCtrlPrm.RtryDurnTiThd) * ((uint32)CNT_1S_TO_1MS);
+ \t  
+-\t  if (SftyActvDchaCtrlByRRtryDurnCnt > adisByRRtryDurnTim)
++\t  if (SftyActvDchaCtrlRtryDurnCnt > adisByRRtryDurnTi)
+ \t  {
+-\t     SftyActvDchaCtrlReqAdisByRCmdUpdEna = SFTY_ACTIV_DCHA_ENABLED;
++\t     SftyActvDchaCtrlReqCmdUpdEna = SFTY_ACTIV_DCHA_ENABLED;
+ \t  }
+ \t  else
+ \t  {
+-         SftyActvDchaCtrlByRRtryDurnCnt++;
++         SftyActvDchaCtrlRtryDurnCnt++;
+ \t  }
+    }
+    else
+@@ -605,17 +636,17 @@ LOCAL_INLINE void SftyActvDchaCtrl_UpdAdisReqCmd(void)
+    }
+ 
+    /* Update the Request Command */
+-   if ((SftyActvDchaCtrlActvDchaReq == ACTV_DCHA_ACTVE) &&
+-   \t (SftyActvDchaCtrlReqAdisByRCmdUpdEna == SFTY_ACTIV_DCHA_ENABLED))
++   if ((SftyActvDchaCtrlAdisReq == ACTV_DCHA_ACTVE)  &&
++   \t  (SftyActvDchaCtrlReqCmdUpdEna == SFTY_ACTIV_DCHA_ENABLED))
+    {
+-      if (SftyActvDhaCtrlAdisOperSts == ADIS_OPER_STS_FINISHED)
++      if (SftyActvDchaCtrlOperSts == ADIS_OPER_STS_FINISHED)
+       {
+          /* Clear it for Dv/Dt delay monitoring */
+-         SftyActvDchaCtrlDvDtChkDlyTimAdisByRCnt = 0U;
++         SftyActvDchaCtrlDvDtChkDlyTiCnt = 0U;
+ 
+-         /* Clear it for Adis via resistor Success monitoring */
+-         SftyActvDchaCtrlAdisByRTimeCnt = 0U;
+-         SftyActvChaCtrlAdisSuccessful  = ERR_DEB_MONR_STS_INACTIVE;
++         /* Clear it for Ad via resistor monitor status */
++         SftyActvDchaCtrlTiCnt = 0U;
++         SftyActvDchaCtrlMonrSt  = ERR_DEB_MONR_STS_INACTIVE;
+       }
+       else
+       {
+@@ -623,13 +654,8 @@ LOCAL_INLINE void SftyActvDchaCtrl_UpdAdisReqCmd(void)
+       }
+ 
+       /* Set request Cmd and operation status */
+-      /* Don\'t move them to above! */
+       SftyActvDchaCtrlActvDchaReqViaR     = ACTV_DCHA_REQ;
+-      SftyActvDhaCtrlAdisOperSts          = ADIS_OPER_STS_RUNNING;
+-
+-      /* Reset them for Interval Time Checking */
+-      SftyActvDchaCtrlByRRtryDurnCnt      = 0UL;
+-      SftyActvDchaCtrlReqAdisByRCmdUpdEna = SFTY_ACTIV_DCHA_DISABLED;
++      SftyActvDchaCtrlOperSts          = ADIS_OPER_STS_RUNNING;
+    }
+    else
+    {
+@@ -641,21 +667,22 @@ LOCAL_INLINE void SftyActvDchaCtrl_UpdAdisReqCmd(void)
+ 
+ /******************************************************************/
+ /*!
+- * \\fn        void SftyActvDchaCtrl_ChkCntnsFlr(void)
++ * \\fn        void SftyActvDchaCtrl_ChkConstFlr(void)
+  * \\brief     This function checks continuous Failure
+  * \\return    None
+  * \\Parent_DD SftyActvDchaCtrl_MainFunction
+  */
+ /******************************************************************/
+-LOCAL_INLINE void SftyActvDchaCtrl_ChkCntnsFlr(void)
++LOCAL_INLINE void SftyActvDchaCtrl_ChkConstFlr(void)
+ {
+-   if (SftyActvDchaCtrlEffeChkFailTimeAdisByRInRowCnt >= SftyActvDchaPrmData.EffeChkFailTimeByRInRowThd)
++   /* Check if the constant failed time are more than 5 times */
++   if (SftyActvDchaCtrlEfcFailTiConsCnt >= SftyActvDchaCtrlPrm.EfcContsFailTiThd)
+    {
+-      SftyActvDchaCtrlEfcErrMonrStInRow = ERR_DEB_MONR_STS_FAILED;
++      SftyActvDchaCtrlEfcConstErrMonrSt = ERR_DEB_MONR_STS_FAILED;
+    }
+    else
+    {
+-      SftyActvDchaCtrlEfcErrMonrStInRow = ERR_DEB_MONR_STS_PASSED;
++      SftyActvDchaCtrlEfcConstErrMonrSt = ERR_DEB_MONR_STS_PASSED;
+    }
+    return;
+ }
+@@ -663,28 +690,29 @@ LOCAL_INLINE void SftyActvDchaCtrl_ChkCntnsFlr(void)
+ 
+ /******************************************************************/
+ /*!
+- * \\fn        void SftyActvDchaCtrl_ChktotalFlr(void)
++ * \\fn        void SftyActvDchaCtrl_ChkTotalFlr(void)
+  * \\brief     This function checks total Failure
+  * \\return    None
+  * \\Parent_DD SftyActvDchaCtrl_MainFunction
+  */
+ /******************************************************************/
+-LOCAL_INLINE void SftyActvDchaCtrl_ChktotalFlr(void)
++LOCAL_INLINE void SftyActvDchaCtrl_ChkTotalFlr(void)
+ {
+-   uint32  adisEffeChkTotalFlrTim ;
++   uint32  adisEffeChkTotalFlrTi;
+ 
+-   SftyActvDchaCtrlEffeChkTotalFailTimesAdisByRTimCnt++;
++   SftyActvDchaCtrlEfcTotFailTi++;
+ 
+-   adisEffeChkTotalFlrTim = MLIB_U32F32((SftyActvDchaPrmData.EffeChkTotalFailTimesByRTimThd) * ((float32)CNT_1S_TO_10MS));
++   adisEffeChkTotalFlrTi = MLIB_U32F32((SftyActvDchaCtrlPrm.EfcFltTiThd) * ((float32)CNT_1S_TO_10MS));
+ 
+-   if ((SftyActvDchaCtrlEffeChkTotalFailTimesAdisByRTimCnt < adisEffeChkTotalFlrTim)    &&     /* < 1.5s */
+-       (SftyActvDchaCtrlEffeChkFailTimesAdisByRTotCnt >= SftyActvDchaPrmData.EffeChkFailTimeByRTotThd))   /* >= 5 Times */
++   /*check if the time is less than 1.5s and the total time are more than 5 times */
++   if ((SftyActvDchaCtrlEfcTotFailTi < adisEffeChkTotalFlrTi)    &&            
++       (SftyActvDchaCtrlEfcFailTiTotCnt >= SftyActvDchaCtrlPrm.EfcFltTotalThd))  
+    {
+-      SftyActvDchaCtrlEfcErrMonrStTotal = ERR_DEB_MONR_STS_FAILED;
++      SftyActvDchaCtrlEfcTotalErrMonrSt = ERR_DEB_MONR_STS_FAILED;
+    }
+    else
+    {
+-      SftyActvDchaCtrlEfcErrMonrStTotal = ERR_DEB_MONR_STS_PASSED;
++      SftyActvDchaCtrlEfcTotalErrMonrSt = ERR_DEB_MONR_STS_PASSED;
+    }
+ 
+    return;
+@@ -700,22 +728,24 @@ LOCAL_INLINE void SftyActvDchaCtrl_ChktotalFlr(void)
+ /******************************************************************/
+ LOCAL_INLINE void SftyActvDchaCtrl_HndlFailTimeCntr(void)
+ {
+-   if (SftyActvDchaCtrlEffeChkFailTimeAdisByRInRowCnt < SFTY_ACTV_DCHA_CTRL_EFCTV_FAIL_TM_R_CTR_MAX )
++   /* Limit the failed constant time counter max value */
++   if (SftyActvDchaCtrlEfcFailTiConsCnt < SFTY_ACTV_DCHA_CTRL_EFCTV_FAIL_TM_R_CTR_MAX )
+    {
+-      SftyActvDchaCtrlEffeChkFailTimeAdisByRInRowCnt++;
++      SftyActvDchaCtrlEfcFailTiConsCnt++;
+    }
+    else
+    {
+-      SftyActvDchaCtrlEffeChkFailTimeAdisByRInRowCnt = SFTY_ACTV_DCHA_CTRL_EFCTV_FAIL_TM_R_CTR_MAX;
++      SftyActvDchaCtrlEfcFailTiConsCnt = SFTY_ACTV_DCHA_CTRL_EFCTV_FAIL_TM_R_CTR_MAX;
+    }
+ 
+-   if (SftyActvDchaCtrlEffeChkFailTimesAdisByRTotCnt < SFTY_ACTV_DCHA_CTRL_EFCTV_FAIL_TM_R_CTR_MAX)
++   /* Limit the failed total time counter max value */
++   if (SftyActvDchaCtrlEfcFailTiTotCnt < SFTY_ACTV_DCHA_CTRL_EFCTV_FAIL_TM_R_CTR_MAX)
+    {
+-      SftyActvDchaCtrlEffeChkFailTimesAdisByRTotCnt++;
++      SftyActvDchaCtrlEfcFailTiTotCnt++;
+    }
+    else
+    {
+-      SftyActvDchaCtrlEffeChkFailTimesAdisByRTotCnt = SFTY_ACTV_DCHA_CTRL_EFCTV_FAIL_TM_R_CTR_MAX;
++      SftyActvDchaCtrlEfcFailTiTotCnt = SFTY_ACTV_DCHA_CTRL_EFCTV_FAIL_TM_R_CTR_MAX;
+    }
+ 
+    return;
+@@ -723,42 +753,42 @@ LOCAL_INLINE void SftyActvDchaCtrl_HndlFailTimeCntr(void)
+ 
+ /******************************************************************/
+ /*!
+- * \\fn        void SftyActvDchaCtrl_EfcFinalChkAdisByR(void)
++ * \\fn        void SftyActvDchaCtrl_EfcFinalChk(void)
+  * \\brief     This function does final Check of the effectivity of active discharge by Resistor
+  * \\return    None
+  * \\Parent_DD SftyActvDchaCtrl_MainFunction
+  */
+ /******************************************************************/
+-LOCAL_INLINE void SftyActvDchaCtrl_EfcFinalChkAdisByR(void)
++LOCAL_INLINE void SftyActvDchaCtrl_EfcFinalChk(void)
+ {
+-   /* Final Check the Effectivity of Active Discharge by Resistor */
+-   if ((SftyActvDchaCtrlEfcErrMonrStInRow == ERR_DEB_MONR_STS_FAILED) ||
+-       (SftyActvDchaCtrlEfcErrMonrStTotal == ERR_DEB_MONR_STS_FAILED))
++   /* Check if the Effectivity of Active Discharge is failed */
++   if ((SftyActvDchaCtrlEfcConstErrMonrSt == ERR_DEB_MONR_STS_FAILED) ||
++       (SftyActvDchaCtrlEfcTotalErrMonrSt == ERR_DEB_MONR_STS_FAILED))
+    {
+-      SftyActvDchaCtrlEfcErrMonrStIntel = ERR_DEB_MONR_STS_FAILED;
++      SftyActvDchaCtrlEfcIntelMonrSt = ERR_DEB_MONR_STS_FAILED;
+    }
+-   else if ((SftyActvDchaCtrlEfcErrMonrStInRow == ERR_DEB_MONR_STS_PASSED) &&
+-            (SftyActvDchaCtrlEfcErrMonrStTotal == ERR_DEB_MONR_STS_PASSED))
++   else if ((SftyActvDchaCtrlEfcConstErrMonrSt == ERR_DEB_MONR_STS_PASSED) &&
++            (SftyActvDchaCtrlEfcTotalErrMonrSt == ERR_DEB_MONR_STS_PASSED))
+    {
+-      SftyActvDchaCtrlEfcErrMonrStIntel = ERR_DEB_MONR_STS_PASSED;
++      SftyActvDchaCtrlEfcIntelMonrSt = ERR_DEB_MONR_STS_PASSED;
+    }
+    else
+    {
+-      SftyActvDchaCtrlEfcErrMonrStIntel = ERR_DEB_MONR_STS_INACTIVE;
++      SftyActvDchaCtrlEfcIntelMonrSt = ERR_DEB_MONR_STS_INACTIVE;
+    }
+    return;
+ }
+ 
+ /******************************************************************/
+ /*!
+- * \\fn        void SftyActvDchaCtrl_MonrAdisByREfc(void)
++ * \\fn        void SftyActvDchaCtrl_MonrEfc(void)
+  * \\brief     This function monitors the Effectivity of Active Discharge by Resistor
+  * \\          its checking result is one of conditions for "End of Active Discharge by Resistor".
+  * \\return    None
+  * \\Parent_DD SftyActvDchaCtrl_MainFunction
+  */
+ /******************************************************************/
+-LOCAL_INLINE void SftyActvDchaCtrl_MonrAdisByREfc(void)
++LOCAL_INLINE void SftyActvDchaCtrl_MonrEfc(void)
+ {
+    /* ******** Variables declaration *********** */
+    float32 adisDeltaHvDcUVal;
+@@ -767,60 +797,63 @@ LOCAL_INLINE void SftyActvDchaCtrl_MonrAdisByREfc(void)
+    /* ************* Source code **************** */
+ 
+    /* Checking the delay time for monitoring Dv/Dt */
+-   if (SftyActvDchaCtrlDvDtChkDlyTimAdisByRCnt >= SftyActvDchaPrmData.DvDtChkDelayTimAdisByRThd)
++   if (SftyActvDchaCtrlDvDtChkDlyTiCnt >= SftyActvDchaCtrlPrm.DvDtDelayTiThd)
+    {
+       adisMonrDvDtEn = SFTY_ACTIV_DCHA_ENABLED;
+    }
+    else
+    {
+-      SftyActvDchaCtrlDvDtChkDlyTimAdisByRCnt++;
++      SftyActvDchaCtrlDvDtChkDlyTiCnt++;
+    }
+ 
+    /* Checking Dv/Dt */
+    if ((adisMonrDvDtEn == SFTY_ACTIV_DCHA_ENABLED) &&
+-   \t (SftyActvDchaCtrlHvDcUVal >= SftyActvDchaPrmData.HvDcVoltThd))
++   \t (SftyActvDchaCtrlHvDcUVal >= SftyActvDchaCtrlPrm.HvDcVoltThd))
+    {
+-      if (SftyActvDchaCtrlDeltaTimeResistorCnt >= SftyActvDchaPrmData.DeltaTimAdisByRThd)   /* >= 10ms */
++      /* check if dt is over than 10ms */
++      if (SftyActvDchaCtrlDeltaTiCnt >= SftyActvDchaCtrlPrm.DeltaTiThd)   
+       {
+-         SftyActvDchaCtrlDeltaTimeResistorCnt = 0U;   /* Clear delta time countor */
++         /* Clear delta time countor */
++         SftyActvDchaCtrlDeltaTiCnt = 0U;   
+ 
+-         /* Calculate Dv */
+-         adisDeltaHvDcUVal = MLIB_F32AbsF32(SftyActvDchaCtrlHvDcUValPre - SftyActvDchaCtrlHvDcUVal);
+-         SftyActvDchaCtrlHvDcUValPre = SftyActvDchaCtrlHvDcUVal;
++         /* Calculate dv */
++         adisDeltaHvDcUVal = SftyActvDchaCtrlHvDcUValPre - SftyActvDchaCtrlHvDcUVal;
+ 
+-         if ((SftyActvDchaCtrlHvDcUValPre > SftyActvDchaCtrlHvDcUVal) &&        /* The Trend has to be down */
+-             (adisDeltaHvDcUVal >= SftyActvDchaPrmData.AdisByREnaDvThd))
++         /* Check if the dv is over than 50V */
++         if(adisDeltaHvDcUVal >= SftyActvDchaCtrlPrm.DvThd)
+          {
+-            SftyActvDchaCtrlEffeChkFailTimeAdisByRInRowCnt = 0U;
++            SftyActvDchaCtrlEfcFailTiConsCnt = 0U;
+          }
+          else
+          {
+             SftyActvDchaCtrl_HndlFailTimeCntr();
+          }
+ 
+-         /* Checking Continous Failure */
+-         SftyActvDchaCtrl_ChkCntnsFlr();
++         /* Checking continous failure status */
++         SftyActvDchaCtrl_ChkConstFlr();
++
++         /* Checking total failure status */
++         SftyActvDchaCtrl_ChkTotalFlr();
+ 
+-         /* Checking Total Failure */
+-         SftyActvDchaCtrl_ChktotalFlr();
++\t\t SftyActvDchaCtrlHvDcUValPre = SftyActvDchaCtrlHvDcUVal;
+       }
+       else
+       {
+-         SftyActvDchaCtrlDeltaTimeResistorCnt++;
++         SftyActvDchaCtrlDeltaTiCnt++;
+       }
+    }
+    else
+    {
+-      SftyActvDchaCtrlDeltaTimeResistorCnt               = 0U;
+-      SftyActvDchaCtrlEffeChkFailTimeAdisByRInRowCnt     = 0U;
+-      SftyActvDchaCtrlEffeChkFailTimesAdisByRTotCnt      = 0U;
+-\t   SftyActvDchaCtrlEffeChkTotalFailTimesAdisByRTimCnt = 0UL;
+-\t   SftyActvDchaCtrlHvDcUValPre                        = SftyActvDchaCtrlHvDcUVal;
+-\t   SftyActvDchaCtrlEfcErrMonrStInRow                  = ERR_DEB_MONR_STS_INACTIVE;
+-\t   SftyActvDchaCtrlEfcErrMonrStTotal                  = ERR_DEB_MONR_STS_INACTIVE;
++      SftyActvDchaCtrlDeltaTiCnt                         = 0U;
++      SftyActvDchaCtrlEfcFailTiConsCnt                   = 0U;
++      SftyActvDchaCtrlEfcFailTiTotCnt                    = 0U;
++\t  SftyActvDchaCtrlEfcTotFailTi                       = 0UL;
++\t  SftyActvDchaCtrlHvDcUValPre                        = SftyActvDchaCtrlHvDcUVal;
++\t  SftyActvDchaCtrlEfcConstErrMonrSt                  = ERR_DEB_MONR_STS_INACTIVE;
++\t  SftyActvDchaCtrlEfcTotalErrMonrSt                  = ERR_DEB_MONR_STS_INACTIVE;
+    }
+-
+-   SftyActvDchaCtrl_EfcFinalChkAdisByR();
++   /* Update the final effiency error monitor status */
++   SftyActvDchaCtrl_EfcFinalChk();
+ 
+    return;
+ }
+@@ -828,124 +861,97 @@ LOCAL_INLINE void SftyActvDchaCtrl_MonrAdisByREfc(void)
+ 
+ /******************************************************************/
+ /*!
+- * \\fn        void SftyActvDchaCtrl_MonrAdisByRSuccess(void)
++ * \\fn        void SftyActvDchaCtrl_MonrSts(void)
+  * \\brief     This function monitors that if Active Discharge by Resistor is successful or not,
+  * \\          its checking result is one of conditions for "End of Active Discharge by Resistor".
+  * \\return    None
+  * \\Parent_DD SftyActvDchaCtrl_MainFunction
+  */
+ /******************************************************************/
+-LOCAL_INLINE void SftyActvDchaCtrl_MonrAdisByRSuccess(void)
++LOCAL_INLINE void SftyActvDchaCtrl_MonrSts(void)
+ {
+ 
+    /* ******** Variables declaration *********** */
+-   uint32 adisByRTime;
++   uint32 adisTi;
+    
+    /* ************* Source code **************** */
+ 
+-   if (SftyActvDchaCtrlHvDcUVal < (SftyActvDchaPrmData.HvDcVoltThd - SftyActvDchaPrmData.HvDcVoltHys))
+-   {
+-      adisByRTime = ((uint32)SftyActvDchaPrmData.AdisByRTimeThd) * ((uint32)CNT_1S_TO_1MS);
+-\t\t 
+-      if (SftyActvDchaCtrlAdisByRTimeCnt < adisByRTime)
+-      {
+-         SftyActvChaCtrlAdisSuccessful = ERR_DEB_MONR_STS_PASSED;
+-      }
+-      else
+-      {
+-         SftyActvChaCtrlAdisSuccessful = ERR_DEB_MONR_STS_FAILED;
+-      }
+-   }
+-   else
+-   {
+-      /* Update the monitor countor */
+-\t  if (SftyActvDchaCtrlAdisByRTimeCnt <  SFTY_ACTV_DCHA_CTRL_ADIS_R_TM_CTR_MAX )
++      adisTi = ((uint32)SftyActvDchaCtrlPrm.TiThd) * ((uint32)CNT_1S_TO_1MS);
++      /* Check if the time is over than 2s */
++\t  if(SftyActvDchaCtrlTiCnt > adisTi)
++\t  {
++\t      /* Check the current actual HvDc voltage */
++          if(SftyActvDchaCtrlHvDcUVal > (SftyActvDchaCtrlPrm.HvDcVoltThd - SftyActvDchaCtrlPrm.HvDcVoltHys))  
++          {
++              SftyActvDchaCtrlMonrSt = ERR_DEB_MONR_STS_FAILED;
++          }
++          else
++          {
++              SftyActvDchaCtrlMonrSt = ERR_DEB_MONR_STS_PASSED;
++          }
++\t  }
++
++      /* Update and limit the time countor */
++\t  if (SftyActvDchaCtrlTiCnt <  SFTY_ACTV_DCHA_CTRL_R_TM_CTR_MAX )
+ \t  {
+-\t     SftyActvDchaCtrlAdisByRTimeCnt++;
++\t     SftyActvDchaCtrlTiCnt++;
+ \t  }
+ \t  else
+ \t  {
+-\t     SftyActvDchaCtrlAdisByRTimeCnt = SFTY_ACTV_DCHA_CTRL_ADIS_R_TM_CTR_MAX;
++\t     SftyActvDchaCtrlTiCnt = SFTY_ACTV_DCHA_CTRL_R_TM_CTR_MAX;
+ \t  }
+-   }
+-
+ 
+-   return;
+-}
+ 
+-/******************************************************************/
+-/*!
+- * \\fn        void SftyActvDchaCtrl_MonrAdisByRExit(void)
+- * \\brief     This function checks the exit conditions for "End of Active Discharge by Resistor".
+- * \\return    None
+- * \\Parent_DD SftyActvDchaCtrl_MainFunction
+- */
+-/******************************************************************/
+-LOCAL_INLINE void SftyActvDchaCtrl_MonrAdisByRExit(void)
+-{
+-   /* ******** Variables declaration *********** */
+-   
+-   /* ************* Source code **************** */
+-
+-   if ((SftyActvDchaCtrlEfcErrMonrStIntel == ERR_DEB_MONR_STS_FAILED) ||  /* Effectivity */
+-   \t (SftyActvChaCtrlAdisSuccessful == ERR_DEB_MONR_STS_PASSED)     ||  /* Discharge Successful */
+-   \t ((SftyActvDchaCtrlActvDchaReqIntel == ACTV_DCHA_DEACTVE)       &&  /* No Adis Request */
+-        (SftyActvDchaCtrlActvDchaReqExtel == ACTV_DCHA_DEACTVE)))
+-   {
+-      SftyActvDchaCtrlActvDchaReqViaR = ACTV_DCHA_NO_REQ;
+-      SftyActvDhaCtrlAdisOperSts      = ADIS_OPER_STS_FINISHED;
+-   }
+-   else
+-   {
+-      /* Do Nothing! */
+-   }
+ 
+    return;
+ }
+ 
+ 
++
+ /******************************************************************/
+ /*!
+- * \\fn        void SftyActvDchaCtrl_MonrAdisSts(void)
++ * \\fn        void SftyActvDchaCtrl_ChkSts(void)
+  * \\brief     This function monitors that if HvDc Volt is higher than the threshold of AD Status checking (60V)
+  * \\          after AD Request was sent for a limited time (2S).
+  * \\return    None
+  * \\Parent_DD SftyActvDchaCtrl_MainFunction
+  */
+ /******************************************************************/
+-LOCAL_INLINE void SftyActvDchaCtrl_MonrAdisSts(void)
++LOCAL_INLINE void SftyActvDchaCtrl_ChkSts(void)
+ {
+    /* ******** Variables declaration *********** */
+    float32 adisFltThd;
+    uint32  adisFltTmThd;
+    
+    /* ************* Source code **************** */
+-   if (SftyActvDhaCtrlAdisOperSts == ADIS_OPER_STS_RUNNING)
++   if (SftyActvDchaCtrlOperSts == ADIS_OPER_STS_RUNNING)
+    {
+-      adisFltTmThd = ((uint32)SftyActvDchaPrmData.AdisFaultTimeThd) * ((uint32)CNT_1S_TO_1MS);
+-
+-      if (SftyActvDchaCtrlAdisFaultTimeCnt > adisFltTmThd)   /* > 2s */
++      adisFltTmThd = ((uint32)SftyActvDchaCtrlPrm.FltTiThd) * ((uint32)CNT_1S_TO_1MS);
++\t  
++      /* Check if time is over than 2s and voltage is over than 58.7V */
++      if (SftyActvDchaCtrlFaultTiCnt > adisFltTmThd)   
+       {
+-         adisFltThd = SftyActvDchaPrmData.HvDcVoltThd - SftyActvDchaPrmData.HvDcVoltTole;   /* > (60V - 1.3V) */
++         adisFltThd = SftyActvDchaCtrlPrm.HvDcVoltThd - SftyActvDchaCtrlPrm.HvDcVoltTole;   
+ 
++\t\t /* Check if HvDc is over than 58.7V */
+          if (SftyActvDchaCtrlHvDcUVal > adisFltThd)
+          {
+-            SftyActvDchaCtrlFltErrMonrStIntel = ERR_DEB_MONR_STS_FAILED;
++            SftyActvDchaCtrlFltIntelMonrSt = ERR_DEB_MONR_STS_FAILED;
+          }
+-         else   /* => (SftyActvDchaCtrlHvDcUVal <= SftyActvDchaCtrlActiveDchaFaultThd) */
++         else 
+          {
+-\t        SftyActvDchaCtrlFltErrMonrStIntel = ERR_DEB_MONR_STS_PASSED;
++\t        SftyActvDchaCtrlFltIntelMonrSt = ERR_DEB_MONR_STS_PASSED;
+          }
+       }
+       else
+       {
+-         SftyActvDchaCtrlAdisFaultTimeCnt++;
++         /* Add the fault time counter */
++         SftyActvDchaCtrlFaultTiCnt++;
+       }
+    }
+    else
+    {
+-      SftyActvDchaCtrlAdisFaultTimeCnt  = 0UL;
+-      SftyActvDchaCtrlFltErrMonrStIntel = ERR_DEB_MONR_STS_INACTIVE;
++      SftyActvDchaCtrlFltIntelMonrSt = ERR_DEB_MONR_STS_INACTIVE;
+    }
+ 
+    return;
+@@ -954,13 +960,13 @@ LOCAL_INLINE void SftyActvDchaCtrl_MonrAdisSts(void)
+ 
+ /******************************************************************/
+ /*!
+- * \\fn        void SftyActvDchaCtrl_MonrAdisExct(void)
++ * \\fn        void SftyActvDchaCtrl_MonrExctSts(void)
+  * \\brief     This function monitors the Active Discharge Execution Status
+  * \\return    None
+  * \\Parent_DD SftyActvDchaCtrl_MainFunction
+  */
+ /******************************************************************/
+-LOCAL_INLINE void SftyActvDchaCtrl_MonrAdisExct(void)
++LOCAL_INLINE void SftyActvDchaCtrl_MonrExctSts(void)
+ {
+    /* ******** Variables declaration *********** */
+    
+@@ -968,28 +974,22 @@ LOCAL_INLINE void SftyActvDchaCtrl_MonrAdisExct(void)
+  
+    if (SftyActvDchaCtrlActvDchaReqViaR == ACTV_DCHA_REQ)   /* Monitor the Active Discharge by Resistor */
+    {
+-      /* 1> Monitoring Effectivity for Active Discharge by Resistor */
+-      SftyActvDchaCtrl_MonrAdisByREfc();
++      /* Monitoring Effectivity for Active Discharge by Resistor Status */
++      SftyActvDchaCtrl_MonrEfc();
+ 
+-      /* 2> Monitoring Active Discharge by Resistor Success */
+-      SftyActvDchaCtrl_MonrAdisByRSuccess();
++      /* Monitoring Active Discharge by Resistor status */
++      SftyActvDchaCtrl_MonrSts();
++
++\t  /* Checking Active Discharge Status */
++      SftyActvDchaCtrl_ChkSts();
+    
+-      /* 3> Monitoring the End of Active Discharge by Resistor */
+-      SftyActvDchaCtrl_MonrAdisByRExit();
+    }
+-#if 0   
+-   else if (SftyActvDchaCtrlActvDchaReqViaW == ACTV_DCHA_REQ)   /* Monitor the Active Discharge by Winding */
+-   {
+-      /* Monitor the Active Discharge by Winding */
+-   }
+-#endif
+    else
+    {
+       /* Do Nothing! */
+    }
+ 
+-   /* Checking Active Discharge Status */
+-   SftyActvDchaCtrl_MonrAdisSts();
++
+    
+    return;
+ }
+@@ -1008,9 +1008,13 @@ LOCAL_INLINE void SftyActvDchaCtrl_UpdErrMonrSt(void)
+    /* ******** Variables declaration *********** */
+ 
+    /* ************* Source code **************** */
+-   SftyActvDchaCtrlEfcErrMonrSt    = SftyActvDchaCtrlEfcErrMonrStIntel;
+-   SftyActvDchaCtrlFltErrMonrSt    = SftyActvDchaCtrlFltErrMonrStIntel;   
++    /* Update monitor status to INV_ACTV_DCHA_EFC fault */
++   SftyActvDchaCtrlEfcErrMonrSt    = SftyActvDchaCtrlEfcIntelMonrSt;
+    
++    /* Update monitor status to INV_ACTV_DCHA_FLT fault */
++   SftyActvDchaCtrlFltErrMonrSt    = SftyActvDchaCtrlFltIntelMonrSt;  
++\t
++   /* Update monitor status to INV_ACTV_DCHA_ACTV fault */
+    if (SftyActvDchaCtrlActvFltSts == ADIS_STS_NO_FAULT)
+    {
+       SftyActvDchaCtrlActvErrMonrSt = ERR_DEB_MONR_STS_PASSED;
+@@ -1019,7 +1023,8 @@ LOCAL_INLINE void SftyActvDchaCtrl_UpdErrMonrSt(void)
+    {
+       SftyActvDchaCtrlActvErrMonrSt = ERR_DEB_MONR_STS_FAILED;
+    }
+-   
++
++   /* Update monitor status to INV_ACTV_DCHA_INACTV fault */
+    if (SftyActvDchaCtrlInactvFltSts == ADIS_STS_NO_FAULT)
+    {
+       SftyActvDchaCtrlInactvErrMonrSt = ERR_DEB_MONR_STS_PASSED;
+@@ -1028,8 +1033,10 @@ LOCAL_INLINE void SftyActvDchaCtrl_UpdErrMonrSt(void)
+    {
+       SftyActvDchaCtrlInactvErrMonrSt = ERR_DEB_MONR_STS_FAILED;
+    }   
+-   
+-   if (SftyActvDchaCtrlFltErrMonrStIntel == ERR_DEB_MONR_STS_FAILED)
++
++   /* Update monitor status to active discharge status */
++   if ((SftyActvDchaCtrlFltIntelMonrSt == ERR_DEB_MONR_STS_FAILED) ||
++   \t  (SftyActvDchaCtrlEfcIntelMonrSt == ERR_DEB_MONR_STS_FAILED))
+    {
+       SftyActvDchaCtrlActvDchaSts     = ACTV_DCHA_FAILURE;
+       SftyC2cData.ActvDchaSts         = ACTV_DCHA_FAILURE;
+@@ -1069,26 +1076,26 @@ FUNC(void, SFTYACTVDCHACTRL) SftyActvDchaCtrl_MainFunction(void)
+    SftyActvDchaCtrl_GetInputData();
+ 
+    /* Controlling and Monitoring Startup Test for Active Discharge */  
+-   SftyActvDchaCtrl_StrtupTest();
++   SftyActvDchaCtrl_StrtupTst();
+ 
+ 
+-   if (SftyActvDchaCtrlStrtupTestSts == ADIS_STRTUP_TEST_FINISHED)
++   if (SftyActvDchaCtrlStrtupTstSts == ADIS_STRTUP_TEST_FINISHED)
+    {
+       /* Judging the Active Disharge Request depending on trigger conditions (Internal / External Request and HvDc Voltage) */
+-      SftyActvDchaCtrl_DetmnAdisReq();
++      SftyActvDchaCtrl_DetmnReq();
+ 
+       /* Updating Active Discharge Request Command considering the interval time of it */
+-      SftyActvDchaCtrl_UpdAdisReqCmd();
++      SftyActvDchaCtrl_UpdReqCmd();
+ 
+       /* Monitoring Active Discharge Execution Status */
+-      SftyActvDchaCtrl_MonrAdisExct();
++      SftyActvDchaCtrl_MonrExctSts();
+    
+       /* Updating Error Monitor Status to the Related Output Interface */
+       SftyActvDchaCtrl_UpdErrMonrSt();
+    }
+    else
+    {
+-      /* Do Nothing! */
++      SftyActvDchaCtrlAdisReq = ACTV_DCHA_DEACTVE;
+    }
+ 
+ #ifdef SWIT_IT_Active
+@@ -1123,15 +1130,15 @@ FUNC(void, SFTYACTVDCHACTRL) SftyActvDchaCtrl_Init(void)
+    
+ 
+    /* Initialize Internal Variables which is used for Sub-functions */
+-   SftyActvDchaCtrlStrtupTestSts        = ADIS_STRTUP_TEST_INACTIVE;
+-   SftyActvDchaCtrlActvDchaReqIntel     = ACTV_DCHA_DEACTVE;
+-   SftyActvDchaCtrlActvDchaReqExtel     = ACTV_DCHA_DEACTVE;
+-   SftyActvDchaCtrlActvDchaReq          = ACTV_DCHA_DEACTVE;   
+-   SftyActvDchaCtrlReqAdisByRCmdUpdEna  = SFTY_ACTIV_DCHA_ENABLED;   /* For the first run, no delay time */
+-   SftyActvDhaCtrlAdisOperSts           = ADIS_OPER_STS_INACTIVE;
+-   SftyActvChaCtrlAdisSuccessful        = ERR_DEB_MONR_STS_INACTIVE;
+-   SftyActvDchaCtrlEfcErrMonrStIntel    = ERR_DEB_MONR_STS_INACTIVE;
+-   SftyActvDchaCtrlFltErrMonrStIntel\t= ERR_DEB_MONR_STS_INACTIVE;
++   SftyActvDchaCtrlStrtupTstSts        = ADIS_STRTUP_TEST_INACTIVE;
++   SftyActvDchaCtrlIntReq     = ACTV_DCHA_DEACTVE;
++   SftyActvDchaCtrlExtReq     = ACTV_DCHA_DEACTVE;
++   SftyActvDchaCtrlAdisReq          = ACTV_DCHA_DEACTVE;   
++   SftyActvDchaCtrlReqCmdUpdEna  = SFTY_ACTIV_DCHA_ENABLED;   /* For the first run, no delay time */
++   SftyActvDchaCtrlOperSts           = ADIS_OPER_STS_INACTIVE;
++   SftyActvDchaCtrlMonrSt        = ERR_DEB_MONR_STS_INACTIVE;
++   SftyActvDchaCtrlEfcIntelMonrSt    = ERR_DEB_MONR_STS_INACTIVE;
++   SftyActvDchaCtrlFltIntelMonrSt\t= ERR_DEB_MONR_STS_INACTIVE;
+    
+ 
+    /* Initialize Output Variables (Output Interface) */
+diff --git a/src/fw_cu/Components/Safety/Sfty_Inv/SftyActvDchaCtrl/src/SftyActvDchaCtrl_data.c b/src/fw_cu/Components/Safety/Sfty_Inv/SftyActvDchaCtrl/src/SftyActvDchaCtrl_data.c
+index 293d12665..d1f6873ed 100644
+--- a/src/fw_cu/Components/Safety/Sfty_Inv/SftyActvDchaCtrl/src/SftyActvDchaCtrl_data.c
++++ b/src/fw_cu/Components/Safety/Sfty_Inv/SftyActvDchaCtrl/src/SftyActvDchaCtrl_data.c
+@@ -194,7 +194,7 @@ VAR(uint8, SFTYACTVDCHACTRL_VAR) SftyActvDchaCtrlFctIdActvDchaCanFailr = ACTV_DC
+ #include "MemMap.h"
+ 
+ /*
+-@@ SYMBOL = SftyActvDchaCtrlEfcErrMonrStIntel
++@@ SYMBOL = SftyActvDchaCtrlEfcIntelMonrSt
+ @@ A2L_TYPE = MEASURE
+ @@ DATA_TYPE = UBYTE [0 ... 2]
+ @@ CONVERSION = TABLE 0 "INACTIVE" 1 "PASSED" 2 "FAILED"
+@@ -202,7 +202,7 @@ VAR(uint8, SFTYACTVDCHACTRL_VAR) SftyActvDchaCtrlFctIdActvDchaCanFailr = ACTV_DC
+ @@ GROUP = SftyActvDchaCtrl
+ @@ END
+ */
+-VAR(uint8, SFTYACTVDCHACTRL_VAR) SftyActvDchaCtrlEfcErrMonrStIntel = ERR_DEB_MONR_STS_INACTIVE;
++VAR(uint8, SFTYACTVDCHACTRL_VAR) SftyActvDchaCtrlEfcIntelMonrSt = ERR_DEB_MONR_STS_INACTIVE;
+ 
+ #define SFTYACTVDCHACTRL_STOP_SEC_VAR_AREA_CMN_FAST_INIT_8
+ #include "MemMap.h"
+@@ -214,7 +214,7 @@ VAR(uint8, SFTYACTVDCHACTRL_VAR) SftyActvDchaCtrlEfcErrMonrStIntel = ERR_DEB_MON
+ #include "MemMap.h"
+ 
+ /*
+-@@ SYMBOL = SftyActvDchaCtrlFltErrMonrStIntel
++@@ SYMBOL = SftyActvDchaCtrlFltIntelMonrSt
+ @@ A2L_TYPE = MEASURE
+ @@ DATA_TYPE = UBYTE [0 ... 2]
+ @@ CONVERSION = TABLE 0 "INACTIVE" 1 "PASSED" 2 "FAILED"
+@@ -222,7 +222,7 @@ VAR(uint8, SFTYACTVDCHACTRL_VAR) SftyActvDchaCtrlEfcErrMonrStIntel = ERR_DEB_MON
+ @@ GROUP = SftyActvDchaCtrl
+ @@ END
+ */
+-VAR(uint8, SFTYACTVDCHACTRL_VAR) SftyActvDchaCtrlFltErrMonrStIntel = ERR_DEB_MONR_STS_INACTIVE;
++VAR(uint8, SFTYACTVDCHACTRL_VAR) SftyActvDchaCtrlFltIntelMonrSt = ERR_DEB_MONR_STS_INACTIVE;
+ 
+ #define SFTYACTVDCHACTRL_STOP_SEC_VAR_AREA_CMN_FAST_INIT_8
+ #include "MemMap.h"
+@@ -364,26 +364,26 @@ VAR(float32, SFTYACTVDCHACTRL_VAR) SftyActvDchaCtrlHvDcUVal = 0.0f;
+ #include "MemMap.h"
+ 
+ /*
+-@@ INSTANCE  = SftyActvDchaPrmData
+-@@ STRUCTURE = SftyActvDchaPrmDataType
++@@ INSTANCE  = SftyActvDchaCtrlPrm
++@@ STRUCTURE = SftyActvDchaCtrlPrmType
+ @@ END
+ */
+ /*! Configuration of all parameter values */
+-CONST(SftyActvDchaPrmDataType, SFTYACTVDCHACTRL_CONST) SftyActvDchaPrmData =
++CONST(SftyActvDchaCtrlPrmType, SFTYACTVDCHACTRL_CONST) SftyActvDchaCtrlPrm =
+ {
+    200.0f,      /* float32: VbatMinThd */
+    60.0f,       /* float32: HvDcVoltThd */
+    1.3f,        /* float32: HvDcVoltTole */
+-   60U,         /* uint8: AdisByRRtryDurnTimThd */
+-   10U,         /* uint8: DeltaTimAdisByRThd */
+-   10U,         /* uint8: DvDtChkDelayTimAdisByRThd */
+-   50.0f,       /* float32: AdisByREnaDvThd */
+-   3U,          /* uint8: EffeChkFailTimeByRInRowThd */
+-   5U,          /* uint8: EffeChkFailTimeByRTotThd */
+-   1.5f,        /* float32: EffeChkTotalFailTimesByRTimThd */
++   60U,         /* uint8: RtryDurnTiThd */
++   10U,         /* uint8: DeltaTiThd */
++   10U,         /* uint8: DvDtDelayTiThd */
++   50.0f,       /* float32: DvThd */
++   3U,          /* uint8: EfcContsFailTiThd */
++   5U,          /* uint8: EfcFltTotalThd */
++   1.5f,        /* float32: EfcFltTiThd */
+    10.0f,       /* float32: HvDcVoltHys */
+-   2U,          /* uint8: AdisFaultTimeThd */
+-   2U           /* uint8: AdisByRTimeThd */
++   2U,          /* uint8: FltTiThd */
++   2U           /* uint8: TiThd */
+ };
+ 
+ #define SFTYACTVDCHACTRL_STOP_SEC_CALIB_32
+@@ -393,260 +393,6 @@ CONST(SftyActvDchaPrmDataType, SFTYACTVDCHACTRL_CONST) SftyActvDchaPrmData =
+ 
+ /* ********************* End Of Calibration Variables ********************* */
+ 
+-
+-
+-/* ********************* Replace Variables For Debug ********************* */
+-
+-/* ********************* SEC_CALIB_8 ********************* */
+-
+-/* Begin: SFTYREPLCMT_START_SEC_CALIB_8 (calib) */
+-#define SFTYREPLCMT_START_SEC_CALIB_8
+-#include "MemMap.h"
+-
+-/*
+-@@ SYMBOL = SftyReplcmtActvDchaCtrlAdisFltStiEna
+-@@ A2L_TYPE = PARAMETER
+-@@ DATA_TYPE = UBYTE [0 ... 1]
+-@@ CONVERSION = TABLE 0 "Disable" 1 "Enable"
+-@@ DESCRIPTION = "Enable stimulation of Active Disharge Fault Status from SftyE2eFpga module"
+-@@ GROUP = SftyActvDchaCtrl
+-@@ END
+-*/
+-CONST(uint8, SFTYREPLCMT_CALIB) SftyReplcmtActvDchaCtrlAdisFltStiEna = FALSE;
+-
+-#define SFTYREPLCMT_STOP_SEC_CALIB_8
+-#include "MemMap.h"
+-/* End: SFTYREPLCMT_STOP_SEC_CALIB_8 (calib) */
+-
+-
+-/* Begin: SFTYREPLCMT_START_SEC_CALIB_8 (calib) */
+-#define SFTYREPLCMT_START_SEC_CALIB_8
+-#include "MemMap.h"
+-
+-/*
+-@@ SYMBOL = SftyReplcmtActvDchaCtrlHvDcVoltStiEna
+-@@ A2L_TYPE = PARAMETER
+-@@ DATA_TYPE = UBYTE [0 ... 1]
+-@@ CONVERSION = TABLE 0 "Disable" 1 "Enable"
+-@@ DESCRIPTION = "Enable stimulation of HvDcU Physical Value from SftyHvDcUEvln module"
+-@@ GROUP = SftyActvDchaCtrl
+-@@ END
+-*/
+-CONST(uint8, SFTYREPLCMT_CALIB) SftyReplcmtActvDchaCtrlHvDcVoltStiEna = FALSE;
+-
+-#define SFTYREPLCMT_STOP_SEC_CALIB_8
+-#include "MemMap.h"
+-/* End: SFTYREPLCMT_STOP_SEC_CALIB_8 (calib) */
+-
+-
+-/* Begin: SFTYREPLCMT_START_SEC_CALIB_8 (calib) */
+-#define SFTYREPLCMT_START_SEC_CALIB_8
+-#include "MemMap.h"
+-
+-/*
+-@@ SYMBOL = SftyReplcmtActvDchaCtrlCanE2eIpStiEna
+-@@ A2L_TYPE = PARAMETER
+-@@ DATA_TYPE = UBYTE [0 ... 1]
+-@@ CONVERSION = TABLE 0 "Disable" 1 "Enable"
+-@@ DESCRIPTION = "Enable stimulation of input interface from SftyE2e module"
+-@@ GROUP = SftyActvDchaCtrl
+-@@ END
+-*/
+-CONST(uint8, SFTYREPLCMT_CALIB) SftyReplcmtActvDchaCtrlCanE2eIpStiEna = FALSE;
+-
+-#define SFTYREPLCMT_STOP_SEC_CALIB_8
+-#include "MemMap.h"
+-/* End: SFTYREPLCMT_STOP_SEC_CALIB_8 (calib) */
+-
+-
+-/* Begin: SFTYREPLCMT_START_SEC_CALIB_8 (calib) */
+-#define SFTYREPLCMT_START_SEC_CALIB_8
+-#include "MemMap.h"
+-
+-/*
+-@@ SYMBOL = SftyReplcmtActvDchaCtrlSftyErrDebIpStiEna
+-@@ A2L_TYPE = PARAMETER
+-@@ DATA_TYPE = UBYTE [0 ... 1]
+-@@ CONVERSION = TABLE 0 "Disable" 1 "Enable"
+-@@ DESCRIPTION = "Enable stimulation of input interface from SftyErrDeb module"
+-@@ GROUP = SftyActvDchaCtrl
+-@@ END
+-*/
+-CONST(uint8, SFTYREPLCMT_CALIB) SftyReplcmtActvDchaCtrlSftyErrDebIpStiEna = FALSE;
+-
+-#define SFTYREPLCMT_STOP_SEC_CALIB_8
+-#include "MemMap.h"
+-/* End: SFTYREPLCMT_STOP_SEC_CALIB_8 (calib) */
+-
+-
+-
+-
+-/* Begin: SFTYREPLCMT_START_SEC_CALIB_8 (calib) */
+-#define SFTYREPLCMT_START_SEC_CALIB_8
+-#include "MemMap.h"
+-
+-/*
+-@@ SYMBOL = SftyReplcmtActvDchaCtrlActvFlt
+-@@ A2L_TYPE = PARAMETER
+-@@ DATA_TYPE = UBYTE [0 ... 1]
+-@@ CONVERSION = TABLE 0 "Fault" 1 "No_Fault"
+-@@ DESCRIPTION = "Replacement value for Fault state of Activate ActiveDischarge safety guarded by E2E"
+-@@ GROUP = SftyActvDchaCtrl
+-@@ END
+-*/
+-CONST(uint8, SFTYREPLCMT_CALIB) SftyReplcmtActvDchaCtrlActvFlt = ADIS_STS_NO_FAULT;
+-
+-#define SFTYREPLCMT_STOP_SEC_CALIB_8
+-#include "MemMap.h"
+-/* End: SFTYREPLCMT_STOP_SEC_CALIB_8 (calib) */
+-
+-
+-/* Begin: SFTYREPLCMT_START_SEC_CALIB_8 (calib) */
+-#define SFTYREPLCMT_START_SEC_CALIB_8
+-#include "MemMap.h"
+-
+-/*
+-@@ SYMBOL = SftyReplcmtActvDchaCtrlInactvFlt
+-@@ A2L_TYPE = PARAMETER
+-@@ DATA_TYPE = UBYTE [0 ... 1]
+-@@ CONVERSION = TABLE 0 "Fault" 1 "No_Fault"
+-@@ DESCRIPTION = "Replacement value for Fault state of inactivate ActiveDischarge safety guarded by E2E"
+-@@ GROUP = SftyActvDchaCtrl
+-@@ END
+-*/
+-CONST(uint8, SFTYREPLCMT_CALIB) SftyReplcmtActvDchaCtrlInactvFlt = ADIS_STS_NO_FAULT;
+-
+-#define SFTYREPLCMT_STOP_SEC_CALIB_8
+-#include "MemMap.h"
+-/* End: SFTYREPLCMT_STOP_SEC_CALIB_8 (calib) */
+-
+-
+-/* Begin: SFTYREPLCMT_START_SEC_CALIB_8 (calib) */
+-#define SFTYREPLCMT_START_SEC_CALIB_8
+-#include "MemMap.h"
+-
+-/*
+-@@ SYMBOL = SftyReplcmtActvDchaCtrlBattCntctrSt
+-@@ A2L_TYPE = PARAMETER
+-@@ DATA_TYPE = UBYTE [0 ... 1]
+-@@ CONVERSION = TABLE 0 "Open" 1 "Close"
+-@@ DESCRIPTION = "Replacement value for Hv Battery Contactor Status from SftyE2e module"
+-@@ GROUP = SftyActvDchaCtrl
+-@@ END
+-*/
+-CONST(uint8, SFTYREPLCMT_CALIB) SftyReplcmtActvDchaCtrlBattCntctrSt = HV_BATT_CONTACTOR_OPEN;
+-
+-#define SFTYREPLCMT_STOP_SEC_CALIB_8
+-#include "MemMap.h"
+-/* End: SFTYREPLCMT_STOP_SEC_CALIB_8 (calib) */
+-
+-
+-/* Begin: SFTYREPLCMT_START_SEC_CALIB_8 (calib) */
+-#define SFTYREPLCMT_START_SEC_CALIB_8
+-#include "MemMap.h"
+-
+-/*
+-@@ SYMBOL = SftyReplcmtActvDchaCtrlE2eReq
+-@@ A2L_TYPE = PARAMETER
+-@@ DATA_TYPE = UBYTE [0 ... 1]
+-@@ CONVERSION = TABLE 0 "No Adis Request" 1 "Adis Request"
+-@@ DESCRIPTION = "Replacement value for Active Discharge request from SftyE2e module"
+-@@ GROUP = SftyActvDchaCtrl
+-@@ END
+-*/
+-CONST(uint8, SFTYREPLCMT_CALIB) SftyReplcmtActvDchaCtrlE2eReq = ACTV_DCHA_DEACTVE;
+-
+-#define SFTYREPLCMT_STOP_SEC_CALIB_8
+-#include "MemMap.h"
+-/* End: SFTYREPLCMT_STOP_SEC_CALIB_8 (calib) */
+-
+-
+-/* Begin: SFTYREPLCMT_START_SEC_CALIB_8 (calib) */
+-#define SFTYREPLCMT_START_SEC_CALIB_8
+-#include "MemMap.h"
+-
+-/*
+-@@ SYMBOL = SftyReplcmtActvDchaCtrlFctIdActDcha
+-@@ A2L_TYPE = PARAMETER
+-@@ DATA_TYPE = UBYTE [0 ... 1]
+-@@ CONVERSION = TABLE 0 "No Adis Request" 1 "Adis Request"
+-@@ DESCRIPTION = "Replacement value for Local Variable that FID to trigger Active Discharge"
+-@@ GROUP = SftyActvDchaCtrl
+-@@ END
+-*/
+-CONST(uint8, SFTYREPLCMT_CALIB) SftyReplcmtActvDchaCtrlFctIdActDcha = ACTV_DCHA_DEACTVE;
+-
+-#define SFTYREPLCMT_STOP_SEC_CALIB_8
+-#include "MemMap.h"
+-/* End: SFTYREPLCMT_STOP_SEC_CALIB_8 (calib) */
+-
+-
+-/* Begin: SFTYREPLCMT_START_SEC_CALIB_8 (calib) */
+-#define SFTYREPLCMT_START_SEC_CALIB_8
+-#include "MemMap.h"
+-
+-/*
+-@@ SYMBOL = SftyReplcmtActvDchaCtrlFctIdCanVcuInvStat1
+-@@ A2L_TYPE = PARAMETER
+-@@ DATA_TYPE = UBYTE [0 ... 1]
+-@@ CONVERSION = TABLE 0 "No Adis Request" 1 "Adis Request"
+-@@ DESCRIPTION = "Replacement value for Local Variable that FID to indicate VcuInvCtrl1 CAN frame failure"
+-@@ GROUP = SftyActvDchaCtrl
+-@@ END
+-*/
+-CONST(uint8, SFTYREPLCMT_CALIB) SftyReplcmtActvDchaCtrlFctIdCanVcuInvStat1 = ACTV_DCHA_DEACTVE;
+-
+-#define SFTYREPLCMT_STOP_SEC_CALIB_8
+-#include "MemMap.h"
+-/* End: SFTYREPLCMT_STOP_SEC_CALIB_8 (calib) */
+-
+-
+-/* Begin: SFTYREPLCMT_START_SEC_CALIB_8 (calib) */
+-#define SFTYREPLCMT_START_SEC_CALIB_8
+-#include "MemMap.h"
+-
+-/*
+-@@ SYMBOL = SftyReplcmtActvDchaCtrlFctIdActvDchaCanFailr
+-@@ A2L_TYPE = PARAMETER
+-@@ DATA_TYPE = UBYTE [0 ... 1]
+-@@ CONVERSION = TABLE 0 "No Adis Request" 1 "Adis Request"
+-@@ DESCRIPTION = "Replacement value for Local Variable that FID to trigger Active discharge during CAN failure conditions"
+-@@ GROUP = SftyActvDchaCtrl
+-@@ END
+-*/
+-CONST(uint8, SFTYREPLCMT_CALIB) SftyReplcmtActvDchaCtrlFctIdActvDchaCanFailr = ACTV_DCHA_DEACTVE;
+-
+-#define SFTYREPLCMT_STOP_SEC_CALIB_8
+-#include "MemMap.h"
+-/* End: SFTYREPLCMT_STOP_SEC_CALIB_8 (calib) */
+-
+-
+-/* Begin: SFTYREPLCMT_START_SEC_CALIB_32 (calib) */
+-#define SFTYREPLCMT_START_SEC_CALIB_32
+-#include "MemMap.h"
+-
+-/*
+-@@ SYMBOL = SftyReplcmtActvDchaCtrlHvDcVolt
+-@@ A2L_TYPE = PARAMETER
+-@@ DATA_TYPE = FLOAT [0.00 ... 914.00]
+-@@ DESCRIPTION = "Replacement value for HvDcU Physical Value in Voltage"
+-@@ GROUP = SftyActvDchaCtrl
+-@@ END
+-*/
+-CONST(float32, SFTYREPLCMT_CALIB) SftyReplcmtActvDchaCtrlHvDcVolt = 0.0f;
+-
+-#define SFTYREPLCMT_STOP_SEC_CALIB_32
+-#include "MemMap.h"
+-/* End: SFTYREPLCMT_STOP_SEC_CALIB_32 (calib) */
+-
+-
+-/* ********************* End Of Replace Variables For Debug ********************* */
+-
+-
+-/*==================================== [End Of Declaration for Calibration Variables] ====================================*/
+-
+-
+-
+ /*================== [closure] ==============================================*/
+ /** @} doxygen end group definition */
+ /* ***************************************************************** */
+diff --git a/src/fw_cu/build/a2l/Measurements-to-Timeslices-Mapping.csv b/src/fw_cu/build/a2l/Measurements-to-Timeslices-Mapping.csv
+index 2ed81cb20..e96bceb74 100644
+--- a/src/fw_cu/build/a2l/Measurements-to-Timeslices-Mapping.csv
++++ b/src/fw_cu/build/a2l/Measurements-to-Timeslices-Mapping.csv
+@@ -4881,10 +4881,6 @@ SftyAcEvlnPlausErrMonrSt,Core_1,Core_1_200us,0.2,,,SSW
+ SftyAcEvlnRngHiErrMonrSt,Core_1,Core_1_200us,0.2,,,SSW
+ SftyAcEvlnRngLoErrMonrSt,Core_1,Core_1_200us,0.2,,,SSW
+ SftyAcEvlnSumErrMonrSt,Core_1,Core_1_200us,0.2,,,SSW
+-SftyActvChaCtrlAdisSuccessful,Core_1,Core_1_200us,1,,,SSW
+-SftyActvDchaCtrlActvDchaReq,Core_1,Core_1_200us,1,,,SSW
+-SftyActvDchaCtrlActvDchaReqExtel,Core_1,Core_1_200us,1,,,SSW
+-SftyActvDchaCtrlActvDchaReqIntel,Core_1,Core_1_200us,1,,,SSW
+ SftyActvDchaCtrlActvDchaReqViaR,Core_1,Core_1_200us,1,,,SSW
+ SftyAcEvlnReinitCntr,Core_1,Core_1_200us,0.2,,,SSW
+ SftyAcEvlnReinitTimCntr,Core_1,Core_1_200us,0.2,,,SSW
+@@ -4896,6 +4892,7 @@ SftyActvDchaCtrlCmd.PrmId2,Core_1,Core_1_200us,0.2,,,SSW
+ SftyActvDchaCtrlCmd.PrmVal1,Core_1,Core_1_200us,0.2,,,SSW
+ SftyActvDchaCtrlCmd.PrmVal2,Core_1,Core_1_200us,0.2,,,SSW
+ SftyActvDchaCtrlCmd.RstRq,Core_1,Core_1_200us,0.2,,,SSW
++SftyActvDchaCtrlDeltaTiCnt,Core_1,Core_1_200us,1,,,SSW
+ SftyActvDchaCtrlrIfMeasData.actvDchaAlvCntrErrSimnEn,Core_1,Core_1_200us,0.2,,,SSW
+ SftyActvDchaCtrlrIfMeasData.actvDchaBoardTestEn,Core_1,Core_1_200us,0.2,,,SSW
+ SftyActvDchaCtrlrIfMeasData.actvDchaBoardTestPwmDutyCyc,Core_1,Core_1_200us,0.2,,,SSW
+@@ -4939,9 +4936,9 @@ SftyActvDchaCtrlrIfMeasData.thdUcActvDchaEnad,Core_1,Core_1_200us,0.2,,,SSW
+ SftyActvDchaCtrlrIfMeasData.topValEnTmr,Core_1,Core_1_200us,0.2,,,SSW
+ SftyActvDchaCtrlrIfMeasData.topValSpiPrmTmr,Core_1,Core_1_200us,0.2,,,SSW
+ SftyActvDchaCtrlrIfMeasData.topValSysProtTmr,Core_1,Core_1_200us,0.2,,,SSW
+-SftyActvDchaCtrlStrtupTestSts,Core_1,Core_1_200us,1,,,SSW
+-SftyActvDhaCtrlAdisOperSts,Core_1,Core_1_200us,1,,,SSW
+-SftyActvDchaCtrlDvDtChkDlyTimAdisByRCnt,Core_1,Core_1_200us,1,,,SSW
++SftyActvDchaCtrlRtryDurnCnt,Core_1,Core_1_200us,1,,,SSW
++SftyActvDchaCtrlStrtupTstSts,Core_1,Core_1_200us,1,,,SSW
++SftyActvDchaCtrlTiCnt,Core_1,Core_1_200us,1,,,SSW
+ SftyActvDchaCtrlrIfMeasData.actvDchaHvILpFilFac,Core_1,Core_1_200us,0.2,,,SSW
+ SftyActvDchaCtrlrIfMeasData.actvDchaHvILpFilDiTiThd,Core_1,Core_1_200us,0.2,,,SSW
+ SftyActvDchaCtrlrIfMeasData.actvDchaHwCircFlt1DiTiThd,Core_1,Core_1_200us,0.2,,,SSW
+@@ -6174,13 +6171,15 @@ filter_phi_TL_OutputData.omega_mech,Core_2,C2_100u_PWM,0.1,,,DRCO
+ filter_phi_TL_OutputData.phi_mech,Core_2,C2_100u_PWM,0.1,,,DRCO
+ filter_phi_TL_OutputData.phi_mech_byp,Core_2,C2_100u_PWM,0.1,,,DRCO
+ XCP_Calibration_Response,Core_0,C0_10ms_Slow,10,XCP event based,,BSW
+-SftyActvDchaCtrlDeltaTimeResistorCnt,Core_1,Core_1_200us,1,,,SSW
++SftyActvDchaCtrlDvDtChkDlyTiCnt,Core_1,Core_1_200us,1,,,SSW
+ SftyActvDchaCtrlE2eReq,Core_1,Core_1_200us,1,,,SSW
+ SftyActvDchaCtrlEfcErrMonrSt,Core_1,Core_1_200us,1,,,SSW
+-SftyActvDchaCtrlEfcErrMonrStIntel,Core_1,Core_1_200us,1,,,SSW
+-SftyActvDchaCtrlEffeChkFailTimeAdisByRInRowCnt,Core_1,Core_1_200us,1,,,SSW
+-SftyActvDchaCtrlEffeChkFailTimesAdisByRTotCnt,Core_1,Core_1_200us,1,,,SSW
+-SftyActvDchaCtrlEffeChkTotalFailTimesAdisByRTimCnt,Core_1,Core_1_200us,1,,,SSW
++SftyActvDchaCtrlEfcFailTiConsCnt,Core_1,Core_1_200us,1,,,SSW
++SftyActvDchaCtrlEfcFailTiTotCnt,Core_1,Core_1_200us,1,,,SSW
++SftyActvDchaCtrlEfcIntelMonrSt,Core_1,Core_1_200us,1,,,SSW
++SftyActvDchaCtrlEfcTotFailTi,Core_1,Core_1_200us,1,,,SSW
++SftyActvDchaCtrlExtReq,Core_1,Core_1_200us,1,,,SSW
++SftyActvDchaCtrlFaultTiCnt,Core_1,Core_1_200us,1,,,SSW
+ SftyC2cSecu2SftyData.EncData,Core_1,Core_1_200us,0.2,,,SSW
+ SftyC2cSecu2SftyData.UpdCntr,Core_1,Core_1_200us,0.2,,,SSW
+ SftyC2cSfty2SecuData.AckCntr,Core_1,Core_1_200us,0.2,,,SSW
+@@ -6329,12 +6328,16 @@ SftyActvDchaCtrlFctIdActvDcha,Core_1,Core_1_200us,1,,,SSW
+ SftyActvDchaCtrlFctIdActvDchaCanFailr,Core_1,Core_1_200us,1,,,SSW
+ SftyActvDchaCtrlFctIdCanVcuInvCtrl1,Core_1,Core_1_200us,1,,,SSW
+ SftyActvDchaCtrlFltErrMonrSt,Core_1,Core_1_200us,1,,,SSW
+-SftyActvDchaCtrlFltErrMonrStIntel,Core_1,Core_1_200us,1,,,SSW
++SftyActvDchaCtrlFltIntelMonrSt,Core_1,Core_1_200us,1,,,SSW
+ SftyActvDchaCtrlHvDcUVal,Core_1,Core_1_200us,1,,,SSW
+ SftyActvDchaCtrlHvDcUValPre,Core_1,Core_1_200us,1,,,SSW
+ SftyActvDchaCtrlInactvErrMonrSt,Core_1,Core_1_200us,1,,,SSW
+ SftyActvDchaCtrlInactvFltSts,Core_1,Core_1_200us,1,,,SSW
+-SftyActvDchaCtrlReqAdisByRCmdUpdEna,Core_1,Core_1_200us,1,,,SSW
++SftyActvDchaCtrlIntReq,Core_1,Core_1_200us,1,,,SSW
++SftyActvDchaCtrlMonrSt,Core_1,Core_1_200us,1,,,SSW
++SftyActvDchaCtrlOperSts,Core_1,Core_1_200us,1,,,SSW
++SftyActvDchaCtrlReqCmdUpdEna,Core_1,Core_1_200us,1,,,SSW
++SftyActvDchaCtrlReqSentCmd,Core_1,Core_1_200us,1,,,SSW
+ SftySbcFs6500LFSRVal,Core_1,Core_1_200us,0.2,,,SSW
+ SftySbcFs6500RegReadBack_INIT_VREG,Core_1,Core_1_200us,0.2,,,SSW
+ SftySbcFs6500RegReadBack_INIT_WU1,Core_1,Core_1_200us,0.2,,,SSW
+@@ -6927,11 +6930,8 @@ SftyParkLockEvlnActrAbsPosn,Core_1,Core_1_200us,0.2,,,SSW
+ SftyActvDchaCtrlActvDchaSts,Core_1,Core_1_200us,1,,,SSW
+ SftyActvDchaCtrlActvErrMonrSt,Core_1,Core_1_200us,1,,,SSW
+ SftyActvDchaCtrlActvFltSts,Core_1,Core_1_200us,1,,,SSW
+-SftyActvDchaCtrlAdisByRTimeCnt,Core_1,Core_1_200us,1,,,SSW
+-SftyActvDchaCtrlAdisFaultTimeCnt,Core_1,Core_1_200us,1,,,SSW
+-SftyActvDchaCtrlAdisReqCmdHasSent,Core_1,Core_1_200us,1,,,SSW
++SftyActvDchaCtrlAdisReq,Core_1,Core_1_200us,1,,,SSW
+ SftyActvDchaCtrlBattCntctrSts,Core_1,Core_1_200us,1,,,SSW
+-SftyActvDchaCtrlByRRtryDurnCnt,Core_1,Core_1_200us,1,,,SSW
+ SftyParkLockEvlnActrAg,Core_1,Core_1_200us,0.2,,,SSW
+ SftyParkLockEvlnActrAgPrev,Core_1,Core_1_200us,0.2,,,SSW
+ SftyParkLockEvlnActrAgSpd,Core_1,Core_1_200us,0.2,,,SSW
+'

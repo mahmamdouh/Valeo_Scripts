@@ -1,0 +1,101 @@
+b'commit 6bfeeb3f4d510e1480a8f33c5f2bc9e22b3745f4
+Author: mbahaa1 <mohamed.bahaa@valeo.com>
+Date:   Thu Feb 10 11:19:26 2022 +0200
+
+    $100kW-51637$ SWIT_IT Fix
+    
+    Change-Id: Idbc00094f8bd2de217b29c61c0d6aa901e00baee
+
+diff --git a/src/fw_cu/Components/Cmn/SWIT/SWIT_SFTY/include/SWIT_Sfty.h b/src/fw_cu/Components/Cmn/SWIT/SWIT_SFTY/include/SWIT_Sfty.h
+index fdd1d50ca..8e8a4dade 100644
+--- a/src/fw_cu/Components/Cmn/SWIT/SWIT_SFTY/include/SWIT_Sfty.h
++++ b/src/fw_cu/Components/Cmn/SWIT/SWIT_SFTY/include/SWIT_Sfty.h
+@@ -2349,7 +2349,12 @@
+ #define SWIT_sftyTempEvlnPhaIU_Input_KEY  20200
+ #define SWIT_sftyTempEvlnPhaIV_Input_KEY 20202
+ #define SWIT_sftyTempEvlnPhaIW_Input_KEY 20204
++
++/*Prioritize control signal keys*/
+ #define SWIT_SftyAcEvlnPlausErrMonrSt_Output_KEY 20251
++#define SWIT_SftyInvActrStateReqMod_Input_KEY                            (40652)
++#define SWIT_SftyInvActrStateReqMod_Output_KEY                           (40651)
++
+ 
+ 
+ /*E2eFpga System Function*/
+@@ -3666,6 +3671,9 @@ extern void SWIT_SftyRslvrCalcn_SpdComp_EndHook(void);
+ extern void SWIT_SftyInvActr_MainFunctionAreaCmn_EndHook(ErrDeb_FctIdBitFieType *SftyErrDebFct);
+ extern void SWIT_SftyInvActr_ReinitMonrData_EndHook(void);
+ extern void SWIT_SftyAcEvln_MainFunctionAreaCmn_EndHook(void);
++extern void SWIT_SftyE2eFpga_AccModPlausChk_BgnHook(void);
++
++
+ 
+ /*IvtrComE2e Hooks*/
+ 
+diff --git a/src/fw_cu/Components/Cmn/SWIT/SWIT_SFTY/src/SWIT_SFTY_AreaCMN.c b/src/fw_cu/Components/Cmn/SWIT/SWIT_SFTY/src/SWIT_SFTY_AreaCMN.c
+index 2443bad35..7972e8d90 100644
+--- a/src/fw_cu/Components/Cmn/SWIT/SWIT_SFTY/src/SWIT_SFTY_AreaCMN.c
++++ b/src/fw_cu/Components/Cmn/SWIT/SWIT_SFTY/src/SWIT_SFTY_AreaCMN.c
+@@ -622,7 +622,7 @@ void SWIT_SftyInvActr_MainFunctionAreaCmn_EndHook(ErrDeb_FctIdBitFieType *SftyEr
+    SWIT_Sfty_Set(&SftyInvActrMidPointPhaVErrMonrSt, SWIT_SftyInvActrMidPointPhaVErrMonrSt_Output_KEY, SWIT_UINT8);
+    SWIT_Sfty_Set(&SftyInvActrMidPointPhaUErrMonrSt, SWIT_SftyInvActrMidPointPhaUErrMonrSt_Output_KEY, SWIT_UINT8);
+    SWIT_Sfty_Set(&SftyInvActrLSGateDrvrErrMonrSt, SWIT_SftyInvActrLSGateDrvrErrMonrSt_Output_KEY, SWIT_UINT8);
+-
++   SWIT_Sfty_Set(&SftyInvActrStateReqMod, SWIT_SftyInvActrStateReqMod_Output_KEY, SWIT_UINT8);
+    //SWIT_Sfty_Check_Input(&SftyModMgrKl30InvStReq, SWIT_SftyModMgrKl30InvStReq_Input_KEY, SWIT_UINT8);
+ }
+ 
+@@ -638,9 +638,9 @@ void SWIT_SftyInvActr_ReinitMonrData_EndHook(void)
+ 
+  void SWIT_SftyAcEvln_MainFunctionAreaCmn_EndHook(void)
+  {
+-\t SWIT_Sfty_Set(&SftyAcEvlnPhaseUOcHWErrMonrSt, SWIT_SftyAcEvlnPhaseUOcHWErrMonrSt_Output_KEY, SWIT_UINT8);
+-\t SWIT_Sfty_Set(&SftyAcEvlnPhaseVOcHWErrMonrSt, SWIT_SftyAcEvlnPhaseVOcHWErrMonrSt_Output_KEY, SWIT_UINT8);
+-\t SWIT_Sfty_Set(&SftyAcEvlnPhaseWOcHWErrMonrSt, SWIT_SftyAcEvlnPhaseWOcHWErrMonrSt_Output_KEY, SWIT_UINT8);
++\t //SWIT_Sfty_Set(&SftyAcEvlnPhaseUOcHWErrMonrSt, SWIT_SftyAcEvlnPhaseUOcHWErrMonrSt_Output_KEY, SWIT_UINT8);
++\t //SWIT_Sfty_Set(&SftyAcEvlnPhaseVOcHWErrMonrSt, SWIT_SftyAcEvlnPhaseVOcHWErrMonrSt_Output_KEY, SWIT_UINT8);
++\t// SWIT_Sfty_Set(&SftyAcEvlnPhaseWOcHWErrMonrSt, SWIT_SftyAcEvlnPhaseWOcHWErrMonrSt_Output_KEY, SWIT_UINT8);
+ \t SWIT_Sfty_Set(&SftyAcEvlnPlausErrMonrSt ,SWIT_SftyAcEvlnPlausErrMonrSt_Output_KEY ,SWIT_UINT8);
+  }
+ 
+@@ -1313,6 +1313,12 @@ void SWIT_SftyAcEvln_MainFunctionAreaCmn_BgnHook(void)
+    SWIT_Sfty_Set(&SftyAcEvlnPlausErrMonrSt ,SWIT_SftyAcEvlnPlausErrMonrSt_Output_KEY ,SWIT_UINT8);
+ 
+ }*/
++
++void SWIT_SftyE2eFpga_AccModPlausChk_BgnHook(void)
++{
++SWIT_Sfty_Check_Input(&SftyInvActrStateReqMod,SWIT_SftyInvActrStateReqMod_Input_KEY,SWIT_UINT8);
++}
++
+ #define SWIT_SFTY_AREA_3_STOP_SEC_CODE_SLOW
+ #include "SWIT_MemMap.h"
+ 
+diff --git a/src/fw_cu/Components/Safety/Sfty_Cmn/SftyE2eFpga/src/SftyE2eFpga.c b/src/fw_cu/Components/Safety/Sfty_Cmn/SftyE2eFpga/src/SftyE2eFpga.c
+index f519701cf..22fc41717 100644
+--- a/src/fw_cu/Components/Safety/Sfty_Cmn/SftyE2eFpga/src/SftyE2eFpga.c
++++ b/src/fw_cu/Components/Safety/Sfty_Cmn/SftyE2eFpga/src/SftyE2eFpga.c
+@@ -1986,6 +1986,9 @@ LOCAL_INLINE void SftyE2eFpga_UpdtC2cData(void)
+ /******************************************************************/
+ LOCAL_INLINE void SftyE2eFpga_AccModPlausChk(void)
+ {
++#ifdef SWIT_IT_Active
++  SWIT_SftyE2eFpga_AccModPlausChk_BgnHook();
++#endif
+    if( SftyInvActrStateReqMod == SftyE2eFpgaCurrMod )
+    {
+       SftyE2eFpgaModPlausErrMonrStAcc |= ERR_DEB_MONR_STS_PASSED;
+diff --git a/src/fw_cu/Components/Safety/Sfty_Inv/SftyInvActr/src/SftyInvActr.c b/src/fw_cu/Components/Safety/Sfty_Inv/SftyInvActr/src/SftyInvActr.c
+index 0e9dcd88b..bd9252342 100644
+--- a/src/fw_cu/Components/Safety/Sfty_Inv/SftyInvActr/src/SftyInvActr.c
++++ b/src/fw_cu/Components/Safety/Sfty_Inv/SftyInvActr/src/SftyInvActr.c
+@@ -863,7 +863,6 @@ if((SWIT_SftyInvActr_EN_KEY==SWIT_First_HookEnableKey))
+ 
+ 
+ #ifdef SWIT_IT_Active
+-   if((SWIT_SftyInvActr_EN_KEY==SWIT_First_HookEnableKey)||(SWIT_SftyInvActr_EN_KEY==SWIT_Second_HookEnableKey)||(SWIT_SftyInvActr_EN_KEY==SWIT_Third_HookEnableKey))
+    SWIT_SftyInvActr_MainFunctionAreaCmn_EndHook(&SftyErrDebFctInhbnSts);
+ #endif
+ 
+'

@@ -1,0 +1,2 @@
+cd C:\\100KW\\Optimus_100KW_Software
+git logreview --name-only --decorate  P2-100KW-MASTER-0257-20220207..HEAD  >C:\\Users\\melmohta\\Desktop\\Integrator_Role\\Scripts\\Transfer_Plan_Script\\Vsersion_2\\Version_4.0.0\\SubFiles\\log.txt

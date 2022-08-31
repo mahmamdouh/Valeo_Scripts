@@ -1,0 +1,36 @@
+b'commit 623164e90fe973ee74c0cf7ee03f706afb71e38a
+Author: Naresh-Singh RAJPUT (JV) <naresh-singh.rajput.jv@valeo.com>
+Date:   Fri Jan 14 17:50:28 2022 +0100
+
+    $100kW-50495$ - EDSADC to DMA Event Enabled for Resolver Signals
+    
+    Change-Id: Id2fb61fc6bca248bbea871a8fb1fd92f4eae10e5
+
+diff --git a/src/fw_cu/Components/Inv/ValMeasAndProc/DSADC/src/dsadc.c b/src/fw_cu/Components/Inv/ValMeasAndProc/DSADC/src/dsadc.c
+index 0f4d07d78..7beb15821 100644
+--- a/src/fw_cu/Components/Inv/ValMeasAndProc/DSADC/src/dsadc.c
++++ b/src/fw_cu/Components/Inv/ValMeasAndProc/DSADC/src/dsadc.c
+@@ -56,8 +56,7 @@
+ #define DSADC_CLEAR_INTEGRATOR_TRIGGER_MODE   (0x8000U)          /*! Set ITRMODE=0 for reconfiguration of Integrator */
+ #define DSADC_CALIB_NORM_RNG                  (1.F)              /*! Normalization range(-1 to +1) of DSADC result values */
+ #define DSADC_TRIG_CALIB                      (1U<<31U | 1U<<28U)/*! Calibration Trigger */
+-/*! TODO : change it to DMA interrupt after DMA driver is ported to TC3xx */
+-#define KEY_DSADC_EVENT_TYPE                  (1U)               /*! 1: DSADC Iv,Iw events will trigger SW-Interrupt*/
++#define KEY_DSADC_EVENT_TYPE                  (0U)               /*! 1: DSADC Iv,Iw events will trigger SW-Interrupt*/
+                                                                  /*  0: DSADC Iv,Iw events will trigger DMA channels*/
+ #define DSADC_CAPSIGNDELAY_ENABLE             (0U)               /*! 1: Issue service request via SRAx in response to Sign Delay Capture event*/
+                                                                  /*  0: No service request via SRAx*/
+diff --git a/src/fw_cu/Components/Safety/Sfty_Cmn/SftyDmaDrvr/src/SftyDmaDrvr_cfg.c b/src/fw_cu/Components/Safety/Sfty_Cmn/SftyDmaDrvr/src/SftyDmaDrvr_cfg.c
+index 0a1d1066c..ef8c019f9 100644
+--- a/src/fw_cu/Components/Safety/Sfty_Cmn/SftyDmaDrvr/src/SftyDmaDrvr_cfg.c
++++ b/src/fw_cu/Components/Safety/Sfty_Cmn/SftyDmaDrvr/src/SftyDmaDrvr_cfg.c
+@@ -607,7 +607,7 @@ CONST(SftyDmaDrvrChannelCfg_Type, SFTY_DMA_DRVR_CALIB) SftyDmaDrvrChannelCfg[] =
+       DSADC result is 16 bits. But complete 32bits of result register is transferred (upper 16 bits of result register are zeros).
+       Becuase, the DMA functionality is buggy if multiple transfers are configured with timestamp enabled and channel data width is not 32bits */
+       .ChIndex            =  SFTY_DMA_DRVR_CH_IDX_SIN_DSADC_RSLVR,
+-      .CH.SADR.U          = (uint32)(&EDSADC_RESM3.U),                              /* PRQA S 0303 */
++      .CH.SADR.U          = (uint32)(&EDSADC_RESM1.U),                              /* PRQA S 0303 */
+       .CH.DADR.U          = (uint32)(SftyRslvrDmaDsadcSinData),                    /* PRQA S 0306 */
+       .CH.CHCFGR.B.PRSEL  = (uint32) SFTY_DMA_DRVR_PRSEL_DAISY_CHAIN,
+       .CH.CHCFGR.B.RROAT  = (uint32) SFTY_DMA_DRVR_RROAT_TRANSFER,
+'

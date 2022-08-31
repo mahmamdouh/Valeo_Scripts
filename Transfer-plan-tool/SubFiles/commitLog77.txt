@@ -1,0 +1,316 @@
+b'commit 0866f5ca97fffdcc0c5b7c433c2734579cf87d16
+Author: Neehara ODANKY <neehara.odanky.jv.ext@valeo.com>
+Date:   Tue Jan 11 19:11:24 2022 +0530
+
+    $100kW-50159$ - FCT_CtrlParkPos - Release code SftyParkLockMgr
+    
+    Change-Id: I7cfd729a3beddc2040d7002ae3926fa4b3ec0d7d
+
+diff --git a/src/fw_cu/Components/Safety/Sfty_Cmn/SftyE2eCompst_Cfg/SftyE2eTx_Cfg/src/SftyE2eTx_cfg.c b/src/fw_cu/Components/Safety/Sfty_Cmn/SftyE2eCompst_Cfg/SftyE2eTx_Cfg/src/SftyE2eTx_cfg.c
+index d75a6744a..3858558a7 100644
+--- a/src/fw_cu/Components/Safety/Sfty_Cmn/SftyE2eCompst_Cfg/SftyE2eTx_Cfg/src/SftyE2eTx_cfg.c
++++ b/src/fw_cu/Components/Safety/Sfty_Cmn/SftyE2eCompst_Cfg/SftyE2eTx_Cfg/src/SftyE2eTx_cfg.c
+@@ -38,6 +38,7 @@
+ #include "SftyHVInterlock_data.h"
+ #include "SftyActvDchaCtrl_data.h"
+ #include "SftyParkLockMgr_data.h"
++#include "SftyParkLockEvln_data.h"
+ /*================== [defines] ==============================================*/
+ 
+ #define SFTY_E2E_TX_KL30_OFFSET              (38u)
+diff --git a/src/fw_cu/Components/Safety/Sfty_Cmn/SftyParkLockMgr/include/SftyParkLockMgr_data.h b/src/fw_cu/Components/Safety/Sfty_Cmn/SftyParkLockMgr/include/SftyParkLockMgr_data.h
+index b20cf9083..7037c1555 100644
+--- a/src/fw_cu/Components/Safety/Sfty_Cmn/SftyParkLockMgr/include/SftyParkLockMgr_data.h
++++ b/src/fw_cu/Components/Safety/Sfty_Cmn/SftyParkLockMgr/include/SftyParkLockMgr_data.h
+@@ -16,185 +16,6 @@
+ #include "AddEnumTypes.h"
+ 
+ 
+-
+-
+-/* Begin: SFTYREPLCMT_START_SEC_CALIB_8 (calib) */
+-#define SFTYREPLCMT_START_SEC_CALIB_8
+-#include "MemMap.h"
+-
+-extern CONST(uint8, SFTYREPLCMT_CALIB) SftyReplcmtParkLockMgrPlkIntFltStiEna;
+-#define SFTYREPLCMT_STOP_SEC_CALIB_8
+-#include "MemMap.h"
+-/* End: SFTYREPLCMT_STOP_SEC_CALIB_8 (calib) */
+-
+-
+-/* Begin: SFTYREPLCMT_START_SEC_CALIB_8 (calib) */
+-#define SFTYREPLCMT_START_SEC_CALIB_8
+-#include "MemMap.h"
+-
+-extern CONST(uint8, SFTYREPLCMT_CALIB) SftyReplcmtParkLockMgrPlkIntFlt; /* PRQA S 0777 #All external variables are created with unique names */
+-#define SFTYREPLCMT_STOP_SEC_CALIB_8
+-#include "MemMap.h"
+-/* End: SFTYREPLCMT_STOP_SEC_CALIB_8 (calib) */
+-
+-/* Begin: SFTYREPLCMT_START_SEC_CALIB_8 (calib) */
+-#define SFTYREPLCMT_START_SEC_CALIB_8
+-#include "MemMap.h"
+-
+-extern CONST(uint8, SFTYREPLCMT_CALIB) SftyReplcmtParkLockMgrE2ePrkgPosnReqVldStiEna;
+-#define SFTYREPLCMT_STOP_SEC_CALIB_8
+-#include "MemMap.h"
+-/* End: SFTYREPLCMT_STOP_SEC_CALIB_8 (calib) */
+-
+-/* Begin: SFTYREPLCMT_START_SEC_CALIB_8 (calib) */
+-#define SFTYREPLCMT_START_SEC_CALIB_8
+-#include "MemMap.h"
+-
+-extern CONST(uint8, SFTYREPLCMT_CALIB) SftyReplcmtParkLockMgrE2ePrkgPosnReqVld; /* PRQA S 0777 #All external variables are created with unique names */
+-#define SFTYREPLCMT_STOP_SEC_CALIB_8
+-#include "MemMap.h"
+-/* End: SFTYREPLCMT_STOP_SEC_CALIB_8 (calib) */
+-
+-/* Begin: SFTYREPLCMT_START_SEC_CALIB_8 (calib) */
+-#define SFTYREPLCMT_START_SEC_CALIB_8
+-#include "MemMap.h"
+-
+-extern CONST(uint8, SFTYREPLCMT_CALIB) SftyReplcmtParkLockMgrE2ePrkgPosnReqStiEna; /* PRQA S 0777 #All external variables are created with unique names */
+-#define SFTYREPLCMT_STOP_SEC_CALIB_8
+-#include "MemMap.h"
+-/* End: SFTYREPLCMT_STOP_SEC_CALIB_8 (calib) */
+-
+-
+-/* Begin: SFTYREPLCMT_START_SEC_CALIB_8 (calib) */
+-#define SFTYREPLCMT_START_SEC_CALIB_8
+-#include "MemMap.h"
+-
+-extern CONST(uint8, SFTYREPLCMT_CALIB) SftyReplcmtParkLockMgrE2ePrkgPosnReq; /* PRQA S 0777 #All external variables are created with unique names */
+-#define SFTYREPLCMT_STOP_SEC_CALIB_8
+-#include "MemMap.h"
+-/* End: SFTYREPLCMT_STOP_SEC_CALIB_8 (calib) */
+-
+-
+-/* Begin: SFTYE2E_START_SEC_VAR_AREA_CMN_FAST_CLEARED (online) */
+-#define SFTYE2E_START_SEC_VAR_AREA_CMN_FAST_CLEARED
+-#include "MemMap.h"
+-
+-extern VAR(uint8, SFTYE2E_VAR) SftyE2ePhyDataVcuInvCtrl2PrkgPosnReq;
+-#define SFTYE2E_STOP_SEC_VAR_AREA_CMN_FAST_CLEARED
+-#include "MemMap.h"
+-/* End: SFTYE2E_STOP_SEC_VAR_AREA_CMN_FAST_CLEARED (online) */
+-
+-
+-/* Begin: SFTYE2E_START_SEC_VAR_AREA_CMN_FAST_CLEARED (online) */
+-#define SFTYE2E_START_SEC_VAR_AREA_CMN_FAST_CLEARED
+-#include "MemMap.h"
+-
+-extern VAR(boolean, SFTYE2E_VAR) SftyE2ePhyDataVcuInvCtrl2PrkgPosnReqVld; /* PRQA S 0777 #All external variables are created with unique names */
+-#define SFTYE2E_STOP_SEC_VAR_AREA_CMN_FAST_CLEARED
+-#include "MemMap.h"
+-/* End: SFTYE2E_STOP_SEC_VAR_AREA_CMN_FAST_CLEARED (online) */
+-
+-
+-/* Begin: SFTYPARKLOCKACTR_START_SEC_VAR_AREA_2_FAST_INIT_8 (online) */
+-#define SFTYPARKLOCKACTR_START_SEC_VAR_AREA_2_FAST_INIT_8
+-#include "MemMap.h"
+-
+-extern VAR(boolean, SFTYPARKLOCKACTR_VAR)SftyParkLockActrPosSnsrSts;
+-#define SFTYPARKLOCKACTR_STOP_SEC_VAR_AREA_2_FAST_INIT_8
+-#include "MemMap.h"
+-/* End: SFTYPARKLOCKACTR_STOP_SEC_VAR_AREA_2_FAST_INIT_8 (online) */
+-
+-
+-/* Begin: SFTYPARKLOCKEVLN_START_SEC_VAR_AREA_2_FAST_INIT_32 (online) */
+-#define SFTYPARKLOCKEVLN_START_SEC_VAR_AREA_2_FAST_INIT_32
+-#include "MemMap.h"
+-
+-extern VAR (float32, SFTYPARKLOCKEVLN_VAR) SftyParkLockEvlnPrimActrPosChUMeas;
+-#define SFTYPARKLOCKEVLN_STOP_SEC_VAR_AREA_2_FAST_INIT_32
+-#include "MemMap.h"
+-/* End: SFTYPARKLOCKEVLN_STOP_SEC_VAR_AREA_2_FAST_INIT_32 (online) */
+-
+-
+-/* Begin: SFTYPARKLOCKEVLN_START_SEC_VAR_AREA_2_FAST_INIT_32 (online) */
+-#define SFTYPARKLOCKEVLN_START_SEC_VAR_AREA_2_FAST_INIT_32
+-#include "MemMap.h"
+-
+-extern VAR (float32, SFTYPARKLOCKEVLN_VAR) SftyParkLockEvlnPrimActrNegChUMeas;
+-#define SFTYPARKLOCKEVLN_STOP_SEC_VAR_AREA_2_FAST_INIT_32
+-#include "MemMap.h"
+-/* End: SFTYPARKLOCKEVLN_STOP_SEC_VAR_AREA_2_FAST_INIT_32 (online) */
+-
+-
+-/* Begin: SFTYPARKLOCKEVLN_START_SEC_VAR_AREA_2_FAST_INIT_32 (online) */
+-#define SFTYPARKLOCKEVLN_START_SEC_VAR_AREA_2_FAST_INIT_32
+-#include "MemMap.h"
+-
+-extern VAR (SftyParkLockEvln_AbsPosnType, SFTYPARKLOCKEVLN_VAR) SftyParkLockEvlnActrAbsPosn;
+-#define SFTYPARKLOCKEVLN_STOP_SEC_VAR_AREA_2_FAST_INIT_32
+-#include "MemMap.h"
+-/* End: SFTYPARKLOCKEVLN_STOP_SEC_VAR_AREA_2_FAST_INIT_32 (online) */
+-
+-
+-/* Begin: SFTYPARKLOCKEVLN_START_SEC_VAR_AREA_2_FAST_INIT_32 (online) */
+-#define SFTYPARKLOCKEVLN_START_SEC_VAR_AREA_2_FAST_INIT_32
+-#include "MemMap.h"
+-
+-extern VAR (float32, SFTYPARKLOCKEVLN_VAR) SftyParkLockEvlnActrAg;
+-#define SFTYPARKLOCKEVLN_STOP_SEC_VAR_AREA_2_FAST_INIT_32
+-#include "MemMap.h"
+-/* End: SFTYPARKLOCKEVLN_STOP_SEC_VAR_AREA_2_FAST_INIT_32 (online) */
+-
+-
+-/* Begin: SFTYPARKLOCKEVLN_AREA_0_START_SEC_VAR_FAST_INIT_32 (online) */
+-#define SFTYPARKLOCKEVLN_AREA_0_START_SEC_VAR_FAST_INIT_32
+-#include "MemMap.h"
+-
+-extern VAR (float32, SFTYPARKLOCKEVLN_VAR) SftyParkLockEvlnPrimActrIMeas;
+-#define SFTYPARKLOCKEVLN_AREA_0_STOP_SEC_VAR_FAST_INIT_32
+-#include "MemMap.h"
+-/* End: SFTYPARKLOCKEVLN_AREA_0_STOP_SEC_VAR_FAST_INIT_32 (online) */
+-
+-
+-/* Begin: SFTYLVSPLYEVLN_START_SEC_VAR_AREA_2_SLOW_INIT_32 */
+-#define SFTYLVSPLYEVLN_START_SEC_VAR_AREA_2_SLOW_INIT_32
+-#include "MemMap.h"
+-
+-extern VAR (float32, SFTYPARKLOCKEVLN_VAR) SftyLvSplyEvlnKl30UMeas;
+-#define SFTYLVSPLYEVLN_STOP_SEC_VAR_AREA_2_SLOW_INIT_32
+-#include "MemMap.h"
+-/* End: SFTYLVSPLYEVLN_STOP_SEC_VAR_AREA_2_SLOW_INIT_32 */
+-
+-
+-/* Begin: SFTYPARKLOCKACTR_START_SEC_VAR_AREA_2_FAST_INIT_32 (online) */
+-#define SFTYPARKLOCKACTR_START_SEC_VAR_AREA_2_FAST_INIT_32
+-#include "MemMap.h"
+-
+-extern VAR (SftyParkLockActr_DirType,SFTYPARKLOCKACTR_VAR) SftyParkLockActrPrimActrDirRq;
+-#define SFTYPARKLOCKACTR_STOP_SEC_VAR_AREA_2_FAST_INIT_32
+-#include "MemMap.h"
+-/* End: SFTYPARKLOCKACTR_STOP_SEC_VAR_AREA_2_FAST_INIT_32 (online) */
+-
+-
+-/* Begin: SFTYREPLCMT_START_SEC_CALIB_8 (calib) */
+-#define SFTYREPLCMT_START_SEC_CALIB_8
+-#include "MemMap.h"
+-
+-extern CONST(boolean, SFTYREPLCMT_CALIB) SftyReplcmtSpdMonMeclSpdVldyFlg;
+-#define SFTYREPLCMT_STOP_SEC_CALIB_8
+-#include "MemMap.h"
+-/* End: SFTYREPLCMT_STOP_SEC_CALIB_8 (calib) */
+-
+-
+-/* Begin: SFTYREPLCMT_START_SEC_CALIB_32 (calib) */
+-#define SFTYREPLCMT_START_SEC_CALIB_32
+-#include "MemMap.h"
+-
+-extern CONST(float32, SFTYREPLCMT_CALIB) SftyReplcmtSpdMonMeclSpdRpmFild;
+-#define SFTYREPLCMT_STOP_SEC_CALIB_32
+-#include "MemMap.h"
+-/* End: SFTYREPLCMT_STOP_SEC_CALIB_32 (calib) */
+-
+-
+ /********************************* AREA 1 - START ***************************************/
+ 
+ /* Begin: SFTYPARKLOCKMGR_START_SEC_VAR_AREA_1_FAST_INIT_8 (online) */
+diff --git a/src/fw_cu/Components/Safety/Sfty_Cmn/SftyParkLockMgr/src/SftyParkLockMgr.c b/src/fw_cu/Components/Safety/Sfty_Cmn/SftyParkLockMgr/src/SftyParkLockMgr.c
+index 4033a799b..21947c3ea 100644
+--- a/src/fw_cu/Components/Safety/Sfty_Cmn/SftyParkLockMgr/src/SftyParkLockMgr.c
++++ b/src/fw_cu/Components/Safety/Sfty_Cmn/SftyParkLockMgr/src/SftyParkLockMgr.c
+@@ -38,7 +38,13 @@
+ #include "SftyParkLockEvln.h"
+ #include "SftyParkLockMgr.h"
+ #include "SftyParkLockMgr_data.h" /* PRQA S 0380 #Macro definitions are required to meet the correct functionality */
++#include "SftyParkLockEvln_data.h"
++#include "SftyLvSplyEvln_data.h"
++#include "SftyParkLockActr_data.h"
++#include "SftySpdMon_data.h"
+ #include "C2cComBswData.h"
++#include "SftyReplcmt_data.h"
++#include "SftyE2eRx_data.h"
+ #include "SftySysInit.h"
+ #include "IfxPort_reg.h"
+ #include "SftyCrc.h"
+@@ -297,8 +303,8 @@ LOCAL_INLINE boolean SftyParkLockMgr_EngPrimActrAllwd(void)
+     * Absolute value of EM speed is less than or equal to speed threshold AND
+     * Parklock is in disengaged or unknown position */
+    if (
+-       (SftyReplcmtSpdMonMeclSpdVldyFlg == TRUE) &&
+-       (MLIB_F32AbsF32(SftyReplcmtSpdMonMeclSpdRpmFild) <= SftyParkLockMgrParlockSpdThd) &&
++       (SftySpdMonMeclSpdVldyFlg == TRUE) &&
++       (MLIB_F32AbsF32(SftySpdMonMeclSpdRpmFild) <= SftyParkLockMgrParlockSpdThd) &&
+        ((SftyParkLockEvlnActrAbsPosn == SFTYPARKLOCK_POSN_DISENGAGED) ||
+         (SftyParkLockEvlnActrAbsPosn == SFTYPARKLOCK_POSN_UNDETERMINED))
+       )
+diff --git a/src/fw_cu/Components/Safety/Sfty_Cmn/Sfty_Common/include/SftyReplcmt_data.h b/src/fw_cu/Components/Safety/Sfty_Cmn/Sfty_Common/include/SftyReplcmt_data.h
+index 40ff4ce73..63558f8a3 100644
+--- a/src/fw_cu/Components/Safety/Sfty_Cmn/Sfty_Common/include/SftyReplcmt_data.h
++++ b/src/fw_cu/Components/Safety/Sfty_Cmn/Sfty_Common/include/SftyReplcmt_data.h
+@@ -948,26 +948,6 @@ extern CONST(uint16, SFTYREPLCMT_CALIB) SftyReplcmtDcEvlnVadcDcU1PMonVal;
+ /* End: SFTYREPLCMT_STOP_SEC_CALIB_16 (calib) */
+ 
+ 
+-/* Begin: SFTYREPLCMT_START_SEC_CALIB_8 (calib) */
+-#define SFTYREPLCMT_START_SEC_CALIB_8
+-#include "MemMap.h"
+-
+-extern CONST(boolean, SFTYREPLCMT_CALIB) SftyReplcmtSpdMonMeclSpdVldyFlg;
+-#define SFTYREPLCMT_STOP_SEC_CALIB_8
+-#include "MemMap.h"
+-/* End: SFTYREPLCMT_STOP_SEC_CALIB_8 (calib) */
+-
+-
+-/* Begin: SFTYREPLCMT_START_SEC_CALIB_32 (calib) */
+-#define SFTYREPLCMT_START_SEC_CALIB_32
+-#include "MemMap.h"
+-
+-extern CONST(float32, SFTYREPLCMT_CALIB) SftyReplcmtSpdMonMeclSpdRpmFild;
+-#define SFTYREPLCMT_STOP_SEC_CALIB_32
+-#include "MemMap.h"
+-/* End: SFTYREPLCMT_STOP_SEC_CALIB_32 (calib) */
+-
+-
+ /* Begin: SFTYREPLCMT_START_SEC_CALIB_8 (calib) */
+ #define SFTYREPLCMT_START_SEC_CALIB_8
+ #include "MemMap.h"
+diff --git a/src/fw_cu/Components/Safety/Sfty_Cmn/Sfty_Common/src/SftyReplcmt_data.c b/src/fw_cu/Components/Safety/Sfty_Cmn/Sfty_Common/src/SftyReplcmt_data.c
+index 58a8548d7..2c7d38ac2 100644
+--- a/src/fw_cu/Components/Safety/Sfty_Cmn/Sfty_Common/src/SftyReplcmt_data.c
++++ b/src/fw_cu/Components/Safety/Sfty_Cmn/Sfty_Common/src/SftyReplcmt_data.c
+@@ -2469,40 +2469,6 @@ CONST(uint32, SFTYREPLCMT_CALIB) SftyReplcmtGtmRslvrExctTiStampVal = 0UL;
+ /* End: SFTYREPLCMT_STOP_SEC_CALIB_32 (calib) */
+ 
+ 
+-
+-
+-/* Begin: SFTYREPLCMT_START_SEC_CALIB_8 (calib) */
+-#define SFTYREPLCMT_START_SEC_CALIB_8
+-#include "MemMap.h"
+-/*
+-@@ SYMBOL = SftyReplcmtSpdMonMeclSpdVldyFlg
+-@@ A2L_TYPE = PARAMETER
+-@@ DATA_TYPE = UBYTE
+-@@ DESCRIPTION = "Replacement value of motor speed validity flag"
+-@@ END
+-*/
+-CONST(boolean, SFTYREPLCMT_CALIB) SftyReplcmtSpdMonMeclSpdVldyFlg = TRUE;
+-#define SFTYREPLCMT_STOP_SEC_CALIB_8
+-#include "MemMap.h"
+-/* End: SFTYREPLCMT_STOP_SEC_CALIB_8 (calib) */
+-
+-
+-#define SFTYREPLCMT_START_SEC_CALIB_32
+-#include "MemMap.h"
+-/*
+-@@ SYMBOL = SftyReplcmtSpdMonMeclSpdRpmFild
+-@@ A2L_TYPE = PARAMETER
+-@@ DATA_TYPE = FLOAT
+-@@ DESCRIPTION = "Replacement value of\xa0filtered motor speed speed in rpm"
+-@@ GROUP = SftyTempEvln
+-@@ END
+-*/
+-CONST(float32, SFTYREPLCMT_CALIB) SftyReplcmtSpdMonMeclSpdRpmFild = 0.0f;
+-#define SFTYREPLCMT_STOP_SEC_CALIB_32
+-#include "MemMap.h"
+-/* End: SFTYREPLCMT_STOP_SEC_CALIB_32 (calib) */
+-
+-
+ /* Begin: SFTYREPLCMT_START_SEC_CALIB_8 (calib) */
+ #define SFTYREPLCMT_START_SEC_CALIB_8
+ #include "MemMap.h"
+'

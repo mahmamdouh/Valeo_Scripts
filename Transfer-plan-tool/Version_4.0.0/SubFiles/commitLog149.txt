@@ -1,0 +1,246 @@
+b'commit 627f39bbbed11499a79cedd936715b33261b2f72
+Author: Emerson-Hai ZHAO (JV) <emerson-hai.zhao.jv@valeo.com>
+Date:   Fri Oct 8 16:49:04 2021 +0800
+
+    $100kW-41791$ - SWE.3.2 - FCT_PrioCtrlSigSw - SW Unit Implementation - B02
+    
+    Change-Id: Ice91789875ea9df608af34da6dedc8a185ee5632
+
+diff --git a/src/fw_cu/Components/Safety/Sfty_Inv/SftyInvActr/include/SftyInvActr_data.h b/src/fw_cu/Components/Safety/Sfty_Inv/SftyInvActr/include/SftyInvActr_data.h
+index 4bca9423d..41fbe99fc 100644
+--- a/src/fw_cu/Components/Safety/Sfty_Inv/SftyInvActr/include/SftyInvActr_data.h
++++ b/src/fw_cu/Components/Safety/Sfty_Inv/SftyInvActr/include/SftyInvActr_data.h
+@@ -1,7 +1,7 @@
+ /* ***************************************************************** */
+ /* Sourcefile: SftyInvActr_data.h\t\t\t\t\t\t\t\t\t */
+ /* ADD Container: SftyInvActr\t\t\t\t\t\t\t\t\t\t */
+-/* ADD Container Version: 01.00\t\t\t\t\t\t\t\t\t\t */
++/* ADD Container Version: 01.01\t\t\t\t\t\t\t\t\t\t */
+ /* ***************************************************************** */
+ /* Copyright (C) Valeo Siemens eAutomotive GmbH 2021 \t\t\t\t */
+ /* All Rights Reserved. Confidential \t\t\t\t\t\t\t\t */
+@@ -275,6 +275,7 @@ extern VAR(boolean, SFTYINVACTR_VAR) SftyInvActrSetLoGateDrvrReinitSt;
+ extern VAR(uint8, SFTYINVACTR_VAR) SftyInvActrSafeStReqIntel;
+ 
+ 
++extern VAR(boolean, SFTYINVACTR_VAR) SftyInvActrStateReqMode;
+ extern VAR(boolean, SFTYINVACTR_VAR) SftyInvActrStateReqEmgySw;
+ extern VAR(boolean, SFTYINVACTR_VAR) SftyInvActrStateReqSCSpdReady;
+ 
+diff --git a/src/fw_cu/Components/Safety/Sfty_Inv/SftyInvActr/src/SftyInvActr.c b/src/fw_cu/Components/Safety/Sfty_Inv/SftyInvActr/src/SftyInvActr.c
+index fbf54ddcc..f090422a9 100644
+--- a/src/fw_cu/Components/Safety/Sfty_Inv/SftyInvActr/src/SftyInvActr.c
++++ b/src/fw_cu/Components/Safety/Sfty_Inv/SftyInvActr/src/SftyInvActr.c
+@@ -211,7 +211,7 @@ LOCAL_INLINE void SftyInvActr_GetInputData(void)
+ /*!
+  * \\fn        uint8 SftyInvActr_GetSafeStReqSfty(void)
+  * \\brief     This function privides the final safe state request
+- * \\          that from SSW module
++ * \\          that from SSW module (ASC > Coordinated ASCPO > SPO)
+  * \\return    Safe State Request from SSW module
+  * \\Parent_DD SftyInvActr_MainFunctionAreaCmn
+  */
+@@ -227,6 +227,7 @@ LOCAL_INLINE uint8 SftyInvActr_GetSafeStReqSfty(void)
+    if ((SftyInvActrFctldLsAscSfty == TRUE)   ||
+    \t   (SftyInvActrFctldHsAscSfty == TRUE))
+    {
++      /* LS_ASC has high priority */
+ \t  if (SftyInvActrFctldLsAscSfty == TRUE)
+ \t  {
+ \t     SafeStReqSfty = LS_ASC_REQ;
+@@ -236,10 +237,6 @@ LOCAL_INLINE uint8 SftyInvActr_GetSafeStReqSfty(void)
+ \t     SafeStReqSfty = HS_ACS_REQ;
+ \t  }
+    }
+-   else if (SftyInvActrFctldSpoSfty == TRUE)
+-   {
+-      SafeStReqSfty = SPO_REQ;
+-   }
+    else if ((SftyInvActrFctldCoordLsAscSpoSfty == TRUE)   ||
+    \t        (SftyInvActrFctldCoordHsAscSpoSfty == TRUE))
+    {
+@@ -252,6 +249,10 @@ LOCAL_INLINE uint8 SftyInvActr_GetSafeStReqSfty(void)
+ \t     SafeStReqSfty = COORD_HS_ASC_SPO_REQ;
+ \t  }\t  
+    }
++   else if (SftyInvActrFctldSpoSfty == TRUE)
++   {
++      SafeStReqSfty = SPO_REQ;
++   }
+    else
+    {
+       SafeStReqSfty = NO_SAFE_STATE_REQ;
+@@ -267,7 +268,7 @@ LOCAL_INLINE uint8 SftyInvActr_GetSafeStReqSfty(void)
+ /*!
+  * \\fn        void SftyInvActr_DetmnSafeStReq(void)
+  * \\brief     This function determines the final safe state request
+- * \\          depending on priority (ASC > SPO > Coordinated ASCPO)
++ * \\          depending on priority (ASC > Coordinated ASCPO > SPO)
+  * \\          (SSW core request is high priority if there are 2 safe state request from different core)
+  * \\return    None
+  * \\Parent_DD SftyInvActr_MainFunctionAreaCmn
+@@ -300,19 +301,14 @@ LOCAL_INLINE void SftyInvActr_DetmnSafeStReq(void)
+ \t     SftyInvActrSafeStReqIntel = SftyInvActrSafeStReqDrv;
+ \t  }
+    }   
+-   else if ((SafeStReqSSW == SPO_REQ)  ||
+-            (SftyInvActrSafeStReqDrv == SPO_REQ))
+-   {
+-       SftyInvActrSafeStReqIntel = SPO_REQ;
+-   }
+    else if ((SafeStReqSSW == COORD_HS_ASC_SPO_REQ)             ||
+    \t        (SafeStReqSSW == COORD_LS_ASC_SPO_REQ)             ||
+    \t        (SftyInvActrSafeStReqDrv == COORD_HS_ASC_SPO_REQ)  ||
+    \t        (SftyInvActrSafeStReqDrv == COORD_LS_ASC_SPO_REQ))
+    {
+-      /* SSW core request is high priority*/
+-\t  /* => COORD_HS_ASC_SPO_REQ Or COORD_LS_ASC_SPO_REQ */      
+-\t  if (SafeStReqSSW <= COORD_HS_ASC_SPO_REQ)
++      /* SSW core request is high priority*/    
++\t  if ((SafeStReqSSW == COORD_HS_ASC_SPO_REQ) ||
++\t  \t  (SafeStReqSSW == COORD_LS_ASC_SPO_REQ))
+ \t  {
+ \t     SftyInvActrSafeStReqIntel = SafeStReqSSW;
+ \t  }
+@@ -321,6 +317,11 @@ LOCAL_INLINE void SftyInvActr_DetmnSafeStReq(void)
+ \t     SftyInvActrSafeStReqIntel = SftyInvActrSafeStReqDrv;
+ \t  }
+    }
++   else if ((SafeStReqSSW == SPO_REQ)  ||
++            (SftyInvActrSafeStReqDrv == SPO_REQ))
++   {
++       SftyInvActrSafeStReqIntel = SPO_REQ;
++   }
+    else   /* => NO_SAFE_STATE_REQ */
+    {
+ \t   SftyInvActrSafeStReqIntel = NO_SAFE_STATE_REQ;
+@@ -353,6 +354,7 @@ LOCAL_INLINE void SftyInvActr_UpdSafeStCmd(void)
+    \t   (SftyInvActrSafeStReqIntel == LS_ASC_REQ))
+    {
+       /* ASC Commends */
++      SftyInvActrStateReqMode       = 1U;
+ \t  SftyInvActrStateReqEmgySw     = 0U;
+ \t  SftyInvActrStateReqSCSpdReady = 1U;
+       
+@@ -362,6 +364,7 @@ LOCAL_INLINE void SftyInvActr_UpdSafeStCmd(void)
+    else if (SftyInvActrSafeStReqIntel == SPO_REQ)
+    {
+       /* SPO Commends */
++      SftyInvActrStateReqMode       = 2U;
+ \t  SftyInvActrStateReqEmgySw     = 0U;
+ \t  SftyInvActrStateReqSCSpdReady = 0U;
+ 
+@@ -374,6 +377,7 @@ LOCAL_INLINE void SftyInvActr_UpdSafeStCmd(void)
+       if (MLIB_F32AbsF32(SftyInvActrMotorSpdFild) >= SftyInvActrSpdReadyHithd)
+       {
+          /* ASC Commends */
++\t     SftyInvActrStateReqMode       = 1U;
+          SftyInvActrStateReqEmgySw     = 0U;
+ \t     SftyInvActrStateReqSCSpdReady = 1U;
+ 
+@@ -383,6 +387,7 @@ LOCAL_INLINE void SftyInvActr_UpdSafeStCmd(void)
+ \t  else
+       {
+          /* SPO Commends */
++\t     SftyInvActrStateReqMode       = 2U;
+ \t\t SftyInvActrStateReqEmgySw     = 0U;
+ \t     SftyInvActrStateReqSCSpdReady = 0U;
+ 
+@@ -395,12 +400,14 @@ LOCAL_INLINE void SftyInvActr_UpdSafeStCmd(void)
+       if (MLIB_F32AbsF32(SftyInvActrMotorSpdFild) >= SftyInvActrSpdReadyHithd)
+       {
+          /* ASC without fault */
++\t     SftyInvActrStateReqMode       = 1U;
+          SftyInvActrStateReqEmgySw     = 1U;
+ \t     SftyInvActrStateReqSCSpdReady = 1U;\t\t 
+       }
+ \t  else
+       {
+          /* SPO without fault */
++\t     SftyInvActrStateReqMode       = 1U;
+ \t\t SftyInvActrStateReqEmgySw     = 1U;
+ \t     SftyInvActrStateReqSCSpdReady = 0U;\t\t 
+       }
+@@ -549,7 +556,7 @@ if((SWIT_SftyInvActr_EN_KEY==SWIT_First_HookEnableKey))
+    /* Copy the data provided by other modules */
+    SftyInvActr_GetInputData();
+ 
+-   /* Judging the final safe state request depending on priority (ASC > SPO > Coordinated ASCPO) */
++   /* Judging the final safe state request depending on priority (ASC > Coordinated ASCPO > SPO) */
+    SftyInvActr_DetmnSafeStReq();
+ 
+    /* Updating safe state request commands considering motor speed */
+@@ -559,8 +566,8 @@ if((SWIT_SftyInvActr_EN_KEY==SWIT_First_HookEnableKey))
+    SftyInvActr_MonrSafeStExct();  
+ 
+ 
+-
+ #ifdef SWIT_IT_Active
++   if((SWIT_SftyInvActr_EN_KEY==SWIT_First_HookEnableKey)||(SWIT_SftyInvActr_EN_KEY==SWIT_Second_HookEnableKey)||(SWIT_SftyInvActr_EN_KEY==SWIT_Third_HookEnableKey))
+    SWIT_SftyInvActr_MainFunctionAreaCmn_EndHook(&SftyErrDebFctInhbnSts);
+ #endif
+ 
+@@ -638,9 +645,6 @@ FUNC(void, SFTY_INV_ACTR_CODE) SftyInvActr_ReinitMonrData(void)   /* PRQA S 1503
+       SftyInvActrSetMidPointPhaWReinitSt = TRUE;
+    }
+    
+-#ifdef SWIT_IT_Active
+-  SWIT_SftyInvActr_ReinitMonrData_EndHook();
+-#endif
+ 
+    return;
+ }
+diff --git a/src/fw_cu/Components/Safety/Sfty_Inv/SftyInvActr/src/SftyInvActr_data.c b/src/fw_cu/Components/Safety/Sfty_Inv/SftyInvActr/src/SftyInvActr_data.c
+index cdfd7d734..6273a1158 100644
+--- a/src/fw_cu/Components/Safety/Sfty_Inv/SftyInvActr/src/SftyInvActr_data.c
++++ b/src/fw_cu/Components/Safety/Sfty_Inv/SftyInvActr/src/SftyInvActr_data.c
+@@ -1,7 +1,7 @@
+ /* ***************************************************************** */
+ /* Sourcefile: SftyInvActr_data.c                                    */
+ /* ADD Container: SftyInvActr                                        */
+-/* ADD Container Version:01.00                                       */
++/* ADD Container Version:01.01                                       */
+ /* ***************************************************************** */
+ /* Copyright (C) Valeo Siemens eAutomotive GmbH 2021                 */
+ /* All Rights Reserved. Confidential                                 */
+@@ -184,6 +184,18 @@ VAR(uint8, SFTYINVACTR_VAR) SftyInvActrSafeStReqDrv = 5U;
+ VAR(uint8, SFTYINVACTR_VAR) SftyInvActrSafeStReqIntel = 5U;
+ 
+ 
++/*
++@@ SYMBOL = SftyInvActrStateReqMode
++@@ A2L_TYPE = MEASURE
++@@ DATA_TYPE = UBYTE [0 ... 3]
++@@ CONVERSION = TABLE 0 "PWM Off" 1 "PWM Direct" 2 "PWM INIT" 3 "Active Discharge"
++@@ DESCRIPTION = "State required command to FPGA, Required Mode"
++@@ GROUP = SftyInvActr
++@@ END
++*/
++VAR(uint8, SFTYINVACTR_VAR) SftyInvActrStateReqMode = 1U;
++
++
+ /*
+ @@ SYMBOL = SftyInvActrStateReqEmgySw
+ @@ A2L_TYPE = MEASURE
+@@ -707,7 +719,7 @@ CONST(uint8, SFTYREPLCMT_CALIB) SftyReplcmtInvActrMotorSpdStiEna = FALSE;
+ /*
+ @@ SYMBOL = SftyReplcmtInvActrMotorSpdFild
+ @@ A2L_TYPE = PARAMETER
+-@@ DATA_TYPE = FLOAT [0.0 ... 23940.0]
++@@ DATA_TYPE = FLOAT [-23940.0 ... 23940.0]
+ @@ DESCRIPTION = "Replacement value for filtered motor speed in rpm"
+ @@ GROUP = SftyInvActr
+ @@ END
+diff --git a/src/fw_cu/build/a2l/Measurements-to-Timeslices-Mapping.csv b/src/fw_cu/build/a2l/Measurements-to-Timeslices-Mapping.csv
+index 20e706ce6..ff454f2ea 100644
+--- a/src/fw_cu/build/a2l/Measurements-to-Timeslices-Mapping.csv
++++ b/src/fw_cu/build/a2l/Measurements-to-Timeslices-Mapping.csv
+@@ -7713,6 +7713,7 @@ SftyInvActrFctldCoordHsAscSpoSfty,Core_1,Core_1_200us,0.2,,,SSW
+ SftyInvActrFctldCoordLsAscSpoSfty,Core_1,Core_1_200us,0.2,,,SSW
+ SftyInvActrSafeStReqDrv,Core_1,Core_1_200us,0.2,,,SSW
+ SftyInvActrSafeStReqIntel,Core_1,Core_1_200us,0.2,,,SSW
++SftyInvActrStateReqMode,Core_1,Core_1_200us,0.2,,,SSW
+ SftyInvActrStateReqEmgySw,Core_1,Core_1_200us,0.2,,,SSW
+ SftyInvActrStateReqSCSpdReady,Core_1,Core_1_200us,0.2,,,SSW
+ SftyInvActrMotorSpdFild,Core_1,Core_1_200us,0.2,,,SSW
+'

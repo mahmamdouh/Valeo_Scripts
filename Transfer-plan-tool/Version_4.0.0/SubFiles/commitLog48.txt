@@ -1,0 +1,1342 @@
+b'commit 7ee96337935ce2ce09e68ded3970fe5f8279c55e
+Author: Murali-Krishna VEERAGANDHAM (JV) <murali-krishna.veeragandham.jv@valeo.com>
+Date:   Fri Jan 28 20:07:43 2022 +0100
+
+    $100kW-51190$ - Control_Stage_LV_SW Calibration changes
+    
+    Change-Id: I7c529b58fdd4bafe5c9851fd05c50d9e930469be
+
+diff --git a/src/fw_cu/Components/Inv/ValMeasAndProc/BswFpgaIf/include/BswFpgaIf.h b/src/fw_cu/Components/Inv/ValMeasAndProc/BswFpgaIf/include/BswFpgaIf.h
+index b8284a646..0bf8e009b 100644
+--- a/src/fw_cu/Components/Inv/ValMeasAndProc/BswFpgaIf/include/BswFpgaIf.h
++++ b/src/fw_cu/Components/Inv/ValMeasAndProc/BswFpgaIf/include/BswFpgaIf.h
+@@ -118,54 +118,35 @@ extern void BswFpgaIf_ReadIgbtTemp(void);
+ /*lint -e(537,451) Repeated inclusion is needed. */
+ #include "MemMap.h"
+ 
+-extern const uint16 BswFpgaIfPhaOcThd;
++extern const uint16 BswFpgaIfTxPwmMinDutycycVal;
++extern const uint16 BswFpgaIfTxPwmMaxDutycycVal;
++extern const uint16 BswFpgaIfTxPwmFreqVal;
++extern const uint16 BswFpgaIfTxPwmDeadTimeVal;
++extern const uint8 BswFpgaIfTxIFiltAvgVal;
++extern const uint8 BswFpgaIfTxVFiltAvgVal;
++extern const uint16 BswFpgaIfTxOVbattThdVal;
++extern const uint16 BswFpgaIfTxSynDlyVal;
++extern const uint16 BswFpgaIfTxMidPtFltDisVal;
++extern const uint16 BswFpgaIfTxCurSamplOffsVal;
++extern const uint16 BswFpgaIfTxActDisDurVal;
+ extern const uint16 FltMskVal;
+-extern const boolean BswFpgaIfReiniCombinedFltOvrdEna;
+-extern const boolean BswFpgaIfTxModReqOvrdEna;
++extern const uint16 BswFpgaIfTxDebugHVal;
++extern const uint16 BswFpgaIfTxOverCurThBatVal;
++extern const uint16 BswFpgaIfPhaOcThdVal;
++extern const uint16 BswFpgaIfTxPwmDeadTimeExcVal;
++extern const uint16 BswFpgaIfTxPwmFreqExcVal;
++extern const uint16 BswFpgaIfTxCurAvgExcVal;
++
++extern const boolean BswFpgaIfTxPwmExcOvrdEna;
++extern const uint16 BswFpgaIfTxPwmExcOvrdVal;
+ extern const boolean BswFpgaIfTxPwmCtrlStgOnOffOvrdEna;
+-extern const boolean BswFpgaIfTxPwmRatioFreqReqOvrdEna;
+-extern const boolean BswFpgaIfTxPwmMinDutycycOvrdEna;
+-extern const boolean BswFpgaIfTxPwmMaxDutycycOvrdEna;
+-extern const boolean BswFpgaIfTxActDischReqOvrdEna;
+-extern const boolean BswFpgaIfTxFyBPwrSupCtrlOvrdEna;
+-extern const boolean BswFpgaIfTxIFiltAvgOvrdEna;
+-extern const boolean BswFpgaIfTxVFiltAvgOvrdEna;
+-extern const boolean BswFpgaIfTxPwmFreqOvrdEna;
+-extern const boolean BswFpgaIfTxPwmDeadTimeOvrdEna;
+-extern const boolean BswFpgaIfTxOVbattThdOvrdEna;
+-extern const boolean BswFpgaIfTxSynDlyOvrdEna;
+-extern const boolean BswFpgaIfTxPwmInitOvrdEna[SYSDEF_EM_PHA_CNT_MAX];
+-extern const boolean BswFpgaIfTxMidPtFltWitSwtPerOvrdEna;
+-extern const boolean BswFpgaIfTxSwtPerFiltWitMidPtFltOvrdEna;
+-extern const boolean BswFpgaIfTxMidPtFltDisOvrdEna;
+-extern const boolean BswFpgaIfDebugValTxOvrdEna;
+-extern const boolean BswFpgaIfTxEmergencySwOvrdEna;
+-extern const boolean BswFpgaIfTxSCSpeedReadyOvrdEna;
+-extern const uint16 BswFpgaIfReiniCombinedFltOvrdVal;
+-extern const uint8 BswFpgaIfTxModReqOvrdVal;
+ extern const boolean BswFpgaIfTxPwmCtrlStgOnOffOvrdVal;
+-extern const uint8 BswFpgaIfTxPwmRatioFreqReqOvrdVal;
+-extern const uint16 BswFpgaIfTxPwmMinDutycycOvrdVal;
+-extern const uint16 BswFpgaIfTxPwmMaxDutycycOvrdVal;
+-extern const boolean BswFpgaIfTxActDischReqOvrdVal;
+-extern const boolean BswFpgaIfTxFyBPwrSupCtrlOvrdVal;
+-extern const uint8 BswFpgaIfTxIFiltAvgOvrdVal;
+-extern const uint8 BswFpgaIfTxVFiltAvgOvrdVal;
+-extern const uint16 BswFpgaIfTxPwmFreqOvrdVal;
+-extern const uint16 BswFpgaIfTxPwmDeadTimeOvrdVal;
+-extern const uint16 BswFpgaIfTxOVbattThdOvrdVal;
+-extern const uint16 BswFpgaIfTxSynDlyOvrdVal;
+-extern const uint16 BswFpgaIfTxPwmInitOvrdVal[SYSDEF_EM_PHA_CNT_MAX];
+-extern const uint16 BswFpgaIfTxMidPtFltWitSwtPerOvrdVal;
+-extern const uint16 BswFpgaIfTxSwtPerFiltWitMidPtFltOvrdVal;
+-extern const uint16 BswFpgaIfTxMidPtFltDisOvrdVal;
+-extern const uint16 BswFpgaIfDebugValTxOvrdVal;
+-extern const boolean BswFpgaIfTxEmergencySwOvrdVal;
+-extern const uint8 BswFpgaIfTxSCSpeedReadyOvrdVal;
+-extern const boolean BswFpgaIfTxPwrSupHbrInhOvrdVal;
+-extern const boolean BswFpgaIfTxPwrSupDrvInhOvrdVal;
+ extern const boolean BswFpgaIfTxPwrSupDrvInhOvrdEna;
++extern const boolean BswFpgaIfTxPwrSupDrvInhOvrdVal;
+ extern const boolean BswFpgaIfTxPwrSupHbrInhOvrdEna;
++extern const boolean BswFpgaIfTxPwrSupHbrInhOvrdVal;
++extern const boolean BswFpgaIfTxPwmSwtFreqOvrdEna;
++extern const uint16 BswFpgaIfTxPwmSwtFreqOvrdVal;
+ 
+ #define STOP_SEC_CALIB
+ /*lint -e(537,451) Repeated inclusion is needed. */
+diff --git a/src/fw_cu/Components/Inv/ValMeasAndProc/BswFpgaIf/include/VsiSrv_e.h b/src/fw_cu/Components/Inv/ValMeasAndProc/BswFpgaIf/include/VsiSrv_e.h
+index 6043bfaa8..566772e36 100644
+--- a/src/fw_cu/Components/Inv/ValMeasAndProc/BswFpgaIf/include/VsiSrv_e.h
++++ b/src/fw_cu/Components/Inv/ValMeasAndProc/BswFpgaIf/include/VsiSrv_e.h
+@@ -515,35 +515,20 @@ LOCAL_INLINE void VSISRV_SetSignalPwmFreqDyn(uint16 value)
+ LOCAL_INLINE void VSISRV_SetSignalPWM_UVW_ON(boolean value);
+ LOCAL_INLINE void VSISRV_SetSignalPWM_UVW_ON(boolean value)
+ {
+-   if(BswFpgaIfTxPwmCtrlStgOnOffOvrdEna == BSWFPGAIF_FALSE)
+-   {
+-     /* VSISRV_SecAtomicStart(); */
+-     VsisrvIpduTx.Data.TxS.Signal.PWM_UVW_ON = value;
+-     /* VSISRV_SecAtomicStop(); */
+-   }
+-   else
+-   {
+-     /* VSISRV_SecAtomicStart(); */
+-     VsisrvIpduTx.Data.TxS.Signal.PWM_UVW_ON = BswFpgaIfTxPwmCtrlStgOnOffOvrdVal;
+-     /* VSISRV_SecAtomicStop(); */
+-   }
++
++   /* VSISRV_SecAtomicStart(); */
++   VsisrvIpduTx.Data.TxS.Signal.PWM_UVW_ON = value;
++   /* VSISRV_SecAtomicStop(); */
++  
+ }
+ /*----------------*/
+ LOCAL_INLINE void VSISRV_SetSignalPWM_RatioFreq(uint8 value);
+ LOCAL_INLINE void VSISRV_SetSignalPWM_RatioFreq(uint8 value)
+ {
+-   if(BswFpgaIfTxPwmRatioFreqReqOvrdEna == BSWFPGAIF_FALSE)
+-   {
+-     /* VSISRV_SecAtomicStart(); */
+-     VsisrvIpduTx.Data.TxS.Signal.PWM_RatioFreq = value;
+-     /* VSISRV_SecAtomicStop(); */
+-   }
+-   else
+-   {
+-      /* VSISRV_SecAtomicStart(); */
+-      VsisrvIpduTx.Data.TxS.Signal.PWM_RatioFreq = BswFpgaIfTxPwmRatioFreqReqOvrdVal;
+-      /* VSISRV_SecAtomicStop(); */
+-   }
++
++   /* VSISRV_SecAtomicStart(); */
++   VsisrvIpduTx.Data.TxS.Signal.PWM_RatioFreq = value;
++   /* VSISRV_SecAtomicStop(); */
+ }
+ /*----------------*/
+ /* Set Ipdu TxA   */
+@@ -553,48 +538,25 @@ LOCAL_INLINE void VSISRV_SetSignalStateReqEmergencySw(boolean value);
+ LOCAL_INLINE void VSISRV_SetSignalStateReqEmergencySw(boolean value)
+ {
+    boolean localValue;
+-   if(BswFpgaIfTxEmergencySwOvrdEna == BSWFPGAIF_FALSE)
+-   {
+-     localValue = (boolean)(value | VSISRV_bAutSigEmergencySwMask);
+-     /* VSISRV_SecAtomicStart(); */
+-     VsisrvIpduTx.Data.TxA.IdMx[0].Signal.StateReq.Field.EmergencySw = localValue;
+-     VsisrvIpduTx.Data.TxA.IdMx[1].Signal.StateReq.Field.EmergencySw = localValue;
+-     VsisrvIpduTx.Data.TxA.IdMx[2].Signal.StateReq.Field.EmergencySw = localValue;
+-     VsisrvIpduTx.Data.TxA.IdMx[3].Signal.StateReq.Field.EmergencySw = localValue;
++   localValue = (boolean)(value | VSISRV_bAutSigEmergencySwMask);
++   /* VSISRV_SecAtomicStart(); */
++   VsisrvIpduTx.Data.TxA.IdMx[0].Signal.StateReq.Field.EmergencySw = localValue;
++   VsisrvIpduTx.Data.TxA.IdMx[1].Signal.StateReq.Field.EmergencySw = localValue;
++   VsisrvIpduTx.Data.TxA.IdMx[2].Signal.StateReq.Field.EmergencySw = localValue;
++   VsisrvIpduTx.Data.TxA.IdMx[3].Signal.StateReq.Field.EmergencySw = localValue;
+    /* VSISRV_SecAtomicStop(); */
+-   }
+-   else
+-   {
+-     VsisrvIpduTx.Data.TxA.IdMx[0].Signal.StateReq.Field.EmergencySw = BswFpgaIfTxEmergencySwOvrdVal;
+-     VsisrvIpduTx.Data.TxA.IdMx[1].Signal.StateReq.Field.EmergencySw = BswFpgaIfTxEmergencySwOvrdVal;
+-     VsisrvIpduTx.Data.TxA.IdMx[2].Signal.StateReq.Field.EmergencySw = BswFpgaIfTxEmergencySwOvrdVal;
+-     VsisrvIpduTx.Data.TxA.IdMx[3].Signal.StateReq.Field.EmergencySw = BswFpgaIfTxEmergencySwOvrdVal;
+-   }
+ }
+ 
+ /*----------------*/
+ LOCAL_INLINE void VSISRV_SetSignalStateReqSCSpeedReady(uint8 value);
+ LOCAL_INLINE void VSISRV_SetSignalStateReqSCSpeedReady(uint8 value)
+ {
+- if(BswFpgaIfTxSCSpeedReadyOvrdEna == BSWFPGAIF_FALSE)
+- {
+    VSISRV_SecAtomicStart();
+-     VsisrvIpduTx.Data.TxA.IdMx[0].Signal.StateReq.Field.SCSpeedReady = value;
+-     VsisrvIpduTx.Data.TxA.IdMx[1].Signal.StateReq.Field.SCSpeedReady = value;
+-     VsisrvIpduTx.Data.TxA.IdMx[2].Signal.StateReq.Field.SCSpeedReady = value;
+-     VsisrvIpduTx.Data.TxA.IdMx[3].Signal.StateReq.Field.SCSpeedReady = value;
++   VsisrvIpduTx.Data.TxA.IdMx[0].Signal.StateReq.Field.SCSpeedReady = value;
++   VsisrvIpduTx.Data.TxA.IdMx[1].Signal.StateReq.Field.SCSpeedReady = value;
++   VsisrvIpduTx.Data.TxA.IdMx[2].Signal.StateReq.Field.SCSpeedReady = value;
++   VsisrvIpduTx.Data.TxA.IdMx[3].Signal.StateReq.Field.SCSpeedReady = value;
+    VSISRV_SecAtomicStop();
+- }
+- else
+- {
+-    VSISRV_SecAtomicStart();
+-    VsisrvIpduTx.Data.TxA.IdMx[0].Signal.StateReq.Field.SCSpeedReady = BswFpgaIfTxSCSpeedReadyOvrdVal;
+-    VsisrvIpduTx.Data.TxA.IdMx[1].Signal.StateReq.Field.SCSpeedReady = BswFpgaIfTxSCSpeedReadyOvrdVal;
+-    VsisrvIpduTx.Data.TxA.IdMx[2].Signal.StateReq.Field.SCSpeedReady = BswFpgaIfTxSCSpeedReadyOvrdVal;
+-    VsisrvIpduTx.Data.TxA.IdMx[3].Signal.StateReq.Field.SCSpeedReady = BswFpgaIfTxSCSpeedReadyOvrdVal;
+-    VSISRV_SecAtomicStop();
+- }
+-
+ }
+ 
+ /*----------------*/
+@@ -625,25 +587,12 @@ LOCAL_INLINE void VSISRV_SetSignalStateReqSwitchType(uint8 value)
+ LOCAL_INLINE void VSISRV_SetSignalStateReqModeReq(uint8 value);
+ LOCAL_INLINE void VSISRV_SetSignalStateReqModeReq(uint8 value)
+ {
+-  if(BswFpgaIfTxModReqOvrdEna == BSWFPGAIF_FALSE)
+-  {
+    VSISRV_SecAtomicStart();
+    VsisrvIpduTx.Data.TxA.IdMx[0].Signal.StateReq.Field.ModeReq = value;
+    VsisrvIpduTx.Data.TxA.IdMx[1].Signal.StateReq.Field.ModeReq = value;
+    VsisrvIpduTx.Data.TxA.IdMx[2].Signal.StateReq.Field.ModeReq = value;
+    VsisrvIpduTx.Data.TxA.IdMx[3].Signal.StateReq.Field.ModeReq = value;
+    VSISRV_SecAtomicStop();
+-  }
+-  else
+-  {
+-     VSISRV_SecAtomicStart();
+-     VsisrvIpduTx.Data.TxA.IdMx[0].Signal.StateReq.Field.ModeReq = BswFpgaIfTxModReqOvrdVal;
+-     VsisrvIpduTx.Data.TxA.IdMx[1].Signal.StateReq.Field.ModeReq = BswFpgaIfTxModReqOvrdVal;
+-     VsisrvIpduTx.Data.TxA.IdMx[2].Signal.StateReq.Field.ModeReq = BswFpgaIfTxModReqOvrdVal;
+-     VsisrvIpduTx.Data.TxA.IdMx[3].Signal.StateReq.Field.ModeReq = BswFpgaIfTxModReqOvrdVal;
+-     VSISRV_SecAtomicStop();
+-    }
+-
+ }
+ 
+ /*----------------*/
+@@ -1117,20 +1066,11 @@ LOCAL_INLINE void VSISRV_SetSignalPwmMinDutyCycle(uint16 value)
+ 
+    valueScal = VSISRV_ScalingGroup1(value);
+ 
+-   if(BswFpgaIfTxPwmMinDutycycOvrdEna == BSWFPGAIF_FALSE)
+-   {
+-     VSISRV_SecAtomicStart1();
+-     VsisrvIpduTx.Data.TxA.Id.Mx0.Signal.M0PwmMinDutyCycle_MSB8 = (uint16)(valueScal >> 4);
+-     VsisrvIpduTx.Data.TxA.Id.Mx0.Signal.M0PwmMinDutyCycle_LSB4 = (uint16)(valueScal);
+-     VSISRV_SecAtomicStop();
+-   }
+-   else
+-   {
+-      VSISRV_SecAtomicStart1();
+-      VsisrvIpduTx.Data.TxA.Id.Mx0.Signal.M0PwmMinDutyCycle_MSB8 = (uint16)(BswFpgaIfTxPwmMinDutycycOvrdVal >> 4);
+-      VsisrvIpduTx.Data.TxA.Id.Mx0.Signal.M0PwmMinDutyCycle_LSB4 = (uint16)(BswFpgaIfTxPwmMinDutycycOvrdVal);
+-      VSISRV_SecAtomicStop();
+-   }
++   VSISRV_SecAtomicStart1();
++   VsisrvIpduTx.Data.TxA.Id.Mx0.Signal.M0PwmMinDutyCycle_MSB8 = (uint16)(valueScal >> 4);
++   VsisrvIpduTx.Data.TxA.Id.Mx0.Signal.M0PwmMinDutyCycle_LSB4 = (uint16)(valueScal);
++   VSISRV_SecAtomicStop();
++   
+ }
+ /*----------------*/
+ LOCAL_INLINE void VSISRV_SetSignalPwmMaxDutyCycle(uint16 value);
+@@ -1139,117 +1079,58 @@ LOCAL_INLINE void VSISRV_SetSignalPwmMaxDutyCycle(uint16 value)
+    uint16 valueScal;
+    VSISRV_SecAtomicStart0();
+ 
+-   if(BswFpgaIfTxPwmMaxDutycycOvrdEna == BSWFPGAIF_FALSE)
+-   {
+      valueScal = VSISRV_ScalingGroup1(value);
+ 
+      VSISRV_SecAtomicStart1();
+      VsisrvIpduTx.Data.TxA.Id.Mx1.Signal.M0PwmMaxDutyCycle_MSB8 = (uint16)(valueScal >> 4);
+      VsisrvIpduTx.Data.TxA.Id.Mx1.Signal.M0PwmMaxDutyCycle_LSB4 = (uint16)(valueScal);
+      VSISRV_SecAtomicStop();
+-   }
+-   else
+-   {
+-      VSISRV_SecAtomicStart1();
+-      VsisrvIpduTx.Data.TxA.Id.Mx1.Signal.M0PwmMaxDutyCycle_MSB8 = (uint16)(BswFpgaIfTxPwmMaxDutycycOvrdVal >> 4);
+-      VsisrvIpduTx.Data.TxA.Id.Mx1.Signal.M0PwmMaxDutyCycle_LSB4 = (uint16)(BswFpgaIfTxPwmMaxDutycycOvrdVal);
+-      VSISRV_SecAtomicStop();
+-   }
+ }
+ /*----------------*/
+ LOCAL_INLINE void VSISRV_SetSignalM0Id2Spare06To11(uint8 value);
+ LOCAL_INLINE void VSISRV_SetSignalM0Id2Spare06To11(uint8 value)
+ {
+-   if(BswFpgaIfTxActDischReqOvrdEna == BSWFPGAIF_FALSE)
+-   {
+-      VSISRV_SecAtomicStart();
+-         VsisrvIpduTx.Data.TxA.Id.Mx2.Signal.M0Id2Spare06To11 = (uint16)value;
+-         VSISRV_SecAtomicStop();
+-   }
+-   else
+-   {
+-      if (BswFpgaIfTxActDischReqOvrdVal == 0)
+-      {
+-         VSISRV_SecAtomicStart();
+-         VsisrvIpduTx.Data.TxA.Id.Mx2.Signal.M0Id2Spare06To11 = 0u;
+-         VSISRV_SecAtomicStop();
+-      }
+-      else
+-      {
+-         VSISRV_SecAtomicStart();
+-         VsisrvIpduTx.Data.TxA.Id.Mx2.Signal.M0Id2Spare06To11 = 0x08u;
+-         VSISRV_SecAtomicStop();
+-      }
+-   }
++
++   VSISRV_SecAtomicStart();
++   VsisrvIpduTx.Data.TxA.Id.Mx2.Signal.M0Id2Spare06To11 = (uint16)value;
++   VSISRV_SecAtomicStop();
++
+ 
+ }
+ /*----------------*/
+ LOCAL_INLINE void VSISRV_SetSignalPwrSupDrvInh(boolean value);
+ LOCAL_INLINE void VSISRV_SetSignalPwrSupDrvInh(boolean value)
+ {
+-   if(BswFpgaIfTxPwrSupDrvInhOvrdEna == BSWFPGAIF_FALSE)
+-   {
+-     VSISRV_SecAtomicStart();
+-     VsisrvIpduTx.Data.TxA.Id.Mx2.Signal.PwrSupDrvInh = (uint16)value;
+-     VSISRV_SecAtomicStop();
+-   }
+-   else
+-   {
+-      VSISRV_SecAtomicStart();
+-      VsisrvIpduTx.Data.TxA.Id.Mx2.Signal.PwrSupDrvInh = (uint16)BswFpgaIfTxPwrSupDrvInhOvrdVal;
+-      VSISRV_SecAtomicStop();
+-   }
++   VSISRV_SecAtomicStart();
++   VsisrvIpduTx.Data.TxA.Id.Mx2.Signal.PwrSupDrvInh = (uint16)value;
++   VSISRV_SecAtomicStop();
+ }
+ /*----------------*/
+ LOCAL_INLINE void VSISRV_SetSignalPwrSupHbrInh(boolean value);
+ LOCAL_INLINE void VSISRV_SetSignalPwrSupHbrInh(boolean value)
+ {
+-  if(BswFpgaIfTxPwrSupHbrInhOvrdEna == BSWFPGAIF_FALSE)
+-  {
+-    VSISRV_SecAtomicStart();
+-    VsisrvIpduTx.Data.TxA.Id.Mx2.Signal.PwrSupHbrInh = (uint16)value;
+-    VSISRV_SecAtomicStop();
+-  }
+-  else
+-  {
+-     VSISRV_SecAtomicStart();
+-     VsisrvIpduTx.Data.TxA.Id.Mx2.Signal.PwrSupHbrInh = (uint16)BswFpgaIfTxPwrSupHbrInhOvrdVal;
+-     VSISRV_SecAtomicStop();
+-  }
++   VSISRV_SecAtomicStart();
++   VsisrvIpduTx.Data.TxA.Id.Mx2.Signal.PwrSupHbrInh = (uint16)value;
++   VSISRV_SecAtomicStop();
+ }
+ /*----------------*/
+ LOCAL_INLINE void VSISRV_SetSignalM0IFilAverage(uint8 value);
+ LOCAL_INLINE void VSISRV_SetSignalM0IFilAverage(uint8 value)
+ {
+-   if(BswFpgaIfTxIFiltAvgOvrdEna == BSWFPGAIF_FALSE)
+-   {
+-     VSISRV_SecAtomicStart();
+-     VsisrvIpduTx.Data.TxA.Id.Mx2.Signal.M0IFilAverage = (uint16)value;
+-     VSISRV_SecAtomicStop();
+-   }
+-   else
+-   {
+-      VSISRV_SecAtomicStart();
+-      VsisrvIpduTx.Data.TxA.Id.Mx2.Signal.M0IFilAverage = (uint16)BswFpgaIfTxIFiltAvgOvrdVal;
+-      VSISRV_SecAtomicStop();
+-   }
++
++   VSISRV_SecAtomicStart();
++   VsisrvIpduTx.Data.TxA.Id.Mx2.Signal.M0IFilAverage = (uint16)value;
++   VSISRV_SecAtomicStop();
++   
+ }
+ /*----------------*/
+ LOCAL_INLINE void VSISRV_SetSignalM0VFilAverage(uint8 value);
+ LOCAL_INLINE void VSISRV_SetSignalM0VFilAverage(uint8 value)
+ {
+-  if(BswFpgaIfTxVFiltAvgOvrdEna == BSWFPGAIF_FALSE)
+-  {
+-    VSISRV_SecAtomicStart();
+-    VsisrvIpduTx.Data.TxA.Id.Mx2.Signal.M0VFilAverage = (uint16)value;
+-    VSISRV_SecAtomicStop();
+-  }
+-  else
+-  {
+-     VSISRV_SecAtomicStart();
+-     VsisrvIpduTx.Data.TxA.Id.Mx2.Signal.M0VFilAverage = (uint16)BswFpgaIfTxVFiltAvgOvrdVal;
+-     VSISRV_SecAtomicStop();
+-  }
++
++   VSISRV_SecAtomicStart();
++   VsisrvIpduTx.Data.TxA.Id.Mx2.Signal.M0VFilAverage = (uint16)value;
++   VSISRV_SecAtomicStop();
+ }
+ /*----------------*/
+ LOCAL_INLINE void VSISRV_SetSignalDebugL(uint16 value);
+@@ -1314,39 +1195,21 @@ LOCAL_INLINE void VSISRV_SetAtomicDebugLDebugH(uint16 valueDebugL, uint16 valueD
+ LOCAL_INLINE void VSISRV_SetSignalPwmFreq(uint16 value);
+ LOCAL_INLINE void VSISRV_SetSignalPwmFreq(uint16 value)
+ {
+-   if(BswFpgaIfTxPwmFreqOvrdEna == BSWFPGAIF_FALSE)
+-      {
+-     VSISRV_SecAtomicStart();
+-     VsisrvIpduTx.Data.TxA.Id.Mx0.Signal.M2PwmFreq_MSB8 = (uint16)(value >> 4);
+-     VsisrvIpduTx.Data.TxA.Id.Mx0.Signal.M2PwmFreq_LSB4 = (uint32)(value);
+-     VSISRV_SecAtomicStop();
+-      }
+-   else
+-   {
+-      VSISRV_SecAtomicStart();
+-      VsisrvIpduTx.Data.TxA.Id.Mx0.Signal.M2PwmFreq_MSB8 = (uint16)(BswFpgaIfTxPwmFreqOvrdVal >> 4);
+-      VsisrvIpduTx.Data.TxA.Id.Mx0.Signal.M2PwmFreq_LSB4 = (uint32)(BswFpgaIfTxPwmFreqOvrdVal);
+-      VSISRV_SecAtomicStop();
+-   }
++
++   VSISRV_SecAtomicStart();
++   VsisrvIpduTx.Data.TxA.Id.Mx0.Signal.M2PwmFreq_MSB8 = (uint16)(value >> 4);
++   VsisrvIpduTx.Data.TxA.Id.Mx0.Signal.M2PwmFreq_LSB4 = (uint32)(value);
++   VSISRV_SecAtomicStop();
++
+ }
+ /*----------------*/
+ LOCAL_INLINE void VSISRV_SetSignalPwmInitValVl(uint16 value);
+ LOCAL_INLINE void VSISRV_SetSignalPwmInitValVl(uint16 value)
+ {
+-   if(BswFpgaIfTxPwmInitOvrdEna[1] == BSWFPGAIF_FALSE)
+-   {
+-     VSISRV_SecAtomicStart();
+-     VsisrvIpduTx.Data.TxA.Id.Mx1.Signal.M2PwmInitValVl_MSB8 = (uint16)(value >> 4);
+-     VsisrvIpduTx.Data.TxA.Id.Mx1.Signal.M2PwmInitValVl_LSB4 = (uint32)(value);
+-     VSISRV_SecAtomicStop();
+-   }
+-   else
+-   {
+-      VSISRV_SecAtomicStart();
+-      VsisrvIpduTx.Data.TxA.Id.Mx1.Signal.M2PwmInitValVl_MSB8 = (uint16)(BswFpgaIfTxPwmInitOvrdVal[1] >> 4);
+-      VsisrvIpduTx.Data.TxA.Id.Mx1.Signal.M2PwmInitValVl_LSB4 = (uint32)(BswFpgaIfTxPwmInitOvrdVal[1]);
+-      VSISRV_SecAtomicStop();
+-   }
++   VSISRV_SecAtomicStart();
++   VsisrvIpduTx.Data.TxA.Id.Mx1.Signal.M2PwmInitValVl_MSB8 = (uint16)(value >> 4);
++   VsisrvIpduTx.Data.TxA.Id.Mx1.Signal.M2PwmInitValVl_LSB4 = (uint32)(value);
++   VSISRV_SecAtomicStop();
+ }
+ /*----------------*/
+ LOCAL_INLINE void VSISRV_SetSignalOverCurThBat(uint16 value);
+@@ -1370,20 +1233,10 @@ LOCAL_INLINE void VSISRV_SetSignalOverCurThMot(uint16 value)
+ LOCAL_INLINE void VSISRV_SetSignalPwmDeadtime(uint16 value);
+ LOCAL_INLINE void VSISRV_SetSignalPwmDeadtime(uint16 value)
+ {
+-   if(BswFpgaIfTxPwmDeadTimeOvrdEna == BSWFPGAIF_FALSE)
+-   {
+      VSISRV_SecAtomicStart();
+      VsisrvIpduTx.Data.TxA.Id.Mx0.Signal.M3PwmDeadtime_MSB4 = (uint16)(value >> 8);
+      VsisrvIpduTx.Data.TxA.Id.Mx0.Signal.M3PwmDeadtime_LSB8 = (uint32)(value);
+-     VSISRV_SecAtomicStop();
+-   }
+-   else
+-   {
+-      VSISRV_SecAtomicStart();
+-      VsisrvIpduTx.Data.TxA.Id.Mx0.Signal.M3PwmDeadtime_MSB4 = (uint16)(BswFpgaIfTxPwmDeadTimeOvrdVal >> 8);
+-      VsisrvIpduTx.Data.TxA.Id.Mx0.Signal.M3PwmDeadtime_LSB8 = (uint32)(BswFpgaIfTxPwmDeadTimeOvrdVal);
+-      VSISRV_SecAtomicStop();
+-   }
++     VSISRV_SecAtomicStop();  
+ }
+ /*----------------*/
+ LOCAL_INLINE void VSISRV_SetSignalPwmInitValVr(uint16 value);
+@@ -1398,20 +1251,10 @@ LOCAL_INLINE void VSISRV_SetSignalPwmInitValVr(uint16 value)
+ LOCAL_INLINE void VSISRV_SetSignalOverVoltVbatTh(uint16 value);
+ LOCAL_INLINE void VSISRV_SetSignalOverVoltVbatTh(uint16 value)
+ {
+-   if(BswFpgaIfTxOVbattThdOvrdEna == BSWFPGAIF_FALSE)
+-   {
+-     VSISRV_SecAtomicStart();
+-     VsisrvIpduTx.Data.TxA.Id.Mx2.Signal.M3OverVoltVbatTh_MSB4 = (uint16)(value >> 8);
+-     VsisrvIpduTx.Data.TxA.Id.Mx2.Signal.M3OverVoltVbatTh_LSB8 = (uint32)(value);
+-     VSISRV_SecAtomicStop();
+-   }
+-   else
+-   {
+-     VSISRV_SecAtomicStart();
+-     VsisrvIpduTx.Data.TxA.Id.Mx2.Signal.M3OverVoltVbatTh_MSB4 = (uint16)(BswFpgaIfTxOVbattThdOvrdVal >> 8);
+-     VsisrvIpduTx.Data.TxA.Id.Mx2.Signal.M3OverVoltVbatTh_LSB8 = (uint32)(BswFpgaIfTxOVbattThdOvrdVal);
+-     VSISRV_SecAtomicStop();
+-   }
++   VSISRV_SecAtomicStart();
++   VsisrvIpduTx.Data.TxA.Id.Mx2.Signal.M3OverVoltVbatTh_MSB4 = (uint16)(value >> 8);
++   VsisrvIpduTx.Data.TxA.Id.Mx2.Signal.M3OverVoltVbatTh_LSB8 = (uint32)(value);
++   VSISRV_SecAtomicStop();
+ }
+ /*----------------*/
+ LOCAL_INLINE void VSISRV_SetSignalActiveDisDur(uint16 value);
+@@ -1435,20 +1278,10 @@ LOCAL_INLINE void VSISRV_SetSignalM4Id0Spare(uint16 value)
+ LOCAL_INLINE void VSISRV_SetSignalPwmInitValWl(uint16 value);
+ LOCAL_INLINE void VSISRV_SetSignalPwmInitValWl(uint16 value)
+ {
+-   if(BswFpgaIfTxPwmInitOvrdEna[2] == BSWFPGAIF_FALSE)
+-   {
+-     VSISRV_SecAtomicStart();
+-     VsisrvIpduTx.Data.TxA.Id.Mx1.Signal.M4PwmInitValWl_MSB8 = (uint16)(value >> 4);
+-     VsisrvIpduTx.Data.TxA.Id.Mx1.Signal.M4PwmInitValWl_LSB4 = (uint32)(value);
+-     VSISRV_SecAtomicStop();
+-   }
+-   else
+-   {
+-      VSISRV_SecAtomicStart();
+-      VsisrvIpduTx.Data.TxA.Id.Mx1.Signal.M4PwmInitValWl_MSB8 = (uint16)(BswFpgaIfTxPwmInitOvrdVal[2] >> 4);
+-      VsisrvIpduTx.Data.TxA.Id.Mx1.Signal.M4PwmInitValWl_LSB4 = (uint32)(BswFpgaIfTxPwmInitOvrdVal[2]);
+-      VSISRV_SecAtomicStop();
+-   }
++   VSISRV_SecAtomicStart();
++   VsisrvIpduTx.Data.TxA.Id.Mx1.Signal.M4PwmInitValWl_MSB8 = (uint16)(value >> 4);
++   VsisrvIpduTx.Data.TxA.Id.Mx1.Signal.M4PwmInitValWl_LSB4 = (uint32)(value);
++   VSISRV_SecAtomicStop();
+ }
+ /*----------------*/
+ LOCAL_INLINE void VSISRV_SetSignalM4Id2Spare(uint16 value);
+@@ -1463,39 +1296,19 @@ LOCAL_INLINE void VSISRV_SetSignalM4Id2Spare(uint16 value)
+ LOCAL_INLINE void VSISRV_SetSignalSynchroDelay(uint16 value);
+ LOCAL_INLINE void VSISRV_SetSignalSynchroDelay(uint16 value)
+ {
+-   if(BswFpgaIfTxSynDlyOvrdEna == BSWFPGAIF_FALSE)
+-   {
+-     VSISRV_SecAtomicStart();
+-     VsisrvIpduTx.Data.TxA.Id.Mx3.Signal.M4SynchroDelay_MSB8 = (uint16)(value >> 4);
+-     VsisrvIpduTx.Data.TxA.Id.Mx3.Signal.M4SynchroDelay_LSB4 = (uint32)(value);
+-     VSISRV_SecAtomicStop();
+-   }
+-   else
+-   {
+-      VSISRV_SecAtomicStart();
+-        VsisrvIpduTx.Data.TxA.Id.Mx3.Signal.M4SynchroDelay_MSB8 = (uint16)(BswFpgaIfTxSynDlyOvrdVal >> 4);
+-        VsisrvIpduTx.Data.TxA.Id.Mx3.Signal.M4SynchroDelay_LSB4 = (uint32)(BswFpgaIfTxSynDlyOvrdVal);
+-        VSISRV_SecAtomicStop();
+-   }
++   VSISRV_SecAtomicStart();
++   VsisrvIpduTx.Data.TxA.Id.Mx3.Signal.M4SynchroDelay_MSB8 = (uint16)(value >> 4);
++   VsisrvIpduTx.Data.TxA.Id.Mx3.Signal.M4SynchroDelay_LSB4 = (uint32)(value);
++   VSISRV_SecAtomicStop();
+ }
+ /*----------------*/
+ LOCAL_INLINE void VSISRV_SetSignalPwmInitValUl(uint16 value);
+ LOCAL_INLINE void VSISRV_SetSignalPwmInitValUl(uint16 value)
+ {
+-   if(BswFpgaIfTxPwmInitOvrdEna[0] == BSWFPGAIF_FALSE)
+-   {
+-     VSISRV_SecAtomicStart();
+-     VsisrvIpduTx.Data.TxA.Id.Mx0.Signal.M5PwmInitValUl_MSB4 = (uint16)(value >> 8);
+-     VsisrvIpduTx.Data.TxA.Id.Mx0.Signal.M5PwmInitValUl_LSB8 = (uint32)(value);
+-     VSISRV_SecAtomicStop();
+-   }
+-   else
+-   {
+-      VSISRV_SecAtomicStart();
+-      VsisrvIpduTx.Data.TxA.Id.Mx0.Signal.M5PwmInitValUl_MSB4 = (uint16)(BswFpgaIfTxPwmInitOvrdVal[0] >> 8);
+-      VsisrvIpduTx.Data.TxA.Id.Mx0.Signal.M5PwmInitValUl_LSB8 = (uint32)(BswFpgaIfTxPwmInitOvrdVal[0]);
+-      VSISRV_SecAtomicStop();
+-   }
++   VSISRV_SecAtomicStart();
++   VsisrvIpduTx.Data.TxA.Id.Mx0.Signal.M5PwmInitValUl_MSB4 = (uint16)(value >> 8);
++   VsisrvIpduTx.Data.TxA.Id.Mx0.Signal.M5PwmInitValUl_LSB8 = (uint32)(value);
++   VSISRV_SecAtomicStop();
+ }
+ /*----------------*/
+ LOCAL_INLINE void VSISRV_SetSignalPwmInitValWr(uint16 value);
+@@ -1557,26 +1370,8 @@ LOCAL_INLINE void VSISRV_SetSignalM6Id3Spare(uint16 value)
+ {
+ 
+    VSISRV_SecAtomicStart();
+-   if(BswFpgaIfTxMidPtFltWitSwtPerOvrdEna == BSWFPGAIF_TRUE)
+-   {
+-     VsisrvIpduTx.Data.TxA.Id.Mx3.Signal.M6Id3Spare_MSB8 = (uint32)(BswFpgaIfTxMidPtFltWitSwtPerOvrdVal >> 4);
+-     VsisrvIpduTx.Data.TxA.Id.Mx3.Signal.M6Id3Spare_LSB4 = (uint16)(BswFpgaIfTxMidPtFltWitSwtPerOvrdVal);
+-   }
+-   else if(BswFpgaIfTxSwtPerFiltWitMidPtFltOvrdEna == BSWFPGAIF_TRUE)
+-   {
+-     VsisrvIpduTx.Data.TxA.Id.Mx3.Signal.M6Id3Spare_MSB8 = (uint32)(BswFpgaIfTxSwtPerFiltWitMidPtFltOvrdVal >> 4);
+-     VsisrvIpduTx.Data.TxA.Id.Mx3.Signal.M6Id3Spare_LSB4 = (uint16)(BswFpgaIfTxSwtPerFiltWitMidPtFltOvrdVal);
+-   }
+-   else if(BswFpgaIfTxMidPtFltDisOvrdEna == BSWFPGAIF_TRUE)
+-   {
+-     VsisrvIpduTx.Data.TxA.Id.Mx3.Signal.M6Id3Spare_MSB8 = (uint32)(BswFpgaIfTxMidPtFltDisOvrdVal >> 4);
+-     VsisrvIpduTx.Data.TxA.Id.Mx3.Signal.M6Id3Spare_LSB4 = (uint16)(BswFpgaIfTxMidPtFltDisOvrdVal);
+-   }
+-   else
+-   {
+-      VsisrvIpduTx.Data.TxA.Id.Mx3.Signal.M6Id3Spare_MSB8 = (uint32)(value >> 4);
+-      VsisrvIpduTx.Data.TxA.Id.Mx3.Signal.M6Id3Spare_LSB4 = (uint16)(value);
+-   }
++   VsisrvIpduTx.Data.TxA.Id.Mx3.Signal.M6Id3Spare_MSB8 = (uint32)(value >> 4);
++   VsisrvIpduTx.Data.TxA.Id.Mx3.Signal.M6Id3Spare_LSB4 = (uint16)(value);
+    VSISRV_SecAtomicStop();
+ }
+ /*--------*/
+@@ -1584,7 +1379,7 @@ LOCAL_INLINE void VSISRV_SetSignalM6Id3Spare(uint16 value)
+ LOCAL_INLINE void VSISRV_SetSignalDebug(uint16 value);
+ LOCAL_INLINE void VSISRV_SetSignalDebug(uint16 value)
+ {
+-   if(BswFpgaIfDebugValTxOvrdEna == BSWFPGAIF_FALSE)
++   if(BswFpgaIfTxPwmExcOvrdEna == BSWFPGAIF_FALSE)
+    {
+ 
+    VSISRV_SecAtomicStart();
+@@ -1604,17 +1399,17 @@ LOCAL_INLINE void VSISRV_SetSignalDebug(uint16 value)
+    else
+    {
+       VSISRV_SecAtomicStart();
+-      VsisrvIpduTx.Data.TxA.IdMx[0].Signal.Debug_MSB4 = (uint16)(BswFpgaIfDebugValTxOvrdVal >> 8);
+-      VsisrvIpduTx.Data.TxA.IdMx[0].Signal.Debug_LSB8 = (uint16)(BswFpgaIfDebugValTxOvrdVal);
++      VsisrvIpduTx.Data.TxA.IdMx[0].Signal.Debug_MSB4 = (uint16)(BswFpgaIfTxPwmExcOvrdVal >> 8);
++      VsisrvIpduTx.Data.TxA.IdMx[0].Signal.Debug_LSB8 = (uint16)(BswFpgaIfTxPwmExcOvrdVal);
+ 
+-      VsisrvIpduTx.Data.TxA.IdMx[1].Signal.Debug_MSB4 = (uint16)(BswFpgaIfDebugValTxOvrdVal >> 8);
+-      VsisrvIpduTx.Data.TxA.IdMx[1].Signal.Debug_LSB8 = (uint16)(BswFpgaIfDebugValTxOvrdVal);
++      VsisrvIpduTx.Data.TxA.IdMx[1].Signal.Debug_MSB4 = (uint16)(BswFpgaIfTxPwmExcOvrdVal >> 8);
++      VsisrvIpduTx.Data.TxA.IdMx[1].Signal.Debug_LSB8 = (uint16)(BswFpgaIfTxPwmExcOvrdVal);
+ 
+-      VsisrvIpduTx.Data.TxA.IdMx[2].Signal.Debug_MSB4 = (uint16)(BswFpgaIfDebugValTxOvrdVal >> 8);
+-      VsisrvIpduTx.Data.TxA.IdMx[2].Signal.Debug_LSB8 = (uint16)(BswFpgaIfDebugValTxOvrdVal);
++      VsisrvIpduTx.Data.TxA.IdMx[2].Signal.Debug_MSB4 = (uint16)(BswFpgaIfTxPwmExcOvrdVal >> 8);
++      VsisrvIpduTx.Data.TxA.IdMx[2].Signal.Debug_LSB8 = (uint16)(BswFpgaIfTxPwmExcOvrdVal);
+ 
+-      VsisrvIpduTx.Data.TxA.IdMx[3].Signal.Debug_MSB4 = (uint16)(BswFpgaIfDebugValTxOvrdVal >> 8);
+-      VsisrvIpduTx.Data.TxA.IdMx[3].Signal.Debug_LSB8 = (uint16)(BswFpgaIfDebugValTxOvrdVal);
++      VsisrvIpduTx.Data.TxA.IdMx[3].Signal.Debug_MSB4 = (uint16)(BswFpgaIfTxPwmExcOvrdVal >> 8);
++      VsisrvIpduTx.Data.TxA.IdMx[3].Signal.Debug_LSB8 = (uint16)(BswFpgaIfTxPwmExcOvrdVal);
+       VSISRV_SecAtomicStop();
+    }
+ }
+diff --git a/src/fw_cu/Components/Inv/ValMeasAndProc/BswFpgaIf/src/BswFpgaIf.c b/src/fw_cu/Components/Inv/ValMeasAndProc/BswFpgaIf/src/BswFpgaIf.c
+index 1278aace8..68d707bd7 100644
+--- a/src/fw_cu/Components/Inv/ValMeasAndProc/BswFpgaIf/src/BswFpgaIf.c
++++ b/src/fw_cu/Components/Inv/ValMeasAndProc/BswFpgaIf/src/BswFpgaIf.c
+@@ -227,28 +227,6 @@ const volatile float32 BswFpgaIf_invA_pwm_DEADTIME=2.5E-6f;            /* = 2.5u
+ /*lint -e(537,451) Repeated inclusion is needed. */
+ #include "MemMap.h"
+ 
+-/*
+-@@ SYMBOL = BswFpgaIfReiniCombinedFltOvrdEna
+-@@ A2L_TYPE = PARAMETER
+-@@ DATA_TYPE = UBYTE [0 ... 1]
+-@@ DESCRIPTION = "Reset the fault"
+-@@ CONVERSION = TABLE 0 "FALSE" 1 "TRUE"
+-@@ GROUP = BswFpgaIf
+-@@ END
+-*/
+-/* Permission to inject safetyLib fault by Tester in Run Time */
+-const boolean BswFpgaIfReiniCombinedFltOvrdEna = 0u;
+-/*
+-@@ SYMBOL = BswFpgaIfReiniCombinedFltOvrdVal
+-@@ A2L_TYPE = PARAMETER
+-@@ DATA_TYPE = UWORD
+-@@ DESCRIPTION = "Reset the fault"
+-@@ GROUP = BswFpgaIf
+-@@ END
+-*/
+-/* Permission to inject safetyLib fault by Tester in Run Time */
+-const uint16 BswFpgaIfReiniCombinedFltOvrdVal = 0xFFFFu;
+-
+ /*
+ @@ SYMBOL = FltMskVal
+ @@ A2L_TYPE = PARAMETER
+@@ -260,226 +238,24 @@ const uint16 BswFpgaIfReiniCombinedFltOvrdVal = 0xFFFFu;
+ /* Permission to inject safetyLib fault by Tester in Run Time */
+ const uint16 FltMskVal = 0xF6Fu;
+ /*
+-@@ SYMBOL = BswFpgaIfPhaOcThd
++@@ SYMBOL = BswFpgaIfPhaOcThdVal
+ @@ A2L_TYPE = PARAMETER
+ @@ DATA_TYPE = UWORD
+ @@ DESCRIPTION = "Overcurrent threshold"
+ @@ GROUP = BswFpgaIf
+ @@ END
+ */
+-const uint16 BswFpgaIfPhaOcThd = 0xEE7u;
+-
+-/*
+-@@ SYMBOL = BswFpgaIfTxModReqOvrdEna
+-@@ A2L_TYPE = PARAMETER
+-@@ DATA_TYPE = UBYTE [0 ... 1]
+-@@ DESCRIPTION = "Rest the Speed"
+-@@ CONVERSION = TABLE 0 "FALSE" 1 "TRUE"
+-@@ GROUP = BswFpgaIf
+-@@ END
+-*/
+-const boolean BswFpgaIfTxModReqOvrdEna = BSWFPGAIF_FALSE;
++const uint16 BswFpgaIfPhaOcThdVal = 0xEE7u;
+ /*
+ @@ SYMBOL = BswFpgaIfTxPwmCtrlStgOnOffOvrdEna
+ @@ A2L_TYPE = PARAMETER
+ @@ DATA_TYPE = UBYTE [0 ... 1]
+-@@ CONVERSION = TABLE 0 "FALSE" 1 "TRUE"
+ @@ DESCRIPTION = "Rest the Speed"
+ @@ GROUP = BswFpgaIf
+ @@ END
+ */
+ const boolean BswFpgaIfTxPwmCtrlStgOnOffOvrdEna = BSWFPGAIF_FALSE;
+ /*
+-@@ SYMBOL = BswFpgaIfTxPwmRatioFreqReqOvrdEna
+-@@ A2L_TYPE = PARAMETER
+-@@ DATA_TYPE = UBYTE [0 ... 1]
+-@@ CONVERSION = TABLE 0 "FALSE" 1 "TRUE"
+-@@ DESCRIPTION = "Rest the Speed"
+-@@ GROUP = BswFpgaIf
+-@@ END
+-*/
+-const boolean BswFpgaIfTxPwmRatioFreqReqOvrdEna = BSWFPGAIF_FALSE;
+-/*
+-@@ SYMBOL = BswFpgaIfTxPwmMinDutycycOvrdEna
+-@@ A2L_TYPE = PARAMETER
+-@@ DATA_TYPE = UBYTE [0 ... 1]
+-@@ CONVERSION = TABLE 0 "FALSE" 1 "TRUE"
+-@@ DESCRIPTION = "Rest the Speed"
+-@@ GROUP = BswFpgaIf
+-@@ END
+-*/
+-const boolean BswFpgaIfTxPwmMinDutycycOvrdEna = BSWFPGAIF_FALSE;
+-/*
+-@@ SYMBOL = BswFpgaIfTxPwmMaxDutycycOvrdEna
+-@@ A2L_TYPE = PARAMETER
+-@@ DATA_TYPE = UBYTE [0 ... 1]
+-@@ CONVERSION = TABLE 0 "FALSE" 1 "TRUE"
+-@@ DESCRIPTION = "Rest the Speed"
+-@@ GROUP = BswFpgaIf
+-@@ END
+-*/
+-const boolean BswFpgaIfTxPwmMaxDutycycOvrdEna = BSWFPGAIF_FALSE;
+-/*
+-@@ SYMBOL = BswFpgaIfTxActDischReqOvrdEna
+-@@ A2L_TYPE = PARAMETER
+-@@ DATA_TYPE = UBYTE [0 ... 1]
+-@@ CONVERSION = TABLE 0 "FALSE" 1 "TRUE"
+-@@ DESCRIPTION = "Rest the Speed"
+-@@ GROUP = BswFpgaIf
+-@@ END
+-*/
+-const boolean BswFpgaIfTxActDischReqOvrdEna = BSWFPGAIF_FALSE;
+-/*
+-@@ SYMBOL = BswFpgaIfTxFyBPwrSupCtrlOvrdEna
+-@@ A2L_TYPE = PARAMETER
+-@@ DATA_TYPE = UBYTE [0 ... 1]
+-@@ CONVERSION = TABLE 0 "FALSE" 1 "TRUE"
+-@@ DESCRIPTION = "Rest the Speed"
+-@@ GROUP = BswFpgaIf
+-@@ END
+-*/
+-const boolean BswFpgaIfTxFyBPwrSupCtrlOvrdEna = BSWFPGAIF_FALSE;
+-/*
+-@@ SYMBOL = BswFpgaIfTxIFiltAvgOvrdEna
+-@@ A2L_TYPE = PARAMETER
+-@@ DATA_TYPE = UBYTE [0 ... 1]
+-@@ CONVERSION = TABLE 0 "FALSE" 1 "TRUE"
+-@@ DESCRIPTION = "Rest the Speed"
+-@@ GROUP = BswFpgaIf
+-@@ END
+-*/
+-const boolean BswFpgaIfTxIFiltAvgOvrdEna = BSWFPGAIF_FALSE;
+-/*
+-@@ SYMBOL = BswFpgaIfTxVFiltAvgOvrdEna
+-@@ A2L_TYPE = PARAMETER
+-@@ DATA_TYPE = UBYTE [0 ... 1]
+-@@ CONVERSION = TABLE 0 "FALSE" 1 "TRUE"
+-@@ DESCRIPTION = "Rest the Speed"
+-@@ GROUP = BswFpgaIf
+-@@ END
+-*/
+-const boolean BswFpgaIfTxVFiltAvgOvrdEna = BSWFPGAIF_FALSE;
+-/*
+-@@ SYMBOL = BswFpgaIfTxPwmFreqOvrdEna
+-@@ A2L_TYPE = PARAMETER
+-@@ DATA_TYPE = UBYTE [0 ... 1]
+-@@ CONVERSION = TABLE 0 "FALSE" 1 "TRUE"
+-@@ DESCRIPTION = "Rest the Speed"
+-@@ GROUP = BswFpgaIf
+-@@ END
+-*/
+-const boolean BswFpgaIfTxPwmFreqOvrdEna = BSWFPGAIF_FALSE;
+-/*
+-@@ SYMBOL = BswFpgaIfTxPwmDeadTimeOvrdEna
+-@@ A2L_TYPE = PARAMETER
+-@@ DATA_TYPE = UBYTE [0 ... 1]
+-@@ CONVERSION = TABLE 0 "FALSE" 1 "TRUE"
+-@@ DESCRIPTION = "Rest the Speed"
+-@@ GROUP = BswFpgaIf
+-@@ END
+-*/
+-const boolean BswFpgaIfTxPwmDeadTimeOvrdEna = BSWFPGAIF_FALSE;
+-/*
+-@@ SYMBOL = BswFpgaIfTxOVbattThdOvrdEna
+-@@ A2L_TYPE = PARAMETER
+-@@ DATA_TYPE = UBYTE [0 ... 1]
+-@@ CONVERSION = TABLE 0 "FALSE" 1 "TRUE"
+-@@ DESCRIPTION = "Rest the Speed"
+-@@ GROUP = BswFpgaIf
+-@@ END
+-*/
+-const boolean BswFpgaIfTxOVbattThdOvrdEna = BSWFPGAIF_FALSE;
+-/*
+-@@ SYMBOL = BswFpgaIfTxSynDlyOvrdEna
+-@@ A2L_TYPE = PARAMETER
+-@@ DATA_TYPE = UBYTE [0 ... 1]
+-@@ CONVERSION = TABLE 0 "FALSE" 1 "TRUE"
+-@@ DESCRIPTION = "Rest the Speed"
+-@@ GROUP = BswFpgaIf
+-@@ END
+-*/
+-const boolean BswFpgaIfTxSynDlyOvrdEna = BSWFPGAIF_FALSE;
+-/*
+-@@ SYMBOL = BswFpgaIfTxPwmInitOvrdEna
+-@@ A2L_TYPE = PARAMETER
+-@@ DATA_TYPE = UBYTE [0 ... 1]
+-@@ DIMENSION = 3
+-@@ CONVERSION = TABLE 0 "FALSE" 1 "TRUE"
+-@@ DESCRIPTION = "Rest the Speed"
+-@@ GROUP = BswFpgaIf
+-@@ END
+-*/
+-const boolean BswFpgaIfTxPwmInitOvrdEna[SYSDEF_EM_PHA_CNT_MAX] = {BSWFPGAIF_FALSE};
+-/*
+-@@ SYMBOL = BswFpgaIfTxMidPtFltWitSwtPerOvrdEna
+-@@ A2L_TYPE = PARAMETER
+-@@ DATA_TYPE = UBYTE [0 ... 1]
+-@@ CONVERSION = TABLE 0 "FALSE" 1 "TRUE"
+-@@ DESCRIPTION = "Rest the Speed"
+-@@ GROUP = BswFpgaIf
+-@@ END
+-*/
+-const boolean BswFpgaIfTxMidPtFltWitSwtPerOvrdEna = BSWFPGAIF_FALSE;
+-/*
+-@@ SYMBOL = BswFpgaIfTxSwtPerFiltWitMidPtFltOvrdEna
+-@@ A2L_TYPE = PARAMETER
+-@@ DATA_TYPE = UBYTE [0 ... 1]
+-@@ CONVERSION = TABLE 0 "FALSE" 1 "TRUE"
+-@@ DESCRIPTION = "Rest the Speed"
+-@@ GROUP = BswFpgaIf
+-@@ END
+-*/
+-const boolean BswFpgaIfTxSwtPerFiltWitMidPtFltOvrdEna = BSWFPGAIF_FALSE;
+-/*
+-@@ SYMBOL = BswFpgaIfTxMidPtFltDisOvrdEna
+-@@ A2L_TYPE = PARAMETER
+-@@ DATA_TYPE = UBYTE [0 ... 1]
+-@@ CONVERSION = TABLE 0 "FALSE" 1 "TRUE"
+-@@ DESCRIPTION = "Rest the Speed"
+-@@ GROUP = BswFpgaIf
+-@@ END
+-*/
+-const boolean BswFpgaIfTxMidPtFltDisOvrdEna = BSWFPGAIF_FALSE;
+-/*
+-@@ SYMBOL = BswFpgaIfDebugValTxOvrdEna
+-@@ A2L_TYPE = PARAMETER
+-@@ DATA_TYPE = UBYTE [0 ... 1]
+-@@ CONVERSION = TABLE 0 "FALSE" 1 "TRUE"
+-@@ DESCRIPTION = "Rest the Speed"
+-@@ GROUP = BswFpgaIf
+-@@ END
+-*/
+-const boolean BswFpgaIfDebugValTxOvrdEna = BSWFPGAIF_FALSE;
+-/*
+-@@ SYMBOL = BswFpgaIfTxEmergencySwOvrdEna
+-@@ A2L_TYPE = PARAMETER
+-@@ DATA_TYPE = UBYTE [0 ... 1]
+-@@ CONVERSION = TABLE 0 "FALSE" 1 "TRUE"
+-@@ DESCRIPTION = "Rest the Speed"
+-@@ GROUP = BswFpgaIf
+-@@ END
+-*/
+-const boolean BswFpgaIfTxEmergencySwOvrdEna = BSWFPGAIF_FALSE;
+-/*
+-@@ SYMBOL = BswFpgaIfTxSCSpeedReadyOvrdEna
+-@@ A2L_TYPE = PARAMETER
+-@@ DATA_TYPE = UBYTE [0 ... 1]
+-@@ CONVERSION = TABLE 0 "FALSE" 1 "TRUE"
+-@@ DESCRIPTION = "Rest the Speed"
+-@@ GROUP = BswFpgaIf
+-@@ END
+-*/
+-const boolean BswFpgaIfTxSCSpeedReadyOvrdEna = BSWFPGAIF_FALSE;
+-/*
+-@@ SYMBOL = BswFpgaIfTxModReqOvrdVal
+-@@ A2L_TYPE = PARAMETER
+-@@ DATA_TYPE = UBYTE
+-@@ DESCRIPTION = "Rest the Speed"
+-@@ GROUP = BswFpgaIf
+-@@ END
+-*/
+-const uint8 BswFpgaIfTxModReqOvrdVal = BSWFPGAIF_FALSE;
+-/*
+ @@ SYMBOL = BswFpgaIfTxPwmCtrlStgOnOffOvrdVal
+ @@ A2L_TYPE = PARAMETER
+ @@ DATA_TYPE = UBYTE [0 ... 1]
+@@ -489,168 +265,131 @@ const uint8 BswFpgaIfTxModReqOvrdVal = BSWFPGAIF_FALSE;
+ */
+ const boolean BswFpgaIfTxPwmCtrlStgOnOffOvrdVal = BSWFPGAIF_FALSE;
+ /*
+-@@ SYMBOL = BswFpgaIfTxPwmRatioFreqReqOvrdVal
+-@@ A2L_TYPE = PARAMETER
+-@@ DATA_TYPE = UBYTE
+-@@ DESCRIPTION = "Rest the Speed"
+-@@ GROUP = BswFpgaIf
+-@@ END
+-*/
+-const uint8 BswFpgaIfTxPwmRatioFreqReqOvrdVal = BSWFPGAIF_FALSE;
+-/*
+-@@ SYMBOL = BswFpgaIfTxPwmMinDutycycOvrdVal
++@@ SYMBOL = BswFpgaIfTxPwmMinDutycycVal
+ @@ A2L_TYPE = PARAMETER
+ @@ DATA_TYPE = UWORD
+ @@ DESCRIPTION = "Rest the Speed"
+ @@ GROUP = BswFpgaIf
+ @@ END
+ */
+-const uint16 BswFpgaIfTxPwmMinDutycycOvrdVal = BSWFPGAIF_FALSE;
++const uint16 BswFpgaIfTxPwmMinDutycycVal = BSWFPGAIF_FALSE;
+ /*
+-@@ SYMBOL = BswFpgaIfTxPwmMaxDutycycOvrdVal
++@@ SYMBOL = BswFpgaIfTxPwmMaxDutycycVal
+ @@ A2L_TYPE = PARAMETER
+ @@ DATA_TYPE = UWORD
+ @@ DESCRIPTION = "Rest the Speed"
+ @@ GROUP = BswFpgaIf
+ @@ END
+ */
+-const uint16 BswFpgaIfTxPwmMaxDutycycOvrdVal = BSWFPGAIF_FALSE;
+-/*
+-@@ SYMBOL = BswFpgaIfTxActDischReqOvrdVal
+-@@ A2L_TYPE = PARAMETER
+-@@ DATA_TYPE = UBYTE [0 ... 1]
+-@@ DESCRIPTION = "Rest the Speed"
+-@@ GROUP = BswFpgaIf
+-@@ END
+-*/
+-const boolean BswFpgaIfTxActDischReqOvrdVal = BSWFPGAIF_FALSE;
++const uint16 BswFpgaIfTxPwmMaxDutycycVal = 2000U;
+ /*
+-@@ SYMBOL = BswFpgaIfTxFyBPwrSupCtrlOvrdVal
+-@@ A2L_TYPE = PARAMETER
+-@@ DATA_TYPE = UBYTE [0 ... 1]
+-@@ DESCRIPTION = "Rest the Speed"
+-@@ GROUP = BswFpgaIf
+-@@ END
+-*/
+-const boolean BswFpgaIfTxFyBPwrSupCtrlOvrdVal = BSWFPGAIF_FALSE;
+-/*
+-@@ SYMBOL = BswFpgaIfTxIFiltAvgOvrdVal
++@@ SYMBOL = BswFpgaIfTxIFiltAvgVal
+ @@ A2L_TYPE = PARAMETER
+ @@ DATA_TYPE = UBYTE
+ @@ DESCRIPTION = "Rest the Speed"
+ @@ GROUP = BswFpgaIf
+ @@ END
+ */
+-const uint8 BswFpgaIfTxIFiltAvgOvrdVal = BSWFPGAIF_FALSE;
++const uint8 BswFpgaIfTxIFiltAvgVal = BSWFPGAIF_FALSE;
+ /*
+-@@ SYMBOL = BswFpgaIfTxVFiltAvgOvrdVal
++@@ SYMBOL = BswFpgaIfTxVFiltAvgVal
+ @@ A2L_TYPE = PARAMETER
+ @@ DATA_TYPE = UBYTE
+ @@ DESCRIPTION = "Rest the Speed"
+ @@ GROUP = BswFpgaIf
+ @@ END
+ */
+-const uint8 BswFpgaIfTxVFiltAvgOvrdVal = BSWFPGAIF_FALSE;
++const uint8 BswFpgaIfTxVFiltAvgVal = BSWFPGAIF_FALSE;
+ /*
+-@@ SYMBOL = BswFpgaIfTxPwmFreqOvrdVal
++@@ SYMBOL = BswFpgaIfTxPwmFreqVal
+ @@ A2L_TYPE = PARAMETER
+ @@ DATA_TYPE = UWORD
+ @@ DESCRIPTION = "Rest the Speed"
+ @@ GROUP = BswFpgaIf
+ @@ END
+ */
+-const uint16 BswFpgaIfTxPwmFreqOvrdVal = BSWFPGAIF_FALSE;
++const uint16 BswFpgaIfTxPwmFreqVal = 2000U;
+ /*
+-@@ SYMBOL = BswFpgaIfTxPwmDeadTimeOvrdVal
++@@ SYMBOL = BswFpgaIfTxPwmDeadTimeVal
+ @@ A2L_TYPE = PARAMETER
+ @@ DATA_TYPE = UWORD
+ @@ DESCRIPTION = "Rest the Speed"
+ @@ GROUP = BswFpgaIf
+ @@ END
+ */
+-const uint16 BswFpgaIfTxPwmDeadTimeOvrdVal = BSWFPGAIF_FALSE;
++const uint16 BswFpgaIfTxPwmDeadTimeVal = 100U;
+ /*
+-@@ SYMBOL = BswFpgaIfTxOVbattThdOvrdVal
++@@ SYMBOL = BswFpgaIfTxOVbattThdVal
+ @@ A2L_TYPE = PARAMETER
+ @@ DATA_TYPE = UWORD
+ @@ DESCRIPTION = "Rest the Speed"
+ @@ GROUP = BswFpgaIf
+ @@ END
+ */
+-const uint16 BswFpgaIfTxOVbattThdOvrdVal = BSWFPGAIF_FALSE;
++const uint16 BswFpgaIfTxOVbattThdVal = 0xB3BU;
+ /*
+-@@ SYMBOL = BswFpgaIfTxSynDlyOvrdVal
++@@ SYMBOL = BswFpgaIfTxSynDlyVal
+ @@ A2L_TYPE = PARAMETER
+ @@ DATA_TYPE = UWORD
+ @@ DESCRIPTION = "Rest the Speed"
+ @@ GROUP = BswFpgaIf
+ @@ END
+ */
+-const uint16 BswFpgaIfTxSynDlyOvrdVal = BSWFPGAIF_FALSE;
++const uint16 BswFpgaIfTxSynDlyVal = 436U;
+ /*
+-@@ SYMBOL = BswFpgaIfTxPwmInitOvrdVal
++@@ SYMBOL = BswFpgaIfTxMidPtFltDisVal
+ @@ A2L_TYPE = PARAMETER
+ @@ DATA_TYPE = UWORD
+-@@ DIMENSION = 3
+ @@ DESCRIPTION = "Rest the Speed"
+ @@ GROUP = BswFpgaIf
+ @@ END
+ */
+-const uint16 BswFpgaIfTxPwmInitOvrdVal[SYSDEF_EM_PHA_CNT_MAX] = {BSWFPGAIF_FALSE};
++const uint16 BswFpgaIfTxMidPtFltDisVal = 0xFFFU;
+ /*
+-@@ SYMBOL = BswFpgaIfTxMidPtFltWitSwtPerOvrdVal
++@@ SYMBOL = BswFpgaIfTxDebugHVal
+ @@ A2L_TYPE = PARAMETER
+ @@ DATA_TYPE = UWORD
+ @@ DESCRIPTION = "Rest the Speed"
+ @@ GROUP = BswFpgaIf
+ @@ END
+ */
+-const uint16 BswFpgaIfTxMidPtFltWitSwtPerOvrdVal = BSWFPGAIF_FALSE;
++const uint16 BswFpgaIfTxDebugHVal = BSWFPGAIF_FALSE;
+ /*
+-@@ SYMBOL = BswFpgaIfTxSwtPerFiltWitMidPtFltOvrdVal
++@@ SYMBOL = BswFpgaIfTxOverCurThBatVal
+ @@ A2L_TYPE = PARAMETER
+ @@ DATA_TYPE = UWORD
+ @@ DESCRIPTION = "Rest the Speed"
+ @@ GROUP = BswFpgaIf
+ @@ END
+ */
+-const uint16 BswFpgaIfTxSwtPerFiltWitMidPtFltOvrdVal = BSWFPGAIF_FALSE;
++const uint16 BswFpgaIfTxOverCurThBatVal = 0xE67U;
+ /*
+-@@ SYMBOL = BswFpgaIfTxMidPtFltDisOvrdVal
++@@ SYMBOL = BswFpgaIfTxPwmDeadTimeExcVal
+ @@ A2L_TYPE = PARAMETER
+ @@ DATA_TYPE = UWORD
+ @@ DESCRIPTION = "Rest the Speed"
+ @@ GROUP = BswFpgaIf
+ @@ END
+ */
+-const uint16 BswFpgaIfTxMidPtFltDisOvrdVal = BSWFPGAIF_FALSE;
++const uint16 BswFpgaIfTxPwmDeadTimeExcVal = BSWFPGAIF_FALSE;
+ /*
+-@@ SYMBOL = BswFpgaIfDebugValTxOvrdVal
++@@ SYMBOL = BswFpgaIfTxPwmFreqExcVal
+ @@ A2L_TYPE = PARAMETER
+ @@ DATA_TYPE = UWORD
+ @@ DESCRIPTION = "Rest the Speed"
+ @@ GROUP = BswFpgaIf
+ @@ END
+ */
+-const uint16 BswFpgaIfDebugValTxOvrdVal = BSWFPGAIF_FALSE;
++const uint16 BswFpgaIfTxPwmFreqExcVal = BSWFPGAIF_FALSE;
+ /*
+-@@ SYMBOL = BswFpgaIfTxEmergencySwOvrdVal
++@@ SYMBOL = BswFpgaIfTxCurAvgExcVal
+ @@ A2L_TYPE = PARAMETER
+-@@ DATA_TYPE = UBYTE [0 ... 1]
+-@@ DESCRIPTION = "Rest the Speed"
+-@@ GROUP = BswFpgaIf
+-@@ END
+-*/
+-const boolean BswFpgaIfTxEmergencySwOvrdVal = BSWFPGAIF_FALSE;
+-/*
+-@@ SYMBOL = BswFpgaIfTxSCSpeedReadyOvrdVal
+-@@ A2L_TYPE = PARAMETER
+-@@ DATA_TYPE = UBYTE
++@@ DATA_TYPE = UWORD
+ @@ DESCRIPTION = "Rest the Speed"
+ @@ GROUP = BswFpgaIf
+ @@ END
+ */
+-const uint8 BswFpgaIfTxSCSpeedReadyOvrdVal = BSWFPGAIF_FALSE;
++const uint16 BswFpgaIfTxCurAvgExcVal = BSWFPGAIF_FALSE;
+ /*
+ @@ SYMBOL = BswFpgaIfPhaISelEna
+ @@ A2L_TYPE = PARAMETER
+@@ -661,7 +400,6 @@ const uint8 BswFpgaIfTxSCSpeedReadyOvrdVal = BSWFPGAIF_FALSE;
+ */
+ /* Permission to inject safetyLib fault by Tester in Run Time */
+ const uint8 BswFpgaIfPhaISelEna = 0u;
+-
+ /*
+ @@ SYMBOL = BswFpgaIfTxPwmSwtFreqOvrdEna
+ @@ A2L_TYPE = PARAMETER
+@@ -681,17 +419,42 @@ const boolean BswFpgaIfTxPwmSwtFreqOvrdEna = BSWFPGAIF_FALSE;
+ @@ END
+ */
+ const uint16 BswFpgaIfTxPwmSwtFreqOvrdVal = 2000u;
+-
+ /*
+-@@ SYMBOL = BswFpgaIfTxISamplOffs
++@@ SYMBOL = BswFpgaIfTxCurSamplOffsVal
+ @@ A2L_TYPE = PARAMETER
+ @@ DATA_TYPE = UWORD
+ @@ DESCRIPTION = "Pwm override Frequency value"
+ @@ GROUP = BswFpgaIf
+ @@ END
+ */
+-const uint16 BswFpgaIfTxISamplOffs = 0u;
+-
++const uint16 BswFpgaIfTxCurSamplOffsVal = 0u;
++/*
++@@ SYMBOL = BswFpgaIfTxActDisDurVal
++@@ A2L_TYPE = PARAMETER
++@@ DATA_TYPE = UWORD
++@@ DESCRIPTION = "Pwm override Frequency value"
++@@ GROUP = BswFpgaIf
++@@ END
++*/
++const uint16 BswFpgaIfTxActDisDurVal = 0u;
++/*
++@@ SYMBOL = BswFpgaIfTxPwmExcOvrdEna
++@@ A2L_TYPE = PARAMETER
++@@ DATA_TYPE = UBYTE [0 ... 1]
++@@ DESCRIPTION = "Rest the Speed"
++@@ GROUP = BswFpgaIf
++@@ END
++*/
++const boolean BswFpgaIfTxPwmExcOvrdEna = BSWFPGAIF_FALSE;
++/*
++@@ SYMBOL = BswFpgaIfTxPwmExcOvrdVal
++@@ A2L_TYPE = PARAMETER
++@@ DATA_TYPE = UWORD
++@@ DESCRIPTION = "Rest the Speed"
++@@ GROUP = BswFpgaIf
++@@ END
++*/
++const uint16 BswFpgaIfTxPwmExcOvrdVal = BSWFPGAIF_FALSE;
+ /*
+ @@ SYMBOL = BswFpgaIfTxPwrSupHbrInhOvrdVal
+ @@ A2L_TYPE = PARAMETER
+@@ -701,7 +464,6 @@ const uint16 BswFpgaIfTxISamplOffs = 0u;
+ @@ END
+ */
+ const boolean BswFpgaIfTxPwrSupHbrInhOvrdVal = BSWFPGAIF_FALSE;
+-
+ /*
+ @@ SYMBOL = BswFpgaIfTxPwrSupDrvInhOvrdVal
+ @@ A2L_TYPE = PARAMETER
+@@ -711,7 +473,6 @@ const boolean BswFpgaIfTxPwrSupHbrInhOvrdVal = BSWFPGAIF_FALSE;
+ @@ END
+ */
+ const boolean BswFpgaIfTxPwrSupDrvInhOvrdVal = BSWFPGAIF_FALSE;
+-
+ /*
+ @@ SYMBOL = BswFpgaIfTxPwrSupDrvInhOvrdEna
+ @@ A2L_TYPE = PARAMETER
+@@ -1544,9 +1305,17 @@ void BswFpgaIf_SetTxSyncData(void)
+     VsisrvIpduTx.Data.TxS.Signal.PWM_Vr_LSB8    = ((Pwm3PhaMuxDutyCycPha_V) & 0xFFu);
+     VsisrvIpduTx.Data.TxS.Signal.PWM_Wr_MSB4    = ((Pwm3PhaMuxDutyCycPha_W >> 8) & 0xFu);
+     VsisrvIpduTx.Data.TxS.Signal.PWM_Wr_LSB8    = ((Pwm3PhaMuxDutyCycPha_W) & 0xFFu);
+-
+-    VSISRV_SetSignalPWM_UVW_ON(1u);
+-    VSISRV_SetSignalPWM_RatioFreq(0u);
++    
++
++\t
++    if(BswFpgaIfTxPwmCtrlStgOnOffOvrdEna == BSWFPGAIF_FALSE)
++\t{
++       VSISRV_SetSignalPWM_UVW_ON(1u);
++\t}
++\telse
++\t{
++\t   VSISRV_SetSignalPWM_UVW_ON(BswFpgaIfTxPwmCtrlStgOnOffOvrdVal);
++\t}
+ 
+     if (BswFpgaIfTxPwmSwtFreqOvrdEna == FALSE)
+     {
+@@ -1556,11 +1325,8 @@ void BswFpgaIf_SetTxSyncData(void)
+     {
+        Freq = BswFpgaIfTxPwmSwtFreqOvrdVal;
+     }
+-
+-    VSISRV_SetSignalM4Id2Spare(BswFpgaIfTxISamplOffs);
+-
+     VSISRV_SetSignalPwmFreqDyn(Freq);
+-
++    VSISRV_SetSignalPWM_RatioFreq(0u);
+ }
+ 
+ /******************************************************************/
+@@ -1579,6 +1345,7 @@ uint8 BswFpgaIf_SetTxAsyncData(void)
+    VSISRV_SetSignalFaultA(SftyC2cData.FpgaTxDataFltAReinitSt.U);
+    VSISRV_SetSignalFaultB(SftyC2cData.FpgaTxDataFltBReinitSt.U);
+    VSISRV_SetSignalStateReqModeReq(SftyC2cData.FpgaStateReq.B.Mode);
++   VSISRV_SetSignalDebug(0);
+    Mode = SftyC2cData.FpgaStateReq.B.Mode;
+    return Mode;
+ }
+@@ -1599,32 +1366,26 @@ void BswFpgaIf_TxRx1ms(void)
+    uint16 Pwm3PhaMuxDutyCycPha_U = 0u;
+    uint16 Pwm3PhaMuxDutyCycPha_V = 0u;
+    uint16 Pwm3PhaMuxDutyCycPha_W = 0u;
+-   uint16 PwmFreq = 0u;
+-   uint16 PwmDeadtime = 0u;
+ 
+-    Pwm3PhaMuxDutyCycPha_U = (( 1 - PwmSpMuxDutyCycPha[SYSDEF_PHA_U] ) * 4000  );
+-    Pwm3PhaMuxDutyCycPha_V = (( 1 - PwmSpMuxDutyCycPha[SYSDEF_PHA_V] ) * 4000 );
+-    Pwm3PhaMuxDutyCycPha_W = (( 1 - PwmSpMuxDutyCycPha[SYSDEF_PHA_W] ) * 4000 );
++   Pwm3PhaMuxDutyCycPha_U = (( 1 - PwmSpMuxDutyCycPha[SYSDEF_PHA_U] ) * 4000  );
++   Pwm3PhaMuxDutyCycPha_V = (( 1 - PwmSpMuxDutyCycPha[SYSDEF_PHA_V] ) * 4000 );
++   Pwm3PhaMuxDutyCycPha_W = (( 1 - PwmSpMuxDutyCycPha[SYSDEF_PHA_W] ) * 4000 );
+ 
+    VSISRV_SetSignalM0Id2Spare06To11(((uint8)SftyC2cData.FpgaActvDchaReq << 3u) & 0x08u);
+-   VSISRV_SetSignalDebug(0);
+-   VSISRV_SetSignalPwrSupDrvInh(0);
+-   VSISRV_SetSignalPwrSupHbrInh(0);
+-   VSISRV_SetSignalSynchroDelay(436u);
+    VSISRV_SetSignalStateReqSCSpeedReady(SftyC2cData.FpgaStateReq.B.SCspdReady);
+    VSISRV_SetSignalStateReqEmergencySw(SftyC2cData.FpgaStateReq.B.NoEmgySw);
+-
++   
+    switch(txMuxIdCnt)
+     {
+       case BSWFPGAIF_TXID0 :
+-
+-      PwmFreq = 2000u; /* (Pwm3PhaPwmFrqAct[SYSDEF_PHA_SET_A] * 0.2); */
+-      PwmDeadtime = (BswFpgaIf_invA_pwm_DEADTIME * 40000000); /* Comes to 100 counts */
+-
+-     //VSISRV_SetSignalPwmFreq(PwmFreq);
+-     VSISRV_SetSignalPwmDeadtime(PwmDeadtime);
+-     VSISRV_SetSignalPwmInitValUl(Pwm3PhaMuxDutyCycPha_U);
+-     VSISRV_SetSignalPwmInitValUr(Pwm3PhaMuxDutyCycPha_U);
++      // PwmFreq = 2000u; /* (Pwm3PhaPwmFrqAct[SYSDEF_PHA_SET_A] * 0.2); */
++      // PwmDeadtime = (BswFpgaIf_invA_pwm_DEADTIME * 40000000); /* Comes to 100 counts */
++  
++       VSISRV_SetSignalPwmFreq(BswFpgaIfTxPwmFreqVal);
++       VSISRV_SetSignalPwmDeadtime(BswFpgaIfTxPwmDeadTimeVal);
++       VSISRV_SetSignalM4Id0Spare(BswFpgaIfTxPwmFreqExcVal);
++       VSISRV_SetSignalPwmInitValUl(Pwm3PhaMuxDutyCycPha_U);
++       VSISRV_SetSignalPwmInitValUr(Pwm3PhaMuxDutyCycPha_U);
+ 
+      break;
+ 
+@@ -1638,24 +1399,48 @@ void BswFpgaIf_TxRx1ms(void)
+ 
+       case BSWFPGAIF_TXID2 :
+ 
+-      VSISRV_SetSignalOverVoltVbatTh(0xB3Bu);
+-      VSISRV_SetSignalM0IFilAverage(0u);
+-      VSISRV_SetSignalM0VFilAverage(0u);
++        VSISRV_SetSignalOverVoltVbatTh(BswFpgaIfTxOVbattThdVal);
++        VSISRV_SetSignalOverCurThBat(BswFpgaIfTxOverCurThBatVal);
++        VSISRV_SetSignalM0IFilAverage(BswFpgaIfTxIFiltAvgVal);
++        VSISRV_SetSignalM0VFilAverage(BswFpgaIfTxVFiltAvgVal);
++        VSISRV_SetSignalM5Id2Spare(BswFpgaIfTxPwmDeadTimeExcVal);
++
++      if(BswFpgaIfTxPwrSupDrvInhOvrdEna == BSWFPGAIF_FALSE)
++      {
++            VSISRV_SetSignalPwrSupDrvInh(0u);
++      }
++      else 
++      {
++        VSISRV_SetSignalPwrSupDrvInh(BswFpgaIfTxPwrSupDrvInhOvrdVal);
++      }
++      if(BswFpgaIfTxPwrSupHbrInhOvrdEna == BSWFPGAIF_FALSE)
++      {
++            VSISRV_SetSignalPwrSupHbrInh(0u);
++      }
++      else
++      {
++        VSISRV_SetSignalPwrSupHbrInh(BswFpgaIfTxPwrSupHbrInhOvrdVal);
++      }
+ 
+      break;
+ 
+       case BSWFPGAIF_TXID3 :
+ 
+-         VSISRV_SetSignalM6Id3Spare(0xFFFu);
+-         VSISRV_SetSignalOverCurThMot(BswFpgaIfPhaOcThd);
++         VSISRV_SetSignalM6Id3Spare(BswFpgaIfTxMidPtFltDisVal);
++         VSISRV_SetSignalOverCurThMot(BswFpgaIfPhaOcThdVal);
+          VSISRV_SetSignalDebugL(FltMskVal);
++         VSISRV_SetSignalDebugH(BswFpgaIfTxDebugHVal);
++         VSISRV_SetSignalSynchroDelay(BswFpgaIfTxSynDlyVal);
++         VSISRV_SetSignalActiveDisDur(BswFpgaIfTxActDisDurVal);
++         VSISRV_SetSignalM5Id3Spare(BswFpgaIfTxCurAvgExcVal);
+ 
+      break;
+ 
+       default :
+         break;
+    }
+-  /**Copy measurement data*/
++   
++   /* Copy measurement data */
+    BswFpgaIf_MeasDataCopy();
+ }
+ 
+diff --git a/src/fw_cu/Components/Inv/ValMeasAndProc/BswFpgaIf/src/VsiSrv.c b/src/fw_cu/Components/Inv/ValMeasAndProc/BswFpgaIf/src/VsiSrv.c
+index ab2fac089..b86b1a9bc 100644
+--- a/src/fw_cu/Components/Inv/ValMeasAndProc/BswFpgaIf/src/VsiSrv.c
++++ b/src/fw_cu/Components/Inv/ValMeasAndProc/BswFpgaIf/src/VsiSrv.c
+@@ -204,7 +204,7 @@ void VSISRV_vidInit(void)
+ 
+       /* MUX ID3 */
+    VSISRV_SetSignalDebugH(0u);
+-   VSISRV_SetSignalOverCurThMot(BswFpgaIfPhaOcThd);
++   VSISRV_SetSignalOverCurThMot(0xEE7u);
+    VSISRV_SetSignalActiveDisDur(0x98Au);
+    VSISRV_SetSignalSynchroDelay(436);
+    VSISRV_SetSignalM5Id3Spare(0u);
+@@ -341,7 +341,7 @@ void VSISRV_vidSetFrameTx(void)
+       case 0x00:
+          VsisrvIpduTx.Data.TxA.Id.Mx0.Signal.Id   = txMuxId;
+                 /* PwmMinDutycycle = ((float32)1 -(BswFpgaIf_invA_pwm_MIN_PULSE_WIDTH * Pwm3PhaPwmFrqAct[SYSDEF_PHA_SET_A])) * 2000; */
+-         VSISRV_SetSignalPwmMinDutyCycle(4000u);
++         VSISRV_SetSignalPwmMinDutyCycle(BswFpgaIfTxPwmMinDutycycVal);
+ 
+          VSISRV_CopyIpduTxAToFrameTxAId0();
+          break;
+@@ -349,20 +349,20 @@ void VSISRV_vidSetFrameTx(void)
+       case 0x01:
+          VsisrvIpduTx.Data.TxA.Id.Mx1.Signal.Id  = txMuxId;
+                   /* PwmMaxDutycycle = ((BswFpgaIf_invA_pwm_MIN_PULSE_WIDTH * Pwm3PhaPwmFrqAct[SYSDEF_PHA_SET_A]) * (float32)2000); */
+-         VSISRV_SetSignalPwmMaxDutyCycle(0u);
++         VSISRV_SetSignalPwmMaxDutyCycle(BswFpgaIfTxPwmMaxDutycycVal);
+ 
+          VSISRV_CopyIpduTxAToFrameTxAId1();
+          break;
+ 
+       case 0x02:
+          VsisrvIpduTx.Data.TxA.Id.Mx2.Signal.Id  = txMuxId;
++         VSISRV_SetSignalM4Id2Spare(BswFpgaIfTxCurSamplOffsVal);
+ 
+          VSISRV_CopyIpduTxAToFrameTxAId2();
+          break;
+ 
+       case 0x03:
+          VsisrvIpduTx.Data.TxA.Id.Mx3.Signal.Id = txMuxId;
+-         VSISRV_SetSignalDebugL(FltMskVal);
+ 
+          VSISRV_CopyIpduTxAToFrameTxAId3();
+          break;
+'

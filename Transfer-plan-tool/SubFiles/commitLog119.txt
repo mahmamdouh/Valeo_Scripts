@@ -1,0 +1,42 @@
+b'commit b0986bb4c0154ae0db98b6aa3aac2e5c224cb0fb
+Author: David VARGA <david.varga.jv.ext@valeo.com>
+Date:   Wed Dec 1 16:52:39 2021 +0100
+
+    $100kW-47585$ - i2t derating update
+    
+    Change-Id: I1906f33d12c75c96e9e166e62d6d69e0701fbd6a
+
+diff --git a/src/fw_cu/Components/Inv/LimAndDrt/IvtrHvAcI2tDrtg/src/IvtrHvAcI2tDrtg_Wrpr.c b/src/fw_cu/Components/Inv/LimAndDrt/IvtrHvAcI2tDrtg/src/IvtrHvAcI2tDrtg_Wrpr.c
+index c0ffd03a4..082e6ab0c 100644
+--- a/src/fw_cu/Components/Inv/LimAndDrt/IvtrHvAcI2tDrtg/src/IvtrHvAcI2tDrtg_Wrpr.c
++++ b/src/fw_cu/Components/Inv/LimAndDrt/IvtrHvAcI2tDrtg/src/IvtrHvAcI2tDrtg_Wrpr.c
+@@ -112,7 +112,6 @@ FUNC(void, IVTRHVACI2TDRTG_CODE) IvtrHvAcI2tDrtg_Run(void)
+    /* Call the cyclic function */
+    IvtrHvAcI2tDrtg();
+ 
+-   IvtrHvAcI2tDrtgMonrSt = IvtrHvAcI2tDrtg_OutputData.ErrSts; /* The error status is set (= 1) either if I2tCntrAct1 > I2tCntrFacForErrSts1*I2tCntrStrtDrtg1 or if I2tCntrAct2 > I2tCntrFacForErrSts2*I2tCntrStrtDrtg2 */
+    IvtrHvAcI2tDrtgIMax = IvtrHvAcI2tDrtg_OutputData.DrtgHvAcIMax; /* Maximum allowed HV AC current (peak value) */
+    IvtrHvAcI2tDrtgFac = IvtrHvAcI2tDrtg_OutputData.DrtgFac; /* Derating factor */
+ 
+diff --git a/src/fw_cu/Components/Inv/LimAndDrt/IvtrHvDcI2tDrtg/src/IvtrHvDcI2tDrtg_Wrpr.c b/src/fw_cu/Components/Inv/LimAndDrt/IvtrHvDcI2tDrtg/src/IvtrHvDcI2tDrtg_Wrpr.c
+index 10115c3da..833208b3e 100644
+--- a/src/fw_cu/Components/Inv/LimAndDrt/IvtrHvDcI2tDrtg/src/IvtrHvDcI2tDrtg_Wrpr.c
++++ b/src/fw_cu/Components/Inv/LimAndDrt/IvtrHvDcI2tDrtg/src/IvtrHvDcI2tDrtg_Wrpr.c
+@@ -41,7 +41,6 @@
+ /*"Justification: Because of the platfrom approach is nescesary to be have the macros to compile the different SWs"*/
+ #include "DrvCtrlErrDeb.h" /*PRQA S 0380*/
+ #include "C2cComBswData.h"
+-#include "C2cComDrvCtrlData.h"
+ 
+ /*================== [defines] ==============================================*/
+ 
+@@ -129,8 +128,6 @@ FUNC(void, IVTRHVDCI2TDRTG_CODE) IvtrHvDcI2tDrtg_Run(void)
+    /* DC I2t Derating functionality failure fault monitor */
+    /*DrvCtrlErrDeb_SetEventStatus(ERR_ID_INV_IDC_TEMP_HWP, IvtrHvDcI2tDrtgMonrSt);*/
+ 
+-   DrvCtrlC2cData.HvDcI2tDrtgIMax = IvtrHvDcI2tDrtgIMax;
+-
+    return;
+ }
+ #define IVTRHVDCI2TDRTG_STOP_SEC_CODE
+'

@@ -1,0 +1,33 @@
+b'commit 490b28986b4d34e042c6a52af4b6d24c89c46017
+Author: Michael HIERL (JV) <michael.hierl.jv@valeo.com>
+Date:   Fri Nov 5 11:01:08 2021 +0100
+
+    $100kW-45189$ - [SWT] B01: The A2.1 HIL cannot wake up after remove the XETK
+    
+    Change-Id: I2e16e6125172321ca68972feaedbcb696f7042b7
+
+diff --git a/src/fw_cu/Components/Cmn/MeasAndCal/Xetk/src/ETK_SER_Handshake_Common.c b/src/fw_cu/Components/Cmn/MeasAndCal/Xetk/src/ETK_SER_Handshake_Common.c
+index 743295028..e5e6254b8 100644
+--- a/src/fw_cu/Components/Cmn/MeasAndCal/Xetk/src/ETK_SER_Handshake_Common.c
++++ b/src/fw_cu/Components/Cmn/MeasAndCal/Xetk/src/ETK_SER_Handshake_Common.c
+@@ -180,14 +180,13 @@ void SER_Initial_Handshake_Execute(void)
+   RS232_TxString_Debug_Level_4("SER_Initial_Handshake...STARTED \\r\
+");
+ #endif
+ 
+-  endinit_EMEM();
+-
+-  SftyMBIST_enableModule1();
+-  SftyMBIST_initSRAM1(SftyMBIST_MbistSel_emem0);
+-
+   EEA_present = SCU_CHIPID.B.EEA;
+   if (1u == EEA_present)
+   {
++    endinit_EMEM();
++
++    SftyMBIST_enableModule1();
++    SftyMBIST_initSRAM1(SftyMBIST_MbistSel_emem0);
+     //endinit_EMEM();
+     (void)SER_ETK_Detect();
+ 
+'

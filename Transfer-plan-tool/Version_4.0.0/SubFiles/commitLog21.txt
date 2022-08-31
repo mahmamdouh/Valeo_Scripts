@@ -1,0 +1,337 @@
+b'commit 3e782403451936a4859883cf038786ae19332f3c
+Author: Yasser MOHAMED <yasser.mohamed@valeo.com>
+Date:   Tue Mar 22 21:25:37 2022 +0200
+
+    $100kW-53525$ Fix Resolver offset UDS issue for BSW part and performing QAC for Idp
+    
+    Change-Id: Id632daa6085ceaefae5ea9c174fe27dc64ff8016
+
+diff --git a/src/fw_cu/Components/Cmn/Diagc/include/Idp.h b/src/fw_cu/Components/Cmn/Diagc/include/Idp.h
+index 09da01c3e..2d45ace7e 100644
+--- a/src/fw_cu/Components/Cmn/Diagc/include/Idp.h
++++ b/src/fw_cu/Components/Cmn/Diagc/include/Idp.h
+@@ -82,10 +82,10 @@
+ #define DID_C161_HVACVoltageCalibrationOffset_FAC     0.00001F
+ #define DID_C161_HVACVoltageCalibrationOffset_OFF     -24.000F
+ 
+-#define DID_C162_ResolverOffsetCalibration_MAX     180.0F
+-#define DID_C162_ResolverOffsetCalibration_MIN     -180.0F
+-#define DID_C162_ResolverOffsetCalibration_FAC     1.0F
+-#define DID_C162_ResolverOffsetCalibration_OFF     0.0F
++#define DID_C162_ResolverOffsetCalibration_MAX     327.67F
++#define DID_C162_ResolverOffsetCalibration_MIN     -327.68F
++#define DID_C162_ResolverOffsetCalibration_FAC     0.01F
++#define DID_C162_ResolverOffsetCalibration_OFF     -327.68F
+ 
+ #define NUMBER_OF_SOFTWARE_BLOCKS                                       8u  /* Anzahl der logischen Softwareblocke */
+ 
+@@ -193,12 +193,13 @@ typedef struct
+     uint32 initializer_pattern;
+ } vagbl_nvm_data_t;
+ extern vagbl_nvm_data_t VAG_BL_BlockNvData_store;
++extern vagbl_nvm_data_t VAG_BL_BlockNvData_run;
+ /*================== [global data] ===========================================*/
+ extern uint8 F15A_Fingerprint[DID_F15A_VWCODINGREPAIRSHOPCODEORSERIALNUMBER_SIZE];
+ extern uint8 F190_VehicleIdentificationNumber[DID_F190_VIN_SIZE];
+ extern uint8 VWLogicalSoftwareBlockVersion[DID_F1AB_LOGICALBLOCKVERSION_SIZE*(NUMBER_OF_SOFTWARE_BLOCKS-1U)]; /* DownGradeProtection */
+ extern uint8 VWDownGradeProtectionVersions[DID_0189_DGPVER_VERS_NUMBERS]; /* DownGradeProtection */
+-extern uint8 DID_F191_ECUHardwareNumber[DID_F191_ECUHardwareNumber_SIZE];
++extern char DID_F191_ECUHardwareNumber[DID_F191_ECUHardwareNumber_SIZE];
+ extern uint8 DID_F1A1_VWDataSetVersionNumber[DID_F1A1_VWDATASETVERSIONNUMBER_SIZE];
+ extern const Idp_ElectricDriveAssemblySerialNumber_NVM_ArrayType ElectricDriveAssemblySerialNumber_Init;
+ extern const Idp_TransmissionHousingSerialNumber_NVM_ArrayType TransmissionHousingSerialNumber_Init;
+diff --git a/src/fw_cu/Components/Cmn/Diagc/include/Tdp.h b/src/fw_cu/Components/Cmn/Diagc/include/Tdp.h
+index af13f4ac7..ca865a935 100644
+--- a/src/fw_cu/Components/Cmn/Diagc/include/Tdp.h
++++ b/src/fw_cu/Components/Cmn/Diagc/include/Tdp.h
+@@ -91,10 +91,10 @@
+ \t\t\t#define Inverter_Coolant_Temperature_FAC \t            (float32)      (1.0)
+ \t\t\t#define Inverter_Coolant_Temperature_OFF\t            (float32)      (-40.0)  
+ 
+-\t\t\t#define Resolver_Offset_MAX\t            (float32)      (180.0)
+-\t\t\t#define Resolver_Offset_MIN\t            (float32)      (-180.0)
+-\t\t\t#define Resolver_Offset_FAC \t            (float32)      (1.0)
+-\t\t\t#define Resolver_Offset_OFF\t            (float32)      (0.0)  
++\t\t\t#define Resolver_Offset_MAX\t                  (327.67F)
++\t\t\t#define Resolver_Offset_MIN\t                  (-327.68F)
++\t\t\t#define Resolver_Offset_FAC \t              (0.01F)
++\t\t\t#define Resolver_Offset_OFF\t                  (-327.68F)  
+ 
+ \t\t\t#define Available_Torque_Maximum_MAX\t            (float32)      (3000.0)
+ \t\t\t#define Available_Torque_Maximum_MIN\t            (float32)      (-3000.0)
+diff --git a/src/fw_cu/Components/Cmn/Diagc/src/Idp.c b/src/fw_cu/Components/Cmn/Diagc/src/Idp.c
+index 0e8daf40a..a0532ef5c 100644
+--- a/src/fw_cu/Components/Cmn/Diagc/src/Idp.c
++++ b/src/fw_cu/Components/Cmn/Diagc/src/Idp.c
+@@ -25,7 +25,7 @@
+ 
+ #include "Rte_Idp.h"
+ #include <TSMem.h>
+-#include "Idp.h"
++#include "Idp.h"/* PRQA S 0380 */
+ #include "swid.h" 
+ #include "psr.h" 
+ #include "NvmHndlr.h"
+@@ -52,10 +52,10 @@
+ #include "MemMap.h"
+ 
+ 
+-const char DID_F180_BootloaderHeader[DID_F180_BootloaderHeader_SIZE] = {100u,\'K\',\'W\',\'_\',\'B\',\'L\',0x02u,0x01u};
+-const char DID_F181_ApplicationSoftwareHeader[DID_F181_ApplicationSoftwareHeader_SIZE] = {100u,\'K\',\'W\',\'A\',\'S\',\'B\',0x02u,0x00};
+-const char DID_F182_ApplicationDataVersion[DID_F182_ApplicationDataVersion_SIZE] = {100u,\'K\',\'W\',\'A\',\'D\',\'B\',0x02u,0x00u};
+-const char DID_F183_ProductionDataHeader[DID_F183_ProductionDataHeader_SIZE] = {100u,\'K\',\'W\',\'P\',\'D\',\'B\',0x02u,0x00u};
++const char DID_F180_BootloaderHeader[DID_F180_BootloaderHeader_SIZE] = {100u,\'K\',\'W\',\'_\',\'B\',\'L\',0x02u,0x01u};/* PRQA S 1293 */
++const char DID_F181_ApplicationSoftwareHeader[DID_F181_ApplicationSoftwareHeader_SIZE] = {100u,\'K\',\'W\',\'A\',\'S\',\'B\',0x02u,0x00u};/* PRQA S 1293 */
++const char DID_F182_ApplicationDataVersion[DID_F182_ApplicationDataVersion_SIZE] = {100u,\'K\',\'W\',\'A\',\'D\',\'B\',0x02u,0x00u};/* PRQA S 1293 */
++const char DID_F183_ProductionDataHeader[DID_F183_ProductionDataHeader_SIZE] = {100u,\'K\',\'W\',\'P\',\'D\',\'B\',0x02u,0x00u};/* PRQA S 1293 */
+ 
+ 
+ /*================== [Vw variables] =====================================================================================*/
+@@ -113,7 +113,7 @@ const uint8 DID_F1A1_VWDataSetVersionNumber_init[4] = {DEFAULT_INIT_VALUE, DEFAU
+ #include "MemMap.h"
+ 
+ vagbl_nvm_data_t VAG_BL_BlockNvData_store;
+-vagbl_nvm_data_t VAG_BL_BlockNvData_run;
++vagbl_nvm_data_t VAG_BL_BlockNvData_run; 
+ 
+ Idp_ElectricDriveAssemblySerialNumber_NVM_ArrayType ElectricDriveAssemblySerialNumber;
+ Idp_TransmissionHousingSerialNumber_NVM_ArrayType TransmissionHousingSerialNumber;
+@@ -126,11 +126,11 @@ Idp_ElectricDriveMotorSerialNumber_NVM_ArrayType ElectricDriveMotorSerialNumber;
+ #define IDP_START_SEC_VAR_SLOW_INIT
+ #include "MemMap.h"
+ 
+-uint8 DID_F191_ECUHardwareNumber[DID_F191_ECUHardwareNumber_SIZE] = {\'b\',\'3\',\'7\',\'7\',\'7\',\'3\',\'7\',\'_\',\'0\',\'0\',\'_\',\'c\'};
++char DID_F191_ECUHardwareNumber[DID_F191_ECUHardwareNumber_SIZE] = {\'b\',\'3\',\'7\',\'7\',\'7\',\'3\',\'7\',\'_\',\'0\',\'0\',\'_\',\'c\'};
+ 
+ 
+ uint8 DID_F1A1_VWDataSetVersionNumber[DID_F1A1_VWDATASETVERSIONNUMBER_SIZE] = {DEFAULT_INIT_VALUE, DEFAULT_INIT_VALUE,
+-                                                                               DEFAULT_INIT_VALUE, DEFAULT_INIT_VALUE};;
++                                                                               DEFAULT_INIT_VALUE, DEFAULT_INIT_VALUE};
+ 
+ /*
+ @@ SYMBOL = Idp_ExpectedModelType
+@@ -164,7 +164,7 @@ uint8 Idp_ExpectedModelType = 0x00U;
+ #ifdef RTE_PTR2ARRAYTYPE_PASSING
+ FUNC(Std_ReturnType, RTE_CODE) Idp_xF180_BootloaderSwVers_ReadData (P2VAR(Dcm_DataF180_BootloaderHeader_ArrayType, AUTOMATIC, RTE_APPL_DATA) Data)
+ #else
+-FUNC(Std_ReturnType, RTE_CODE) Idp_xF180_BootloaderSwVers_ReadData (P2VAR(uint8, AUTOMATIC, RTE_APPL_DATA) Data)
++FUNC(Std_ReturnType, RTE_CODE) Idp_xF180_BootloaderSwVers_ReadData (P2VAR(uint8, AUTOMATIC, RTE_APPL_DATA) Data)/* PRQA S 3432 */
+ #endif
+ {
+    Std_ReturnType retStatus = DCM_E_OK;
+@@ -187,7 +187,7 @@ FUNC(Std_ReturnType, RTE_CODE) Idp_xF180_BootloaderSwVers_ReadData (P2VAR(uint8,
+ #ifdef RTE_PTR2ARRAYTYPE_PASSING
+ FUNC(Std_ReturnType, RTE_CODE) Idp_xF181_ApplSwVers_ReadData (P2VAR(Dcm_DataF181_ApplicationSoftwareHeader_ArrayType, AUTOMATIC, RTE_APPL_DATA) Data)
+ #else
+-FUNC(Std_ReturnType, RTE_CODE) Idp_xF181_ApplSwVers_ReadData (P2VAR(uint8, AUTOMATIC, RTE_APPL_DATA) Data)
++FUNC(Std_ReturnType, RTE_CODE) Idp_xF181_ApplSwVers_ReadData (P2VAR(uint8, AUTOMATIC, RTE_APPL_DATA) Data)/* PRQA S 3432 */
+ #endif
+ {
+    Std_ReturnType retStatus = DCM_E_OK;
+@@ -210,7 +210,7 @@ FUNC(Std_ReturnType, RTE_CODE) Idp_xF181_ApplSwVers_ReadData (P2VAR(uint8, AUTOM
+ #ifdef RTE_PTR2ARRAYTYPE_PASSING
+ FUNC(Std_ReturnType, RTE_CODE) Idp_xF183_ProdDataVers_ReadData (P2VAR(Dcm_DataF183_ProductionDataHeader_ArrayType, AUTOMATIC, RTE_APPL_DATA) Data)
+ #else
+-FUNC(Std_ReturnType, RTE_CODE) Idp_xF183_ProdDataVers_ReadData (P2VAR(uint8, AUTOMATIC, RTE_APPL_DATA) Data)
++FUNC(Std_ReturnType, RTE_CODE) Idp_xF183_ProdDataVers_ReadData (P2VAR(uint8, AUTOMATIC, RTE_APPL_DATA) Data)/* PRQA S 3432 */
+ #endif
+ {
+    Std_ReturnType retStatus = DCM_E_OK;
+@@ -233,7 +233,7 @@ FUNC(Std_ReturnType, RTE_CODE) Idp_xF183_ProdDataVers_ReadData (P2VAR(uint8, AUT
+ #ifdef RTE_PTR2ARRAYTYPE_PASSING
+ extern FUNC(Std_ReturnType, RTE_CODE) Idp_xF182_ApplDataVers_ReadData (P2VAR(Dcm_DataF182_ApplicationDataVersion_ArrayType, AUTOMATIC, RTE_APPL_DATA) Data)
+ #else
+-extern FUNC(Std_ReturnType, RTE_CODE) Idp_xF182_ApplDataVers_ReadData (P2VAR(uint8, AUTOMATIC, RTE_APPL_DATA) Data)
++extern FUNC(Std_ReturnType, RTE_CODE) Idp_xF182_ApplDataVers_ReadData (P2VAR(uint8, AUTOMATIC, RTE_APPL_DATA) Data)/* PRQA S 3432 */
+ #endif
+ {
+       Std_ReturnType retStatus = DCM_E_OK;
+@@ -256,7 +256,7 @@ extern FUNC(Std_ReturnType, RTE_CODE) Idp_xF182_ApplDataVers_ReadData (P2VAR(uin
+ #ifdef RTE_PTR2ARRAYTYPE_PASSING
+ Std_ReturnType Idp_xF191_HwPartAndVersNum_ReadData (P2VAR(Dcm_DataF191_ECUHardwareNumber_ArrayType, AUTOMATIC, RTE_APPL_DATA) Data)
+ #else
+-Std_ReturnType Idp_xF191_HwPartAndVersNum_ReadData (P2VAR(uint8, AUTOMATIC, RTE_APPL_DATA) Data)
++Std_ReturnType Idp_xF191_HwPartAndVersNum_ReadData (P2VAR(uint8, AUTOMATIC, RTE_APPL_DATA) Data)/* PRQA S 3432 */
+ #endif
+ {
+    Std_ReturnType retStatus = DCM_E_OK;
+@@ -279,7 +279,7 @@ Std_ReturnType Idp_xF191_HwPartAndVersNum_ReadData (P2VAR(uint8, AUTOMATIC, RTE_
+ #ifdef RTE_PTR2ARRAYTYPE_PASSING
+ Std_ReturnType Idp_xF191_HwPartAndVersNum_WriteData (P2VAR(Dcm_DataF191_ECUHardwareNumber_ArrayType, AUTOMATIC, RTE_APPL_DATA) Data)
+ #else
+-Std_ReturnType Idp_xF191_HwPartAndVersNum_WriteData (P2CONST(uint8, AUTOMATIC, RTE_APPL_DATA) Data, P2VAR(Dcm_NegativeResponseCodeType, AUTOMATIC, RTE_APPL_DATA) ErrorCode)
++Std_ReturnType Idp_xF191_HwPartAndVersNum_WriteData (P2CONST(uint8, AUTOMATIC, RTE_APPL_DATA) Data, P2VAR(Dcm_NegativeResponseCodeType, AUTOMATIC, RTE_APPL_DATA) ErrorCode)/* PRQA S 3432 */
+ #endif
+ {
+    Std_ReturnType retStatus = DCM_E_OK;
+@@ -314,15 +314,15 @@ Std_ReturnType Idp_xF191_HwPartAndVersNum_WriteData (P2CONST(uint8, AUTOMATIC, R
+ #ifdef RTE_PTR2ARRAYTYPE_PASSING
+ extern FUNC(Std_ReturnType, RTE_CODE) Idp_C160_HVACCurrentCalibrationGain_ReadData (P2VAR(Dcm_DataC160_HVACCurrentCalibrationGain_ArrayType, AUTOMATIC, RTE_APPL_DATA) Data)
+ #else
+-extern FUNC(Std_ReturnType, RTE_CODE) Idp_C160_HVACCurrentCalibrationGain_ReadData (P2VAR(uint8, AUTOMATIC, RTE_APPL_DATA) Data)
++extern FUNC(Std_ReturnType, RTE_CODE) Idp_C160_HVACCurrentCalibrationGain_ReadData (P2VAR(uint8, AUTOMATIC, RTE_APPL_DATA) Data)/* PRQA S 3432 */
+ #endif
+ {
+    Std_ReturnType retStatus = DCM_E_OK;
+    float32 DID_C160_HVACCurrentCalibrationGain_PHY = HvAcIMeasProdData.RAW2AMPERE_U_GAIN;
+-   uint32 DID_C160_HVACCurrentCalibrationGain_RAW = 0U;
++   uint32 DID_C160_HVACCurrentCalibrationGain_RAW ;
+ 
+    DID_C160_HVACCurrentCalibrationGain_PHY = Idp_SIG_LIMIT_CHECKING(DID_C160_HVACCurrentCalibrationGain_PHY, DID_C160_HVACCurrentCalibrationGain_MAX,DID_C160_HVACCurrentCalibrationGain_MIN);
+-   DID_C160_HVACCurrentCalibrationGain_RAW = (uint32)Idp_PHY_TO_RAW_CONV(DID_C160_HVACCurrentCalibrationGain_PHY, DID_C160_HVACCurrentCalibrationGain_FAC, DID_C160_HVACCurrentCalibrationGain_OFF);
++   DID_C160_HVACCurrentCalibrationGain_RAW = (uint32)Idp_PHY_TO_RAW_CONV(DID_C160_HVACCurrentCalibrationGain_PHY, DID_C160_HVACCurrentCalibrationGain_FAC, DID_C160_HVACCurrentCalibrationGain_OFF);/* PRQA S 4395 */ /* PRQA S 4119 */
+    /* copy data into the result buffer */
+    TS_MemCpy(Data, &(DID_C160_HVACCurrentCalibrationGain_RAW), DID_C160_HVACCurrentCalibrationGain_SIZE);/* PRQA S 4471 */ /* PRQA S 0315 *//*The TS_MemCpy can handle this conversion*/
+       /* Swapping byte order of the element */
+@@ -343,7 +343,7 @@ extern FUNC(Std_ReturnType, RTE_CODE) Idp_C160_HVACCurrentCalibrationGain_ReadDa
+ #ifdef RTE_PTR2ARRAYTYPE_PASSING
+ FUNC(Std_ReturnType, RTE_CODE) Idp_C160_HVACCurrentCalibrationGain_WriteData (P2CONST(Dcm_DataC160_HVACCurrentCalibrationOffset_ArrayType, AUTOMATIC, RTE_APPL_DATA) Data, P2VAR(Dcm_NegativeResponseCodeType, AUTOMATIC, RTE_APPL_DATA) ErrorCode)
+ #else
+-FUNC(Std_ReturnType, RTE_CODE) Idp_C160_HVACCurrentCalibrationGain_WriteData (P2CONST(uint8, AUTOMATIC, RTE_APPL_DATA) Data, P2VAR(Dcm_NegativeResponseCodeType, AUTOMATIC, RTE_APPL_DATA) ErrorCode)
++FUNC(Std_ReturnType, RTE_CODE) Idp_C160_HVACCurrentCalibrationGain_WriteData (P2CONST(uint8, AUTOMATIC, RTE_APPL_DATA) Data, P2VAR(Dcm_NegativeResponseCodeType, AUTOMATIC, RTE_APPL_DATA) ErrorCode)/* PRQA S 3432 */ /* PRQA S 3206 */
+ #endif
+ {
+       Std_ReturnType retStatus = DCM_E_OK;
+@@ -373,15 +373,15 @@ FUNC(Std_ReturnType, RTE_CODE) Idp_C160_HVACCurrentCalibrationGain_WriteData (P2
+ #ifdef RTE_PTR2ARRAYTYPE_PASSING
+ FUNC(Std_ReturnType, RTE_CODE) Idp_C160_HVACCurrentCalibrationOffset_ReadData (P2VAR(Dcm_DataC160_HVACCurrentCalibrationOffset_ArrayType, AUTOMATIC, RTE_APPL_DATA) Data)
+ #else
+-FUNC(Std_ReturnType, RTE_CODE) Idp_C160_HVACCurrentCalibrationOffset_ReadData (P2VAR(uint8, AUTOMATIC, RTE_APPL_DATA) Data)
++FUNC(Std_ReturnType, RTE_CODE) Idp_C160_HVACCurrentCalibrationOffset_ReadData (P2VAR(uint8, AUTOMATIC, RTE_APPL_DATA) Data)/* PRQA S 3432 */
+ #endif
+ {
+    Std_ReturnType retStatus = DCM_E_OK;
+    float32 DID_C160_HVACCurrentCalibrationOffset_PHY = HvAcIMeasProdData.RAW2AMPERE_U_OFFSET;
+-   uint16 DID_C160_HVACCurrentCalibrationOffset_RAW = 0U;
++   uint16 DID_C160_HVACCurrentCalibrationOffset_RAW ;
+ 
+    DID_C160_HVACCurrentCalibrationOffset_PHY = Idp_SIG_LIMIT_CHECKING(DID_C160_HVACCurrentCalibrationOffset_PHY, DID_C160_HVACCurrentCalibrationOffset_MAX,DID_C160_HVACCurrentCalibrationOffset_MIN);
+-   DID_C160_HVACCurrentCalibrationOffset_RAW = (uint16)Idp_PHY_TO_RAW_CONV(DID_C160_HVACCurrentCalibrationOffset_PHY, DID_C160_HVACCurrentCalibrationOffset_FAC, DID_C160_HVACCurrentCalibrationOffset_OFF);
++   DID_C160_HVACCurrentCalibrationOffset_RAW = (uint16)Idp_PHY_TO_RAW_CONV(DID_C160_HVACCurrentCalibrationOffset_PHY, DID_C160_HVACCurrentCalibrationOffset_FAC, DID_C160_HVACCurrentCalibrationOffset_OFF);/* PRQA S 4395 */ /* PRQA S 4119 */
+    /* copy data into the result buffer */
+    TS_MemCpy(Data, &(DID_C160_HVACCurrentCalibrationOffset_RAW), DID_C160_HVACCurrentCalibrationOffset_SIZE);/* PRQA S 4471 */ /* PRQA S 0315 *//*The TS_MemCpy can handle this conversion*/
+       /* Swapping byte order of the element */
+@@ -402,7 +402,7 @@ FUNC(Std_ReturnType, RTE_CODE) Idp_C160_HVACCurrentCalibrationOffset_ReadData (P
+ #ifdef RTE_PTR2ARRAYTYPE_PASSING
+ FUNC(Std_ReturnType, RTE_CODE) Idp_C160_HVACCurrentCalibrationOffset_WriteData (P2CONST(Dcm_DataC160_HVACCurrentCalibrationOffset_ArrayType, AUTOMATIC, RTE_APPL_DATA) Data, P2VAR(Dcm_NegativeResponseCodeType, AUTOMATIC, RTE_APPL_DATA) ErrorCode)
+ #else
+-FUNC(Std_ReturnType, RTE_CODE) Idp_C160_HVACCurrentCalibrationOffset_WriteData (P2CONST(uint8, AUTOMATIC, RTE_APPL_DATA) Data, P2VAR(Dcm_NegativeResponseCodeType, AUTOMATIC, RTE_APPL_DATA) ErrorCode)
++FUNC(Std_ReturnType, RTE_CODE) Idp_C160_HVACCurrentCalibrationOffset_WriteData (P2CONST(uint8, AUTOMATIC, RTE_APPL_DATA) Data, P2VAR(Dcm_NegativeResponseCodeType, AUTOMATIC, RTE_APPL_DATA) ErrorCode)/* PRQA S 3432 */ /* PRQA S 3206 */
+ #endif
+ {
+       Std_ReturnType retStatus = DCM_E_OK;
+@@ -432,15 +432,15 @@ FUNC(Std_ReturnType, RTE_CODE) Idp_C160_HVACCurrentCalibrationOffset_WriteData (
+ #ifdef RTE_PTR2ARRAYTYPE_PASSING
+ FUNC(Std_ReturnType, RTE_CODE) Idp_C161_HVACVoltageCalibrationGain_ReadData (P2VAR(Dcm_DataC161_HVACVoltageCalibrationGain_ArrayType, AUTOMATIC, RTE_APPL_DATA) Data)
+ #else
+-FUNC(Std_ReturnType, RTE_CODE) Idp_C161_HVACVoltageCalibrationGain_ReadData (P2VAR(uint8, AUTOMATIC, RTE_APPL_DATA) Data)
++FUNC(Std_ReturnType, RTE_CODE) Idp_C161_HVACVoltageCalibrationGain_ReadData (P2VAR(uint8, AUTOMATIC, RTE_APPL_DATA) Data)/* PRQA S 3432 */
+ #endif
+ {
+    Std_ReturnType retStatus = DCM_E_OK;
+    float32 DID_C161_HVACVoltageCalibrationGain_PHY = HvDcUMeasProdData.RAW2VOLT_DC_GAIN;
+-   uint16 DID_C161_HVACVoltageCalibrationGain_RAW = 0U;
++   uint16 DID_C161_HVACVoltageCalibrationGain_RAW ;
+ 
+    DID_C161_HVACVoltageCalibrationGain_PHY = Idp_SIG_LIMIT_CHECKING(DID_C161_HVACVoltageCalibrationGain_PHY, DID_C161_HVACVoltageCalibrationGain_MAX,DID_C161_HVACVoltageCalibrationGain_MIN);
+-   DID_C161_HVACVoltageCalibrationGain_RAW = (uint16)Idp_PHY_TO_RAW_CONV(DID_C161_HVACVoltageCalibrationGain_PHY, DID_C161_HVACVoltageCalibrationGain_FAC, DID_C161_HVACVoltageCalibrationGain_OFF);
++   DID_C161_HVACVoltageCalibrationGain_RAW = (uint16)Idp_PHY_TO_RAW_CONV(DID_C161_HVACVoltageCalibrationGain_PHY, DID_C161_HVACVoltageCalibrationGain_FAC, DID_C161_HVACVoltageCalibrationGain_OFF);/* PRQA S 4395 */ /* PRQA S 4119 */
+    /* copy data into the result buffer */
+    TS_MemCpy(Data, &(DID_C161_HVACVoltageCalibrationGain_RAW), DID_C161_HVACVoltageCalibrationGain_SIZE);/* PRQA S 4471 */ /* PRQA S 0315 *//*The TS_MemCpy can handle this conversion*/
+       /* Swapping byte order of the element */
+@@ -461,7 +461,7 @@ FUNC(Std_ReturnType, RTE_CODE) Idp_C161_HVACVoltageCalibrationGain_ReadData (P2V
+ #ifdef RTE_PTR2ARRAYTYPE_PASSING
+ FUNC(Std_ReturnType, RTE_CODE) Idp_C161_HVACVoltageCalibrationGain_WriteData (P2CONST(Dcm_DataC161_HVACVoltageCalibrationGain_ArrayType, AUTOMATIC, RTE_APPL_DATA) Data, P2VAR(Dcm_NegativeResponseCodeType, AUTOMATIC, RTE_APPL_DATA) ErrorCode)
+ #else
+-FUNC(Std_ReturnType, RTE_CODE) Idp_C161_HVACVoltageCalibrationGain_WriteData (P2CONST(uint8, AUTOMATIC, RTE_APPL_DATA) Data, P2VAR(Dcm_NegativeResponseCodeType, AUTOMATIC, RTE_APPL_DATA) ErrorCode)
++FUNC(Std_ReturnType, RTE_CODE) Idp_C161_HVACVoltageCalibrationGain_WriteData (P2CONST(uint8, AUTOMATIC, RTE_APPL_DATA) Data, P2VAR(Dcm_NegativeResponseCodeType, AUTOMATIC, RTE_APPL_DATA) ErrorCode)/* PRQA S 3432 */ /* PRQA S 3206 */
+ #endif
+ {
+       Std_ReturnType retStatus = DCM_E_OK;
+@@ -491,15 +491,15 @@ FUNC(Std_ReturnType, RTE_CODE) Idp_C161_HVACVoltageCalibrationGain_WriteData (P2
+ #ifdef RTE_PTR2ARRAYTYPE_PASSING
+ FUNC(Std_ReturnType, RTE_CODE) Idp_C161_HVACVoltageCalibrationOffset_ReadData (P2VAR(Dcm_DataC161_HVACVoltageCalibrationOffset_ArrayType, AUTOMATIC, RTE_APPL_DATA) Data)
+ #else
+-FUNC(Std_ReturnType, RTE_CODE) Idp_C161_HVACVoltageCalibrationOffset_ReadData (P2VAR(uint8, AUTOMATIC, RTE_APPL_DATA) Data)
++FUNC(Std_ReturnType, RTE_CODE) Idp_C161_HVACVoltageCalibrationOffset_ReadData (P2VAR(uint8, AUTOMATIC, RTE_APPL_DATA) Data)/* PRQA S 3432 */
+ #endif
+ {
+    Std_ReturnType retStatus = DCM_E_OK;
+    float32 DID_C161_HVACVoltageCalibrationOffset_PHY = HvDcUMeasProdData.RAW2VOLT_DC_OFFSET;
+-   uint16 DID_C161_HVACVoltageCalibrationOffset_RAW = 0U;
++   uint16 DID_C161_HVACVoltageCalibrationOffset_RAW;
+ 
+    DID_C161_HVACVoltageCalibrationOffset_PHY = Idp_SIG_LIMIT_CHECKING(DID_C161_HVACVoltageCalibrationOffset_PHY, DID_C161_HVACVoltageCalibrationOffset_MAX,DID_C161_HVACVoltageCalibrationOffset_MIN);
+-   DID_C161_HVACVoltageCalibrationOffset_RAW = (uint16)Idp_PHY_TO_RAW_CONV(DID_C161_HVACVoltageCalibrationOffset_PHY, DID_C161_HVACVoltageCalibrationOffset_FAC, DID_C161_HVACVoltageCalibrationOffset_OFF);
++   DID_C161_HVACVoltageCalibrationOffset_RAW = (uint16)Idp_PHY_TO_RAW_CONV(DID_C161_HVACVoltageCalibrationOffset_PHY, DID_C161_HVACVoltageCalibrationOffset_FAC, DID_C161_HVACVoltageCalibrationOffset_OFF);/* PRQA S 4395 */ /* PRQA S 4119 */
+    /* copy data into the result buffer */
+    TS_MemCpy(Data, &(DID_C161_HVACVoltageCalibrationOffset_RAW), DID_C161_HVACVoltageCalibrationOffset_SIZE);/* PRQA S 4471 */ /* PRQA S 0315 *//*The TS_MemCpy can handle this conversion*/
+       /* Swapping byte order of the element */
+@@ -520,7 +520,7 @@ FUNC(Std_ReturnType, RTE_CODE) Idp_C161_HVACVoltageCalibrationOffset_ReadData (P
+ #ifdef RTE_PTR2ARRAYTYPE_PASSING
+ FUNC(Std_ReturnType, RTE_CODE) Idp_C161_HVACVoltageCalibrationOffset_WriteData (P2CONST(Dcm_DataC161_HVACVoltageCalibrationOffset_ArrayType, AUTOMATIC, RTE_APPL_DATA) Data, P2VAR(Dcm_NegativeResponseCodeType, AUTOMATIC, RTE_APPL_DATA) ErrorCode)
+ #else
+-FUNC(Std_ReturnType, RTE_CODE) Idp_C161_HVACVoltageCalibrationOffset_WriteData (P2CONST(uint8, AUTOMATIC, RTE_APPL_DATA) Data, P2VAR(Dcm_NegativeResponseCodeType, AUTOMATIC, RTE_APPL_DATA) ErrorCode)
++FUNC(Std_ReturnType, RTE_CODE) Idp_C161_HVACVoltageCalibrationOffset_WriteData (P2CONST(uint8, AUTOMATIC, RTE_APPL_DATA) Data, P2VAR(Dcm_NegativeResponseCodeType, AUTOMATIC, RTE_APPL_DATA) ErrorCode)/* PRQA S 3432 */ /* PRQA S 3206 */
+ #endif
+ {
+      Std_ReturnType retStatus = DCM_E_OK;
+@@ -551,17 +551,17 @@ FUNC(Std_ReturnType, RTE_CODE) Idp_C161_HVACVoltageCalibrationOffset_WriteData (
+ #ifdef RTE_PTR2ARRAYTYPE_PASSING
+ FUNC(Std_ReturnType, RTE_CODE) Idp_xC162_RslvrOffsCal_ReadData (P2VAR(Dcm_DataC162_ResolverOffsetCalibration_ArrayType, AUTOMATIC, RTE_APPL_DATA) Data)
+ #else
+-FUNC(Std_ReturnType, RTE_CODE) Idp_xC162_RslvrOffsCal_ReadData (P2VAR(uint8, AUTOMATIC, RTE_APPL_DATA) Data)
++FUNC(Std_ReturnType, RTE_CODE) Idp_xC162_RslvrOffsCal_ReadData (P2VAR(uint8, AUTOMATIC, RTE_APPL_DATA) Data)/* PRQA S 3432 */
+ #endif
+ {
+    Std_ReturnType retStatus = DCM_E_OK;
+    float32 DID_C162_ResolverOffsetCalibration_PHY;
+-   uint16 DID_C162_ResolverOffsetCalibration_RAW = 0U;
++   uint16 DID_C162_ResolverOffsetCalibration_RAW;
+ 
+-   (void)Rte_Read_Idp_RslvrOffsUds_RslvrOffsVal(&DID_C162_ResolverOffsetCalibration_PHY);
++   (void)Rte_Read_Idp_RslvrOffsUds_RslvrOffsVal(&DID_C162_ResolverOffsetCalibration_PHY); /* PRQA S 3417 */
+ 
+    DID_C162_ResolverOffsetCalibration_PHY = Idp_SIG_LIMIT_CHECKING(DID_C162_ResolverOffsetCalibration_PHY, DID_C162_ResolverOffsetCalibration_MAX,DID_C162_ResolverOffsetCalibration_MIN);
+-   DID_C162_ResolverOffsetCalibration_RAW = (uint16)Idp_PHY_TO_RAW_CONV(DID_C162_ResolverOffsetCalibration_PHY, DID_C162_ResolverOffsetCalibration_FAC, DID_C162_ResolverOffsetCalibration_OFF);
++   DID_C162_ResolverOffsetCalibration_RAW = (uint16)Idp_PHY_TO_RAW_CONV(DID_C162_ResolverOffsetCalibration_PHY, DID_C162_ResolverOffsetCalibration_FAC, DID_C162_ResolverOffsetCalibration_OFF);/* PRQA S 4395 */ /* PRQA S 4119 */
+    /* copy data into the result buffer */
+    TS_MemCpy(Data, &(DID_C162_ResolverOffsetCalibration_RAW), DID_C162_ResolverOffsetCalibration_SIZE);/* PRQA S 4471 */ /* PRQA S 0315 *//*The TS_MemCpy can handle this conversion*/
+       /* Swapping byte order of the element */
+@@ -584,24 +584,25 @@ FUNC(Std_ReturnType, RTE_CODE) Idp_xC162_RslvrOffsCal_ReadData (P2VAR(uint8, AUT
+ #ifdef RTE_PTR2ARRAYTYPE_PASSING
+ FUNC(Std_ReturnType, RTE_CODE) Idp_xC162_RslvrOffsCal_WriteData (P2CONST(Dcm_DataC162_ResolverOffsetCalibration_ArrayType, AUTOMATIC, RTE_APPL_DATA) Data, P2VAR(Dcm_NegativeResponseCodeType, AUTOMATIC, RTE_APPL_DATA) ErrorCode)
+ #else
+-FUNC(Std_ReturnType, RTE_CODE) Idp_xC162_RslvrOffsCal_WriteData (P2CONST(uint8, AUTOMATIC, RTE_APPL_DATA) Data, P2VAR(Dcm_NegativeResponseCodeType, AUTOMATIC, RTE_APPL_DATA) ErrorCode)
++FUNC(Std_ReturnType, RTE_CODE) Idp_xC162_RslvrOffsCal_WriteData (P2CONST(uint8, AUTOMATIC, RTE_APPL_DATA) Data, P2VAR(Dcm_NegativeResponseCodeType, AUTOMATIC, RTE_APPL_DATA) ErrorCode)/* PRQA S 3432 */
+ #endif
+ {
+    uint8 ResolverOffsetCalibration[DID_C162_ResolverOffsetCalibration_SIZE];
++   float32 DID_C162_ResolverOffsetCalibration_PHY;
++   uint16 DID_C162_ResolverOffsetCalibration_RAW;
+ 
+    Std_ReturnType retStatus = DCM_E_OK;
+       if (NULL_PTR != Data)
+       {
+          TS_MemCpy(&(ResolverOffsetCalibration),Data,DID_C162_ResolverOffsetCalibration_SIZE);/* PRQA S 4471 */ /* PRQA S 0315 *//*The TS_MemCpy can handle this conversion*/
+-         if( (ResolverOffsetCalibration[0] > 0U) || (ResolverOffsetCalibration[1] > DID_C162_ResolverOffsetCalibration_MAX ) )
+-         {
+-            *ErrorCode=DCM_E_REQUESTOUTOFRANGE;
+-            retStatus=E_NOT_OK;
+-         }
+-         else
+-         {
+-            (void)Rte_Write_RslvrOffsValReqUds_RslvrOffsValReqUds((float32)ResolverOffsetCalibration[1]);
+-         }
++         DID_C162_ResolverOffsetCalibration_RAW = ((uint16)ResolverOffsetCalibration[0U] << 8U)  |  /* PRQA S 4397 */
++                                                  ((uint16)ResolverOffsetCalibration[1U]);
++
++         DID_C162_ResolverOffsetCalibration_PHY = (float32)Idp_RAW_TO_PHY_CONV((float32)DID_C162_ResolverOffsetCalibration_RAW,DID_C162_ResolverOffsetCalibration_FAC,DID_C162_ResolverOffsetCalibration_OFF);
++         DID_C162_ResolverOffsetCalibration_PHY = Idp_SIG_LIMIT_CHECKING(DID_C162_ResolverOffsetCalibration_PHY, DID_C162_ResolverOffsetCalibration_MAX,DID_C162_ResolverOffsetCalibration_MIN);                                                
++
++         (void)Rte_Write_RslvrOffsValReqUds_RslvrOffsValReqUds(DID_C162_ResolverOffsetCalibration_PHY);/* PRQA S 3417 */
++         
+       }    
+       else
+       {
+'

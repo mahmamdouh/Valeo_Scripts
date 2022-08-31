@@ -1,0 +1,1780 @@
+b'commit 0a91de74fb98902d907a23aae076dde1b5c1d8a7
+Author: Santosh Pallanti <santos.pallanti.jv.ext@valeo.com>
+Date:   Wed Jan 5 11:54:09 2022 +0530
+
+    $100kW-50150$ - [CR] FCT_DetmnRslvrOfsSw - Release Unit Construction
+    
+    Change-Id: I19f3d60b6556b26a2a18e0d750c7dbac862f75f5
+
+diff --git a/src/fw_cu/Components/Cmn/Com/C2cCom/include/C2cComCmnData.h b/src/fw_cu/Components/Cmn/Com/C2cCom/include/C2cComCmnData.h
+index c77168a0a..ed0646450 100644
+--- a/src/fw_cu/Components/Cmn/Com/C2cCom/include/C2cComCmnData.h
++++ b/src/fw_cu/Components/Cmn/Com/C2cCom/include/C2cComCmnData.h
+@@ -321,12 +321,12 @@ typedef struct C2cRslvrOffsNvmType_
+    uint16 RslvrOffsChks; /*! Checksum of RslvrOffs */
+ 
+ 
+-
+    /*
+    @@ ELEMENT = Pattern
+    @@ STRUCTURE = C2cRslvrOffsNvmType
+    @@ A2L_TYPE = MEASURE
+    @@ DATA_TYPE = UWORD
++   @@ CONVERSION = TABLE 0x0000 "INVALID PATTERN" 0xA55A "VALID PATTERN" DEFAULT_VALUE "Unknown"
+    @@ DESCRIPTION = "Pattern for checking if Resolver Offset Calibration has been performed"
+    @@ GROUP = C2cCom
+    @@ END
+diff --git a/src/fw_cu/Components/Cmn/Com/C2cCom/include/C2cComSftyData.h b/src/fw_cu/Components/Cmn/Com/C2cCom/include/C2cComSftyData.h
+index f8ee98828..dfa377a23 100644
+--- a/src/fw_cu/Components/Cmn/Com/C2cCom/include/C2cComSftyData.h
++++ b/src/fw_cu/Components/Cmn/Com/C2cCom/include/C2cComSftyData.h
+@@ -288,8 +288,8 @@ typedef struct SftyC2cDataType_
+    @@ ELEMENT = RslvrOffsVld
+    @@ STRUCTURE = SftyC2cDataType
+    @@ A2L_TYPE = MEASURE
+-   @@ DATA_TYPE = UBYTE [0 ... 1]
+-   @@ CONVERSION = TABLE 0 "INVALID" 1 "VALID" DEFAULT_VALUE "Unknown"
++   @@ DATA_TYPE = UBYTE [0 ... 2]
++   @@ CONVERSION = TABLE 0 "INVALID" 1 "VALID" 2 "UNDETERMINED" DEFAULT_VALUE "Unknown"
+    @@ DESCRIPTION = "Resolver offset valid flag (invalid indicates that the default offset is used)"
+    @@ GROUP = C2cCom
+    @@ END
+diff --git a/src/fw_cu/Components/Safety/Sfty_Cmn/SftyErrDeb/include/SftyErrDeb_data.h b/src/fw_cu/Components/Safety/Sfty_Cmn/SftyErrDeb/include/SftyErrDeb_data.h
+index 2c19e47d8..c29639677 100644
+--- a/src/fw_cu/Components/Safety/Sfty_Cmn/SftyErrDeb/include/SftyErrDeb_data.h
++++ b/src/fw_cu/Components/Safety/Sfty_Cmn/SftyErrDeb/include/SftyErrDeb_data.h
+@@ -1547,7 +1547,7 @@ extern VAR(uint8, SFTYRSLVROFFSHNDLR_VAR) SftyRslvrOffsHndlrAscIqPlausErrMonrSt;
+ #define SFTYRSLVROFFSHNDLR_START_SEC_VAR_AREA_CMN_SLOW_INIT_8
+ #include "MemMap.h"
+ 
+-extern VAR(uint8, SFTYRSLVROFFSHNDLR_VAR) SftyRslvrOffsHndlrRslvrOffsNvmWriteErrMonrSt;
++extern VAR(uint8, SFTYRSLVROFFSHNDLR_VAR) SftyRslvrOffsHndlrRslvrOffsNvmWrErrMonrSt;
+ #define SFTYRSLVROFFSHNDLR_STOP_SEC_VAR_AREA_CMN_SLOW_INIT_8
+ #include "MemMap.h"
+ /* End: SFTYRSLVROFFSHNDLR_STOP_SEC_VAR_AREA_CMN_SLOW_INIT_8 (online) */
+diff --git a/src/fw_cu/Components/Safety/Sfty_Inv/SftyRslvrOffsHndlr/include/SftyRslvrOffsHndlr_data.h b/src/fw_cu/Components/Safety/Sfty_Inv/SftyRslvrOffsHndlr/include/SftyRslvrOffsHndlr_data.h
+index 6eb6563d3..465ad2d22 100644
+--- a/src/fw_cu/Components/Safety/Sfty_Inv/SftyRslvrOffsHndlr/include/SftyRslvrOffsHndlr_data.h
++++ b/src/fw_cu/Components/Safety/Sfty_Inv/SftyRslvrOffsHndlr/include/SftyRslvrOffsHndlr_data.h
+@@ -1,7 +1,7 @@
+ /* ***************************************************************** */
+ /* Sourcefile: SftyRslvrOffsHndlr_data.h                             */
+ /* ADD Container: SftyRslvrOffsHndlr                                 */
+-/* ADD Container Version: 1.0.0                                      */
++/* ADD Container Version: 1.1.0                                      */
+ /* ***************************************************************** */
+ /* Copyright (C) Valeo Siemens eAutomotive Germany GmbH 2021         */
+ /* All Rights Reserved. Confidential                                 */
+@@ -30,15 +30,10 @@ extern VAR(float32, SFTYRSLVROFFSHNDLR_VAR) SftyRslvrOffsHndlrRslvrOffsRad;
+ #define SFTYRSLVROFFSHNDLR_START_SEC_VAR_AREA_CMN_SLOW_INIT_8
+ #include "MemMap.h"
+ 
+-extern VAR(uint8, SFTYRSLVROFFSHNDLR_VAR) SftyRslvrOffsHndlrIacSumErrMonrSt;
+-extern VAR(uint8, SFTYRSLVROFFSHNDLR_VAR) SftyRslvrOffsHndlrAscIacImbErrMonrSt;
+ extern VAR(uint8, SFTYRSLVROFFSHNDLR_VAR) SftyRslvrOffsHndlrRslvrOffsCrcErrMonrSt;
+-extern VAR(uint8, SFTYRSLVROFFSHNDLR_VAR) SftyRslvrOffsHndlrRslvrOffsNvmRngErrMonrSt;
+ extern VAR(uint8, SFTYRSLVROFFSHNDLR_VAR) SftyRslvrOffsHndlrRslvrOffsRngErrMonrSt;
+-extern VAR(uint8, SFTYRSLVROFFSHNDLR_VAR) SftyRslvrOffsHndlrRslvrOffsNvmWriteErrMonrSt;
++extern VAR(uint8, SFTYRSLVROFFSHNDLR_VAR) SftyRslvrOffsHndlrRslvrOffsNvmWrErrMonrSt;
+ extern VAR(uint8, SFTYRSLVROFFSHNDLR_VAR) SftyRslvrOffsHndlrAscIqPlausErrMonrSt;
+-extern VAR(uint8, SFTYRSLVROFFSHNDLR_VAR) SftyRslvrOffsHndlrSpdErrMonrSt;
+-extern VAR(uint8, SFTYRSLVROFFSHNDLR_VAR) SftyRslvrOffsHndlrBackEmfErrMonrSt;
+ 
+ #define SFTYRSLVROFFSHNDLR_STOP_SEC_VAR_AREA_CMN_SLOW_INIT_8
+ #include "MemMap.h"
+diff --git a/src/fw_cu/Components/Safety/Sfty_Inv/SftyRslvrOffsHndlr/src/SftyRslvrOffsHndlr.c b/src/fw_cu/Components/Safety/Sfty_Inv/SftyRslvrOffsHndlr/src/SftyRslvrOffsHndlr.c
+index 4c9b5e9f1..2c5156895 100644
+--- a/src/fw_cu/Components/Safety/Sfty_Inv/SftyRslvrOffsHndlr/src/SftyRslvrOffsHndlr.c
++++ b/src/fw_cu/Components/Safety/Sfty_Inv/SftyRslvrOffsHndlr/src/SftyRslvrOffsHndlr.c
+@@ -55,6 +55,15 @@
+ #endif
+ 
+ /*================== [defines] ==============================================*/
++/*! Resolver offset value is invalid */
++#define SFTY_RSLVR_OFFS_INVLD                      (0x0U)
++/*! Resolver offset value is valid */
++#define SFTY_RSLVR_OFFS_VLD                        (0x1U)
++/*! Resolver offset value is undetermined */
++#define SFTY_RSLVR_OFFS_UNDETM                     (0x2U)
++/*! Resolver offset pattern invalid value */
++#define SFTY_RSLVR_OFFS_PATTERN_OFFLN_INVLD        (0x0U)
++/*! Resolver offset pattern valid value */
+ #define SFTY_RSLVR_OFFS_PATTERN_OFFLN_VLD          (0xA55AU)
+ /*! Selection of Phase Current SETA */
+ #define SFTY_RSLVR_OFFS_SETA_IVAL_SELN             (0U)
+@@ -123,7 +132,7 @@ typedef enum SftyRslvrOffsHndlrUdsOffsVldnSt_
+ /*! Different stages during Resolver Offset Learning (ROL) data validation */
+ typedef enum SftyRslvrOffsHndlrRolOffsVldnSt_
+ {
+-   SFTYRSLVROFFSHNDLR_ROL_VLDN_ENTRY_CHK = 0UL
++   SFTYRSLVROFFSHNDLR_ROL_VLDN_INIT = 0UL
+   ,SFTYRSLVROFFSHNDLR_ROL_VLDN_RODA_LEARN
+   ,SFTYRSLVROFFSHNDLR_ROL_VLDN_RNG_CHK
+   ,SFTYRSLVROFFSHNDLR_ROL_VLDN_ASC_PLAUS_CHK
+@@ -169,7 +178,14 @@ typedef enum SftyRslvrOffsHndlrTmrState_
+ #define SFTYRSLVROFFSHNDLR_START_SEC_VAR_AREA_CMN_SLOW_INIT_32
+ #include "MemMap.h"
+ 
+-/*! \\cvar Safety Resolver Offset Handler Minimum Speed; unit \'rpm\' */
++/*
++@@ SYMBOL = SftyRslvrOffsHndlrMinSpd
++@@ A2L_TYPE = MEASURE
++@@ DATA_TYPE = FLOAT
++@@ DESCRIPTION = "Safety Resolver Offset Handler Minimum Speed; unit \'rpm\'"
++@@ GROUP = SftyRslvrOffsHndlr
++@@ END
++*/
+ STATIC VAR(float32, SFTYRSLVROFFSHNDLR_VAR) SftyRslvrOffsHndlrMinSpd = SFTY_RSLVR_OFFS_MIN_BUMPY_SPEED_INIT;
+ 
+ #define SFTYRSLVROFFSHNDLR_STOP_SEC_VAR_AREA_CMN_SLOW_INIT_32
+@@ -180,45 +196,204 @@ STATIC VAR(float32, SFTYRSLVROFFSHNDLR_VAR) SftyRslvrOffsHndlrMinSpd = SFTY_RSLV
+ #define SFTYRSLVROFFSHNDLR_START_SEC_VAR_AREA_CMN_FAST_CLEARED_32
+ #include "MemMap.h"
+ 
+-/*! \\cvar Safety Resolver Offset Handler Soft ASC Timer; unit \'us\' */
++/*
++@@ SYMBOL = SftyRslvrOffsHndlrSoftASCTmr
++@@ A2L_TYPE = MEASURE
++@@ DATA_TYPE = ULONG
++@@ DESCRIPTION = "Safety Resolver Offset Handler Soft ASC Timer; unit \'us\'"
++@@ GROUP = SftyRslvrOffsHndlr
++@@ END
++*/
+ STATIC VAR(uint32, SFTYRSLVROFFSHNDLR_VAR) SftyRslvrOffsHndlrSoftASCTmr;
+-/*! \\cvar Safety Resolver Offset Handler NvM Storage Timer; unit \'us\' */
++
++/*
++@@ SYMBOL = SftyRslvrOffsHndlrNvMStoreTmr
++@@ A2L_TYPE = MEASURE
++@@ DATA_TYPE = ULONG
++@@ DESCRIPTION = "Safety Resolver Offset Handler NvM Storage Timer; unit \'us\'"
++@@ GROUP = SftyRslvrOffsHndlr
++@@ END
++*/
+ STATIC VAR(uint32, SFTYRSLVROFFSHNDLR_VAR) SftyRslvrOffsHndlrNvMStoreTmr;
+-/*! \\cvar Safety Resolver Offset Handler RODA Learn Timer; unit \'us\' */
++
++/*
++@@ SYMBOL = SftyRslvrOffsHndlrRodaLearnTmr
++@@ A2L_TYPE = MEASURE
++@@ DATA_TYPE = ULONG
++@@ DESCRIPTION = "Safety Resolver Offset Handler RODA Learn Timer; unit \'us\'"
++@@ GROUP = SftyRslvrOffsHndlr
++@@ END
++*/
+ STATIC VAR(uint32, SFTYRSLVROFFSHNDLR_VAR) SftyRslvrOffsHndlrRodaLearnTmr;
+-/*! \\cvar Resolver offset of internal logic; unit \'radians\' */
++
++/*
++@@ SYMBOL = SftyRslvrOffsHndlrInternRslvrOffs
++@@ A2L_TYPE = MEASURE
++@@ DATA_TYPE = FLOAT
++@@ DESCRIPTION = "Resolver offset of internal logic; unit \'radians\'"
++@@ GROUP = SftyRslvrOffsHndlr
++@@ END
++*/
+ STATIC VAR(float32, SFTYRSLVROFFSHNDLR_VAR) SftyRslvrOffsHndlrInternRslvrOffs;
+-/*! \\cvar Resolver offset of internal logic; unit \'degree\' */
+-STATIC VAR(float32, SFTYRSLVROFFSHNDLR_VAR) SftyRslvrOffsHndlrNvMOffsInDegree;
+-/*! \\cvar Resolver offset value in degrees from UDS; unit \'degree\' */
+-STATIC VAR(float32, SFTYRSLVROFFSHNDLR_VAR)  SftyRslvrOffsHndlrUdsOffsInDegree;
+-/*! \\cvar Resolver offset value in degrees from online RODA; unit \'degree\' */
+-STATIC VAR(float32, SFTYRSLVROFFSHNDLR_VAR)  SftyRslvrOffsHndlrBackEmfOffsInDegree;
+-/*! Resolver offset value in degree on which ASC plausibility check shall be performed; unit \'degree\' */
+-STATIC VAR(float32, SFTYRSLVROFFSHNDLR_VAR)  SftyRslvrOffsHndlrOffsForAscPlausInDegree;
+-/*! \\cvar Safety Resolver Offset Handler Previous Electrical Angle; unit \'angle\' */
++
++/*
++@@ SYMBOL = SftyRslvrOffsHndlrNvMOffsInDeg
++@@ A2L_TYPE = MEASURE
++@@ DATA_TYPE = FLOAT
++@@ DESCRIPTION = "Resolver offset of internal logic; unit \'degree\'"
++@@ GROUP = SftyRslvrOffsHndlr
++@@ END
++*/
++STATIC VAR(float32, SFTYRSLVROFFSHNDLR_VAR) SftyRslvrOffsHndlrNvMOffsInDeg;
++
++/*
++@@ SYMBOL = SftyRslvrOffsHndlrUdsOffsInDeg
++@@ A2L_TYPE = MEASURE
++@@ DATA_TYPE = FLOAT
++@@ DESCRIPTION = "Resolver offset value in degrees from UDS; unit \'degree\'"
++@@ GROUP = SftyRslvrOffsHndlr
++@@ END
++*/
++STATIC VAR(float32, SFTYRSLVROFFSHNDLR_VAR)  SftyRslvrOffsHndlrUdsOffsInDeg;
++
++/*
++@@ SYMBOL = SftyRslvrOffsHndlrBackEmfOffsInDeg
++@@ A2L_TYPE = MEASURE
++@@ DATA_TYPE = FLOAT
++@@ DESCRIPTION = "Resolver offset value in degrees from online RODA; unit \'degree\'"
++@@ GROUP = SftyRslvrOffsHndlr
++@@ END
++*/
++STATIC VAR(float32, SFTYRSLVROFFSHNDLR_VAR)  SftyRslvrOffsHndlrBackEmfOffsInDeg;
++
++/*
++@@ SYMBOL = SftyRslvrOffsHndlrOffsForAscPlausInDeg
++@@ A2L_TYPE = MEASURE
++@@ DATA_TYPE = FLOAT
++@@ DESCRIPTION = "Resolver offset value in degree on which ASC plausibility check shall be performed; unit \'degree\'"
++@@ GROUP = SftyRslvrOffsHndlr
++@@ END
++*/
++STATIC VAR(float32, SFTYRSLVROFFSHNDLR_VAR)  SftyRslvrOffsHndlrOffsForAscPlausInDeg;
++
++/*
++@@ SYMBOL = SftyRslvrOffsHndlrPrevElecAg
++@@ A2L_TYPE = MEASURE
++@@ DATA_TYPE = FLOAT
++@@ DESCRIPTION = "Safety Resolver Offset Handler Previous Electrical Angle; unit \'angle\'"
++@@ GROUP = SftyRslvrOffsHndlr
++@@ END
++*/
+ STATIC VAR(float32, SFTYRSLVROFFSHNDLR_VAR) SftyRslvrOffsHndlrPrevElecAg;
+-/*! \\cvar Safety Resolver Offset Handler Average Speed; unit \'rpm\' */
++
++/*
++@@ SYMBOL = SftyRslvrOffsHndlrAvgSpd
++@@ A2L_TYPE = MEASURE
++@@ DATA_TYPE = FLOAT
++@@ DESCRIPTION = "Safety Resolver Offset Handler Average Speed; unit \'rpm\'"
++@@ GROUP = SftyRslvrOffsHndlr
++@@ END
++*/
+ STATIC VAR(float32, SFTYRSLVROFFSHNDLR_VAR) SftyRslvrOffsHndlrAvgSpd;
+-/*! \\cvar Safety Resolver Offset Handler Speed Sum; unit \'rpm\' */
++
++/*
++@@ SYMBOL = SftyRslvrOffsHndlrSpdSum
++@@ A2L_TYPE = MEASURE
++@@ DATA_TYPE = FLOAT
++@@ DESCRIPTION = "Safety Resolver Offset Handler Speed Sum; unit \'rpm\'"
++@@ GROUP = SftyRslvrOffsHndlr
++@@ END
++*/
+ STATIC VAR(float32, SFTYRSLVROFFSHNDLR_VAR) SftyRslvrOffsHndlrSpdSum;
+-/*! \\cvar Safety Resolver Offset Handler Current in Alpha direction; unit \'A\' */
++
++/*
++@@ SYMBOL = SftyRslvrOffsHndlrIAlpha
++@@ A2L_TYPE = MEASURE
++@@ DATA_TYPE = FLOAT
++@@ DESCRIPTION = "Safety Resolver Offset Handler Current in Alpha direction; unit \'A\'"
++@@ GROUP = SftyRslvrOffsHndlr
++@@ END
++*/
+ STATIC VAR(float32, SFTYRSLVROFFSHNDLR_VAR) SftyRslvrOffsHndlrIAlpha;
+-/*! \\cvar Safety Resolver Offset Handler Current in Beta direction; unit \'A\' */
++
++/*
++@@ SYMBOL = SftyRslvrOffsHndlrIBeta
++@@ A2L_TYPE = MEASURE
++@@ DATA_TYPE = FLOAT
++@@ DESCRIPTION = "Safety Resolver Offset Handler Current in Beta direction; unit \'A\'"
++@@ GROUP = SftyRslvrOffsHndlr
++@@ END
++*/
+ STATIC VAR(float32, SFTYRSLVROFFSHNDLR_VAR) SftyRslvrOffsHndlrIBeta;
+-/*! \\cvar Safety Resolver Offset Handler q Current (Torque generating current); unit \'A\' */
++
++/*
++@@ SYMBOL = SftyRslvrOffsHndlrIq
++@@ A2L_TYPE = MEASURE
++@@ DATA_TYPE = FLOAT
++@@ DESCRIPTION = "Safety Resolver Offset Handler Iq Current (Torque generating current); unit \'A\'"
++@@ GROUP = SftyRslvrOffsHndlr
++@@ END
++*/
+ STATIC VAR(float32, SFTYRSLVROFFSHNDLR_VAR) SftyRslvrOffsHndlrIq;
+-/*! \\cvar Safety Resolver Offset Handler q Current Sum; unit \'A\' */
++
++/*
++@@ SYMBOL = SftyRslvrOffsHndlrIqSum
++@@ A2L_TYPE = MEASURE
++@@ DATA_TYPE = FLOAT
++@@ DESCRIPTION = "Safety Resolver Offset Handler Iq Current Sum; unit \'A\'"
++@@ GROUP = SftyRslvrOffsHndlr
++@@ END
++*/
+ STATIC VAR(float32, SFTYRSLVROFFSHNDLR_VAR) SftyRslvrOffsHndlrIqSum;
+-/*! \\cvar Safety Resolver Offset Handler Average q Current; unit \'A\' */
++
++/*
++@@ SYMBOL = SftyRslvrOffsHndlrAvgIq
++@@ A2L_TYPE = MEASURE
++@@ DATA_TYPE = FLOAT
++@@ DESCRIPTION = "Safety Resolver Offset Handler Average Iq Current; unit \'A\'"
++@@ GROUP = SftyRslvrOffsHndlr
++@@ END
++*/
+ STATIC VAR(float32, SFTYRSLVROFFSHNDLR_VAR) SftyRslvrOffsHndlrAvgIq;
+-/*! \\cvar Safety Resolver Offset Handler Phase current U of PU A; unit \'A\' */
++
++/*
++@@ SYMBOL = SftyRslvrOffsHndlrPhaIU
++@@ A2L_TYPE = MEASURE
++@@ DATA_TYPE = FLOAT
++@@ DESCRIPTION = "Safety Resolver Offset Handler Phase current U of PU A; unit \'A\'"
++@@ GROUP = SftyRslvrOffsHndlr
++@@ END
++*/
+ STATIC VAR(float32, SFTYRSLVROFFSHNDLR_VAR) SftyRslvrOffsHndlrPhaIU;
+-/*! \\cvar Safety Resolver Offset Handler Phase current V of PU A; unit \'A\' */
++
++/*
++@@ SYMBOL = SftyRslvrOffsHndlrPhaIV
++@@ A2L_TYPE = MEASURE
++@@ DATA_TYPE = FLOAT
++@@ DESCRIPTION = "Safety Resolver Offset Handler Phase current V of PU A; unit \'A\'"
++@@ GROUP = SftyRslvrOffsHndlr
++@@ END
++*/
+ STATIC VAR(float32, SFTYRSLVROFFSHNDLR_VAR) SftyRslvrOffsHndlrPhaIV;
+-/*! \\cvar Safety Resolver Offset Handler Phase current W of PU A; unit \'A\' */
++
++/*
++@@ SYMBOL = SftyRslvrOffsHndlrPhaIW
++@@ A2L_TYPE = MEASURE
++@@ DATA_TYPE = FLOAT
++@@ DESCRIPTION = "Safety Resolver Offset Handler Phase current W of PU A; unit \'A\'"
++@@ GROUP = SftyRslvrOffsHndlr
++@@ END
++*/
+ STATIC VAR(float32, SFTYRSLVROFFSHNDLR_VAR) SftyRslvrOffsHndlrPhaIW;
+-/*! \\cvar Safety Resolver Offset Handler Sum of 3 phase AC Currents PU A; unit \'A\' */
++
++/*
++@@ SYMBOL = SftyRslvrOffsHndlrlPhaISum
++@@ A2L_TYPE = MEASURE
++@@ DATA_TYPE = FLOAT
++@@ DESCRIPTION = "Safety Resolver Offset Handler Sum of 3 phase AC Currents PU A; unit \'A\'"
++@@ GROUP = SftyRslvrOffsHndlr
++@@ END
++*/
+ STATIC VAR(float32, SFTYRSLVROFFSHNDLR_VAR) SftyRslvrOffsHndlrlPhaISum;
+ 
+ #define SFTYRSLVROFFSHNDLR_STOP_SEC_VAR_AREA_CMN_FAST_CLEARED_32
+@@ -229,51 +404,236 @@ STATIC VAR(float32, SFTYRSLVROFFSHNDLR_VAR) SftyRslvrOffsHndlrlPhaISum;
+ #define SFTYRSLVROFFSHNDLR_START_SEC_VAR_AREA_CMN_FAST_CLEARED_8
+ #include "MemMap.h"
+ 
+-/*! \\cvar Safety Resolver Offset NvM Validation State Machine; unit \'-\' */
++/*
++@@ SYMBOL = SftyRslvrOffsHndlrNvMOffsVldnState
++@@ A2L_TYPE = MEASURE
++@@ DATA_TYPE = UBYTE [0 ... 4]
++@@ DESCRIPTION = "Safety Resolver Offset NvM Validation State Machine; unit \'-\'"
++@@ GROUP = SftyRslvrOffsHndlr
++@@ END
++*/
+ STATIC VAR(SftyRslvrOffsHndlrNvMOffsVldnSt, SFTYRSLVROFFSHNDLR_VAR) SftyRslvrOffsHndlrNvMOffsVldnState;
+-/*! \\cvar Safety Resolver Offset NvM Validation State Machine; unit \'-\' */
++
++/*
++@@ SYMBOL = SftyRslvrOffsHndlrUdsOffsVldnState
++@@ A2L_TYPE = MEASURE
++@@ DATA_TYPE = UBYTE [0 ... 5]
++@@ DESCRIPTION = "Safety Resolver Offset NvM Validation State Machine; unit \'-\'"
++@@ GROUP = SftyRslvrOffsHndlr
++@@ END
++*/
+ STATIC VAR(SftyRslvrOffsHndlrUdsOffsVldnSt, SFTYRSLVROFFSHNDLR_VAR) SftyRslvrOffsHndlrUdsOffsVldnState;
+-/*! \\cvar Safety Resolver Offset NvM Validation State Machine; unit \'-\' */
++
++/*
++@@ SYMBOL = SftyRslvrOffsHndlrRolOffsVldnState
++@@ A2L_TYPE = MEASURE
++@@ DATA_TYPE = UBYTE [0 ... 6]
++@@ DESCRIPTION = "Safety Resolver Offset NvM Validation State Machine; unit \'-\'"
++@@ GROUP = SftyRslvrOffsHndlr
++@@ END
++*/
+ STATIC VAR(SftyRslvrOffsHndlrRolOffsVldnSt, SFTYRSLVROFFSHNDLR_VAR) SftyRslvrOffsHndlrRolOffsVldnState;
+-/*! \\cvar Safety Resolver Offset Handler Previous NvM Update Status; unit \'-\' */
++
++/*
++@@ SYMBOL = SftyRslvrOffsHndlrNvmUpdtPrevSts
++@@ A2L_TYPE = MEASURE
++@@ DATA_TYPE = UBYTE [0 ... 3]
++@@ DESCRIPTION = "Safety Resolver Offset Handler Previous NvM Update Status; unit \'-\'"
++@@ GROUP = SftyRslvrOffsHndlr
++@@ END
++*/
+ STATIC VAR(RslvrOffsNvmUpdtStsType, SFTYRSLVROFFSHNDLR_VAR) SftyRslvrOffsHndlrNvmUpdtPrevSts;
+-/*! \\cvar Safety Resolver Offset Handler Current NvM Update Status; unit \'-\' */
++
++/*
++@@ SYMBOL = SftyRslvrOffsHndlrNvmUpdtCurrSts
++@@ A2L_TYPE = MEASURE
++@@ DATA_TYPE = UBYTE [0 ... 3]
++@@ DESCRIPTION = "Safety Resolver Offset Handler Current NvM Update Status; unit \'-\'"
++@@ GROUP = SftyRslvrOffsHndlr
++@@ END
++*/
+ STATIC VAR(RslvrOffsNvmUpdtStsType, SFTYRSLVROFFSHNDLR_VAR) SftyRslvrOffsHndlrNvmUpdtCurrSts;
+-/*! \\cvar Safety Resolver Offset Handler Calibration Request; unit \'-\' */
++
++/*
++@@ SYMBOL = SftyRslvrOffsHndlrReqCalibSfty
++@@ A2L_TYPE = MEASURE
++@@ DATA_TYPE = UBYTE [0 ... 3]
++@@ DESCRIPTION = "Safety Resolver Offset Handler Calibration Request; unit \'-\'"
++@@ GROUP = SftyRslvrOffsHndlr
++@@ END
++*/
+ STATIC VAR(C2cReqCalibSftyType, SFTYRSLVROFFSHNDLR_VAR) SftyRslvrOffsHndlrReqCalibSfty;
+-/*! \\cvar Safety Resolver Offset Handler Soft ASC Timer Status; unit \'-\' */
++
++/*
++@@ SYMBOL = SftyRslvrOffsHndlrSoftAscTmrState
++@@ A2L_TYPE = MEASURE
++@@ DATA_TYPE = UBYTE [0 ... 3]
++@@ DESCRIPTION = "Safety Resolver Offset Handler Soft ASC Timer Status; unit \'-\'"
++@@ GROUP = SftyRslvrOffsHndlr
++@@ END
++*/
+ STATIC VAR(SftyRslvrOffsHndlrTmrState, SFTYRSLVROFFSHNDLR_VAR) SftyRslvrOffsHndlrSoftAscTmrState;
+-/*! \\cvar Safety Resolver Offset Handler NvM Store Timer Status; unit \'-\' */
++
++/*
++@@ SYMBOL = SftyRslvrOffsHndlrNvMStoreTmrState
++@@ A2L_TYPE = MEASURE
++@@ DATA_TYPE = UBYTE [0 ... 3]
++@@ DESCRIPTION = "Safety Resolver Offset Handler NvM Store Timer Status; unit \'-\'"
++@@ GROUP = SftyRslvrOffsHndlr
++@@ END
++*/
+ STATIC VAR(SftyRslvrOffsHndlrTmrState, SFTYRSLVROFFSHNDLR_VAR) SftyRslvrOffsHndlrNvMStoreTmrState;
+-/*! \\cvar Safety Resolver Offset Handler RODA Learn Timer Status; unit \'-\' */
++
++/*
++@@ SYMBOL = SftyRslvrOffsHndlrRodaLearnTmrState
++@@ A2L_TYPE = MEASURE
++@@ DATA_TYPE = UBYTE [0 ... 3]
++@@ DESCRIPTION = "Safety Resolver Offset Handler RODA Learn Timer Status; unit \'-\'"
++@@ GROUP = SftyRslvrOffsHndlr
++@@ END
++*/
+ STATIC VAR(SftyRslvrOffsHndlrTmrState, SFTYRSLVROFFSHNDLR_VAR) SftyRslvrOffsHndlrRodaLearnTmrState;
+-/*! \\cvar Safety Resolver Offset Handler Measurement Cycle State; unit \'-\' */
++
++/*
++@@ SYMBOL = SftyRslvrOffsHndlrMeasCycState
++@@ A2L_TYPE = MEASURE
++@@ DATA_TYPE = UBYTE [0 ... 5]
++@@ DESCRIPTION = "Safety Resolver Offset Handler Measurement Cycle State; unit \'-\'"
++@@ GROUP = SftyRslvrOffsHndlr
++@@ END
++*/
+ STATIC VAR(SftyRslvrOffsHndlrMeasCycSt, SFTYRSLVROFFSHNDLR_VAR) SftyRslvrOffsHndlrMeasCycState;
+-/*! \\cvar Safety Resolver Offset Handler ASC Plausibility State Machine; unit \'-\' */
++
++/*
++@@ SYMBOL = SftyRslvrOffsHndlrAscPlausChkState
++@@ A2L_TYPE = MEASURE
++@@ DATA_TYPE = UBYTE [0 ... 4]
++@@ DESCRIPTION = "Safety Resolver Offset Handler ASC Plausibility State Machine; unit \'-\'"
++@@ GROUP = SftyRslvrOffsHndlr
++@@ END
++*/
+ STATIC VAR(SftyRslvrOffsHndlrAscPlausChkSt, SFTYRSLVROFFSHNDLR_VAR) SftyRslvrOffsHndlrAscPlausChkState;
+-/*! \\cvar Safety Resolver Offset Handler Average Iq Current; unit \'-\' */
++
++/*
++@@ SYMBOL = SftyRslvrOffsHndlrAvgIqCntr
++@@ A2L_TYPE = MEASURE
++@@ DATA_TYPE = UBYTE
++@@ DESCRIPTION = "Safety Resolver Offset Handler Average Iq Current; unit \'-\'"
++@@ GROUP = SftyRslvrOffsHndlr
++@@ END
++*/
+ STATIC VAR(uint8, SFTYRSLVROFFSHNDLR_VAR) SftyRslvrOffsHndlrAvgIqCntr;
+-/*! \\cvar Safety Resolver Offset Handler Average Speed Counter; unit \'-\' */
++
++/*
++@@ SYMBOL = SftyRslvrOffsHndlrAvgSpdCntr
++@@ A2L_TYPE = MEASURE
++@@ DATA_TYPE = UBYTE
++@@ DESCRIPTION = "Safety Resolver Offset Handler Average Speed Counter; unit \'-\'"
++@@ GROUP = SftyRslvrOffsHndlr
++@@ END
++*/
+ STATIC VAR(uint8, SFTYRSLVROFFSHNDLR_VAR) SftyRslvrOffsHndlrAvgSpdCntr;
+-/*! \\cvar Safety Resolver Offset Handler Measurement Cycle Counter; unit \'-\' */
++
++/*
++@@ SYMBOL = SftyRslvrOffsHndlrMeasCycCntr
++@@ A2L_TYPE = MEASURE
++@@ DATA_TYPE = UBYTE
++@@ DESCRIPTION = "Safety Resolver Offset Handler Measurement Cycle Counter; unit \'-\'"
++@@ GROUP = SftyRslvrOffsHndlr
++@@ END
++*/
+ STATIC VAR(uint8, SFTYRSLVROFFSHNDLR_VAR) SftyRslvrOffsHndlrMeasCycCntr;
+-/*! \\cvar Safety Resolver Offset Handler Total Counter; unit \'-\' */
++
++/*
++@@ SYMBOL = SftyRslvrOffsHndlrTotalMeasCycCntr
++@@ A2L_TYPE = MEASURE
++@@ DATA_TYPE = UBYTE
++@@ DESCRIPTION = "Safety Resolver Offset Handler Total Counter; unit \'-\'"
++@@ GROUP = SftyRslvrOffsHndlr
++@@ END
++*/
+ STATIC VAR(uint8, SFTYRSLVROFFSHNDLR_VAR) SftyRslvrOffsHndlrTotalMeasCycCntr;
+-/*! \\cvar Safety Resolver Offset Handler First Run Done; unit \'-\' */
++
++/*
++@@ SYMBOL = SftyRslvrOffsHndlrFirstRunDone
++@@ A2L_TYPE = MEASURE
++@@ DATA_TYPE = UBYTE [0 ... 1]
++@@ DESCRIPTION = "Safety Resolver Offset Handler First Run Done; unit \'-\'"
++@@ GROUP = SftyRslvrOffsHndlr
++@@ END
++*/
+ STATIC VAR(uint8, SFTYRSLVROFFSHNDLR_VAR) SftyRslvrOffsHndlrFirstRunDone;
+-/*! \\cvar Safety Resolver Offset Handler Valid Cycle Counter; unit \'-\' */
++
++/*
++@@ SYMBOL = SftyRslvrOffsHndlrAscVldMeasCycCntr
++@@ A2L_TYPE = MEASURE
++@@ DATA_TYPE = UBYTE
++@@ DESCRIPTION = "Safety Resolver Offset Handler Valid Cycle Counter; unit \'-\'"
++@@ GROUP = SftyRslvrOffsHndlr
++@@ END
++*/
+ STATIC VAR(uint8, SFTYRSLVROFFSHNDLR_VAR) SftyRslvrOffsHndlrAscVldMeasCycCntr;
+-/*! \\cvar Safety Resolver Offset Handler Invalid Cycle Counter; unit \'-\' */
++
++/*
++@@ SYMBOL = SftyRslvrOffsHndlrInVldMeasCycCntr
++@@ A2L_TYPE = MEASURE
++@@ DATA_TYPE = UBYTE
++@@ DESCRIPTION = "Safety Resolver Offset Handler Invalid Cycle Counter; unit \'-\'"
++@@ GROUP = SftyRslvrOffsHndlr
++@@ END
++*/
+ STATIC VAR(uint8, SFTYRSLVROFFSHNDLR_VAR) SftyRslvrOffsHndlrInVldMeasCycCntr;
+-/*! \\cvar Safety Resolver Offset Handler q Current Counter; unit \'-\' */
++
++/*
++@@ SYMBOL = SftyRslvrOffsHndlrIqCntr
++@@ A2L_TYPE = MEASURE
++@@ DATA_TYPE = UBYTE
++@@ DESCRIPTION = "Safety Resolver Offset Handler Iq Current Counter; unit \'-\'"
++@@ GROUP = SftyRslvrOffsHndlr
++@@ END
++*/
+ STATIC VAR(uint8, SFTYRSLVROFFSHNDLR_VAR) SftyRslvrOffsHndlrIqCntr;
+-/*! \\cvar Safety Resolver Offset Phase Current Imbalance Validity Flag; unit \'-\' */
++
++/*
++@@ SYMBOL = SftyRslvrOffsHndlrIacImbVldyFlg
++@@ A2L_TYPE = MEASURE
++@@ DATA_TYPE = UBYTE [0 ... 1]
++@@ CONVERSION = TABLE 0 "INVALID" 1 "VALID"
++@@ DESCRIPTION = "Safety Resolver Offset Phase Current Imbalance Validity Flag; unit \'-\'"
++@@ GROUP = SftyRslvrOffsHndlr
++@@ END
++*/
+ STATIC VAR(uint8, SFTYRSLVROFFSHNDLR_VAR) SftyRslvrOffsHndlrIacImbVldyFlg;
+-/*! \\cvar Safety Resolver Offset Handler Phase Current Sum Counter; unit \'-\' */
++
++/*
++@@ SYMBOL = SftyRslvrOffsHndlrIacSumErrCntr
++@@ A2L_TYPE = MEASURE
++@@ DATA_TYPE = UBYTE
++@@ DESCRIPTION = "Safety Resolver Offset Handler Phase Current Sum Counter; unit \'-\'"
++@@ GROUP = SftyRslvrOffsHndlr
++@@ END
++*/
+ STATIC VAR(uint8, SFTYRSLVROFFSHNDLR_VAR) SftyRslvrOffsHndlrIacSumErrCntr;
+-/*! \\cvar Status of internal offset validity flag; unit \'-\' */
++
++/*
++@@ SYMBOL = SftyRslvrOffsHndlrInternRslvrOffsVld
++@@ A2L_TYPE = MEASURE
++@@ DATA_TYPE = UBYTE [0 ... 2]
++@@ CONVERSION = TABLE 0 "SFTY_RSLVR_OFFS_INVLD" 1 "SFTY_RSLVR_OFFS_VLD" 2 "SFTY_RSLVR_OFFS_UNDETM"
++@@ DESCRIPTION = "Status of internal offset validity flag; unit \'-\'"
++@@ GROUP = SftyRslvrOffsHndlr
++@@ END
++*/
+ STATIC VAR(uint8, SFTYRSLVROFFSHNDLR_VAR) SftyRslvrOffsHndlrInternRslvrOffsVld;
+-/*! \\cvar Safety Resolver Offset Handler Maximum Speed; unit \'rpm\' */
++
++/*
++@@ SYMBOL = SftyRslvrOffsHndlrMaxSpd
++@@ A2L_TYPE = MEASURE
++@@ DATA_TYPE = FLOAT
++@@ DESCRIPTION = "Safety Resolver Offset Handler Maximum Speed; unit \'rpm\'"
++@@ GROUP = SftyRslvrOffsHndlr
++@@ END
++*/
+ STATIC VAR(float32, SFTYRSLVROFFSHNDLR_VAR) SftyRslvrOffsHndlrMaxSpd;
+ 
+ #define SFTYRSLVROFFSHNDLR_STOP_SEC_VAR_AREA_CMN_FAST_CLEARED_8
+@@ -370,33 +730,23 @@ LOCAL_INLINE void SftyRslvrOffsHndlr_PerformCurrImbChk(void)
+       /* Check if the sum of phase currents for PU A is greater than the defined threshold */
+       if(SftyRslvrOffsHndlrlPhaISum > SftyRslvrOffsHndlrPhaISumThr[SFTY_RSLVR_OFFS_SETA_IVAL_SELN])
+       {
+-         /* Sum is Not OK */
+-         SftyRslvrOffsHndlrIacSumErrMonrSt = ERR_DEB_MONR_STS_FAILED;
+-
+-         /* Increment Phase Current Sum Error counter */
++         /* Sum is not OK. Increment Phase Current Sum Error counter */
+          SftyRslvrOffsHndlrIacSumErrCntr++;
+       }
+       else
+       {
+-         /* Sum is OK */
+-         SftyRslvrOffsHndlrIacSumErrMonrSt = ERR_DEB_MONR_STS_PASSED;
++         /* Sum is OK. Continue ASC plausibility check */
+       }
+ 
+       /* Check if phase current sum error counter is less than or equal to defined threshold limit */
+       if(SftyRslvrOffsHndlrIacSumErrCntr <= SftyRslvrOffsHndlrIacImbThd)
+       {
+-         /* Set current imbalance check as no error */
+-         SftyRslvrOffsHndlrAscIacImbErrMonrSt = ERR_DEB_MONR_STS_PASSED;
+-
+-         /* Set current imbalance validity flag to TRUE */
++         /* Current imbalance check as no error. Set current imbalance validity flag to TRUE */
+          SftyRslvrOffsHndlrIacImbVldyFlg = TRUE;
+       }
+       else
+       {
+-         /* Set current imbalance check as error */
+-         SftyRslvrOffsHndlrAscIacImbErrMonrSt = ERR_DEB_MONR_STS_FAILED;
+-
+-         /* Set current imbalance validity flag to FALSE */
++         /* Current imbalance check error detected. Set current imbalance validity flag to FALSE */
+          SftyRslvrOffsHndlrIacImbVldyFlg = FALSE;
+       }
+    }
+@@ -474,9 +824,6 @@ LOCAL_INLINE boolean SftyRslvrOffsHndlr_RampOffset(float32 pRoda)
+    /* Set internal resolver offset value to new offset */
+    SftyRslvrOffsHndlrInternRslvrOffs = rodaNew;
+ 
+-   /* Set internal resolver offset validity flag to FALSE */
+-   SftyRslvrOffsHndlrInternRslvrOffsVld = FALSE;
+-
+    return rampStatus;
+ }
+ 
+@@ -489,6 +836,7 @@ LOCAL_INLINE boolean SftyRslvrOffsHndlr_RampOffset(float32 pRoda)
+  * \\return    : None
+  */
+ /*************************************************************************************************/
++/* PRQA S 4700 1 # Justification for STM29 HIS Warning. This function is supposed to be widely used within current SW-Component */
+ LOCAL_INLINE void SftyRslvrOffsHndlr_PropagateOffsValues(float32 rslvrOffsInDeg, uint8 rslvrOffsVld)
+ {
+    /* ******** Variables declaration *********** */
+@@ -860,6 +1208,45 @@ LOCAL_INLINE void SftyRslvrOffsHndlr_CalAvgSpdNAvgIq(void)
+    return;
+ }
+ 
++/*********************************************************/
++/*!
++ * \\fn        : float32 SftyRslvrOffsHndlr_ScaleAng(float angle)
++ * \\brief     : This function returns scaled angle value
++ * \\Parent_DD : SftyRslvrOffsHndlr_RunAscPlausChk
++ * \\return    : Return scaled angle value from [-pi ... pi]
++ */
++/*********************************************************/
++LOCAL_INLINE float32 SftyRslvrOffsHndlr_ScaleAng(float32 angle)
++{
++   /* ******** Variables declaration *********** */
++   float32 retScaAngle;
++
++   /* ************* Source code **************** */
++
++   /* Scale angle to [-pi ... pi] */
++   if(MLIB_F32AbsF32(angle) > SYSCON_PI)
++   {
++      /* Check if angle is positive */
++      if(angle > 0.F)
++      {
++         /* Decrement angle by 2*PI */
++         retScaAngle = angle - (float32)SYSCON_2PI;
++      }
++      else
++      {
++         /* Increment angle by 2*PI */
++         retScaAngle = angle + (float32)SYSCON_2PI;
++      }
++   }
++   else
++   {
++      /* Angle is within SYSCON_PI */
++      retScaAngle = angle;
++   }
++
++   return retScaAngle;
++}
++
+ /*********************************************************/
+ /*!
+  * \\fn        : void SftyRslvrOffsHndlr_AccumIq(void)
+@@ -885,7 +1272,7 @@ LOCAL_INLINE void SftyRslvrOffsHndlr_AccumIq(void)
+    /* Calculate Iq within every measurement cycle */
+ 
+    /* Resolver offset value for which ASC plausibility check shall be performed (it can be from UDS or Back-EMF learning) to calculate Iq currents */
+-   rslvrOffsInternal = SftyRslvrOffsHndlrOffsForAscPlausInDegree;
++   rslvrOffsInternal = SftyRslvrOffsHndlrOffsForAscPlausInDeg;
+ 
+ #ifndef SERIES_PRODUCTION
+    /* Check simulation enable flag */
+@@ -905,24 +1292,7 @@ LOCAL_INLINE void SftyRslvrOffsHndlr_AccumIq(void)
+    angle = angle - (SYSCON_2PI * MLIB_F32S32(MLIB_S32F32(angle/SYSCON_2PI)));
+ 
+    /* Scale angle to [-pi ... pi] */
+-   if(MLIB_F32AbsF32(angle) > SYSCON_PI)
+-   {
+-      /* Check if angle is positive */
+-      if(angle > 0.F)
+-      {
+-         /* Decrement angle by 2*PI */
+-         angle -= (float32)SYSCON_2PI;
+-      }
+-      else
+-      {
+-         /* Increment angle by 2*PI */
+-         angle += (float32)SYSCON_2PI;
+-      }
+-   }
+-   else
+-   {
+-      /* Angle is within SYSCON_PI */
+-   }
++   angle = SftyRslvrOffsHndlr_ScaleAng(angle);
+ 
+    /* calculate sin and cos form inverse angle */
+    angle = angle * SFTY_RSLVR_OFFS_NEG_VAL;
+@@ -931,14 +1301,7 @@ LOCAL_INLINE void SftyRslvrOffsHndlr_AccumIq(void)
+    cosx = cosf(angle);
+ 
+    /* check parameter for reverse direction */
+-   if(SysPrmDrvgDirRvs == 0U)
+-   {
+-      reverse = SFTY_RSLVR_OFFS_POS_VAL;
+-   }
+-   else
+-   {
+-      reverse = SFTY_RSLVR_OFFS_NEG_VAL;
+-   }
++   reverse = (SysPrmDrvgDirRvs == 0U) ? (SFTY_RSLVR_OFFS_POS_VAL) : (SFTY_RSLVR_OFFS_NEG_VAL);
+ 
+    /* Calculate IAlpha and IBeta using Clark Transformation */
+    SftyRslvrOffsHndlrIAlpha = ((SftyAcEvlnIPhaVal[0][0] * 2.F) - SftyAcEvlnIPhaVal[0][1] - SftyAcEvlnIPhaVal[0][2]) / 3.F;
+@@ -1079,7 +1442,6 @@ LOCAL_INLINE void SftyRslvrOffsHndlr_InitCalcSpd(void)
+    SftyRslvrOffsHndlrSpdSum       = 0.f;
+    SftyRslvrOffsHndlrAvgSpd       = 0.f;
+    SftyRslvrOffsHndlrAvgSpdCntr   = 0U;
+-   SftyRslvrOffsHndlrSpdErrMonrSt = ERR_DEB_MONR_STS_INACTIVE;
+ 
+    return;
+ }
+@@ -1137,6 +1499,113 @@ LOCAL_INLINE void  SftyRslvrOffsHndlr_CalcMeasCycInit(void)
+    SftyRslvrOffsHndlr_InitCalcIq();
+ }
+ 
++/*******************************************************************/
++/*!
++ * \\fn        : void SftyRslvrOffsHndlr_DetnStrtMeasCyc(void)
++ * \\brief     : This function check detect start of measurement cycle
++ *              for ASC plausibility check
++ * \\Parent_DD : SftyRslvrOffsHndlr_CalcMeasCyc
++ * \\return    : None
++ */
++/******************************************************************/
++LOCAL_INLINE void SftyRslvrOffsHndlr_DetnStrtMeasCyc(void)
++{
++   /* ******** Variables declaration *********** */
++
++   /* ************* Source code **************** */
++
++   /* Detects the start of measurement cycle by
++    * detecting falling edge of Resolver Angle
++    * which indirectly denotes the start of Measurement cycle */
++   if (
++       (SftyRslvrCalcnAg < SftyRslvrOffsHndlrPrevElecAg) &&
++       (SftyRslvrOffsHndlrFirstRunDone == TRUE)
++      )
++   {
++      /* Start of measurement cycle detected. Start measurement cycle counter */
++      SftyRslvrOffsHndlrMeasCycCntr++;
++
++      /* Change measurement cycle state to MEASCYC_ACTIVE */
++      SftyRslvrOffsHndlrMeasCycState = SFTYRSLVROFFSHNDLR_MEASCYC_ACTV;
++   }
++   else
++   {
++      /* Reset all parameters before start of measurement cycle */
++      SftyRslvrOffsHndlr_CalcMeasCycInit();
++
++      /* First run done */
++      SftyRslvrOffsHndlrFirstRunDone = TRUE;
++   }
++
++   /* Record the previous value of resolver angle */
++   SftyRslvrOffsHndlrPrevElecAg = SftyRslvrCalcnAg;
++
++   return;
++}
++
++/*******************************************************************/
++/*!
++ * \\fn        : void SftyRslvrOffsHndlr_ChkOneMeasCycCmpl(void)
++ * \\brief     : This function checks if one measurement cycle is complete
++ * \\Parent_DD : SftyRslvrOffsHndlr_CalcMeasCyc
++ * \\return    : None
++ */
++/******************************************************************/
++LOCAL_INLINE void SftyRslvrOffsHndlr_ChkOneMeasCycCmpl(void)
++{
++   /* ******** Variables declaration *********** */
++
++   /* ************* Source code **************** */
++
++   /* Check if one measurement cycle is complete */
++   if (SftyRslvrOffsHndlrMeasCycCntr >= SFTY_RSLVR_OFFS_ONEMEASCYC_CNTR)
++   {
++      /* One measurement cycle is complete. Change measurement cycle state to MEASCYC_ONE_COMPLETE */
++      SftyRslvrOffsHndlrMeasCycState = SFTYRSLVROFFSHNDLR_MEASCYC_ONE_CMPLT;
++   }
++   else
++   {
++      /* Continue incrementing measurement cycle counter
++       * until it reaches \'One Complete Measurement Cycle\' */
++      SftyRslvrOffsHndlrMeasCycCntr++;
++   }
++
++   return;
++}
++
++/*******************************************************************/
++/*!
++ * \\fn        : void SftyRslvrOffsHndlr_ChkTotMeasCycCmpl(void)
++ * \\brief     : This function checks if total measurement cycles is complete
++ * \\Parent_DD : SftyRslvrOffsHndlr_CalcMeasCyc
++ * \\return    : None
++ */
++/******************************************************************/
++LOCAL_INLINE void SftyRslvrOffsHndlr_ChkTotMeasCycCmpl(void)
++{
++   /* ******** Variables declaration *********** */
++
++   /* ************* Source code **************** */
++
++   /* Increment Total number of One Complete Measurement Cycle\'s counter */
++   SftyRslvrOffsHndlrTotalMeasCycCntr++;
++
++   /* Check if maximum count of \'One Cycle Measurement\' are reached */
++   if(SftyRslvrOffsHndlrTotalMeasCycCntr >= SFTY_RSLVR_OFFS_MEASCYC_MAX_CNTR)
++   {
++      /* Total measurement cycles complete. Change measurement cycle state to MEASCYC_TOTAL_COMPLETE */
++      SftyRslvrOffsHndlrMeasCycState = SFTYRSLVROFFSHNDLR_MEASCYC_TOTAL_CMPLT;
++   }
++   else
++   {
++      /* Total measurement cycles not complete yet. Start measurement cycle again
++       * Change measurement cycle state to MEASCYC_START_DETECT */
++      SftyRslvrOffsHndlrMeasCycState = SFTYRSLVROFFSHNDLR_MEASCYC_START_DETECT;
++   }
++
++   return;
++}
++
+ /*******************************************************************/
+ /*!
+  * \\fn        : void SftyRslvrOffsHndlr_CalcMeasCyc(void)
+@@ -1168,70 +1637,24 @@ LOCAL_INLINE void SftyRslvrOffsHndlr_CalcMeasCyc(void)
+ 
+       case SFTYRSLVROFFSHNDLR_MEASCYC_START_DETECT:
+       {
+-         /* Detects the start of measurement cycle by
+-          * detecting falling edge of Resolver Angle
+-          * which indirectly denotes the start of Measurement cycle */
+-         if (
+-             (SftyRslvrCalcnAg < SftyRslvrOffsHndlrPrevElecAg) &&
+-             (SftyRslvrOffsHndlrFirstRunDone == TRUE)
+-            )
+-         {
+-            /* Start of measurement cycle detected. Start measurement cycle counter */
+-            SftyRslvrOffsHndlrMeasCycCntr++;
+-
+-            /* Change measurement cycle state to MEASCYC_ACTIVE */
+-            SftyRslvrOffsHndlrMeasCycState = SFTYRSLVROFFSHNDLR_MEASCYC_ACTV;
+-         }
+-         else
+-         {
+-            /* Reset all parameters before start of measurement cycle */
+-            SftyRslvrOffsHndlr_CalcMeasCycInit();
+-
+-            /* First run done */
+-            SftyRslvrOffsHndlrFirstRunDone = TRUE;
+-         }
+-
+-         /* Record the previous value of resolver angle */
+-         SftyRslvrOffsHndlrPrevElecAg = SftyRslvrCalcnAg;
++         /* Detect start of measurement cycle */
++         SftyRslvrOffsHndlr_DetnStrtMeasCyc();
+ 
+          break;
+       }
+ 
+       case SFTYRSLVROFFSHNDLR_MEASCYC_ACTV:
+       {
+-         /* Check if one measurement cycle is complete */
+-         if (SftyRslvrOffsHndlrMeasCycCntr >= SFTY_RSLVR_OFFS_ONEMEASCYC_CNTR)
+-         {
+-            /* Change measurement cycle state to MEASCYC_ONE_COMPLETE */
+-            SftyRslvrOffsHndlrMeasCycState = SFTYRSLVROFFSHNDLR_MEASCYC_ONE_CMPLT;
+-         }
+-         else
+-         {
+-            /* Continue incrementing measurement cycle counter
+-             * until it reaches \'One Complete Measurement Cycle\' */
+-            SftyRslvrOffsHndlrMeasCycCntr++;
+-         }
++         /* Check if One Measurement cycle is complete */
++         SftyRslvrOffsHndlr_ChkOneMeasCycCmpl();
+ 
+          break;
+       }
+ 
+       case SFTYRSLVROFFSHNDLR_MEASCYC_ONE_CMPLT:
+       {
+-         /* Increment Total number of One Complete Measurement Cycle\'s counter */
+-         SftyRslvrOffsHndlrTotalMeasCycCntr++;
+-
+          /* Check if maximum count of \'One Cycle Measurement\' are reached */
+-         if(SftyRslvrOffsHndlrTotalMeasCycCntr >= SFTY_RSLVR_OFFS_MEASCYC_MAX_CNTR)
+-         {
+-            /* Change measurement cycle state to MEASCYC_TOTAL_COMPLETE */
+-            SftyRslvrOffsHndlrMeasCycState = SFTYRSLVROFFSHNDLR_MEASCYC_TOTAL_CMPLT;
+-         }
+-         else
+-         {
+-            /* Not complete yet. Start measurement cycle again
+-             * Change measurement cycle state to MEASCYC_START_DETECT */
+-            SftyRslvrOffsHndlrMeasCycState = SFTYRSLVROFFSHNDLR_MEASCYC_START_DETECT;
+-         }
++         SftyRslvrOffsHndlr_ChkTotMeasCycCmpl();
+ 
+          break;
+       }
+@@ -1306,7 +1729,6 @@ LOCAL_INLINE void SftyRslvrOffsHndlr_StartAscPlausChk(void)
+       SftyRslvrOffsHndlrMeasCycState      = SFTYRSLVROFFSHNDLR_MEASCYC_INIT;
+ 
+       /* Reset error monitors related ASC plausibility check */
+-      SftyRslvrOffsHndlrSpdErrMonrSt        = ERR_DEB_MONR_STS_INACTIVE;
+       SftyRslvrOffsHndlrAscIqPlausErrMonrSt = ERR_DEB_MONR_STS_INACTIVE;
+ 
+       /* Start ASC plausibility check entry timer */
+@@ -1371,8 +1793,8 @@ LOCAL_INLINE Std_ReturnType SftyRslvrOffsHndlr_OnlineRodaEntryChk(void)
+ 
+    /* Check entry conditions for starting online RODA */
+    if(
+-      (SftyHvDcUEvlnUdcVal > SftyRslrOffsHndlrHvDcDerMinLow)  &&
+-      (SftyRslvrOffsHndlrInternRslvrOffsVld == FALSE)          &&
++      (SftyHvDcUEvlnUdcVal > SftyRslrOffsHndlrHvDcDerMinLow) &&
++      (SftyRslvrOffsHndlrInternRslvrOffsVld == SFTY_RSLVR_OFFS_INVLD) &&
+       (SftyE2ePhyDataVcuInvCtrl2RslvrOffsCalReq == TRUE)      &&
+       (SftyRslvrCalcnMeclSpdFild > (SftyRslrOffsHndlrCalSpdLo + SftyRslrOffsHndlrCalSpdHys)) &&
+       (SftyRslvrCalcnMeclSpdFild < SftyRslrOffsHndlrCalSpdHi) &&
+@@ -1478,31 +1900,33 @@ LOCAL_INLINE void SftyRslvrOffsHndlr_StartRodaLearnTimeout(void)
+ 
+ /***********************************************************************/
+ /*!
+- * \\fn        : void SftyRslvrOffsHndlr_ValidateOnlineRodaEntryChk(void)
+- * \\brief     : This function checks for RODA entry conditions
++ * \\fn        : void SftyRslvrOffsHndlr_ValidateOnlineRodaInit(void)
++ * \\brief     : This function initializes variables for online RODA and
++ *              also checks for RODA entry conditions
+  * \\Parent_DD : SftyRslvrOffsHndlr_ValidateOnlineRoda
+  * \\return    : None
+  */
+ /**********************************************************************/
+-LOCAL_INLINE void SftyRslvrOffsHndlr_ValidateOnlineRodaEntryChk(void)
++LOCAL_INLINE void SftyRslvrOffsHndlr_ValidateOnlineRodaInit(void)
+ {
+    /* ******** Variables declaration *********** */
+    uint8 rodaEntryChkSt;
+ 
+    /* ************* Source code **************** */
+ 
++   /* Reset all error monitor states and variables before start of validation */
++   SftyRslvrOffsHndlrRslvrOffsRngErrMonrSt      = ERR_DEB_MONR_STS_INACTIVE;
++   SftyRslvrOffsHndlrAscIqPlausErrMonrSt        = ERR_DEB_MONR_STS_INACTIVE;
++   SftyRslvrOffsHndlrRslvrOffsNvmWrErrMonrSt    = ERR_DEB_MONR_STS_INACTIVE;
++
++   /* Before start of validation set SftyC2c NvM pattern to invalid */
++   SftyC2cData.RslvrOffsNvm.Pattern = SFTY_RSLVR_OFFS_PATTERN_OFFLN_INVLD;
++
+    /* Check if online RODA entry conditions are passed */
+    rodaEntryChkSt = SftyRslvrOffsHndlr_OnlineRodaEntryChk();
+ 
+    if(rodaEntryChkSt == E_OK)
+    {
+-      /* Reset all error monitor states and variables before start of validation */
+-      SftyRslvrOffsHndlrRslvrOffsRngErrMonrSt      = ERR_DEB_MONR_STS_INACTIVE;
+-      SftyRslvrOffsHndlrAscIqPlausErrMonrSt        = ERR_DEB_MONR_STS_INACTIVE;
+-      SftyRslvrOffsHndlrRslvrOffsNvmWriteErrMonrSt = ERR_DEB_MONR_STS_INACTIVE;
+-      SftyRslvrOffsHndlrSpdErrMonrSt               = ERR_DEB_MONR_STS_INACTIVE;
+-      SftyRslvrOffsHndlrBackEmfErrMonrSt           = ERR_DEB_MONR_STS_INACTIVE;
+-
+       /* Set safety calibration status to Active */
+       SftyC2cData.StsCalibSfty = (uint8)STS_CALIB_ACTIVE;
+ 
+@@ -1515,7 +1939,7 @@ LOCAL_INLINE void SftyRslvrOffsHndlr_ValidateOnlineRodaEntryChk(void)
+       SftyC2cData.StsCalibSfty = (uint8)STS_CALIB_FAILED;
+ 
+       /* Propagate offset value and validation status to DRCO and BSW  */
+-      SftyRslvrOffsHndlr_PropagateOffsValues(SftyRslvrOffsHndlrRslvrOffDfltCalib, FALSE);
++      SftyRslvrOffsHndlr_PropagateOffsValues(SftyRslvrOffsHndlrRslvrOffDfltCalib, SFTY_RSLVR_OFFS_INVLD);
+ 
+       /* ROL validation failed. Change validation state to VLDN_CMPLT */
+       SftyRslvrOffsHndlrRolOffsVldnState = SFTYRSLVROFFSHNDLR_ROL_VLDN_CMPLT;
+@@ -1560,7 +1984,7 @@ LOCAL_INLINE void SftyRslvrOffsHndlr_ValidateOnlineRodaLearn(void)
+          SftyC2cData.StsCalibSfty = (uint8)STS_CALIB_FAILED;
+ 
+          /* Propagate default offset value and validation status to DRCO and BSW  */
+-         SftyRslvrOffsHndlr_PropagateOffsValues(SftyRslvrOffsHndlrRslvrOffDfltCalib, FALSE);
++         SftyRslvrOffsHndlr_PropagateOffsValues(SftyRslvrOffsHndlrRslvrOffDfltCalib, SFTY_RSLVR_OFFS_INVLD);
+ 
+          /* ROL validation failed. Change validation state to VLDN_CMPLT */
+          SftyRslvrOffsHndlrRolOffsVldnState = SFTYRSLVROFFSHNDLR_ROL_VLDN_CMPLT;
+@@ -1579,7 +2003,7 @@ LOCAL_INLINE void SftyRslvrOffsHndlr_ValidateOnlineRodaLearn(void)
+       SftyC2cData.StsCalibSfty = (uint8)STS_CALIB_FAILED;
+ 
+       /* Propagate default offset value and validation status to DRCO and BSW  */
+-      SftyRslvrOffsHndlr_PropagateOffsValues(SftyRslvrOffsHndlrRslvrOffDfltCalib, FALSE);
++      SftyRslvrOffsHndlr_PropagateOffsValues(SftyRslvrOffsHndlrRslvrOffDfltCalib, SFTY_RSLVR_OFFS_INVLD);
+ 
+       /* ROL validation failed. Change validation state to VLDN_CMPLT */
+       SftyRslvrOffsHndlrRolOffsVldnState = SFTYRSLVROFFSHNDLR_ROL_VLDN_CMPLT;
+@@ -1614,19 +2038,19 @@ LOCAL_INLINE void SftyRslvrOffsHndlr_ValidateOnlineRodaRangeChk(void)
+       rodaBackEmfRslvrOffs = DrvCtrlC2cData.RslvrOffsEmf;
+ 
+       /* Convert offset value in radains to degrees */
+-      SftyRslvrOffsHndlrBackEmfOffsInDegree = (rodaBackEmfRslvrOffs / SYSCON_PI) * 180.f;
++      SftyRslvrOffsHndlrBackEmfOffsInDeg = (rodaBackEmfRslvrOffs / SYSCON_PI) * 180.f;
+ 
+       /* Check if RODA Offset is within valid range */
+       if(
+-         (SftyRslvrOffsHndlrBackEmfOffsInDegree <= (SftyRslvrOffsHndlrRslvrOffDfltCalib + SftyRslvrOffsHndlrRslvrOffsMax)) &&
+-         (SftyRslvrOffsHndlrBackEmfOffsInDegree >= (SftyRslvrOffsHndlrRslvrOffDfltCalib + SftyRslvrOffsHndlrRslvrOffsMin))
++         (SftyRslvrOffsHndlrBackEmfOffsInDeg <= (SftyRslvrOffsHndlrRslvrOffDfltCalib + SftyRslvrOffsHndlrRslvrOffsMax)) &&
++         (SftyRslvrOffsHndlrBackEmfOffsInDeg >= (SftyRslvrOffsHndlrRslvrOffDfltCalib + SftyRslvrOffsHndlrRslvrOffsMin))
+         )
+       {
+          /* Update resolver offset range error monitor state to passed */
+          SftyRslvrOffsHndlrRslvrOffsRngErrMonrSt = ERR_DEB_MONR_STS_PASSED;
+ 
+          /* Perform ASC Plausibility check on new RODA offset value */
+-         SftyRslvrOffsHndlrOffsForAscPlausInDegree = SftyRslvrOffsHndlrBackEmfOffsInDegree;
++         SftyRslvrOffsHndlrOffsForAscPlausInDeg = SftyRslvrOffsHndlrBackEmfOffsInDeg;
+ 
+          /* Start ASC Plausibility check on this ROL offset value */
+          SftyRslvrOffsHndlr_StartAscPlausChk();
+@@ -1643,7 +2067,7 @@ LOCAL_INLINE void SftyRslvrOffsHndlr_ValidateOnlineRodaRangeChk(void)
+          SftyC2cData.StsCalibSfty = (uint8)STS_CALIB_FAILED;
+ 
+          /* Propagate default offset value and validation status to DRCO and BSW  */
+-         SftyRslvrOffsHndlr_PropagateOffsValues(SftyRslvrOffsHndlrRslvrOffDfltCalib, FALSE);
++         SftyRslvrOffsHndlr_PropagateOffsValues(SftyRslvrOffsHndlrRslvrOffDfltCalib, SFTY_RSLVR_OFFS_INVLD);
+ 
+          /* ROL validation failed. Change validation state to VLDN_CMPLT */
+          SftyRslvrOffsHndlrRolOffsVldnState = SFTYRSLVROFFSHNDLR_ROL_VLDN_CMPLT;
+@@ -1655,7 +2079,7 @@ LOCAL_INLINE void SftyRslvrOffsHndlr_ValidateOnlineRodaRangeChk(void)
+       SftyC2cData.StsCalibSfty = (uint8)STS_CALIB_FAILED;
+ 
+       /* Propagate default offset value and validation status to DRCO and BSW  */
+-      SftyRslvrOffsHndlr_PropagateOffsValues(SftyRslvrOffsHndlrRslvrOffDfltCalib, FALSE);
++      SftyRslvrOffsHndlr_PropagateOffsValues(SftyRslvrOffsHndlrRslvrOffDfltCalib, SFTY_RSLVR_OFFS_INVLD);
+ 
+       /* ROL validation failed. Change validation state to VLDN_CMPLT */
+       SftyRslvrOffsHndlrRolOffsVldnState = SFTYRSLVROFFSHNDLR_ROL_VLDN_CMPLT;
+@@ -1694,14 +2118,17 @@ LOCAL_INLINE void SftyRslvrOffsHndlr_ValidateOnlineRodaAscPlausChk(void)
+       if(ascPlausCheckStatus == ASC_PLAUS_CHECK_PASSED)
+       {
+          /* ASC plausibility passed. Calculate new checksum value using ROL offset */
+-         SftyC2cData.RslvrOffsNvm.RslvrOffs     = SftyRslvrOffsHndlrBackEmfOffsInDegree;
++         SftyC2cData.RslvrOffsNvm.RslvrOffs     = SftyRslvrOffsHndlrBackEmfOffsInDeg;
+          SftyC2cData.RslvrOffsNvm.RslvrOffsChks = SftyCrc_CalcCRC16(
+-                                                                    (const uint8*)&SftyRslvrOffsHndlrBackEmfOffsInDegree,
+-                                                                     sizeof(SftyRslvrOffsHndlrBackEmfOffsInDegree),
++                                                                    (const uint8*)&SftyRslvrOffsHndlrBackEmfOffsInDeg,
++                                                                     sizeof(SftyRslvrOffsHndlrBackEmfOffsInDeg),
+                                                                      CRC_INITIAL_VALUE16,
+                                                                      TRUE
+                                                                     );
+ 
++         /* Send valid SftyC2c NvM pattern to BSW */
++         SftyC2cData.RslvrOffsNvm.Pattern = SFTY_RSLVR_OFFS_PATTERN_OFFLN_VLD;
++
+          /* Inform BSW to store the new offset value by setting SSW calibration status to PASSED */
+          SftyC2cData.StsCalibSfty = (uint8)STS_CALIB_PASSED;
+ 
+@@ -1717,7 +2144,7 @@ LOCAL_INLINE void SftyRslvrOffsHndlr_ValidateOnlineRodaAscPlausChk(void)
+          SftyC2cData.StsCalibSfty = (uint8)STS_CALIB_FAILED;
+ 
+          /* Propagate offset value and validation status to DRCO and BSW  */
+-         SftyRslvrOffsHndlr_PropagateOffsValues(SftyRslvrOffsHndlrRslvrOffDfltCalib, FALSE);
++         SftyRslvrOffsHndlr_PropagateOffsValues(SftyRslvrOffsHndlrRslvrOffDfltCalib, SFTY_RSLVR_OFFS_INVLD);
+ 
+          /* ROL validation failed. Change validation state to VLDN_CMPLT */
+          SftyRslvrOffsHndlrRolOffsVldnState = SFTYRSLVROFFSHNDLR_ROL_VLDN_CMPLT;
+@@ -1736,7 +2163,7 @@ LOCAL_INLINE void SftyRslvrOffsHndlr_ValidateOnlineRodaAscPlausChk(void)
+       SftyC2cData.StsCalibSfty = (uint8)STS_CALIB_FAILED;
+ 
+       /* Propagate default offset value and validation status to DRCO and BSW  */
+-      SftyRslvrOffsHndlr_PropagateOffsValues(SftyRslvrOffsHndlrRslvrOffDfltCalib, FALSE);
++      SftyRslvrOffsHndlr_PropagateOffsValues(SftyRslvrOffsHndlrRslvrOffDfltCalib, SFTY_RSLVR_OFFS_INVLD);
+ 
+       /* ROL validation failed. Change validation state to VLDN_CMPLT */
+       SftyRslvrOffsHndlrRolOffsVldnState = SFTYRSLVROFFSHNDLR_ROL_VLDN_CMPLT;
+@@ -1769,21 +2196,16 @@ LOCAL_INLINE void SftyRslvrOffsHndlr_ValidateOnlineRodaNvMStore(void)
+    /* Check NvM storage status */
+    if(nvmStoreStatus == NVM_STORE_PASSED)
+    {
+-      /* ROL offset value store in NvM passed.
+-       * Recover from AC current limitation by setting NvmRngErrMonrSt to PASSED */
+-      SftyRslvrOffsHndlrRslvrOffsNvmRngErrMonrSt = ERR_DEB_MONR_STS_PASSED;
+-
+       /* ROL offset store in NvM passed. Change validation state to OFFSET_RAMP */
+       SftyRslvrOffsHndlrRolOffsVldnState = SFTYRSLVROFFSHNDLR_ROL_VLDN_OFFSET_RAMP;
+    }
+    else if(nvmStoreStatus == NVM_STORE_FAILED)
+    {
+-      /* Propagate default resolver offset value and validation status to DRCO and BSW  */
+-      SftyRslvrOffsHndlr_PropagateOffsValues(SftyRslvrOffsHndlrRslvrOffDfltCalib, FALSE);
++      /* ASC plausibility failed. Set SSW calibration status to failed */
++      SftyC2cData.StsCalibSfty = (uint8)STS_CALIB_FAILED;
+ 
+-      /* ROL offset value store in NvM failed.
+-       * Set AC current limitation by setting NvmRngErrMonrSt to FAILED */
+-      SftyRslvrOffsHndlrRslvrOffsNvmRngErrMonrSt = ERR_DEB_MONR_STS_FAILED;
++      /* Propagate default resolver offset value and validation status to DRCO and BSW  */
++      SftyRslvrOffsHndlr_PropagateOffsValues(SftyRslvrOffsHndlrRslvrOffDfltCalib, SFTY_RSLVR_OFFS_INVLD);
+ 
+       /* ROL offset store in NvM failed. Change validation state to VLDN_CMPLT */
+       SftyRslvrOffsHndlrRolOffsVldnState = SFTYRSLVROFFSHNDLR_ROL_VLDN_CMPLT;
+@@ -1812,13 +2234,13 @@ LOCAL_INLINE void SftyRslvrOffsHndlr_ValidateOnlineRodaOffsetRamp(void)
+    /* ************* Source code **************** */
+ 
+    /* If NvM write was successful. Now ramp the internal offset value to new offset */
+-   rampDone = SftyRslvrOffsHndlr_RampOffset(SftyRslvrOffsHndlrBackEmfOffsInDegree);
++   rampDone = SftyRslvrOffsHndlr_RampOffset(SftyRslvrOffsHndlrBackEmfOffsInDeg);
+ 
+    /* Check if ramping is done */
+    if(rampDone == TRUE)
+    {
+       /* Propagate new ROL offset value and validation status to DRCO and BSW  */
+-      SftyRslvrOffsHndlr_PropagateOffsValues(SftyRslvrOffsHndlrBackEmfOffsInDegree, TRUE);
++      SftyRslvrOffsHndlr_PropagateOffsValues(SftyRslvrOffsHndlrBackEmfOffsInDeg, SFTY_RSLVR_OFFS_VLD);
+ 
+       /* ROL offset validation is successful. Change validation state to VLDN_CMPLT */
+       SftyRslvrOffsHndlrRolOffsVldnState = SFTYRSLVROFFSHNDLR_ROL_VLDN_CMPLT;
+@@ -1850,7 +2272,7 @@ LOCAL_INLINE void SftyRslvrOffsHndlr_ValidateOnlineRodaComplete(void)
+    SftyC2cData.StsCalibSfty = (uint8)STS_CALIB_INACTIVE;
+ 
+    /* Reset ROL validation state to VALIDATION_ENTRY_CHK */
+-   SftyRslvrOffsHndlrRolOffsVldnState = SFTYRSLVROFFSHNDLR_ROL_VLDN_ENTRY_CHK;
++   SftyRslvrOffsHndlrRolOffsVldnState = SFTYRSLVROFFSHNDLR_ROL_VLDN_INIT;
+ 
+    return;
+ }
+@@ -1876,8 +2298,10 @@ LOCAL_INLINE void SftyRslvrOffsHndlr_ValidateRslvrDataUdsInit(void)
+    /* Reset all error monitor states and variables before start of validation */
+    SftyRslvrOffsHndlrRslvrOffsRngErrMonrSt      = ERR_DEB_MONR_STS_INACTIVE;
+    SftyRslvrOffsHndlrAscIqPlausErrMonrSt        = ERR_DEB_MONR_STS_INACTIVE;
+-   SftyRslvrOffsHndlrRslvrOffsNvmWriteErrMonrSt = ERR_DEB_MONR_STS_INACTIVE;
+-   SftyRslvrOffsHndlrSpdErrMonrSt               = ERR_DEB_MONR_STS_INACTIVE;
++   SftyRslvrOffsHndlrRslvrOffsNvmWrErrMonrSt    = ERR_DEB_MONR_STS_INACTIVE;
++
++   /* Set SftyC2c NvM pattern to invalid */
++   SftyC2cData.RslvrOffsNvm.Pattern = SFTY_RSLVR_OFFS_PATTERN_OFFLN_INVLD;
+ 
+    /* Change UDS validation state to RANGE_CHK */
+    SftyRslvrOffsHndlrUdsOffsVldnState = SFTYRSLVROFFSHNDLR_UDS_VLDN_RNG_CHK;
+@@ -1900,19 +2324,19 @@ LOCAL_INLINE void SftyRslvrOffsHndlr_ValidateRslvrDataUdsRangeChk(void)
+    /* ************* Source code **************** */
+ 
+    /* Read UDS resolver offset value (in electrical degree) received from BSW */
+-   SftyRslvrOffsHndlrUdsOffsInDegree = BswC2cData.RslvrOffsUds.RslvrOffs;
++   SftyRslvrOffsHndlrUdsOffsInDeg = BswC2cData.RslvrOffsUds.RslvrOffs;
+ 
+    /* Check if UDS offset is within valid range */
+    if(
+-      (SftyRslvrOffsHndlrUdsOffsInDegree <= (SftyRslvrOffsHndlrRslvrOffDfltCalib + SftyRslvrOffsHndlrRslvrOffsMax)) &&
+-      (SftyRslvrOffsHndlrUdsOffsInDegree >= (SftyRslvrOffsHndlrRslvrOffDfltCalib + SftyRslvrOffsHndlrRslvrOffsMin))
++      (SftyRslvrOffsHndlrUdsOffsInDeg <= (SftyRslvrOffsHndlrRslvrOffDfltCalib + SftyRslvrOffsHndlrRslvrOffsMax)) &&
++      (SftyRslvrOffsHndlrUdsOffsInDeg >= (SftyRslvrOffsHndlrRslvrOffDfltCalib + SftyRslvrOffsHndlrRslvrOffsMin))
+      )
+    {
+       /* Update resolver offset range error monitor state to failed */
+       SftyRslvrOffsHndlrRslvrOffsRngErrMonrSt = ERR_DEB_MONR_STS_PASSED;
+ 
+       /* Perform ASC Plausibility check on this UDS offset value */
+-      SftyRslvrOffsHndlrOffsForAscPlausInDegree = SftyRslvrOffsHndlrUdsOffsInDegree;
++      SftyRslvrOffsHndlrOffsForAscPlausInDeg = SftyRslvrOffsHndlrUdsOffsInDeg;
+ 
+       /* Start ASC Plausibility check on this UDS offset value */
+       SftyRslvrOffsHndlr_StartAscPlausChk();
+@@ -1929,7 +2353,7 @@ LOCAL_INLINE void SftyRslvrOffsHndlr_ValidateRslvrDataUdsRangeChk(void)
+       SftyRslvrOffsHndlrRslvrOffsRngErrMonrSt = ERR_DEB_MONR_STS_FAILED;
+ 
+       /* Propagate default offset value and validation status to DRCO and BSW  */
+-      SftyRslvrOffsHndlr_PropagateOffsValues(SftyRslvrOffsHndlrRslvrOffDfltCalib, FALSE);
++      SftyRslvrOffsHndlr_PropagateOffsValues(SftyRslvrOffsHndlrRslvrOffDfltCalib, SFTY_RSLVR_OFFS_INVLD);
+ 
+       /* UDS resolver offset validation failed. Change validation state to VLDN_CMPLT */
+       SftyRslvrOffsHndlrUdsOffsVldnState = SFTYRSLVROFFSHNDLR_UDS_VLDN_CMPLT;
+@@ -1960,13 +2384,16 @@ LOCAL_INLINE void SftyRslvrOffsHndlr_ValidateRslvrDataUdsAscPlausChk(void)
+    if(ascPlausCheckStatus == ASC_PLAUS_CHECK_PASSED)
+    {
+       /* ASC plausibility passed. Calculate checksum value using UDS offset */
+-      SftyC2cData.RslvrOffsNvm.RslvrOffs     = SftyRslvrOffsHndlrUdsOffsInDegree;
++      SftyC2cData.RslvrOffsNvm.RslvrOffs     = SftyRslvrOffsHndlrUdsOffsInDeg;
+       SftyC2cData.RslvrOffsNvm.RslvrOffsChks = SftyCrc_CalcCRC16(
+-                                                                 (const uint8*)&SftyRslvrOffsHndlrUdsOffsInDegree,
+-                                                                 sizeof(SftyRslvrOffsHndlrUdsOffsInDegree),
++                                                                 (const uint8*)&SftyRslvrOffsHndlrUdsOffsInDeg,
++                                                                 sizeof(SftyRslvrOffsHndlrUdsOffsInDeg),
+                                                                  CRC_INITIAL_VALUE16,
+                                                                  TRUE
+                                                                 );
++      /* Send valid SftyC2c NvM pattern to BSW */
++      SftyC2cData.RslvrOffsNvm.Pattern = SFTY_RSLVR_OFFS_PATTERN_OFFLN_VLD;
++
+       /* Inform BSW to store the new offset value by setting SSW calibration status to PASSED */
+       SftyC2cData.StsCalibSfty = (uint8)STS_CALIB_PASSED;
+ 
+@@ -1982,7 +2409,7 @@ LOCAL_INLINE void SftyRslvrOffsHndlr_ValidateRslvrDataUdsAscPlausChk(void)
+       SftyC2cData.StsCalibSfty = (uint8)STS_CALIB_FAILED;
+ 
+       /* Propagate default resolver offset value and validation status to DRCO and BSW  */
+-      SftyRslvrOffsHndlr_PropagateOffsValues(SftyRslvrOffsHndlrRslvrOffDfltCalib, FALSE);
++      SftyRslvrOffsHndlr_PropagateOffsValues(SftyRslvrOffsHndlrRslvrOffDfltCalib, SFTY_RSLVR_OFFS_INVLD);
+ 
+       /* UDS resolver offset validation failed. Change validation state to VLDN_CMPLT */
+       SftyRslvrOffsHndlrUdsOffsVldnState = SFTYRSLVROFFSHNDLR_UDS_VLDN_CMPLT;
+@@ -2016,21 +2443,16 @@ LOCAL_INLINE void SftyRslvrOffsHndlr_ValidateRslvrDataUdsNvMStore(void)
+    /* Check NvM storage status */
+    if(nvmStoreStatus == NVM_STORE_PASSED)
+    {
+-      /* UDS offset value store in NvM passed.
+-       * Recover from AC current limitation by setting NvmRngErrMonrSt to PASSED */
+-      SftyRslvrOffsHndlrRslvrOffsNvmRngErrMonrSt = ERR_DEB_MONR_STS_PASSED;
+-
+-      /* Change UDS validation status to OFFSET_RAMP */
++      /* UDS offset value store in NvM passed. Change UDS validation status to OFFSET_RAMP */
+       SftyRslvrOffsHndlrUdsOffsVldnState = SFTYRSLVROFFSHNDLR_UDS_VLDN_OFFSET_RAMP;
+    }
+    else if(nvmStoreStatus == NVM_STORE_FAILED)
+    {
+-      /* Propagate default resolver offset value and validation status to DRCO and BSW  */
+-      SftyRslvrOffsHndlr_PropagateOffsValues(SftyRslvrOffsHndlrRslvrOffDfltCalib, FALSE);
++      /* ASC plausibility failed. Set SSW calibration status to failed */
++      SftyC2cData.StsCalibSfty = (uint8)STS_CALIB_FAILED;
+ 
+-      /* UDS offset value store in NvM failed.
+-       * Set AC current limitation by setting NvmRngErrMonrSt to FAILED */
+-      SftyRslvrOffsHndlrRslvrOffsNvmRngErrMonrSt = ERR_DEB_MONR_STS_FAILED;
++      /* UDS offset value store in NvM failed. Propagate default resolver offset value and validation status to DRCO and BSW  */
++      SftyRslvrOffsHndlr_PropagateOffsValues(SftyRslvrOffsHndlrRslvrOffDfltCalib, SFTY_RSLVR_OFFS_INVLD);
+ 
+       /* UDS resolver offset validation failed. Change validation state to VLDN_CMPLT */
+       SftyRslvrOffsHndlrUdsOffsVldnState = SFTYRSLVROFFSHNDLR_UDS_VLDN_CMPLT;
+@@ -2059,13 +2481,13 @@ LOCAL_INLINE void SftyRslvrOffsHndlr_ValidateRslvrDataUdsOffsetRamp(void)
+    /* ************* Source code **************** */
+ 
+    /* If NvM write was successful. Now ramp the internal offset value to new offset */
+-   rampDone = SftyRslvrOffsHndlr_RampOffset(SftyRslvrOffsHndlrUdsOffsInDegree);
++   rampDone = SftyRslvrOffsHndlr_RampOffset(SftyRslvrOffsHndlrUdsOffsInDeg);
+ 
+    /* Check if ramping is done */
+    if(rampDone == TRUE)
+    {
+       /* Propagate new UDS resolver offset value and validation status to DRCO and BSW  */
+-      SftyRslvrOffsHndlr_PropagateOffsValues(SftyRslvrOffsHndlrUdsOffsInDegree, TRUE);
++      SftyRslvrOffsHndlr_PropagateOffsValues(SftyRslvrOffsHndlrUdsOffsInDeg, SFTY_RSLVR_OFFS_VLD);
+ 
+       /* UDS resolver offset validation passed. Change validation state to VLDN_CMPLT */
+       SftyRslvrOffsHndlrUdsOffsVldnState = SFTYRSLVROFFSHNDLR_UDS_VLDN_CMPLT;
+@@ -2122,7 +2544,6 @@ LOCAL_INLINE void SftyRslvrOffsHndlr_ValidateRslvrDataNvmInit(void)
+ 
+    /* Reset all error monitor states and variables before start of validation */
+    SftyRslvrOffsHndlrRslvrOffsCrcErrMonrSt    = ERR_DEB_MONR_STS_INACTIVE;
+-   SftyRslvrOffsHndlrRslvrOffsNvmRngErrMonrSt = ERR_DEB_MONR_STS_INACTIVE;
+ 
+    /* Change NvM validation state to PATTERN_CHK */
+    SftyRslvrOffsHndlrNvMOffsVldnState = SFTYRSLVROFFSHNDLR_NVM_VLDN_PATTERN_CHK;
+@@ -2161,7 +2582,7 @@ LOCAL_INLINE void SftyRslvrOffsHndlr_ValidateRslvrDataNvmPatternChk(void)
+       SftyC2cData.StsCalibSfty = (uint8)STS_CALIB_FAILED;
+ 
+       /* Propagate default offset value and validation status to DRCO and BSW  */
+-      SftyRslvrOffsHndlr_PropagateOffsValues(SftyRslvrOffsHndlrRslvrOffDfltCalib, FALSE);
++      SftyRslvrOffsHndlr_PropagateOffsValues(SftyRslvrOffsHndlrRslvrOffDfltCalib, SFTY_RSLVR_OFFS_UNDETM);
+ 
+       /* NvM resolver offset validation failed. Change validation state to VLDN_CMPLT */
+       SftyRslvrOffsHndlrNvMOffsVldnState = SFTYRSLVROFFSHNDLR_NVM_VLDN_CMPLT;
+@@ -2216,7 +2637,7 @@ LOCAL_INLINE void SftyRslvrOffsHndlr_ValidateRslvrDataNvmCrcChk(void)
+       SftyC2cData.StsCalibSfty = (uint8)STS_CALIB_FAILED;
+ 
+       /* Propagate default offset value and validation status to DRCO and BSW  */
+-      SftyRslvrOffsHndlr_PropagateOffsValues(SftyRslvrOffsHndlrRslvrOffDfltCalib, FALSE);
++      SftyRslvrOffsHndlr_PropagateOffsValues(SftyRslvrOffsHndlrRslvrOffDfltCalib, SFTY_RSLVR_OFFS_UNDETM);
+ 
+       /* NvM resolver offset validation failed. Change validation state to VLDN_CMPLT */
+       SftyRslvrOffsHndlrNvMOffsVldnState = SFTYRSLVROFFSHNDLR_NVM_VLDN_CMPLT;
+@@ -2251,32 +2672,24 @@ LOCAL_INLINE void SftyRslvrOffsHndlr_ValidateRslvrDataNvmRangeChk(void)
+       )
+    {
+       /* NvM resolver offset range check passed. Accept this NvM offset value */
+-      SftyRslvrOffsHndlrNvMOffsInDegree = rslvrOffsNvmInDegree;
+-
+-      /* NvM resolver offset value range check passed.
+-       * Recover from AC current limitation by setting NvmRngErrMonrSt to PASSED */
+-      SftyRslvrOffsHndlrRslvrOffsNvmRngErrMonrSt = ERR_DEB_MONR_STS_PASSED;
++      SftyRslvrOffsHndlrNvMOffsInDeg = rslvrOffsNvmInDegree;
+ 
+       /* NvM Validation passed */
+       SftyC2cData.StsCalibSfty = (uint8)STS_CALIB_PASSED;
+ 
+       /* Propagate NvM offset value and validation status to DRCO and BSW  */
+-      SftyRslvrOffsHndlr_PropagateOffsValues(SftyRslvrOffsHndlrNvMOffsInDegree, TRUE);
++      SftyRslvrOffsHndlr_PropagateOffsValues(SftyRslvrOffsHndlrNvMOffsInDeg, SFTY_RSLVR_OFFS_VLD);
+ 
+       /* NvM resolver offset validation passed. Change validation state to VLDN_CMPLT */
+       SftyRslvrOffsHndlrNvMOffsVldnState = SFTYRSLVROFFSHNDLR_NVM_VLDN_CMPLT;
+    }
+    else
+    {
+-      /* NvM resolver offset value range check failed.
+-       * Set AC current limitation by setting NvmRngErrMonrSt to FAILED */
+-      SftyRslvrOffsHndlrRslvrOffsNvmRngErrMonrSt = ERR_DEB_MONR_STS_FAILED;
+-
+       /* NvM Validation failed */
+       SftyC2cData.StsCalibSfty = (uint8)STS_CALIB_FAILED;
+ 
+       /* Propagate default offset value and validation status to DRCO and BSW  */
+-      SftyRslvrOffsHndlr_PropagateOffsValues(SftyRslvrOffsHndlrRslvrOffDfltCalib, FALSE);
++      SftyRslvrOffsHndlr_PropagateOffsValues(SftyRslvrOffsHndlrRslvrOffDfltCalib, SFTY_RSLVR_OFFS_UNDETM);
+ 
+       /* NvM resolver offset validation failed. Change validation state to VLDN_CMPLT */
+       SftyRslvrOffsHndlrNvMOffsVldnState = SFTYRSLVROFFSHNDLR_NVM_VLDN_CMPLT;
+@@ -2396,22 +2809,15 @@ LOCAL_INLINE void SftyRslvrOffsHndlr_PerformAscPlausChk(void)
+ 
+             if(bumpySpdErrStatus == E_OK)
+             {
+-               /* Set Bumpy speed no error */
+-               SftyRslvrOffsHndlrSpdErrMonrSt = ERR_DEB_MONR_STS_PASSED;
+-
+-               /* Calculate average speed and average Iq current for One Measurement cycle */
++               /* No bumpy speed error detected. Calculate average speed and average Iq current for One Measurement cycle */
+                SftyRslvrOffsHndlr_CalAvgSpdNAvgIq();
+ 
+-               /* Perform ASC plausibility check on calculated
+-                * average speed and average Iq*/
++               /* Perform ASC plausibility check on calculated average speed and average Iq */
+                SftyRslvrOffsHndlr_IqPlausChk();
+             }
+             else
+             {
+-               /* Set Bumpy speed error */
+-               SftyRslvrOffsHndlrSpdErrMonrSt = ERR_DEB_MONR_STS_FAILED;
+-
+-               /* ASC Plausibility check failed. Change ASC plausibility check state to PLAUS_CHK_FAILED */
++               /* ASC Plausibility check failed as bumpy speed error detected. Change ASC plausibility check state to PLAUS_CHK_FAILED */
+                SftyRslvrOffsHndlrAscPlausChkState = SFTYRSLVROFFSHNDLR_ASC_PLAUS_CHK_FAILED;
+             }
+ 
+@@ -2628,7 +3034,7 @@ STATIC FUNC(SftyRslvrOffsHndlrNvMStoreSt, SFTYRSLVROFFSHNDLR_CODE) SftyRslvrOffs
+       retNvMStoreStatus = NVM_STORE_PASSED;
+ 
+       /* Set NvM write error monitor state to passed  */
+-      SftyRslvrOffsHndlrRslvrOffsNvmWriteErrMonrSt = ERR_DEB_MONR_STS_PASSED;
++      SftyRslvrOffsHndlrRslvrOffsNvmWrErrMonrSt = ERR_DEB_MONR_STS_PASSED;
+ 
+       /* Reset the states before exit */
+       SftyRslvrOffsHndlrNvmUpdtCurrSts = NVM_UPDT_INACTIVE;
+@@ -2639,7 +3045,7 @@ STATIC FUNC(SftyRslvrOffsHndlrNvMStoreSt, SFTYRSLVROFFSHNDLR_CODE) SftyRslvrOffs
+       retNvMStoreStatus = NVM_STORE_FAILED;
+ 
+       /* Set NvM write error monitor state to failed  */
+-      SftyRslvrOffsHndlrRslvrOffsNvmWriteErrMonrSt = ERR_DEB_MONR_STS_FAILED;
++      SftyRslvrOffsHndlrRslvrOffsNvmWrErrMonrSt = ERR_DEB_MONR_STS_FAILED;
+ 
+       /* Reset the states before exit */
+       SftyRslvrOffsHndlrNvmUpdtCurrSts = NVM_UPDT_INACTIVE;
+@@ -2656,7 +3062,7 @@ STATIC FUNC(SftyRslvrOffsHndlrNvMStoreSt, SFTYRSLVROFFSHNDLR_CODE) SftyRslvrOffs
+          retNvMStoreStatus = NVM_STORE_FAILED;
+ 
+          /* Set NvM write error monitor state to failed  */
+-         SftyRslvrOffsHndlrRslvrOffsNvmWriteErrMonrSt = ERR_DEB_MONR_STS_FAILED;
++         SftyRslvrOffsHndlrRslvrOffsNvmWrErrMonrSt = ERR_DEB_MONR_STS_FAILED;
+ 
+          /* Reset the states before exit */
+          SftyRslvrOffsHndlrNvmUpdtCurrSts = NVM_UPDT_INACTIVE;
+@@ -2716,10 +3122,7 @@ STATIC FUNC(SftyRslvrOffsHndlrRodaLearnSt, SFTYRSLVROFFSHNDLR_CODE) SftyRslvrOff
+          /* RODA learn with BackEmf method successful */
+          case STS_CALIB_PASSED:
+          {
+-            /* No error in back-EMF RODA learning process */
+-            SftyRslvrOffsHndlrBackEmfErrMonrSt = ERR_DEB_MONR_STS_PASSED;
+-
+-            /* RODA learning was successful */
++            /* No error in back-EMF RODA learning process. RODA learning was successful */
+             retRodaLearnStatus = RODA_LEARN_PASSED;
+ 
+             break;
+@@ -2728,10 +3131,7 @@ STATIC FUNC(SftyRslvrOffsHndlrRodaLearnSt, SFTYRSLVROFFSHNDLR_CODE) SftyRslvrOff
+          /* Calibration procedure failed due to internal failure reason */
+          case STS_CALIB_FAILED:
+          {
+-            /* Error in back-EMF RODA learning process */
+-            SftyRslvrOffsHndlrBackEmfErrMonrSt = ERR_DEB_MONR_STS_FAILED;
+-
+-            /* RODA learning failed */
++            /* Error in back-EMF RODA learning process. RODA learning failed */
+             retRodaLearnStatus = RODA_LEARN_FAILED;
+ 
+             break;
+@@ -2869,7 +3269,7 @@ STATIC FUNC(void, SFTYRSLVROFFSHNDLR_CODE) SftyRslvrOffsHndlr_ValidateRslvrDataU
+    {
+       case SFTYRSLVROFFSHNDLR_UDS_VLDN_INIT:
+       {
+-         /* Initialize UDS validation */
++         /* Prepare for UDS validation */
+          SftyRslvrOffsHndlr_ValidateRslvrDataUdsInit();
+ 
+          break;
+@@ -2942,10 +3342,10 @@ STATIC FUNC(void, SFTYRSLVROFFSHNDLR_CODE) SftyRslvrOffsHndlr_ValidateOnlineRoda
+ 
+    switch(SftyRslvrOffsHndlrRolOffsVldnState)
+    {
+-      case SFTYRSLVROFFSHNDLR_ROL_VLDN_ENTRY_CHK:
++      case SFTYRSLVROFFSHNDLR_ROL_VLDN_INIT:
+       {
+-         /* Check online RODA Entry conditions */
+-         SftyRslvrOffsHndlr_ValidateOnlineRodaEntryChk();
++         /* Prepare for RODA online validation */
++         SftyRslvrOffsHndlr_ValidateOnlineRodaInit();
+ 
+          break;
+       }
+@@ -3030,10 +3430,8 @@ FUNC(void, SFTYRSLVROFFSHNDLR_CODE) SftyRslvrOffsHndlr_ReInitMonrSt(void)
+ 
+    SftyRslvrOffsHndlrRslvrOffsRngErrMonrSt      = ERR_DEB_MONR_STS_INACTIVE;
+    SftyRslvrOffsHndlrRslvrOffsCrcErrMonrSt      = ERR_DEB_MONR_STS_INACTIVE;
+-   SftyRslvrOffsHndlrRslvrOffsNvmRngErrMonrSt   = ERR_DEB_MONR_STS_INACTIVE;
+-   SftyRslvrOffsHndlrRslvrOffsNvmWriteErrMonrSt = ERR_DEB_MONR_STS_INACTIVE;
++   SftyRslvrOffsHndlrRslvrOffsNvmWrErrMonrSt    = ERR_DEB_MONR_STS_INACTIVE;
+    SftyRslvrOffsHndlrAscIqPlausErrMonrSt        = ERR_DEB_MONR_STS_INACTIVE;
+-   SftyRslvrOffsHndlrBackEmfErrMonrSt           = ERR_DEB_MONR_STS_INACTIVE;
+ 
+    return;
+ }
+@@ -3056,19 +3454,16 @@ FUNC(void, SFTYRSLVROFFSHNDLR_CODE) SftyRslvrOffsHndlr_InitAsilC(void)
+    /* Initialize all global error monitors used in slower raster to INACTIVE */
+    SftyRslvrOffsHndlrRslvrOffsRngErrMonrSt      = ERR_DEB_MONR_STS_INACTIVE;
+    SftyRslvrOffsHndlrRslvrOffsCrcErrMonrSt      = ERR_DEB_MONR_STS_INACTIVE;
+-   SftyRslvrOffsHndlrRslvrOffsNvmRngErrMonrSt   = ERR_DEB_MONR_STS_INACTIVE;
+-   SftyRslvrOffsHndlrRslvrOffsNvmWriteErrMonrSt = ERR_DEB_MONR_STS_INACTIVE;
++   SftyRslvrOffsHndlrRslvrOffsNvmWrErrMonrSt    = ERR_DEB_MONR_STS_INACTIVE;
+    SftyRslvrOffsHndlrAscIqPlausErrMonrSt        = ERR_DEB_MONR_STS_INACTIVE;
+-   SftyRslvrOffsHndlrBackEmfErrMonrSt           = ERR_DEB_MONR_STS_INACTIVE;
+-   SftyRslvrOffsHndlrSpdErrMonrSt               = ERR_DEB_MONR_STS_INACTIVE;
+ 
+    /* Initialize all static variables used in slower raster */
+-   SftyRslvrOffsHndlrSoftAscTmrState       = SFTYRSLVROFFSHNDLR_TIMER_INACTV;
+-   SftyRslvrOffsHndlrNvMStoreTmrState      = SFTYRSLVROFFSHNDLR_TIMER_INACTV;
+-   SftyRslvrOffsHndlrRodaLearnTmrState     = SFTYRSLVROFFSHNDLR_TIMER_INACTV;
+-   SftyRslvrOffsHndlrNvMOffsVldnState  = SFTYRSLVROFFSHNDLR_NVM_VLDN_INIT;
+-   SftyRslvrOffsHndlrUdsOffsVldnState  = SFTYRSLVROFFSHNDLR_UDS_VLDN_INIT;
+-   SftyRslvrOffsHndlrRolOffsVldnState  = SFTYRSLVROFFSHNDLR_ROL_VLDN_ENTRY_CHK;
++   SftyRslvrOffsHndlrSoftAscTmrState         = SFTYRSLVROFFSHNDLR_TIMER_INACTV;
++   SftyRslvrOffsHndlrNvMStoreTmrState        = SFTYRSLVROFFSHNDLR_TIMER_INACTV;
++   SftyRslvrOffsHndlrRodaLearnTmrState       = SFTYRSLVROFFSHNDLR_TIMER_INACTV;
++   SftyRslvrOffsHndlrNvMOffsVldnState        = SFTYRSLVROFFSHNDLR_NVM_VLDN_INIT;
++   SftyRslvrOffsHndlrUdsOffsVldnState        = SFTYRSLVROFFSHNDLR_UDS_VLDN_INIT;
++   SftyRslvrOffsHndlrRolOffsVldnState        = SFTYRSLVROFFSHNDLR_ROL_VLDN_INIT;
+    SftyRslvrOffsHndlrMeasCycState            = SFTYRSLVROFFSHNDLR_MEASCYC_INACTV;
+    SftyRslvrOffsHndlrAscPlausChkState        = SFTYRSLVROFFSHNDLR_ASC_PLAUS_CHK_INACTV;
+    SftyRslvrOffsHndlrNvmUpdtPrevSts          = NVM_UPDT_INACTIVE;
+@@ -3080,10 +3475,10 @@ FUNC(void, SFTYRSLVROFFSHNDLR_CODE) SftyRslvrOffsHndlr_InitAsilC(void)
+    SftyRslvrOffsHndlrNvMStoreTmr             = 0UL;
+    SftyRslvrOffsHndlrRodaLearnTmr            = 0UL;
+    SftyRslvrOffsHndlrInternRslvrOffs         = 0.0F;
+-   SftyRslvrOffsHndlrNvMOffsInDegree         = 0.0F;
+-   SftyRslvrOffsHndlrUdsOffsInDegree         = 0.0F;
+-   SftyRslvrOffsHndlrBackEmfOffsInDegree     = 0.0F;
+-   SftyRslvrOffsHndlrOffsForAscPlausInDegree = 0.0F;
++   SftyRslvrOffsHndlrNvMOffsInDeg            = 0.0F;
++   SftyRslvrOffsHndlrUdsOffsInDeg            = 0.0F;
++   SftyRslvrOffsHndlrBackEmfOffsInDeg        = 0.0F;
++   SftyRslvrOffsHndlrOffsForAscPlausInDeg    = 0.0F;
+    SftyRslvrOffsHndlrPrevElecAg              = 0.0F;
+    SftyRslvrOffsHndlrAvgSpd                  = 0.0F;
+    SftyRslvrOffsHndlrSpdSum                  = 0.0F;
+@@ -3096,11 +3491,11 @@ FUNC(void, SFTYRSLVROFFSHNDLR_CODE) SftyRslvrOffsHndlr_InitAsilC(void)
+    SftyRslvrOffsHndlrAvgSpdCntr              = 0U;
+    SftyRslvrOffsHndlrMeasCycCntr             = 0U;
+    SftyRslvrOffsHndlrTotalMeasCycCntr        = 0U;
+-   SftyRslvrOffsHndlrFirstRunDone            = 0U;
++   SftyRslvrOffsHndlrFirstRunDone            = FALSE;
+    SftyRslvrOffsHndlrAscVldMeasCycCntr       = 0U;
+    SftyRslvrOffsHndlrInVldMeasCycCntr        = 0U;
+    SftyRslvrOffsHndlrIqCntr                  = 0U;
+-   SftyRslvrOffsHndlrInternRslvrOffsVld      = 0U;
++   SftyRslvrOffsHndlrInternRslvrOffsVld      = SFTY_RSLVR_OFFS_INVLD;
+ 
+    /* Initialize all global variables used in slower raster */
+    SftyRslvrOffsHndlrRslvrOffsRad = 0.0F;
+@@ -3199,17 +3594,13 @@ FUNC(void, SFTYRSLVROFFSHNDLR_CODE) SftyRslvrOffsHndlr_InitFast(void)
+ 
+    /* ************* Source code **************** */
+ 
+-   /* Initialize all global error monitors used in faster raster to INACTIVE */
+-   SftyRslvrOffsHndlrIacSumErrMonrSt    = ERR_DEB_MONR_STS_INACTIVE;
+-   SftyRslvrOffsHndlrAscIacImbErrMonrSt = ERR_DEB_MONR_STS_INACTIVE;
+-
+    /* Initialize all static variables used in faster raster */
+-   SftyRslvrOffsHndlrPhaIU            = 0.0F;
+-   SftyRslvrOffsHndlrPhaIV            = 0.0F;
+-   SftyRslvrOffsHndlrPhaIW            = 0.0F;
+-   SftyRslvrOffsHndlrlPhaISum         = 0.0F;
+-   SftyRslvrOffsHndlrIacSumErrCntr    = 0U;
+-   SftyRslvrOffsHndlrIacImbVldyFlg    = FALSE;
++   SftyRslvrOffsHndlrPhaIU          = 0.0F;
++   SftyRslvrOffsHndlrPhaIV          = 0.0F;
++   SftyRslvrOffsHndlrPhaIW          = 0.0F;
++   SftyRslvrOffsHndlrlPhaISum       = 0.0F;
++   SftyRslvrOffsHndlrIacSumErrCntr  = 0U;
++   SftyRslvrOffsHndlrIacImbVldyFlg  = FALSE;
+ 
+    return;
+ }
+diff --git a/src/fw_cu/Components/Safety/Sfty_Inv/SftyRslvrOffsHndlr/src/SftyRslvrOffsHndlr_data.c b/src/fw_cu/Components/Safety/Sfty_Inv/SftyRslvrOffsHndlr/src/SftyRslvrOffsHndlr_data.c
+index f2099a7de..67da0f73f 100644
+--- a/src/fw_cu/Components/Safety/Sfty_Inv/SftyRslvrOffsHndlr/src/SftyRslvrOffsHndlr_data.c
++++ b/src/fw_cu/Components/Safety/Sfty_Inv/SftyRslvrOffsHndlr/src/SftyRslvrOffsHndlr_data.c
+@@ -1,7 +1,7 @@
+ /* ***************************************************************** */
+ /* Sourcefile: SftyRslvrOffsHndlr_data.c                             */
+ /* ADD Container: SftyRslvrOffsHndlr                                 */
+-/* ADD Container Version: 1.0.0                                      */
++/* ADD Container Version: 1.1.0                                      */
+ /* ***************************************************************** */
+ /* Copyright (C) Valeo Siemens eAutomotive Germany GmbH 2021         */
+ /* All Rights Reserved. Confidential                                 */
+@@ -15,28 +15,6 @@
+ #define SFTYRSLVROFFSHNDLR_START_SEC_VAR_AREA_CMN_SLOW_INIT_8
+ #include "MemMap.h"
+ 
+-/*
+-@@ SYMBOL = SftyRslvrOffsHndlrIacSumErrMonrSt
+-@@ A2L_TYPE = MEASURE
+-@@ DATA_TYPE = UBYTE [0 ... 2]
+-@@ CONVERSION = TABLE 0 "INACTIVE" 1 "PASSED" 2 "FAILED"
+-@@ DESCRIPTION = "Resolver Offset Handler Resolver Phase Current Sum Error Monitor State; unit \'-\'\'"
+-@@ GROUP = SftyRslvrOffsHndlr
+-@@ END
+-*/
+-VAR(uint8, SFTYRSLVROFFSHNDLR_VAR) SftyRslvrOffsHndlrIacSumErrMonrSt = 0U;
+-
+-/*
+-@@ SYMBOL = SftyRslvrOffsHndlrAscIacImbErrMonrSt
+-@@ A2L_TYPE = MEASURE
+-@@ DATA_TYPE = UBYTE [0 ... 2]
+-@@ CONVERSION = TABLE 0 "INACTIVE" 1 "PASSED" 2 "FAILED"
+-@@ DESCRIPTION = "Resolver Offset Handler Resolver Phase Current Imbalance Error Monitor State; unit \'-\'"
+-@@ GROUP = SftyRslvrOffsHndlr
+-@@ END
+-*/
+-VAR(uint8, SFTYRSLVROFFSHNDLR_VAR) SftyRslvrOffsHndlrAscIacImbErrMonrSt =0U;
+-
+ /*
+ @@ SYMBOL = SftyRslvrOffsHndlrRslvrOffsCrcErrMonrSt
+ @@ A2L_TYPE = MEASURE
+@@ -48,17 +26,6 @@ VAR(uint8, SFTYRSLVROFFSHNDLR_VAR) SftyRslvrOffsHndlrAscIacImbErrMonrSt =0U;
+ */
+ VAR(uint8, SFTYRSLVROFFSHNDLR_VAR) SftyRslvrOffsHndlrRslvrOffsCrcErrMonrSt = 0U;
+ 
+-/*
+-@@ SYMBOL = SftyRslvrOffsHndlrRslvrOffsNvmRngErrMonrSt
+-@@ A2L_TYPE = MEASURE
+-@@ DATA_TYPE = UBYTE [0 ... 2]
+-@@ CONVERSION = TABLE 0 "INACTIVE" 1 "PASSED" 2 "FAILED"
+-@@ DESCRIPTION = "Resolver Offset Handler Resolver Offset Range Monitor (NVM) State; unit \'-\'"
+-@@ GROUP = SftyRslvrOffsHndlr
+-@@ END
+-*/
+-VAR(uint8, SFTYRSLVROFFSHNDLR_VAR) SftyRslvrOffsHndlrRslvrOffsNvmRngErrMonrSt = 0U;
+-
+ /*
+ @@ SYMBOL = SftyRslvrOffsHndlrRslvrOffsRngErrMonrSt
+ @@ A2L_TYPE = MEASURE
+@@ -71,7 +38,7 @@ VAR(uint8, SFTYRSLVROFFSHNDLR_VAR) SftyRslvrOffsHndlrRslvrOffsNvmRngErrMonrSt =
+ VAR(uint8, SFTYRSLVROFFSHNDLR_VAR) SftyRslvrOffsHndlrRslvrOffsRngErrMonrSt = 0U;
+ 
+ /*
+-@@ SYMBOL = SftyRslvrOffsHndlrRslvrOffsNvmWriteErrMonrSt
++@@ SYMBOL = SftyRslvrOffsHndlrRslvrOffsNvmWrErrMonrSt
+ @@ A2L_TYPE = MEASURE
+ @@ DATA_TYPE = UBYTE [0 ... 2]
+ @@ CONVERSION = TABLE 0 "INACTIVE" 1 "PASSED" 2 "FAILED"
+@@ -79,7 +46,7 @@ VAR(uint8, SFTYRSLVROFFSHNDLR_VAR) SftyRslvrOffsHndlrRslvrOffsRngErrMonrSt = 0U;
+ @@ GROUP = SftyRslvrOffsHndlr
+ @@ END
+ */
+-VAR(uint8, SFTYRSLVROFFSHNDLR_VAR) SftyRslvrOffsHndlrRslvrOffsNvmWriteErrMonrSt = 0U;
++VAR(uint8, SFTYRSLVROFFSHNDLR_VAR) SftyRslvrOffsHndlrRslvrOffsNvmWrErrMonrSt = 0U;
+ 
+ /*
+ @@ SYMBOL = SftyRslvrOffsHndlrAscIqPlausErrMonrSt
+@@ -92,28 +59,6 @@ VAR(uint8, SFTYRSLVROFFSHNDLR_VAR) SftyRslvrOffsHndlrRslvrOffsNvmWriteErrMonrSt
+ */
+ VAR(uint8, SFTYRSLVROFFSHNDLR_VAR) SftyRslvrOffsHndlrAscIqPlausErrMonrSt = 0U;
+ 
+-/*
+-@@ SYMBOL = SftyRslvrOffsHndlrSpdErrMonrSt
+-@@ A2L_TYPE = MEASURE
+-@@ DATA_TYPE = UBYTE [0 ... 2]
+-@@ CONVERSION = TABLE 0 "INACTIVE" 1 "PASSED" 2 "FAILED"
+-@@ DESCRIPTION = "Safety Resolver Offset Handler Speed Error Monitor State ; unit \'-\'"
+-@@ GROUP = SftyRslvrOffsHndlr
+-@@ END
+-*/
+-VAR(uint8, SFTYRSLVROFFSHNDLR_VAR) SftyRslvrOffsHndlrSpdErrMonrSt = 0U;
+-
+-/*
+-@@ SYMBOL = SftyRslvrOffsHndlrBackEmfErrMonrSt
+-@@ A2L_TYPE = MEASURE
+-@@ DATA_TYPE = UBYTE [0 ... 2]
+-@@ CONVERSION = TABLE 0 "INACTIVE" 1 "PASSED" 2 "FAILED"
+-@@ DESCRIPTION = "Safety Resolver Offset Handler Back EMF Error Monitor State ; unit \'-\'"
+-@@ GROUP = SftyRslvrOffsHndlr
+-@@ END
+-*/
+-VAR(uint8, SFTYRSLVROFFSHNDLR_VAR) SftyRslvrOffsHndlrBackEmfErrMonrSt = 0U;
+-
+ #define SFTYRSLVROFFSHNDLR_STOP_SEC_VAR_AREA_CMN_SLOW_INIT_8
+ #include "MemMap.h"
+ /* End: SFTYRSLVROFFSHNDLR_STOP_SEC_VAR_AREA_CMN_SLOW_INIT_8 (online) */
+diff --git a/src/fw_cu/build/a2l/Add.a2l b/src/fw_cu/build/a2l/Add.a2l
+index 3210cfa02..624cab205 100644
+--- a/src/fw_cu/build/a2l/Add.a2l
++++ b/src/fw_cu/build/a2l/Add.a2l
+@@ -33141,16 +33141,11 @@ ASAP2_VERSION 1 60
+             SftyReplcmtRslvrOffsVld
+          /end REF_CHARACTERISTIC
+          /begin OUT_MEASUREMENT
+-            SftyRslvrOffsHndlrDftOffsErrMonrSt
+-            SftyRslvrOffsHndlrEmFltErrMonrSt
+-            SftyRslvrOffsHndlrInvFltErrMonrSt
+-            SftyRslvrOffsHndlrRodaRslvrOffsPlausErrMonrSt
+             SftyRslvrOffsHndlrRslvrOffsCrcErrMonrSt
+-            SftyRslvrOffsHndlrRslvrOffsNvmRngErrMonrSt
+             SftyRslvrOffsHndlrRslvrOffsRngErrMonrSt
+-            SftyRslvrOffsHndlr_RslvrOffs
+-            SftyRslvrOffsHndlr_RslvrOffsRad
+-            SftyRslvrOffsHndlr_RslvrOffsVld
++            SftyRslvrOffsHndlrRslvrOffsNvmWrErrMonrSt
++            SftyRslvrOffsHndlrAscIqPlausErrMonrSt
++            SftyRslvrOffsHndlrRslvrOffsRad
+          /end OUT_MEASUREMENT
+          /begin LOC_MEASUREMENT
+             SftyRslvrOffsHndlrBackEmfOffs
+@@ -34737,11 +34732,10 @@ ASAP2_VERSION 1 60
+             SftyRslvrEvlnVadcSinRngHiErrMonrSt
+             SftyRslvrEvlnVadcSinRngLoErrMonrSt
+             SftyRslvrEvlnValCompErrMonrSt
+-            SftyRslvrOffsHndlrDftOffsErrMonrSt
+-            SftyRslvrOffsHndlrEmFltErrMonrSt
+-            SftyRslvrOffsHndlrInvFltErrMonrSt
+-            SftyRslvrOffsHndlrRodaRslvrOffsPlausErrMonrSt
++            SftyRslvrOffsHndlrRslvrOffsCrcErrMonrSt
+             SftyRslvrOffsHndlrRslvrOffsRngErrMonrSt
++            SftyRslvrOffsHndlrRslvrOffsNvmWrErrMonrSt
++            SftyRslvrOffsHndlrAscIqPlausErrMonrSt
+             SftySbcCtrlComErrMonrSt
+             SftySbcCtrlFs0bErrMonrSt
+             SftyShutoffPahTstIvtrErrMonrSt
+diff --git a/src/fw_cu/build/a2l/Measurements-to-Timeslices-Mapping.csv b/src/fw_cu/build/a2l/Measurements-to-Timeslices-Mapping.csv
+index 5116dfdc3..050bc75c2 100644
+--- a/src/fw_cu/build/a2l/Measurements-to-Timeslices-Mapping.csv
++++ b/src/fw_cu/build/a2l/Measurements-to-Timeslices-Mapping.csv
+@@ -6456,16 +6456,11 @@ SftyRslvrEvlnVadcTiStamp,Core_1,Core_1_200us,0.2,,,SSW
+ SftyRslvrEvlnValCompErrMonrSt,Core_1,Core_1_200us,0.2,,,SSW
+ SftyRslvrEvlnValCompErrMonrSt.MonrStsCombined,Core_1,Core_1_200us,0.2,,,SSW
+ SftyRslvrEvlnVldyFlg,Core_1,Core_1_200us,0.2,,,SSW
+-SftyRslvrOffsHndlrAscIacImbErrMonrSt,Core_1,Core_1_200us,0.2,,,SSW
+ SftyRslvrOffsHndlrAscIqPlausErrMonrSt,Core_1,Core_1_200us,0.2,,,SSW
+-SftyRslvrOffsHndlrBackEmfErrMonrSt,Core_1,Core_1_200us,0.2,,,SSW
+-SftyRslvrOffsHndlrIacSumErrMonrSt,Core_1,Core_1_200us,0.2,,,SSW
+ SftyRslvrOffsHndlrRslvrOffsCrcErrMonrSt,Core_1,Core_1_200us,0.2,,,SSW
+-SftyRslvrOffsHndlrRslvrOffsNvmRngErrMonrSt,Core_1,Core_1_200us,0.2,,,SSW
+-SftyRslvrOffsHndlrRslvrOffsNvmWriteErrMonrSt,Core_1,Core_1_200us,0.2,,,SSW
++SftyRslvrOffsHndlrRslvrOffsNvmWrErrMonrSt,Core_1,Core_1_200us,0.2,,,SSW
+ SftyRslvrOffsHndlrRslvrOffsRad,Core_1,Core_1_200us,0.2,,,SSW
+ SftyRslvrOffsHndlrRslvrOffsRngErrMonrSt,Core_1,Core_1_200us,0.2,,,SSW
+-SftyRslvrOffsHndlrSpdErrMonrSt,Core_1,Core_1_200us,0.2,,,SSW
+ SftySbcFs6500WakeupSrc,Core_1,Core_1_200us,0.2,,,SSW
+ SftySdlIdCntInv,Core_1,Core_1_200us,0.2,,,SSW
+ SftySdlOverallCpuLoad,Core_1,Core_1_200us,10,,,SSW
+@@ -8628,3 +8623,47 @@ ErrDebTaskDataCore2.FctInhbnSts.B.FCT_ID_SPD_MAX_LIM,Core_2,C2_100u_PWM,0.1,,,DR
+ ErrDebTaskDataCore2.FctInhbnSts.B.FCT_ID_TQ_MAX_LIM_30,Core_2,C2_100u_PWM,0.1,,,DRCO
+ ErrDebTaskDataCore2.FctInhbnSts.B.FCT_ID_VEH_PRKG_TI_INI,Core_2,C2_100u_PWM,0.1,,,DRCO
+ ErrDebTaskDataCore2.FctInhbnSts.B.FCT_ID_VEH_PRKG_TI_INVLD,Core_2,C2_100u_PWM,0.1,,,DRCO
++SftyRslvrOffsHndlrAscPlausChkState,Core_1,Core_1_200us,0.2,,,SSW
++SftyRslvrOffsHndlrAscVldMeasCycCntr,Core_1,Core_1_200us,0.2,,,SSW
++SftyRslvrOffsHndlrAvgIq,Core_1,Core_1_200us,0.2,,,SSW
++SftyRslvrOffsHndlrAvgIqCntr,Core_1,Core_1_200us,0.2,,,SSW
++SftyRslvrOffsHndlrAvgSpd,Core_1,Core_1_200us,0.2,,,SSW
++SftyRslvrOffsHndlrAvgSpdCntr,Core_1,Core_1_200us,0.2,,,SSW
++SftyRslvrOffsHndlrBackEmfOffsInDeg,Core_1,Core_1_200us,0.2,,,SSW
++SftyRslvrOffsHndlrFirstRunDone,Core_1,Core_1_200us,0.2,,,SSW
++SftyRslvrOffsHndlrIAlpha,Core_1,Core_1_200us,0.2,,,SSW
++SftyRslvrOffsHndlrIBeta,Core_1,Core_1_200us,0.2,,,SSW
++SftyRslvrOffsHndlrIacImbVldyFlg,Core_1,Core_1_200us,0.2,,,SSW
++SftyRslvrOffsHndlrIacSumErrCntr,Core_1,Core_1_200us,0.2,,,SSW
++SftyRslvrOffsHndlrInVldMeasCycCntr,Core_1,Core_1_200us,0.2,,,SSW
++SftyRslvrOffsHndlrInternRslvrOffs,Core_1,Core_1_200us,0.2,,,SSW
++SftyRslvrOffsHndlrInternRslvrOffsVld,Core_1,Core_1_200us,0.2,,,SSW
++SftyRslvrOffsHndlrIq,Core_1,Core_1_200us,0.2,,,SSW
++SftyRslvrOffsHndlrIqCntr,Core_1,Core_1_200us,0.2,,,SSW
++SftyRslvrOffsHndlrIqSum,Core_1,Core_1_200us,0.2,,,SSW
++SftyRslvrOffsHndlrMaxSpd,Core_1,Core_1_200us,0.2,,,SSW
++SftyRslvrOffsHndlrMeasCycCntr,Core_1,Core_1_200us,0.2,,,SSW
++SftyRslvrOffsHndlrMeasCycState,Core_1,Core_1_200us,0.2,,,SSW
++SftyRslvrOffsHndlrMinSpd,Core_1,Core_1_200us,0.2,,,SSW
++SftyRslvrOffsHndlrNvMOffsInDeg,Core_1,Core_1_200us,0.2,,,SSW
++SftyRslvrOffsHndlrNvMOffsVldnState,Core_1,Core_1_200us,0.2,,,SSW
++SftyRslvrOffsHndlrNvMStoreTmr,Core_1,Core_1_200us,0.2,,,SSW
++SftyRslvrOffsHndlrNvMStoreTmrState,Core_1,Core_1_200us,0.2,,,SSW
++SftyRslvrOffsHndlrNvmUpdtCurrSts,Core_1,Core_1_200us,0.2,,,SSW
++SftyRslvrOffsHndlrNvmUpdtPrevSts,Core_1,Core_1_200us,0.2,,,SSW
++SftyRslvrOffsHndlrOffsForAscPlausInDeg,Core_1,Core_1_200us,0.2,,,SSW
++SftyRslvrOffsHndlrPhaIU,Core_1,Core_1_200us,0.2,,,SSW
++SftyRslvrOffsHndlrPhaIV,Core_1,Core_1_200us,0.2,,,SSW
++SftyRslvrOffsHndlrPhaIW,Core_1,Core_1_200us,0.2,,,SSW
++SftyRslvrOffsHndlrPrevElecAg,Core_1,Core_1_200us,0.2,,,SSW
++SftyRslvrOffsHndlrReqCalibSfty,Core_1,Core_1_200us,0.2,,,SSW
++SftyRslvrOffsHndlrRodaLearnTmr,Core_1,Core_1_200us,0.2,,,SSW
++SftyRslvrOffsHndlrRodaLearnTmrState,Core_1,Core_1_200us,0.2,,,SSW
++SftyRslvrOffsHndlrRolOffsVldnState,Core_1,Core_1_200us,0.2,,,SSW
++SftyRslvrOffsHndlrSoftASCTmr,Core_1,Core_1_200us,0.2,,,SSW
++SftyRslvrOffsHndlrSoftAscTmrState,Core_1,Core_1_200us,0.2,,,SSW
++SftyRslvrOffsHndlrSpdSum,Core_1,Core_1_200us,0.2,,,SSW
++SftyRslvrOffsHndlrTotalMeasCycCntr,Core_1,Core_1_200us,0.2,,,SSW
++SftyRslvrOffsHndlrUdsOffsInDeg,Core_1,Core_1_200us,0.2,,,SSW
++SftyRslvrOffsHndlrUdsOffsVldnState,Core_1,Core_1_200us,0.2,,,SSW
++SftyRslvrOffsHndlrlPhaISum,Core_1,Core_1_200us,0.2,,,SSW
+'

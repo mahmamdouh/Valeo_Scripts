@@ -1,0 +1,134 @@
+b'commit aacbe2fe8fdc2a5901f9bdafdc5293864da450c3
+Author: Karthik CHIDAMBARAM (JV EXT) <karthik.chidambaram.jv@valeo.com>
+Date:   Fri Oct 1 16:32:54 2021 +0200
+
+    $100kW-41946$ Part 5 SSW Merge A05 to Mater
+    
+    $100kW-41507$ - Enable switch of HVIL replacement value should seperate
+    
+    Change-Id: I8304acc390c0a67ce5194e22d8e5d049b9484c06
+
+diff --git a/src/fw_cu/Components/Safety/Sfty_Cmn/Sfty_Common/include/SftyReplcmt_data.h b/src/fw_cu/Components/Safety/Sfty_Cmn/Sfty_Common/include/SftyReplcmt_data.h
+index b55aa1549..bb584f48d 100644
+--- a/src/fw_cu/Components/Safety/Sfty_Cmn/Sfty_Common/include/SftyReplcmt_data.h
++++ b/src/fw_cu/Components/Safety/Sfty_Cmn/Sfty_Common/include/SftyReplcmt_data.h
+@@ -2611,7 +2611,16 @@ extern CONST(uint8, SFTYREPLCMT_CALIB) SftyReplcmtE2eInterlockEvt;
+ #define SFTYREPLCMT_START_SEC_CALIB_8
+ #include "MemMap.h"
+ 
+-extern CONST(uint8, SFTYREPLCMT_CALIB) SftyReplcmtVadcInterlockStiEna;
++extern CONST(uint8, SFTYREPLCMT_CALIB) SftyReplcmtHvInterlockVadcStiEna;
++#define SFTYREPLCMT_STOP_SEC_CALIB_8
++#include "MemMap.h"
++/* End: SFTYREPLCMT_STOP_SEC_CALIB_8 (calib) */
++
++/* Begin: SFTYREPLCMT_START_SEC_CALIB_8 (calib) */
++#define SFTYREPLCMT_START_SEC_CALIB_8
++#include "MemMap.h"
++
++extern CONST(uint8, SFTYREPLCMT_CALIB) SftyReplcmtHvInterlockVadcTiStampStiEna;
+ #define SFTYREPLCMT_STOP_SEC_CALIB_8
+ #include "MemMap.h"
+ /* End: SFTYREPLCMT_STOP_SEC_CALIB_8 (calib) */
+diff --git a/src/fw_cu/Components/Safety/Sfty_Cmn/Sfty_Common/src/SftyReplcmt_data.c b/src/fw_cu/Components/Safety/Sfty_Cmn/Sfty_Common/src/SftyReplcmt_data.c
+index 849800de2..c178a709d 100644
+--- a/src/fw_cu/Components/Safety/Sfty_Cmn/Sfty_Common/src/SftyReplcmt_data.c
++++ b/src/fw_cu/Components/Safety/Sfty_Cmn/Sfty_Common/src/SftyReplcmt_data.c
+@@ -2686,14 +2686,30 @@ CONST(uint8, SFTYREPLCMT_CALIB) SftyReplcmtE2eInterlockEvt = 3U;
+ #define SFTYREPLCMT_START_SEC_CALIB_8
+ #include "MemMap.h"
+ /*
+-@@ SYMBOL = SftyReplcmtVadcInterlockStiEna
++@@ SYMBOL = SftyReplcmtHvInterlockVadcStiEna
+ @@ A2L_TYPE = PARAMETER
+ @@ DATA_TYPE = UBYTE
+ @@ DESCRIPTION = "Safety replacement values enabled for VADC HvInterlock Signal Detection"
+ @@ GROUP = SftyHvInterlock
+ @@ END
+ */
+-CONST(uint8, SFTYREPLCMT_CALIB) SftyReplcmtVadcInterlockStiEna = 0U;
++CONST(uint8, SFTYREPLCMT_CALIB) SftyReplcmtHvInterlockVadcStiEna = 0U;
++#define SFTYREPLCMT_STOP_SEC_CALIB_8
++#include "MemMap.h"
++/* End: SFTYREPLCMT_STOP_SEC_CALIB_8 (calib) */
++
++/* Begin: SFTYREPLCMT_START_SEC_CALIB_8 (calib) */
++#define SFTYREPLCMT_START_SEC_CALIB_8
++#include "MemMap.h"
++/*
++@@ SYMBOL = SftyReplcmtHvInterlockVadcTiStampStiEna
++@@ A2L_TYPE = PARAMETER
++@@ DATA_TYPE = UBYTE
++@@ DESCRIPTION = "Safety replacement values enabled for VADC HvInterlock Time Stamp Detection"
++@@ GROUP = SftyHvInterlock
++@@ END
++*/
++CONST(uint8, SFTYREPLCMT_CALIB) SftyReplcmtHvInterlockVadcTiStampStiEna = 0U;
+ #define SFTYREPLCMT_STOP_SEC_CALIB_8
+ #include "MemMap.h"
+ /* End: SFTYREPLCMT_STOP_SEC_CALIB_8 (calib) */
+diff --git a/src/fw_cu/Components/Safety/Sfty_Inv/SftyHvInterlock/include/SftyHvInterlock_data.h b/src/fw_cu/Components/Safety/Sfty_Inv/SftyHvInterlock/include/SftyHvInterlock_data.h
+index 6283c3b0e..421360add 100644
+--- a/src/fw_cu/Components/Safety/Sfty_Inv/SftyHvInterlock/include/SftyHvInterlock_data.h
++++ b/src/fw_cu/Components/Safety/Sfty_Inv/SftyHvInterlock/include/SftyHvInterlock_data.h
+@@ -64,7 +64,8 @@ extern VAR(uint8, SFTYCRASHSIGMON_VAR) SftyHvInterlockTiErrMonrSt;
+ #define SFTYREPLCMT_START_SEC_CALIB_8
+ #include "MemMap.h"
+ 
+-extern CONST(uint8, SFTYREPLCMT_CALIB) SftyReplcmtVadcInterlockStiEna;
++extern CONST(uint8, SFTYREPLCMT_CALIB) SftyReplcmtHvInterlockVadcStiEna;
++extern CONST(uint8, SFTYREPLCMT_CALIB) SftyReplcmtHvInterlockVadcTiStampStiEna;
+ extern CONST(uint8, SFTYREPLCMT_CALIB) SftyReplcmtHvInterlockStiEna;
+ extern CONST(uint8, SFTYREPLCMT_CALIB) SftyReplcmtE2eInterlockEvt;
+ 
+diff --git a/src/fw_cu/Components/Safety/Sfty_Inv/SftyHvInterlock/src/SftyHvInterlock.c b/src/fw_cu/Components/Safety/Sfty_Inv/SftyHvInterlock/src/SftyHvInterlock.c
+index 79ef471d5..a66a8ddc3 100644
+--- a/src/fw_cu/Components/Safety/Sfty_Inv/SftyHvInterlock/src/SftyHvInterlock.c
++++ b/src/fw_cu/Components/Safety/Sfty_Inv/SftyHvInterlock/src/SftyHvInterlock.c
+@@ -142,17 +142,28 @@ LOCAL_INLINE void SftyHvInterlock_GetTiStamp(void)
+    /* Get data from DMA buffer */
+    SftyDma_UpdateRawInterlockData();
+ 
+-   /* Replacement Values for Interlock Raw value and Timestamp Value*/
+-   if (SftyReplcmtVadcInterlockStiEna == TRUE)
++#ifndef SERIES_PRODUCTION
++   /* Replacement Values for Interlock Raw value */
++   if (SftyReplcmtHvInterlockVadcStiEna == TRUE)
+    {
+       SftyHvInterlockVadc = SftyReplcmtHvInterlockVadc;
+-      SftyHvInterlockVadcCurTiStamp = SftyReplcmtHvInterlockVadcTiStamp;
+    }
+    else
++#endif /* SERIES_PRODUCTION */
+    {
+       /* Raw interlock signal measured over VADC */
+       SftyHvInterlockVadc = SftyDmaVadcInterlock;
++   }
+ 
++#ifndef SERIES_PRODUCTION
++   /* Replacement Values for Interlock Timestamp Value */
++   if (SftyReplcmtHvInterlockVadcTiStampStiEna == TRUE)
++   {
++      SftyHvInterlockVadcCurTiStamp = SftyReplcmtHvInterlockVadcTiStamp;
++   }
++   else
++#endif /* SERIES_PRODUCTION */
++   {
+       /* Timestamp of interlock signal from VADC measurement */
+       SftyHvInterlockVadcCurTiStamp = SftyDmaVadcInterlockTi;
+    }
+@@ -338,11 +349,11 @@ LOCAL_INLINE void SftyHvInterlock_UpdtCanSts(void)
+    /* Check if qualified interlock status */
+    if (ErrDebFltData_INV_IL_ACTIVE.FltSts1QualSts == ERR_DEB_FLT_STS_PASSED)
+    {
+-      SftyHvInterlockMonrStsToVeh = SFTYHVINTERLOCK_CONNECTED;
++      SftyHvInterlockMonrStsToVeh = (uint8)SFTYHVINTERLOCK_CONNECTED;
+    }
+    else if( ErrDebFltData_INV_IL_ACTIVE.FltSts1QualSts == ERR_DEB_FLT_STS_FAILED )
+    {
+-      SftyHvInterlockMonrStsToVeh = SFTYHVINTERLOCK_OPEN;
++      SftyHvInterlockMonrStsToVeh = (uint8)SFTYHVINTERLOCK_OPEN;
+    }
+    else
+    {
+'
