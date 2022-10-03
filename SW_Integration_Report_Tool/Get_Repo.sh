@@ -1,0 +1,2 @@
+cd C:\\P2-800V-Gen5\\proj5742_inv_gen5
+git logreview --name-only --decorate  P2-800V_SIC-MASTER-0001-20220603..HEAD  >C:\\Users\\melmohta\\Desktop\\Integrator_Role\\Scripts\\Transfer_Plan_Script\\Vsersion_2\\Compilation\\SubFiles\\log.txt
