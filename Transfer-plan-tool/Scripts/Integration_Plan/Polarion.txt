@@ -1,7 +1,0 @@
-User name: asolima2
-Password: Asolima2228
-Project: 100kW
-Plan: B02_00
-Base RB:
-Local Path:
-IP Document: 06_05_02_sw_integration_plan/Integration%20Plan%20-%20B03
